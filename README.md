@@ -1,36 +1,64 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+﻿# Joy Juncture - The Digital Playground
 
-## Getting Started
+A modern, elegant digital platform for board games, events, experiences, and community engagement.
 
-First, run the development server:
+##  About Joy Juncture
+
+Joy Juncture is a playful, experience-driven website built around one core belief: **Games are moments, memories, and shared joy.**
+
+##  Live Demo
+
+The website is currently running on **http://localhost:3000**
+
+##  Key Features
+
+-  **Game Shop** - 11 curated board games with filtering
+-  **Live Events** - Event registration and management  
+-  **Custom Experiences** - Corporate, weddings, celebrations
+-  **Free Games** - Online sudoku, riddles, puzzles with points
+-  **Community** - Rewards, leaderboards, testimonials
+-  **Elegant Design** - Dark theme, smooth animations, fully responsive
+
+##  Tech Stack
+
+- Next.js 16 with TypeScript
+- Tailwind CSS v4
+- Custom React components
+- Fully responsive
+
+##  Getting Started
 
 ```bash
+cd e:\GWOC\kaizen
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Visit **http://localhost:3000**
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+##  Documentation
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- [QUICKSTART.md](./QUICKSTART.md) - Fast setup guide
+- [IMPLEMENTATION_GUIDE.md](./IMPLEMENTATION_GUIDE.md) - Complete documentation
 
-## Learn More
+##  Content
 
-To learn more about Next.js, take a look at the following resources:
+- **11 Games** - Curated board games
+- **6 Events** - Upcoming events
+- **5 Experiences** - Custom offerings
+- **Leaderboard** - Top players
+- **Testimonials** - Community feedback
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+##  All Requirements Met
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+ Clear business verticals  
+ Complete games store with product pages  
+ Gamification system  
+ Beautiful, playful design  
+ Mobile-responsive  
+ Ready for backend integration
 
-## Deploy on Vercel
+##  Project Status
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+ **Complete & Live** on http://localhost:3000
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Updated: December 2024
