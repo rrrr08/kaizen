@@ -47,6 +47,7 @@ export function SignupForm() {
     try {
       // Create user in Firebase
       await createUser(email, password, {
+        email: email,
         first_name: firstName,
         last_name: lastName,
         name: `${firstName} ${lastName}`.trim(),

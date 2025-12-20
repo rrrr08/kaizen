@@ -2,6 +2,7 @@ export interface Product {
   id: string;
   name: string;
   price: number;
+  stock?: number;
   description: string;
   story: string;
   howToPlay: string;
@@ -35,10 +36,43 @@ export interface Experience {
 }
 
 export interface UserProfile {
+  id?: string;
+  email: string | null;
   name: string;
-  points: number;
-  wallet: number;
-  history: { date: string; points: number; activity: string }[];
+  first_name?: string;
+  last_name?: string;
+  photoURL?: string | null;
+  avatar_url?: string | null;
+  avatarSeed?: string;
+  role?: string;
+  onboardingCompleted?: boolean;
+  likedBlogs?: string[];
+  activity?: any[];
+  blogCount?: number;
+  created_at?: any;
+  updated_at?: any;
+  last_sign_in_at?: any;
+  points?: number;
+  wallet?: number;
+  history?: { date: string; points: number; activity: string }[];
+}
+
+export interface ChatMessage {
+  id?: string;
+  content: string;
+  role: string;
+  timestamp: Date;
+  attachedFiles?: string[];
+}
+
+export interface Conversation {
+  id: string;
+  user_id: string;
+  user_email: string;
+  messages?: any[];
+  difyConversationId?: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export enum Page {

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { updateGoogleIntegration } from '@/lib/consultation-firebase';
+import { updateGoogleIntegration } from '@/lib/firebase';
 
 export async function GET(request: NextRequest) {
   console.log(' Google OAuth callback started');
@@ -66,7 +66,7 @@ const tokens = await tokenResponse.json();
     console.log(' Tokens received:', { accessToken: tokens.access_token });
 
     // Store tokens in Firestore
-await updateGoogleIntegration(state, tokens);
+    await updateGoogleIntegration(state, tokens);
     console.log(' Tokens stored successfully in Firestore');
 
     // Redirect back to events page with success

@@ -209,7 +209,7 @@ export const getUserProfile = async (userId: string): Promise<UserProfile | null
   const userSnap = await getDoc(userRef);
 
   if (userSnap.exists()) {
-    return userSnap.data();
+    return userSnap.data() as UserProfile;
   }
 
   return null;
@@ -524,5 +524,30 @@ export const updateConversationDifyId = async (
   await updateDoc(conversationRef, {
     difyConversationId: difyConversationId,
     updatedAt: serverTimestamp(),
+  });
+};
+
+// Google Calendar Integration
+export const updateGoogleIntegration = async (
+  userId: string,
+  tokens: {
+    access_token: string;
+    refresh_token?: string;
+    expiry_date?: number;
+    scope?: string;
+    token_type?: string;
+  }
+) => {
+  const userRef = doc(db, "users", userId);
+  await updateDoc(userRef, {
+    googleIntegration: {
+      accessToken: tokens.access_token,
+      refreshToken: tokens.refresh_token || null,
+      expiryDate: tokens.expiry_date || null,
+      scope: tokens.scope || null,
+      tokenType: tokens.token_type || 'Bearer',
+      connectedAt: serverTimestamp(),
+    },
+    updated_at: serverTimestamp(),
   });
 };
