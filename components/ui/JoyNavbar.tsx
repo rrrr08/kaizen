@@ -1,7 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { auth } from '@/lib/firebase';
+import { onAuthStateChanged, signOut, User } from 'firebase/auth';
 
 interface NavbarProps {
   points?: number;
@@ -10,26 +13,43 @@ interface NavbarProps {
 
 const Navbar: React.FC<NavbarProps> = ({ points = 0, isObsidian = false }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      router.push('/');
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
 
   const navItems = [
     { label: 'HOME', href: '/' },
     { label: 'SHOP', href: '/shop' },
     { label: 'EXPERIENCES', href: '/experiences' },
     { label: 'PLAY', href: '/play' },
-    { label: 'EVENTS', href: '/events' },
-    { label: 'COMMUNITY', href: '/community' },
+    { label: 'EVENTS & COMMUNITY', href: '/community' },
+    { label: 'BLOG', href: '/blog' },
     { label: 'ABOUT', href: '/about' },
   ];
 
   return (
-    <nav className={`fixed top-0 left-0 w-full z-[100] h-24 flex items-center px-8 md:px-12 transition-all duration-500 ${
-      isObsidian ? 'brightness-[0.85]' : ''
-    }`}>
+    <nav className={`fixed top-0 left-0 w-full z-[100] h-24 flex items-center px-8 md:px-12 transition-all duration-500 ${isObsidian ? 'brightness-[0.85]' : ''
+      }`}>
       <div className="absolute inset-0 bg-gradient-to-b from-black/80 to-transparent pointer-events-none"></div>
-      
+
       <div className="relative w-full flex items-center justify-between">
         {/* Logo */}
-        <Link 
+        <Link
           href="/"
           className="font-header text-2xl cursor-pointer tracking-[0.2em] group"
         >
@@ -52,13 +72,22 @@ const Navbar: React.FC<NavbarProps> = ({ points = 0, isObsidian = false }) => {
 
         {/* Right Side - Points & Toggle */}
         <div className="flex items-center gap-4 md:gap-8">
-          <Link
-            href="/auth/login"
-            className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-full border border-white/10 hover:border-white/30 transition-all"
-          >
-            <span className="font-header text-[8px] tracking-[0.2em] text-white/70">SIGN IN</span>
-          </Link>
-          
+          {user ? (
+            <button
+              onClick={handleLogout}
+              className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-full border border-white/10 hover:border-white/30 hover:bg-white/5 transition-all"
+            >
+              <span className="font-header text-[8px] tracking-[0.2em] text-white/70">LOGOUT</span>
+            </button>
+          ) : (
+            <Link
+              href="/auth/login"
+              className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-full border border-white/10 hover:border-white/30 hover:bg-white/5 transition-all"
+            >
+              <span className="font-header text-[8px] tracking-[0.2em] text-white/70">SIGN IN</span>
+            </Link>
+          )}
+
           {points > 0 && (
             <div className="flex items-center gap-3">
               <div className="font-serif italic text-lg text-amber-500">{points}</div>
@@ -68,7 +97,7 @@ const Navbar: React.FC<NavbarProps> = ({ points = 0, isObsidian = false }) => {
         </div>
 
         {/* Mobile Menu Button */}
-        <button 
+        <button
           className="md:hidden ml-4"
           onClick={() => setMobileOpen(!mobileOpen)}
         >
@@ -94,6 +123,26 @@ const Navbar: React.FC<NavbarProps> = ({ points = 0, isObsidian = false }) => {
                 {item.label}
               </Link>
             ))}
+            <div className="h-[1px] bg-white/10 w-full my-2"></div>
+            {user ? (
+              <button
+                onClick={() => {
+                  handleLogout();
+                  setMobileOpen(false);
+                }}
+                className="font-header text-[10px] tracking-[0.3em] text-white/60 hover:text-amber-500 text-left"
+              >
+                LOGOUT
+              </button>
+            ) : (
+              <Link
+                href="/auth/login"
+                className="font-header text-[10px] tracking-[0.3em] text-white/60 hover:text-amber-500"
+                onClick={() => setMobileOpen(false)}
+              >
+                SIGN IN
+              </Link>
+            )}
           </div>
         </div>
       )}
