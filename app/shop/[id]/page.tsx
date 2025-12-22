@@ -1,24 +1,71 @@
 'use client';
 
-import { PRODUCTS } from '@/lib/constants';
+import { getProductById, getProducts } from '@/lib/firebase';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useCart } from '@/app/context/CartContext';
 import { useToast } from '@/hooks/use-toast';
 
 export default function ProductDetail() {
   const params = useParams();
-  const product = PRODUCTS.find(p => p.id === params.id);
+  const [product, setProduct] = useState<any>(null);
+  const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const { addToCart } = useCart();
   const { addToast } = useToast();
 
-  if (!product) {
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        setLoading(true);
+        const productId = typeof params.id === 'string' ? params.id : params.id[0];
+        const productData = await getProductById(productId);
+        
+        if (productData) {
+          setProduct(productData);
+          
+          // Fetch related products
+          const allProducts = await getProducts();
+          const related = allProducts
+            .filter((p: any) => 
+              p.id !== productData.id && 
+              p.occasion?.some((o: string) => productData.occasion?.includes(o))
+            )
+            .slice(0, 4);
+          setRelatedProducts(related);
+        } else {
+          setError('Product not found');
+        }
+      } catch (err) {
+        console.error('Error fetching product:', err);
+        setError('Failed to load product');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProduct();
+  }, [params.id]);
+
+  if (loading) {
     return (
       <div className="min-h-screen pt-28 pb-16 flex items-center justify-center">
         <div className="text-center">
-          <h1 className="font-header text-4xl mb-4">PRODUCT NOT FOUND</h1>
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-amber-500 mb-4"></div>
+          <p className="text-white/60 font-header text-[10px] tracking-[0.4em]">LOADING PRODUCT...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !product) {
+    return (
+      <div className="min-h-screen pt-28 pb-16 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="font-header text-4xl mb-4">{error || 'PRODUCT NOT FOUND'}</h1>
           <Link href="/shop" className="text-amber-500 font-header text-[10px] tracking-[0.4em]">
             RETURN TO SHOP
           </Link>
@@ -68,7 +115,7 @@ export default function ProductDetail() {
 
             {/* Badges */}
             <div className="flex flex-wrap gap-3 mb-8">
-              {product.badges.map(badge => (
+              {product.badges?.map((badge: string) => (
                 <span key={badge} className="px-4 py-2 border border-amber-500/30 text-amber-500 font-header text-[8px] tracking-widest rounded-full">
                   {badge.toUpperCase()}
                 </span>
@@ -88,11 +135,11 @@ export default function ProductDetail() {
             </div>
 
             {/* Occasions */}
-            {product.occasion.length > 0 && (
+            {product.occasion?.length > 0 && (
               <div className="mb-12 pb-12 border-b border-white/10">
                 <h3 className="font-display text-lg font-bold tracking-wider text-amber-500 mb-6 uppercase">Best For</h3>
                 <div className="flex flex-wrap gap-3">
-                  {product.occasion.map(occ => (
+                  {product.occasion.map((occ: string) => (
                     <span key={occ} className="px-4 py-2 bg-white/5 border border-white/10 rounded-sm font-header text-[9px] tracking-widest">
                       {occ}
                     </span>
@@ -140,23 +187,25 @@ export default function ProductDetail() {
         </div>
 
         {/* Related Products */}
-        <div className="mt-24 pt-24 border-t border-white/10">
-          <h2 className="font-header text-4xl mb-12">SIMILAR GAMES</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {PRODUCTS.filter(p => p.id !== product.id && p.occasion.some(o => product.occasion.includes(o))).slice(0, 4).map(relProduct => (
-              <Link key={relProduct.id} href={`/shop/${relProduct.id}`} className="group">
-                <div className="aspect-[9/16] overflow-hidden rounded-sm border border-white/5 group-hover:border-amber-500/40 bg-white/5 transition-all mb-4">
-                  <img 
-                    src={relProduct.image}
-                    alt={relProduct.name}
-                    className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
-                  />
-                </div>
-                <h3 className="font-header text-sm tracking-wider group-hover:text-amber-500 transition-colors">{relProduct.name}</h3>
-              </Link>
-            ))}
+        {relatedProducts.length > 0 && (
+          <div className="mt-24 pt-24 border-t border-white/10">
+            <h2 className="font-header text-4xl mb-12">SIMILAR GAMES</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+              {relatedProducts.map(relProduct => (
+                <Link key={relProduct.id} href={`/shop/${relProduct.id}`} className="group">
+                  <div className="aspect-[9/16] overflow-hidden rounded-sm border border-white/5 group-hover:border-amber-500/40 bg-white/5 transition-all mb-4">
+                    <img 
+                      src={relProduct.image}
+                      alt={relProduct.name}
+                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
+                    />
+                  </div>
+                  <h3 className="font-header text-sm tracking-wider group-hover:text-amber-500 transition-colors">{relProduct.name}</h3>
+                </Link>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

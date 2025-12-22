@@ -871,3 +871,181 @@ export async function updateGamificationConfig(config: GamificationConfig) {
   const configRef = doc(db, 'settings', 'gamification');
   await setDoc(configRef, config);
 }
+
+// ============================================
+// DATA FETCH FUNCTIONS (For Pages)
+// ============================================
+
+/**
+ * Fetch all products from Firestore
+ */
+export async function getProducts() {
+  try {
+    const q = query(collection(db, 'products'));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+  } catch (error) {
+    console.error('Error fetching products:', error);
+    return [];
+  }
+}
+
+/**
+ * Fetch single product by ID
+ */
+export async function getProductById(id: string) {
+  try {
+    const docRef = doc(db, 'products', id);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      return { id: docSnap.id, ...docSnap.data() };
+    }
+    return null;
+  } catch (error) {
+    console.error('Error fetching product:', error);
+    return null;
+  }
+}
+
+/**
+ * Fetch all events from Firestore
+ */
+export async function getEvents() {
+  try {
+    const q = query(collection(db, 'events'), orderBy('date', 'asc'));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+  } catch (error) {
+    console.error('Error fetching events:', error);
+    return [];
+  }
+}
+
+/**
+ * Fetch single event by ID
+ */
+export async function getEventById(id: string) {
+  try {
+    const docRef = doc(db, 'events', id);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      return { id: docSnap.id, ...docSnap.data() };
+    }
+    return null;
+  } catch (error) {
+    console.error('Error fetching event:', error);
+    return null;
+  }
+}
+
+/**
+ * Fetch all games from Firestore
+ */
+export async function getGames() {
+  try {
+    const q = query(collection(db, 'games'));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+  } catch (error) {
+    console.error('Error fetching games:', error);
+    return [];
+  }
+}
+
+/**
+ * Fetch all experiences from Firestore
+ */
+export async function getExperiences() {
+  try {
+    const q = query(collection(db, 'experiences'));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+  } catch (error) {
+    console.error('Error fetching experiences:', error);
+    return [];
+  }
+}
+
+/**
+ * Fetch single experience by ID
+ */
+export async function getExperienceById(id: string) {
+  try {
+    const docRef = doc(db, 'experiences', id);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      return { id: docSnap.id, ...docSnap.data() };
+    }
+    return null;
+  } catch (error) {
+    console.error('Error fetching experience:', error);
+    return null;
+  }
+}
+
+/**
+ * Fetch all testimonials from Firestore
+ */
+export async function getTestimonials() {
+  try {
+    const q = query(collection(db, 'testimonials'));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+  } catch (error) {
+    console.error('Error fetching testimonials:', error);
+    return [];
+  }
+}
+
+/**
+ * Fetch all blog posts from Firestore
+ */
+export async function getBlogPosts() {
+  try {
+    const q = query(
+      collection(db, 'blog_posts'),
+      where('published', '==', true),
+      orderBy('createdAt', 'desc')
+    );
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+  } catch (error) {
+    console.error('Error fetching blog posts:', error);
+    return [];
+  }
+}
+
+/**
+ * Fetch single blog post by ID
+ */
+export async function getBlogPostById(id: string) {
+  try {
+    const docRef = doc(db, 'blog_posts', id);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      return { id: docSnap.id, ...docSnap.data() };
+    }
+    return null;
+  } catch (error) {
+    console.error('Error fetching blog post:', error);
+    return null;
+  }
+}
