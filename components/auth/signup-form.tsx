@@ -50,7 +50,13 @@ export function SignupForm() {
       // Create user in Firebase
       await createUser(email, password, {
         email: email,
-        fMerge local cart with Firebase after signup
+        first_name: firstName,
+        last_name: lastName,
+        name: `${firstName} ${lastName}`.trim(),
+        role: USER_ROLES.MEMBER,
+      });
+
+      // Merge local cart with Firebase after signup
       await mergeLocalCartWithFirebase();
 
       // Send verification email
@@ -72,13 +78,7 @@ export function SignupForm() {
           }
         }
 
-        router.push(`/auth/verify?email=${email}&redirect=${encodeURIComponent(redirectUrl)
-          handleCodeInApp: true,
-        };
-
-        console.log('Sending verification email with action URL:', actionUrl);
-        await sendEmailVerification(auth.currentUser, actionCodeSettings);
-        router.push(`/auth/verify?email=${email}`);
+        router.push(`/auth/verify?email=${email}&redirect=${encodeURIComponent(redirectUrl)}`);
       } else {
         console.error("Signup successful, but auth.currentUser is null before sending verification email.");
         setError("Signup was successful, but couldn't send verification email. Please try logging in.");
@@ -99,6 +99,17 @@ export function SignupForm() {
         setError("Unable to connect to the database. Please check your internet connection, firewall, or ensure the Firestore database exists in the Firebase Console.");
       } else {
         setError(authError.message || "An error occurred during signup");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSignup = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
       const userCredential = await signInWithGoogle();
 
       if (userCredential) {
@@ -115,17 +126,6 @@ export function SignupForm() {
         // Redirect to specified URL or home
         router.push(redirectUrl);
       }
-    } catch (error) {
-      console.error("Google sign in error:", error);
-      const authError = error as { message: string };
-      setError(authError.message || "An error occurred with Google sign in");
-      setLoading(false);
-  const handleGoogleSignup = async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      await signInWithGoogle();
     } catch (error) {
       console.error("Google sign in error:", error);
       const authError = error as { message: string };

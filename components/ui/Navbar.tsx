@@ -77,9 +77,9 @@ export default function Navbar() {
   };
 
   return (
-    <header className="bg-gradient-to-b from-black/80 to-transparent fixed top-0 left-0 w-full z-50 h-24 flex items-center">
-      <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8 w-full">
-        <div className="flex h-16 items-center justify-between">
+    <header className="bg-gradient-to-b from-black/80 to-transparent fixed top-0 left-0 w-full z-50 h-24 flex items-center overflow-visible">
+      <div className="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8 w-full overflow-visible">
+        <div className="flex h-16 items-center justify-between overflow-visible">
           {/* Logo */}
           <div className="md:flex md:items-center md:gap-12">
             <Link href="/" className="block font-header text-2xl tracking-[0.2em] hover:opacity-80 transition-opacity group">
@@ -120,8 +120,28 @@ export default function Navbar() {
             </nav>
           </div>
 
+          {/* Mobile Menu Button */}
+          <div className="block md:hidden ml-auto">
+            <button
+              onClick={toggleMobileMenu}
+              className="p-2 text-white/60 hover:text-amber-500 transition-colors"
+              aria-label="Toggle mobile menu"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="size-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+          </div>
+
           {/* Right Side - Auth & User Menu */}
-          <div className="flex items-center gap-8">
+          <div className="flex items-center gap-1 hidden md:flex">
             {loading ? (
               // Loading state - show skeleton
               <div className="hidden sm:flex items-center gap-3 px-4 py-2 rounded-full border border-amber-500/20 bg-amber-500/5 animate-pulse">
@@ -195,41 +215,21 @@ export default function Navbar() {
               </div>
             ) : (
               /* Auth Links */
-              <div className="sm:flex sm:gap-3 hidden">
+              <div className="flex items-center gap-2">
                 <Link
-                  className="font-header text-[9px] tracking-[0.2em] px-4 py-2 rounded-full border border-amber-500/40 text-amber-500 hover:bg-amber-500/10 transition-all"
+                  className="font-header text-[9px] tracking-[0.08em] px-3 py-2 rounded-full border border-amber-500/40 text-amber-500 hover:bg-amber-500/10 transition-all whitespace-nowrap"
                   href="/auth/login"
                 >
                   SIGN IN
                 </Link>
                 <Link
-                  className="font-header text-[9px] tracking-[0.2em] px-4 py-2 rounded-full border border-amber-500 bg-amber-500 text-black hover:bg-amber-400 transition-all"
+                  className="font-header text-[9px] tracking-[0.08em] px-3 py-2 rounded-full border border-amber-500 bg-amber-500 text-black hover:bg-amber-400 transition-all whitespace-nowrap"
                   href="/auth/signup"
                 >
-                  JOIN US
+                  SIGN UP
                 </Link>
               </div>
             )}
-
-            {/* Mobile Menu Button */}
-            <div className="block md:hidden">
-              <button
-                onClick={toggleMobileMenu}
-                className="p-2 text-white/60 hover:text-amber-500 transition-colors"
-                aria-label="Toggle mobile menu"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="size-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-              </button>
-            </div>
           </div>
         </div>
 

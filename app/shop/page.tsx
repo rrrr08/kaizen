@@ -19,15 +19,19 @@ const TarotCard = ({ product, onClick }: any) => {
         <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80"></div>
 
         <div className="absolute bottom-12 left-6 md:left-8 right-6 md:right-8 text-center">
-          <div className="text-amber-500 font-header text-[9px] tracking-[0.5em] mb-4 opacity-0 group-hover:opacity-100 transition-all">
-            {product.mood.toUpperCase()}
-          </div>
+          {product.mood && (
+            <div className="text-amber-500 font-header text-[9px] tracking-[0.5em] mb-4 opacity-0 group-hover:opacity-100 transition-all">
+              {product.mood.toUpperCase()}
+            </div>
+          )}
           <h3 className="font-header text-2xl mb-1 tracking-wider uppercase text-white group-hover:text-amber-400 transition-colors">
             {product.name}
           </h3>
-          <div className="font-serif italic text-white/40 text-sm">
-            {product.players}
-          </div>
+          {product.players && (
+            <div className="font-serif italic text-white/40 text-sm">
+              {product.players}
+            </div>
+          )}
         </div>
       </div>
       
