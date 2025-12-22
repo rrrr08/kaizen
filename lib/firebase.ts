@@ -8,6 +8,8 @@ import {
   signInWithPopup,
   onAuthStateChanged,
   sendEmailVerification,
+  setPersistence,
+  browserLocalPersistence,
 } from "firebase/auth";
 
 import {
@@ -69,6 +71,11 @@ const db = getFirestore(app);
 const storage = getStorage(app);
 const googleProvider = new GoogleAuthProvider();
 
+// Enable persistence (LOCAL is default, but let's make it explicit)
+setPersistence(auth, browserLocalPersistence).catch((error) => {
+  console.error('Error setting persistence:', error);
+});
+
 // ProfileUpdateData interface removed for JavaScript conversion
 
 export const createUser = async (email: string, password: string, userData: UserProfile) => {
@@ -94,7 +101,38 @@ export const createUser = async (email: string, password: string, userData: User
 };
 
 export const signIn = async (email: string, password: string) => {
-  return signInWithEmailAndPassword(auth, email, password);
+  const userCredential = await signInWithEmailAndPassword(auth, email, password);
+  const { user } = userCredential;
+
+  // Ensure user profile exists in Firestore
+  if (user) {
+    try {
+      const userExists = await checkUserExists(user.uid);
+      if (!userExists) {
+        // Create profile if it doesn't exist
+        const profileData: UserProfile = {
+          email: user.email,
+          name: user.displayName || user.email,
+          role: "member",
+          created_at: serverTimestamp(),
+          updated_at: serverTimestamp(),
+          last_sign_in_at: serverTimestamp(),
+        };
+        await createUserProfile(user.uid, profileData);
+      } else {
+        // Update last sign-in time
+        const userRef = doc(db, "users", user.uid);
+        await updateDoc(userRef, {
+          last_sign_in_at: serverTimestamp(),
+          updated_at: serverTimestamp()
+        });
+      }
+    } catch (error) {
+      console.error("Error syncing user profile on sign-in:", error);
+    }
+  }
+
+  return userCredential;
 };
 
 export const signInWithGoogle = async () => {
@@ -232,8 +270,19 @@ export const updateUserProfile = async (userId: string, data: Partial<UserProfil
 };
 
 export const checkUserIsAdmin = async (userId: string) => {
-  const profile = await getUserProfile(userId);
-  return profile?.role === "admin";
+  try {
+    const profile = await getUserProfile(userId);
+    console.log('[Firebase] checkUserIsAdmin - Profile:', {
+      uid: userId,
+      role: profile?.role,
+      email: profile?.email,
+      isAdmin: profile?.role === "admin"
+    });
+    return profile?.role === "admin";
+  } catch (error) {
+    console.error('[Firebase] Error in checkUserIsAdmin:', error);
+    return false;
+  }
 };
 
 if (typeof window !== "undefined") {
@@ -551,3 +600,274 @@ export const updateGoogleIntegration = async (
     updated_at: serverTimestamp(),
   });
 };
+
+// ===== WALLET & POINTS MANAGEMENT =====
+
+export async function updateUserWallet(userId: string, pointsToAdd: number) {
+  const userRef = doc(db, 'users', userId);
+  const userDoc = await getDoc(userRef);
+  
+  if (!userDoc.exists()) {
+    throw new Error('User not found');
+  }
+
+  const currentPoints = userDoc.data()?.points || 0;
+  const newPoints = currentPoints + pointsToAdd;
+
+  await updateDoc(userRef, {
+    points: newPoints,
+    updated_at: serverTimestamp(),
+  });
+
+  return newPoints;
+}
+
+export async function getUserWallet(userId: string) {
+  const userRef = doc(db, 'users', userId);
+  const userDoc = await getDoc(userRef);
+  
+  if (!userDoc.exists()) {
+    return { points: 0, history: [] };
+  }
+
+  const data = userDoc.data();
+  return {
+    points: data?.points || 0,
+    history: data?.pointHistory || [],
+  };
+}
+
+export async function addPointHistory(
+  userId: string,
+  points: number,
+  activity: string,
+  orderId?: string
+) {
+  const userRef = doc(db, 'users', userId);
+  const historyEntry = {
+    date: new Date().toISOString(),
+    points,
+    activity,
+    orderId: orderId || null,
+  };
+
+  await updateDoc(userRef, {
+    pointHistory: arrayUnion(historyEntry),
+    updated_at: serverTimestamp(),
+  });
+}
+
+// ===== ORDERS MANAGEMENT =====
+
+export async function createOrder(
+  userId: string,
+  orderData: {
+    items: any[];
+    totalPrice: number;
+    totalPoints: number;
+    paymentId: string;
+    shippingAddress?: any;
+  }
+) {
+  const orderId = Date.now().toString();
+  
+  const order = {
+    id: orderId,
+    userId,
+    items: orderData.items,
+    totalPrice: orderData.totalPrice,
+    totalPoints: orderData.totalPoints,
+    paymentId: orderData.paymentId,
+    shippingAddress: orderData.shippingAddress || {},
+    status: 'completed',
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  };
+
+  const orderRef = doc(db, 'orders', orderId);
+  await setDoc(orderRef, order);
+
+  return orderId;
+}
+
+export async function getUserOrders(userId: string) {
+  const q = query(
+    collection(db, 'orders'),
+    where('userId', '==', userId)
+  );
+
+  const snapshot = await getDocs(q);
+  const orders = snapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data(),
+    createdAt: doc.data().createdAt?.toDate?.() || new Date(),
+    updatedAt: doc.data().updatedAt?.toDate?.() || new Date(),
+  }));
+  
+  // Sort by createdAt on the client side instead
+  return orders.sort((a, b) => {
+    const dateA = a.createdAt instanceof Date ? a.createdAt : new Date(a.createdAt);
+    const dateB = b.createdAt instanceof Date ? b.createdAt : new Date(b.createdAt);
+    return dateB.getTime() - dateA.getTime();
+  });
+}
+
+export async function getOrderById(orderId: string) {
+  const orderRef = doc(db, 'orders', orderId);
+  const orderDoc = await getDoc(orderRef);
+  
+  if (!orderDoc.exists()) {
+    return null;
+  }
+
+  return {
+    id: orderDoc.id,
+    ...orderDoc.data(),
+    createdAt: orderDoc.data().createdAt?.toDate?.() || new Date(),
+  };
+}
+
+// ===== CART MANAGEMENT =====
+
+export async function updateUserCart(userId: string, cartItems: any[]) {
+  const userRef = doc(db, 'users', userId);
+  
+  await updateDoc(userRef, {
+    cart: cartItems,
+    cartUpdatedAt: serverTimestamp(),
+    updated_at: serverTimestamp(),
+  });
+}
+
+export async function getUserCart(userId: string) {
+  const userRef = doc(db, 'users', userId);
+  const userDoc = await getDoc(userRef);
+  
+  if (!userDoc.exists()) {
+    return [];
+  }
+
+  return userDoc.data()?.cart || [];
+}
+
+export async function clearUserCart(userId: string) {
+  const userRef = doc(db, 'users', userId);
+  
+  await updateDoc(userRef, {
+    cart: [],
+    cartUpdatedAt: serverTimestamp(),
+    updated_at: serverTimestamp(),
+  });
+}
+
+// ===== NOTIFICATIONS MANAGEMENT =====
+
+export interface NotificationHistory {
+  id: string;
+  title: string;
+  message: string;
+  type: 'info' | 'success' | 'offer' | 'warning';
+  recipientType: 'all' | 'specific';
+  recipientCount: number;
+  sentAt: string;
+  actionUrl?: string;
+}
+
+export async function getNotificationHistory() {
+  const q = query(collection(db, 'notifications'), orderBy('sentAt', 'desc'));
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data()
+  })) as NotificationHistory[];
+}
+
+export async function addNotification(notification: Omit<NotificationHistory, 'id' | 'sentAt'> & { sentAt?: string }) {
+  const notifRef = collection(db, 'notifications');
+  const docRef = await addDoc(notifRef, {
+    ...notification,
+    sentAt: notification.sentAt || new Date().toISOString(),
+    createdAt: serverTimestamp(),
+  });
+  return docRef.id;
+}
+
+// ===== CAMPAIGNS MANAGEMENT =====
+
+export interface Campaign {
+  id: string;
+  title: string;
+  message: string;
+  status: string;
+  recipientCount: number;
+  deliveredCount: number;
+  interactionCount: number;
+  createdAt: string;
+  image?: string;
+  actionUrl?: string;
+  priority?: string;
+}
+
+export async function getCampaigns() {
+  const q = query(collection(db, 'campaigns'), orderBy('createdAt', 'desc'));
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data()
+  })) as Campaign[];
+}
+
+export async function addCampaign(campaign: Omit<Campaign, 'id' | 'deliveredCount' | 'interactionCount'>) {
+  const campaignRef = collection(db, 'campaigns');
+  const docRef = await addDoc(campaignRef, {
+    ...campaign,
+    deliveredCount: 0,
+    interactionCount: 0,
+    createdAt: new Date().toISOString(),
+  });
+  return docRef.id;
+}
+
+// ===== GAMIFICATION CONFIG =====
+
+export interface GamificationConfig {
+  pointsPerRupee: number;
+  firstTimeBonusPoints: number;
+  firstTimeThreshold: number;
+  redeemRate: number;
+  maxRedeemPercent: number;
+  referralBonus: number;
+  birthdayBonus: number;
+  bonusRules: any[];
+  levelThresholds?: any[];
+}
+
+export async function getGamificationConfig(): Promise<GamificationConfig> {
+  try {
+    const configRef = doc(db, 'settings', 'gamification');
+    const configDoc = await getDoc(configRef);
+    
+    if (configDoc.exists()) {
+      return configDoc.data() as GamificationConfig;
+    }
+  } catch (error) {
+    console.error('Error loading gamification config:', error);
+  }
+
+  // Return default if not found
+  return {
+    pointsPerRupee: 1,
+    firstTimeBonusPoints: 100,
+    firstTimeThreshold: 500,
+    redeemRate: 0.5,
+    maxRedeemPercent: 50,
+    referralBonus: 50,
+    birthdayBonus: 100,
+    bonusRules: [],
+  };
+}
+
+export async function updateGamificationConfig(config: GamificationConfig) {
+  const configRef = doc(db, 'settings', 'gamification');
+  await setDoc(configRef, config);
+}

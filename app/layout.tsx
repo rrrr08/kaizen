@@ -3,6 +3,9 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/ui/JoyNavbar";
 import Footer from "@/components/ui/Footer";
+import { CartProvider } from "@/app/context/CartContext";
+import { GamificationProvider } from "@/app/context/GamificationContext";
+import { AuthProvider } from "@/app/context/AuthContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,12 +29,24 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <script
+          src="https://checkout.razorpay.com/v1/checkout.js"
+          async
+        ></script>
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black text-white`}
       >
-        <Navbar />
-        {children}
-        <Footer />
+        <AuthProvider>
+          <GamificationProvider>
+            <CartProvider>
+              <Navbar />
+              {children}
+              <Footer />
+            </CartProvider>
+          </GamificationProvider>
+        </AuthProvider>
       </body>
     </html>
   );
