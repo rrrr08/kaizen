@@ -39,7 +39,7 @@ import {
   deleteObject,
 } from "firebase/storage";
 // Type imports removed for JavaScript conversion - Re-added for TypeScript
-import { UserProfile, ChatMessage, Conversation, Product } from "./types";
+import { UserProfile, ChatMessage, Conversation, Product, GameEvent } from "./types";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,

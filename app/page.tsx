@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { PRODUCTS, EVENTS } from '@/lib/constants';
 import { ArrowRight, Star, Heart, Trophy, Users, Puzzle, Calendar, ShoppingBag, MapPin, Gift, Crown, Info } from 'lucide-react';
-
+import { splitDateTime } from '@/lib/utils';
 export default function Home() {
   return (
     <div className="relative min-h-screen bg-black overflow-x-hidden">

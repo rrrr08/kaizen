@@ -1,3 +1,4 @@
+import { Timestamp } from 'firebase/firestore';
 export interface Product {
   id: string;
   name: string;
@@ -13,18 +14,38 @@ export interface Product {
   badges: string[];
 }
 
+export interface EventHighlight {
+  icon?: string; // optional emoji or icon key
+  text: string;
+}
+
+export interface EventTestimonial {
+  name: string;
+  role?: string;
+  quote: string;
+}
+
+
 export interface GameEvent {
   id: string;
   title: string;
-  date: string;
-  time: string;
+  datetime: Date;   
   location: string;
   price: number;
   description: string;
   image: string;
   capacity: number;
   registered: number;
+  status: "upcoming" | "past";
+  createdAt: Date;  
+  updatedAt: Date;  
+
+  // 👇 past-only enrichments
+  highlights?: EventHighlight[];
+  gallery?: string[];
+  testimonials?: EventTestimonial[];
 }
+
 
 export interface Experience {
   id: string;

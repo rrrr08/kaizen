@@ -157,7 +157,10 @@ export const EVENTS: GameEvent[] = [
     description: "Join us for an exclusive evening of curated board games, networking, and revelry. Experience Joy Juncture's signature atmosphere with fellow game enthusiasts.",
     image: "https://picsum.photos/seed/event1/800/400",
     capacity: 100,
-    registered: 67
+    registered: 67,
+    status: "upcoming",
+    createdAt: new Date("2024-12-01T10:00:00Z"),
+    updatedAt: new Date("2024-12-10T14:30:00Z")
   },
   {
     id: 'e2',
@@ -169,7 +172,10 @@ export const EVENTS: GameEvent[] = [
     description: "Learn how to design engaging games from industry experts. Hands-on session covering mechanics, balance, and playtesting.",
     image: "https://picsum.photos/seed/workshop/800/400",
     capacity: 40,
-    registered: 32
+    registered: 32,
+    status: "upcoming",
+    createdAt: new Date("2024-11-20T09:15:00Z"),
+    updatedAt: new Date("2024-12-05T11:45:00Z")
   },
   {
     id: 'e3',
@@ -181,7 +187,10 @@ export const EVENTS: GameEvent[] = [
     description: "Competitive gameplay across multiple titles. Winners take home exclusive prizes and VIP points.",
     image: "https://picsum.photos/seed/tournament/800/400",
     capacity: 50,
-    registered: 45
+    registered: 45,
+    status: "upcoming",
+    createdAt: new Date("2024-11-25T13:20:00Z"),
+    updatedAt: new Date("2024-12-12T16:10:00Z")
   },
   {
     id: 'e4',
@@ -193,7 +202,10 @@ export const EVENTS: GameEvent[] = [
     description: "Bring the whole family for a relaxed evening of games, snacks, and fun. Perfect for all ages.",
     image: "https://picsum.photos/seed/family/800/400",
     capacity: 60,
-    registered: 38
+    registered: 38,
+    status: "upcoming",
+    createdAt: new Date("2024-11-28T15:45:00Z"),
+    updatedAt: new Date("2024-12-08T10:20:00Z")
   },
   {
     id: 'e5',
@@ -205,7 +217,10 @@ export const EVENTS: GameEvent[] = [
     description: "Custom corporate event with tailored games and team-building activities. Includes catering and dedicated facilitator.",
     image: "https://picsum.photos/seed/corporate/800/400",
     capacity: 120,
-    registered: 0
+    registered: 0,
+    status: "upcoming",
+    createdAt: new Date("2024-12-05T09:00:00Z"),
+    updatedAt: new Date("2024-12-05T09:00:00Z")
   },
   {
     id: 'e6',
@@ -217,7 +232,56 @@ export const EVENTS: GameEvent[] = [
     description: "Test your mental acuity against fellow puzzle enthusiasts. Multiple rounds of increasing difficulty.",
     image: "https://picsum.photos/seed/puzzle/800/400",
     capacity: 45,
-    registered: 29
+    registered: 29,
+    status: "upcoming",
+    createdAt: new Date("2024-11-30T12:30:00Z"),
+    updatedAt: new Date("2024-12-09T14:15:00Z")
+  },
+  // PAST EVENTS (for variety)
+  {
+    id: 'e7',
+    title: "Vintage Board Game Retro Night",
+    date: "2024-12-10",
+    time: "6:30 PM",
+    location: "Retro Arcade Lounge",
+    price: 349,
+    description: "A nostalgic journey through classic board games from the 80s and 90s.",
+    image: "https://picsum.photos/seed/vintage/800/400",
+    capacity: 80,
+    registered: 72,
+    status: "past",
+    createdAt: new Date("2024-10-15T11:00:00Z"),
+    updatedAt: new Date("2024-12-11T09:45:00Z")
+  },
+  {
+    id: 'e8',
+    title: "Strategy Games Workshop",
+    date: "2024-11-25",
+    time: "2:00 PM",
+    location: "Strategy Club House",
+    price: 0,
+    description: "Master the art of strategy games with expert guidance and practice sessions.",
+    image: "https://picsum.photos/seed/strategy/800/400",
+    capacity: 35,
+    registered: 35,
+    status: "past",
+    createdAt: new Date("2024-10-10T14:20:00Z"),
+    updatedAt: new Date("2024-11-26T10:30:00Z")
+  },
+  {
+    id: 'e9',
+    title: "Charity Game Marathon",
+    date: "2024-12-03",
+    time: "12:00 PM",
+    location: "Joy Juncture Main Hall",
+    price: 0,
+    description: "24-hour game marathon to raise funds for children's education.",
+    image: "https://picsum.photos/seed/charity/800/400",
+    capacity: 150,
+    registered: 128,
+    status: "past",
+    createdAt: new Date("2024-09-20T08:45:00Z"),
+    updatedAt: new Date("2024-12-04T18:20:00Z")
   }
 ];
 

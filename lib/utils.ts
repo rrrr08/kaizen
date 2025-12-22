@@ -1,5 +1,6 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge"
+import { Timestamp } from "firebase/firestore";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -79,4 +80,19 @@ export function getOrderStatus(status: string) {
   };
   
   return statusMap[status] || { text: 'Unknown', color: 'gray' };
+}
+
+export function splitDateTime(dateTime: string | Date) {
+  const date =
+    dateTime instanceof Date
+      ? dateTime
+      : new Date(dateTime); // 🔑 rehydrate
+
+  return {
+    date: date.toISOString().split("T")[0],
+    time: date.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
+  };
 }
