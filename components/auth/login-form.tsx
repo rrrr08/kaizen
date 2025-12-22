@@ -1,19 +1,26 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Eye, EyeOff, Mail, Lock, Loader2 } from 'lucide-react';
 import { signIn, signInWithGoogle, getUserProfile } from '@/lib/firebase';
+import { useCart } from '@/app/context/CartContext';
 
 export function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const { mergeLocalCartWithFirebase } = useCart();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [rememberMe, setRememberMe] = useState(false);
+
+  // Get redirect URL from query params (default to home or checkout)
+  const redirectUrl = searchParams.get('redirect') || '/';
+  const hasCheckoutIntent = typeof window !== 'undefined' && sessionStorage.getItem('checkoutIntent') === 'true';
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,6 +37,9 @@ export function LoginForm() {
         setLoading(false);
         return;
       }
+
+      // Merge local cart with Firebase
+      await mergeLocalCartWithFirebase();
 
       const profile = await getUserProfile(user.uid);
 
@@ -49,7 +59,15 @@ export function LoginForm() {
         return;
       }
 
-      router.push("/");
+      // Clear checkout intent
+      if (hasCheckoutIntent) {
+        if (typeof window !== 'undefined') {
+          sessionStorage.removeItem('checkoutIntent');
+        }
+      }
+
+      // Redirect to specified URL or home
+      router.push(redirectUrl);
     } catch (error) {
       const authError = error as { code?: string; message: string };
 
@@ -77,6 +95,9 @@ export function LoginForm() {
       const userCredential = await signInWithGoogle();
 
       if (userCredential) {
+        // Merge local cart with Firebase
+        await mergeLocalCartWithFirebase();
+
         const profile = await getUserProfile(userCredential.user.uid);
 
         if (!profile?.onboardingCompleted && !profile?.role) {
@@ -89,7 +110,15 @@ export function LoginForm() {
           return;
         }
 
-        router.push("/");
+        // Clear checkout intent
+        if (hasCheckoutIntent) {
+          if (typeof window !== 'undefined') {
+            sessionStorage.removeItem('checkoutIntent');
+          }
+        }
+
+        // Redirect to specified URL or home
+        router.push(redirectUrl);
       }
     } catch (error) {
       const authError = error as { message: string };

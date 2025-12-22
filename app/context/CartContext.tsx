@@ -17,9 +17,11 @@ interface CartContextType {
   setAppliedPointsDiscount: (discount: number) => void;
   getFinalPrice: () => number;
   isLoading: boolean;
+  mergeLocalCartWithFirebase: () => Promise<void>;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
+const CART_STORAGE_KEY = 'joy-juncture-cart';
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
@@ -28,24 +30,39 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [appliedPointsDiscount, setAppliedPointsDiscount] = useState(0);
   const { user } = useAuth();
   const [pendingSync, setPendingSync] = useState(false);
+  const [hasMergedCart, setHasMergedCart] = useState(false);
 
-  // Load cart from Firebase on mount and when user changes
+  // Load cart from localStorage or Firebase
   useEffect(() => {
     const loadCart = async () => {
-      if (!user?.uid) {
-        setItems([]);
-        setIsLoading(false);
-        setMounted(true);
-        return;
-      }
-
       try {
         setIsLoading(true);
-        const cartData = await getUserCart(user.uid);
-        setItems(cartData || []);
+
+        // User is authenticated
+        if (user?.uid) {
+          const cartData = await getUserCart(user.uid);
+          setItems(cartData || []);
+          
+          // Merge local cart with Firebase if this is the first load and we have a local cart
+          if (!hasMergedCart) {
+            const localCart = getLocalCart();
+            if (localCart.length > 0 && (!cartData || cartData.length === 0)) {
+              // Merge local items with Firebase
+              await updateUserCart(user.uid, localCart);
+              setItems(localCart);
+            }
+            setHasMergedCart(true);
+          }
+        } else {
+          // User is not authenticated - load from localStorage
+          const localCart = getLocalCart();
+          setItems(localCart);
+        }
       } catch (error) {
-        console.error('Failed to load cart from Firebase:', error);
-        setItems([]);
+        console.error('Failed to load cart:', error);
+        // Fallback to localStorage
+        const localCart = getLocalCart();
+        setItems(localCart);
       } finally {
         setIsLoading(false);
         setMounted(true);
@@ -53,18 +70,28 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     };
 
     loadCart();
-  }, [user?.uid]);
+  }, [user?.uid, hasMergedCart]);
 
-  // Save cart to Firebase whenever it changes (debounced)
+  // Save cart to Firebase when user is authenticated, or localStorage when not
   useEffect(() => {
-    if (!mounted || !user?.uid || pendingSync) return;
+    if (!mounted || pendingSync) return;
 
     setPendingSync(true);
     const timer = setTimeout(async () => {
       try {
-        await updateUserCart(user.uid, items);
+        if (user?.uid) {
+          // User authenticated - save to Firebase
+          await updateUserCart(user.uid, items);
+        } else {
+          // User not authenticated - save to localStorage
+          saveLocalCart(items);
+        }
       } catch (error) {
-        console.error('Failed to save cart to Firebase:', error);
+        console.error('Failed to save cart:', error);
+        // Fallback: save to localStorage
+        if (!user?.uid) {
+          saveLocalCart(items);
+        }
       } finally {
         setPendingSync(false);
       }
@@ -72,6 +99,64 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
     return () => clearTimeout(timer);
   }, [items, mounted, user?.uid, pendingSync]);
+
+  const getLocalCart = (): CartItem[] => {
+    if (typeof window === 'undefined') return [];
+    try {
+      const stored = localStorage.getItem(CART_STORAGE_KEY);
+      return stored ? JSON.parse(stored) : [];
+    } catch (error) {
+      console.error('Error reading local cart:', error);
+      return [];
+    }
+  };
+
+  const saveLocalCart = (cartItems: CartItem[]) => {
+    if (typeof window === 'undefined') return;
+    try {
+      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartItems));
+    } catch (error) {
+      console.error('Error saving local cart:', error);
+    }
+  };
+
+  const mergeLocalCartWithFirebase = async () => {
+    if (!user?.uid) return;
+
+    try {
+      const localCart = getLocalCart();
+      const firebaseCart = await getUserCart(user.uid);
+
+      if (localCart.length === 0) return;
+
+      // Merge carts: if item exists in both, take the one with higher quantity
+      const mergedCart = [...(firebaseCart || [])];
+
+      for (const localItem of localCart) {
+        const existingIndex = mergedCart.findIndex(item => item.productId === localItem.productId);
+        
+        if (existingIndex >= 0) {
+          // Item exists in both - take the higher quantity
+          mergedCart[existingIndex].quantity = Math.max(
+            mergedCart[existingIndex].quantity,
+            localItem.quantity
+          );
+        } else {
+          // Item only in local cart - add it
+          mergedCart.push(localItem);
+        }
+      }
+
+      // Save merged cart to Firebase and state
+      await updateUserCart(user.uid, mergedCart);
+      setItems(mergedCart);
+
+      // Clear local cart
+      saveLocalCart([]);
+    } catch (error) {
+      console.error('Error merging cart:', error);
+    }
+  };
 
   const addToCart = (product: Product, quantity: number) => {
     setItems((prevItems) => {
@@ -122,6 +207,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       } catch (error) {
         console.error('Failed to clear cart in Firebase:', error);
       }
+    } else {
+      saveLocalCart([]);
     }
   };
 
@@ -151,6 +238,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         setAppliedPointsDiscount,
         getFinalPrice,
         isLoading,
+        mergeLocalCartWithFirebase,
       }}
     >
       {children}

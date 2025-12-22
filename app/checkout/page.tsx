@@ -1,6 +1,7 @@
 'use client';
 
 import { useCart } from '@/app/context/CartContext';
+import { useAuth } from '@/app/context/AuthContext';
 import { useGamification } from '@/app/context/GamificationContext';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
@@ -17,7 +18,8 @@ declare global {
 }
 
 export default function CheckoutPage() {
-  const { items, getTotalPrice, clearCart, appliedPointsDiscount, setAppliedPointsDiscount, getFinalPrice } = useCart();
+  const { items, getTotalPrice, clearCart, appliedPointsDiscount, setAppliedPointsDiscount, getFinalPrice, mergeLocalCartWithFirebase } = useCart();
+  const { user, loading: authLoading } = useAuth();
   const { config, calculatePoints, calculatePointWorth, getMaxRedeemableAmount } = useGamification();
   const router = useRouter();
   const { addToast } = useToast();
@@ -37,6 +39,26 @@ export default function CheckoutPage() {
     state: '',
     zipCode: '',
   });
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!authLoading && !user) {
+      // Store the intent to checkout after login
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('checkoutIntent', 'true');
+      }
+      router.push('/auth/login?redirect=/checkout');
+    }
+  }, [user, authLoading, router]);
+
+  // Merge local cart when user signs in
+  useEffect(() => {
+    if (user?.uid && !authLoading) {
+      mergeLocalCartWithFirebase().catch(error => {
+        console.error('Failed to merge cart:', error);
+      });
+    }
+  }, [user?.uid, authLoading, mergeLocalCartWithFirebase]);
 
   // Load wallet points and settings on mount
   useEffect(() => {
@@ -118,6 +140,16 @@ export default function CheckoutPage() {
 
   const handlePlaceOrder = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Double-check authentication
+    if (!user?.uid) {
+      addToast({
+        title: 'Authentication Required',
+        description: 'Please sign in to complete your purchase.',
+      });
+      router.push('/auth/login?redirect=/checkout');
+      return;
+    }
 
     if (!formData.name || !formData.email || !formData.phone || !formData.address) {
       addToast({
@@ -307,7 +339,7 @@ export default function CheckoutPage() {
     }
   };
 
-  if (items.length === 0) {
+  if (items.length === 0 && !authLoading) {
     return (
       <div className="min-h-screen pt-28 pb-16 flex items-center justify-center">
         <div className="text-center">
@@ -319,6 +351,23 @@ export default function CheckoutPage() {
         </div>
       </div>
     );
+  }
+
+  // Show loading while checking authentication
+  if (authLoading || (user === null && authLoading === false && items.length > 0)) {
+    return (
+      <div className="min-h-screen pt-28 pb-16 flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
+          <p className="text-white/60 font-header text-[10px] tracking-[0.4em]">REDIRECTING TO LOGIN...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render checkout form if user is not authenticated (they'll be redirected)
+  if (!user?.uid) {
+    return null;
   }
 
   return (
