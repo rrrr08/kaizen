@@ -11,7 +11,7 @@ function VerifyPageContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const emailFromQuery = searchParams.get("email") || "";
-    const redirectTo = searchParams.get("redirectTo") || "/";
+    const redirectUrl = searchParams.get("redirect") || searchParams.get("redirectTo") || "/";
 
     const [error, setError] = useState<string | null>(null);
     const [message, setMessage] = useState<string | null>(null);
@@ -39,7 +39,7 @@ function VerifyPageContent() {
                 if (user.emailVerified) {
                     setMessage("Your email is already verified! Redirecting...");
                     setTimeout(() => {
-                        router.push(redirectTo || '/');
+                        router.push(decodeURIComponent(redirectUrl) || '/');
                     }, 2000);
                 } else {
                     setMessage("Please verify your email. If you received a code, enter it below, or request a new verification email.");
@@ -55,7 +55,7 @@ function VerifyPageContent() {
             setSessionChecking(false);
         });
         return () => unsubscribe();
-    }, [router, redirectTo, emailFromQuery]);
+    }, [router, redirectUrl, emailFromQuery]);
 
     const handleResendOTP = async () => {
         const targetEmail = auth.currentUser?.email || emailFromQuery;

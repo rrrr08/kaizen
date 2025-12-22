@@ -2,14 +2,17 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Eye, EyeOff, Mail, Lock, User, Loader2 } from 'lucide-react';
 import { createUser, signInWithGoogle, auth } from '@/lib/firebase';
 import { sendEmailVerification } from 'firebase/auth';
 import { USER_ROLES } from '@/lib/roles';
+import { useCart } from '@/app/context/CartContext';
 
 export function SignupForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const { mergeLocalCartWithFirebase } = useCart();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -19,6 +22,10 @@ export function SignupForm() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Get redirect URL from query params (default to home or checkout)
+  const redirectUrl = searchParams.get('redirect') || '/';
+  const hasCheckoutIntent = typeof window !== 'undefined' && sessionStorage.getItem('checkoutIntent') === 'true';
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,11 +50,8 @@ export function SignupForm() {
       // Create user in Firebase
       await createUser(email, password, {
         email: email,
-        first_name: firstName,
-        last_name: lastName,
-        name: `${firstName} ${lastName}`.trim(),
-        role: USER_ROLES.MEMBER,
-      });
+        fMerge local cart with Firebase after signup
+      await mergeLocalCartWithFirebase();
 
       // Send verification email
       if (auth.currentUser) {
@@ -55,6 +59,20 @@ export function SignupForm() {
 
         const actionCodeSettings = {
           url: actionUrl,
+          handleCodeInApp: true,
+        };
+
+        console.log('Sending verification email with action URL:', actionUrl);
+        await sendEmailVerification(auth.currentUser, actionCodeSettings);
+        
+        // Clear checkout intent
+        if (hasCheckoutIntent) {
+          if (typeof window !== 'undefined') {
+            sessionStorage.removeItem('checkoutIntent');
+          }
+        }
+
+        router.push(`/auth/verify?email=${email}&redirect=${encodeURIComponent(redirectUrl)
           handleCodeInApp: true,
         };
 
@@ -81,12 +99,27 @@ export function SignupForm() {
         setError("Unable to connect to the database. Please check your internet connection, firewall, or ensure the Firestore database exists in the Firebase Console.");
       } else {
         setError(authError.message || "An error occurred during signup");
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
+      const userCredential = await signInWithGoogle();
 
+      if (userCredential) {
+        // Merge local cart with Firebase after Google signup
+        await mergeLocalCartWithFirebase();
+
+        // Clear checkout intent
+        if (hasCheckoutIntent) {
+          if (typeof window !== 'undefined') {
+            sessionStorage.removeItem('checkoutIntent');
+          }
+        }
+
+        // Redirect to specified URL or home
+        router.push(redirectUrl);
+      }
+    } catch (error) {
+      console.error("Google sign in error:", error);
+      const authError = error as { message: string };
+      setError(authError.message || "An error occurred with Google sign in");
+      setLoading(false);
   const handleGoogleSignup = async () => {
     setLoading(true);
     setError(null);
