@@ -1,7 +1,12 @@
 import admin from 'firebase-admin';
 
-// Initialize Firebase Admin SDK if not already initialized
-if (!admin.apps.length) {
+let isInitialized = false;
+
+function initializeFirebaseAdmin() {
+  if (isInitialized || admin.apps.length > 0) {
+    return;
+  }
+
   try {
     // First, check if the JSON string is provided as a single environment variable
     if (process.env.FIREBASE_ADMIN_SERVICE_ACCOUNT) {
@@ -55,29 +60,29 @@ if (!admin.apps.length) {
     }
   } catch (error) {
     console.error('Firebase Admin initialization error:', error);
-    
-    // For development environment, we can use a fallback configuration
-    if (process.env.NODE_ENV !== 'production' && process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID) {
-      console.warn('Firebase Admin SDK not properly configured, using fallback for development');
-      admin.initializeApp({
-        projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID
-      });
-      console.log('Firebase Admin initialized with fallback configuration for development');
-    } else {
-      // In production or when no fallback available, log the error but don't throw
-      console.error('Firebase Admin SDK configuration error:', error instanceof Error ? error.message : String(error));
-      console.warn('Some server-side features may not work properly');
-      
-      // Initialize with minimal config to prevent build failures
-      if (process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID) {
-        admin.initializeApp({
-          projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID
-        });
-      }
-    }
+    throw error;
   }
+  
+  isInitialized = true;
 }
 
-export const adminAuth = admin.auth();
-export const adminDb = admin.firestore();
+export function getAdminDb() {
+  initializeFirebaseAdmin();
+  return admin.firestore();
+}
+
+export function getAdminAuth() {
+  initializeFirebaseAdmin();
+  return admin.auth();
+}
+
+// For compatibility with existing imports
+export const adminDb = {
+  collection: (...args: any[]) => getAdminDb().collection(...args),
+};
+
+export const adminAuth = {
+  getUserByEmail: (email: string) => getAdminAuth().getUserByEmail(email),
+};
+
 export default admin;
