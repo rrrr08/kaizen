@@ -83,6 +83,11 @@ export const adminDb = {
 
 export const adminAuth = {
   getUserByEmail: (email: string) => getAdminAuth().getUserByEmail(email),
+  verifyIdToken: (token: string) => getAdminAuth().verifyIdToken(token),
+  verifySessionCookie: (cookie: string) => getAdminAuth().verifySessionCookie(cookie),
+  createSessionCookie: (idToken: string, options: any) => getAdminAuth().createSessionCookie(idToken, options),
+  setCustomUserClaims: (uid: string, claims: any) => getAdminAuth().setCustomUserClaims(uid, claims),
+  revokeRefreshTokens: (uid: string) => getAdminAuth().revokeRefreshTokens(uid),
 };
 
 export default admin;
