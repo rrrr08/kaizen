@@ -50,7 +50,7 @@ export default function EventRegistrationForm({
 
   const loadWallet = async () => {
     try {
-      if (!user) return;
+      if (!user?.uid) return;
       const walletData = await getUserWallet(user.uid);
       // If wallet doesn't exist, create a default one with 0 points
       setWallet(walletData || { points: 0, userId: user.uid });
