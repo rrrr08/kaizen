@@ -100,6 +100,16 @@ function ensureFirebaseInit() {
   }
 }
 
+// Helper to get initialized Firestore instance
+export async function getFirebaseDb() {
+  if (db) return db;
+  
+  const firebase = await import('@/lib/firebase');
+  if (firebase.db) return firebase.db;
+  
+  throw new Error('Firebase Firestore not initialized');
+}
+
 // ProfileUpdateData interface removed for JavaScript conversion
 
 export const createUser = async (email: string, password: string, userData: UserProfile) => {
@@ -454,6 +464,12 @@ export async function updateProduct(productId: string, product: Partial<Product>
 }
 
 export async function deleteProduct(productId: string) {
+  if (!db) {
+    const firebase = await import('@/lib/firebase');
+    const firebaseDb = firebase.db;
+    if (!firebaseDb) throw new Error('Firebase not initialized');
+    return await deleteDoc(doc(firebaseDb, 'products', productId));
+  }
   await deleteDoc(doc(db, 'products', productId));
 }
 
@@ -679,7 +695,8 @@ export const updateGoogleIntegration = async (
 // ===== WALLET & POINTS MANAGEMENT =====
 
 export async function updateUserWallet(userId: string, pointsToAdd: number) {
-  const userRef = doc(db, 'users', userId);
+  const firebaseDb = await getFirebaseDb();
+  const userRef = doc(firebaseDb, 'users', userId);
   const userDoc = await getDoc(userRef);
   
   if (!userDoc.exists()) {
@@ -698,7 +715,8 @@ export async function updateUserWallet(userId: string, pointsToAdd: number) {
 }
 
 export async function getUserWallet(userId: string) {
-  const userRef = doc(db, 'users', userId);
+  const firebaseDb = await getFirebaseDb();
+  const userRef = doc(firebaseDb, 'users', userId);
   const userDoc = await getDoc(userRef);
   
   if (!userDoc.exists()) {
@@ -766,8 +784,9 @@ export async function createOrder(
 }
 
 export async function getUserOrders(userId: string) {
+  const firebaseDb = await getFirebaseDb();
   const q = query(
-    collection(db, 'orders'),
+    collection(firebaseDb, 'orders'),
     where('userId', '==', userId)
   );
 
@@ -792,7 +811,8 @@ export async function getUserOrders(userId: string) {
 }
 
 export async function getOrderById(orderId: string) {
-  const orderRef = doc(db, 'orders', orderId);
+  const firebaseDb = await getFirebaseDb();
+  const orderRef = doc(firebaseDb, 'orders', orderId);
   const orderDoc = await getDoc(orderRef);
   
   if (!orderDoc.exists()) {
@@ -809,7 +829,8 @@ export async function getOrderById(orderId: string) {
 // ===== CART MANAGEMENT =====
 
 export async function updateUserCart(userId: string, cartItems: any[]) {
-  const userRef = doc(db, 'users', userId);
+  const firebaseDb = await getFirebaseDb();
+  const userRef = doc(firebaseDb, 'users', userId);
   
   await updateDoc(userRef, {
     cart: cartItems,
@@ -819,7 +840,8 @@ export async function updateUserCart(userId: string, cartItems: any[]) {
 }
 
 export async function getUserCart(userId: string) {
-  const userRef = doc(db, 'users', userId);
+  const firebaseDb = await getFirebaseDb();
+  const userRef = doc(firebaseDb, 'users', userId);
   const userDoc = await getDoc(userRef);
   
   if (!userDoc.exists()) {
@@ -830,7 +852,8 @@ export async function getUserCart(userId: string) {
 }
 
 export async function clearUserCart(userId: string) {
-  const userRef = doc(db, 'users', userId);
+  const firebaseDb = await getFirebaseDb();
+  const userRef = doc(firebaseDb, 'users', userId);
   
   await updateDoc(userRef, {
     cart: [],
@@ -853,7 +876,8 @@ export interface NotificationHistory {
 }
 
 export async function getNotificationHistory() {
-  const q = query(collection(db, 'notifications'), orderBy('sentAt', 'desc'));
+  const firebaseDb = await getFirebaseDb();
+  const q = query(collection(firebaseDb, 'notifications'), orderBy('sentAt', 'desc'));
   const snapshot = await getDocs(q);
   return snapshot.docs.map(doc => ({
     id: doc.id,
@@ -862,7 +886,8 @@ export async function getNotificationHistory() {
 }
 
 export async function addNotification(notification: Omit<NotificationHistory, 'id' | 'sentAt'> & { sentAt?: string }) {
-  const notifRef = collection(db, 'notifications');
+  const firebaseDb = await getFirebaseDb();
+  const notifRef = collection(firebaseDb, 'notifications');
   const docRef = await addDoc(notifRef, {
     ...notification,
     sentAt: notification.sentAt || new Date().toISOString(),
@@ -888,7 +913,8 @@ export interface Campaign {
 }
 
 export async function getCampaigns() {
-  const q = query(collection(db, 'campaigns'), orderBy('createdAt', 'desc'));
+  const firebaseDb = await getFirebaseDb();
+  const q = query(collection(firebaseDb, 'campaigns'), orderBy('createdAt', 'desc'));
   const snapshot = await getDocs(q);
   return snapshot.docs.map(doc => ({
     id: doc.id,
@@ -897,7 +923,8 @@ export async function getCampaigns() {
 }
 
 export async function addCampaign(campaign: Omit<Campaign, 'id' | 'deliveredCount' | 'interactionCount'>) {
-  const campaignRef = collection(db, 'campaigns');
+  const firebaseDb = await getFirebaseDb();
+  const campaignRef = collection(firebaseDb, 'campaigns');
   const docRef = await addDoc(campaignRef, {
     ...campaign,
     deliveredCount: 0,
@@ -923,10 +950,12 @@ export interface GamificationConfig {
 
 export async function getGamificationConfig(): Promise<GamificationConfig> {
   try {
-    if (!db) {
+    const firebase = await import('@/lib/firebase');
+    const firebaseDb = firebase.db;
+    if (!firebaseDb) {
       throw new Error('Firebase not initialized');
     }
-    const configRef = doc(db, 'settings', 'gamification');
+    const configRef = doc(firebaseDb, 'settings', 'gamification');
     const configDoc = await getDoc(configRef);
     
     if (configDoc.exists()) {
@@ -950,10 +979,12 @@ export async function getGamificationConfig(): Promise<GamificationConfig> {
 }
 
 export async function updateGamificationConfig(config: GamificationConfig) {
-  if (!db) {
+  const firebase = await import('@/lib/firebase');
+  const firebaseDb = firebase.db;
+  if (!firebaseDb) {
     throw new Error('Firebase not initialized');
   }
-  const configRef = doc(db, 'settings', 'gamification');
+  const configRef = doc(firebaseDb, 'settings', 'gamification');
   await setDoc(configRef, config);
 }
 
@@ -966,7 +997,8 @@ export async function updateGamificationConfig(config: GamificationConfig) {
  */
 export async function getProducts() {
   try {
-    const q = query(collection(db, 'products'));
+    const firebaseDb = await getFirebaseDb();
+    const q = query(collection(firebaseDb, 'products'));
     const snapshot = await getDocs(q);
     return snapshot.docs.map(doc => ({
       id: doc.id,
@@ -983,7 +1015,8 @@ export async function getProducts() {
  */
 export async function getProductById(id: string) {
   try {
-    const docRef = doc(db, 'products', id);
+    const firebaseDb = await getFirebaseDb();
+    const docRef = doc(firebaseDb, 'products', id);
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
       return { id: docSnap.id, ...docSnap.data() };
@@ -1000,7 +1033,8 @@ export async function getProductById(id: string) {
  */
 export async function getEvents() {
   try {
-    const q = query(collection(db, 'events'), orderBy('date', 'asc'));
+    const firebaseDb = await getFirebaseDb();
+    const q = query(collection(firebaseDb, 'events'), orderBy('date', 'asc'));
     const snapshot = await getDocs(q);
     return snapshot.docs.map(doc => ({
       id: doc.id,
@@ -1017,7 +1051,8 @@ export async function getEvents() {
  */
 export async function getEventById(id: string) {
   try {
-    const docRef = doc(db, 'events', id);
+    const firebaseDb = await getFirebaseDb();
+    const docRef = doc(firebaseDb, 'events', id);
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
       return { id: docSnap.id, ...docSnap.data() };
@@ -1034,7 +1069,8 @@ export async function getEventById(id: string) {
  */
 export async function getGames() {
   try {
-    const q = query(collection(db, 'games'));
+    const firebaseDb = await getFirebaseDb();
+    const q = query(collection(firebaseDb, 'games'));
     const snapshot = await getDocs(q);
     return snapshot.docs.map(doc => ({
       id: doc.id,
@@ -1051,7 +1087,8 @@ export async function getGames() {
  */
 export async function getExperiences() {
   try {
-    const q = query(collection(db, 'experiences'));
+    const firebaseDb = await getFirebaseDb();
+    const q = query(collection(firebaseDb, 'experiences'));
     const snapshot = await getDocs(q);
     return snapshot.docs.map(doc => ({
       id: doc.id,
