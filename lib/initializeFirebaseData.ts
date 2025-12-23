@@ -33,7 +33,7 @@ export async function initializeFirebaseData() {
     await initializeOrders(firebaseDb, addDoc, serverTimestamp);
 
     // 6. Initialize Users
-    await initializeUsers(firebaseDb, setDoc, doc);
+    await initializeUsers(firebaseDb, setDoc, doc, addDoc);
 
     console.log('✅ Firebase initialization complete!');
     return { success: true, message: 'Firebase initialized successfully' };
@@ -454,7 +454,7 @@ async function initializeOrders(db: any, addDoc: any, serverTimestamp: any) {
   }
 }
 
-async function initializeUsers(db: any, setDoc: any, doc: any) {
+async function initializeUsers(db: any, setDoc: any, doc: any, addDoc: any) {
   try {
     console.log('👥 Starting users initialization...');
     const { collection, getDocs } = await import('@/lib/firebase');
