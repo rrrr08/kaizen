@@ -7,20 +7,11 @@ import {
   getDoc,
   doc,
 } from "firebase/firestore";
-
-let db: any = null;
-
-async function getDb() {
-  if (!db) {
-    const firebase = await import("@/lib/firebase");
-    db = firebase.db;
-  }
-  return db;
-}
+import { getFirebaseDb } from "@/lib/firebase";
 
 export async function getEvents(filters:{status:'upcoming' | 'past'}) {
   try {
-    const database = await getDb();
+    const database = await getFirebaseDb();
     const eventsCollection = collection(database, 'events');
     let q = query(
       eventsCollection,
@@ -51,7 +42,7 @@ export async function getEvents(filters:{status:'upcoming' | 'past'}) {
 
 export async function getEventById(eventId: string) {
     try{
-        const database = await getDb();
+        const database = await getFirebaseDb();
         const ref = doc(database, "events", eventId);
         const snap = await getDoc(ref);
 

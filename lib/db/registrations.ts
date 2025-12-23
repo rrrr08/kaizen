@@ -9,20 +9,11 @@ import {
   increment,
   serverTimestamp,
 } from "firebase/firestore";
-
-let db: any = null;
-
-async function getDb() {
-  if (!db) {
-    const firebase = await import("@/lib/firebase");
-    db = firebase.db;
-  }
-  return db;
-}
+import { getFirebaseDb } from "@/lib/firebase";
 
 export async function registerForEvent(eventId: string, userId: string) {
   try {
-    const database = await getDb();
+    const database = await getFirebaseDb();
     const registrationsCollection = collection(database, 'event_registrations');
     const eventsCollection = collection(database, 'events');
     
@@ -102,7 +93,7 @@ export async function registerForEvent(eventId: string, userId: string) {
 
 export async function getEventRegistrations(eventId: string) {
   try {
-    const database = await getDb();
+    const database = await getFirebaseDb();
     const registrationsCollection = collection(database, 'event_registrations');
     const q = query(
       registrationsCollection,
@@ -125,7 +116,7 @@ export async function getEventRegistrations(eventId: string) {
 
 export async function getUserEventRegistrations(userId: string) {
   try {
-    const database = await getDb();
+    const database = await getFirebaseDb();
     const registrationsCollection = collection(database, 'event_registrations');
     const q = query(
       registrationsCollection,
@@ -148,7 +139,7 @@ export async function getUserEventRegistrations(userId: string) {
 
 export async function cancelRegistration(registrationId: string, eventId: string) {
   try {
-    const database = await getDb();
+    const database = await getFirebaseDb();
     await updateDoc(doc(database, 'event_registrations', registrationId), {
       status: 'cancelled',
       updatedAt: serverTimestamp(),

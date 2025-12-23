@@ -950,9 +950,10 @@ export interface GamificationConfig {
 
 export async function getGamificationConfig(): Promise<GamificationConfig> {
   try {
-    const firebase = await import('@/lib/firebase');
-    const firebaseDb = firebase.db;
+    // Use the module-level db variable directly, don't re-import
+    const firebaseDb = db;
     if (!firebaseDb) {
+      console.warn('Firebase Firestore not initialized - using defaults');
       throw new Error('Firebase not initialized');
     }
     const configRef = doc(firebaseDb, 'settings', 'gamification');
@@ -979,13 +980,19 @@ export async function getGamificationConfig(): Promise<GamificationConfig> {
 }
 
 export async function updateGamificationConfig(config: GamificationConfig) {
-  const firebase = await import('@/lib/firebase');
-  const firebaseDb = firebase.db;
-  if (!firebaseDb) {
-    throw new Error('Firebase not initialized');
+  try {
+    // Use the module-level db variable directly, don't re-import
+    const firebaseDb = db;
+    if (!firebaseDb) {
+      console.warn('Firebase Firestore not initialized');
+      throw new Error('Firebase not initialized');
+    }
+    const configRef = doc(firebaseDb, 'settings', 'gamification');
+    await setDoc(configRef, config);
+  } catch (error) {
+    console.error('Failed to save gamification config to Firebase:', error);
+    throw error;
   }
-  const configRef = doc(firebaseDb, 'settings', 'gamification');
-  await setDoc(configRef, config);
 }
 
 // ============================================

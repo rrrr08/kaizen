@@ -4,20 +4,11 @@ import {
   getDoc,
   doc,
 } from "firebase/firestore";
-
-let db: any = null;
-
-async function getDb() {
-  if (!db) {
-    const firebase = await import("@/lib/firebase");
-    db = firebase.db;
-  }
-  return db;
-}
+import { getFirebaseDb } from "@/lib/firebase";
 
 export async function getAboutData() {
   try {
-    const database = await getDb();
+    const database = await getFirebaseDb();
     const aboutCollection = collection(database, 'about');
     const snapshot = await getDocs(aboutCollection);
 
@@ -43,7 +34,7 @@ export async function getAboutData() {
 export async function getCommunityData() {
   try {
     // Get community settings/content
-    const database = await getDb();
+    const database = await getFirebaseDb();
     const communityRef = doc(database, 'community', 'main');
     const snap = await getDoc(communityRef);
 

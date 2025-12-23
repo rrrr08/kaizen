@@ -9,29 +9,7 @@ import {
   increment,
   serverTimestamp,
 } from "firebase/firestore";
-
-let db: any = null;
-let registrationsCollection: any = null;
-let eventsCollection: any = null;
-let walletsCollection: any = null;
-
-async function getDb() {
-  if (!db) {
-    const firebase = await import("@/lib/firebase");
-    db = firebase.db;
-    
-    if (!db) {
-      throw new Error('Firebase Firestore is not initialized. Check your Firebase configuration.');
-    }
-    
-    registrationsCollection = collection(db, 'event_registrations');
-    eventsCollection = collection(db, 'events');
-    walletsCollection = collection(db, 'wallets');
-  }
-  return db;
-}
-
-export { registrationsCollection, eventsCollection, walletsCollection };
+import { getFirebaseDb } from "@/lib/firebase";
 
 export async function createPaymentOrder(
   eventId: string,
@@ -40,7 +18,7 @@ export async function createPaymentOrder(
   walletPointsUsed: number = 0
 ) {
   try {
-    const firebaseDb = await getDb();
+    const firebaseDb = await getFirebaseDb();
     // Create payment order record in Firestore (for tracking)
     const orderData = {
       eventId,
@@ -75,7 +53,7 @@ export async function completeRegistration(
 ) {
   try {
     // Initialize Firebase Firestore first
-    const firebaseDb = await getDb();
+    const firebaseDb = await getFirebaseDb();
     
     // Create collection references using returned db
     const registrations = collection(firebaseDb, 'event_registrations');
@@ -179,7 +157,7 @@ export async function completeRegistration(
 
 export async function getUserWallet(userId: string) {
   try {
-    const firebaseDb = await getDb();
+    const firebaseDb = await getFirebaseDb();
     const wallets = collection(firebaseDb, 'wallets');
     
     const walletSnap = await getDocs(
