@@ -1,10 +1,17 @@
-import Razorpay from 'razorpay';
 import { NextRequest, NextResponse } from 'next/server';
 
-const razorpay = new Razorpay({
-  key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
-  key_secret: process.env.RAZORPAY_KEY_SECRET!,
-});
+let razorpayInstance: any = null;
+
+async function getRazorpay() {
+  if (!razorpayInstance) {
+    const Razorpay = (await import('razorpay')).default;
+    razorpayInstance = new Razorpay({
+      key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
+      key_secret: process.env.RAZORPAY_KEY_SECRET!,
+    });
+  }
+  return razorpayInstance;
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -20,6 +27,7 @@ export async function POST(request: NextRequest) {
     // Amount should be in paise (multiply by 100)
     const razorpayAmount = Math.round(amount * 100);
 
+    const razorpay = await getRazorpay();
     const order = await razorpay.orders.create({
       amount: razorpayAmount,
       currency,
