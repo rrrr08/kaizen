@@ -3,11 +3,12 @@
  * Call GET /api/admin/init-mock-data to populate Firestore with demo data
  */
 
-import { initializeAllMockData } from '@/lib/initMockData';
 import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {
+    // Dynamically import to avoid Firebase initialization at build time
+    const { initializeAllMockData } = await import('@/lib/initMockData');
     await initializeAllMockData();
     return NextResponse.json({
       success: true,
