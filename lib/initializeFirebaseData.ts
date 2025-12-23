@@ -134,7 +134,7 @@ async function initializeSettings(db: any, getDocs: any, query: any, doc: any, s
 async function initializeProducts(db: any, setDoc: any, doc: any, serverTimestamp: any) {
   try {
     console.log('📦 Starting product initialization...');
-    const { collection, getDocs } = await import('@/lib/firebase');
+    const { collection, getDocs, addDoc } = await import('@/lib/firebase');
     const productsRef = collection(db, 'products');
     
     // Check if products already exist
