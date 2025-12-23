@@ -23,6 +23,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     
     // Lazy load Firebase
     import('@/lib/firebase').then(({ auth, db }) => {
+      // Check if Firebase is initialized
+      if (!auth) {
+        console.warn('[AuthContext] Firebase auth not initialized');
+        setLoading(false);
+        return;
+      }
+      
       import('firebase/auth').then(({ onAuthStateChanged }) => {
         import('firebase/firestore').then(({ doc, getDoc }) => {
           const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -37,6 +44,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             if (currentUser) {
               // Fetch user role from Firestore
               try {
+                if (!db) {
+                  console.warn('[AuthContext] Firebase db not initialized');
+                  setRole(null);
+                  setIsAdmin(false);
+                  setLoading(false);
+                  return;
+                }
+                
                 const userDocRef = doc(db, 'users', currentUser.uid);
                 const userDocSnap = await getDoc(userDocRef);
                 
