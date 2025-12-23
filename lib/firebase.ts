@@ -349,7 +349,8 @@ export const checkUserIsAdmin = async (userId: string) => {
   }
 };
 
-if (typeof window !== "undefined") {
+// Set up auth state listener only if Firebase is initialized
+if (typeof window !== "undefined" && auth) {
   onAuthStateChanged(auth, async (user) => {
     if (user) {
       try {
@@ -383,11 +384,13 @@ if (typeof window !== "undefined") {
           }
         } else {
           // Update last sign in for existing users
-          const userRef = doc(db, "users", user.uid);
-          await updateDoc(userRef, {
-            last_sign_in_at: serverTimestamp(),
-            updated_at: serverTimestamp()
-          });
+          if (db) {
+            const userRef = doc(db, "users", user.uid);
+            await updateDoc(userRef, {
+              last_sign_in_at: serverTimestamp(),
+              updated_at: serverTimestamp()
+            });
+          }
         }
       } catch (error) {
         console.error(
