@@ -21,7 +21,7 @@ export async function initializeFirebaseData() {
     await initializeGamificationConfig(firebaseDb, setDoc, doc, serverTimestamp);
 
     // 2. Initialize Mock Settings
-    await initializeSettings(firebaseDb, getDocs, query, doc);
+    await initializeSettings(firebaseDb, getDocs, query, doc, serverTimestamp);
 
     // 3. Initialize Products
     await initializeProducts(firebaseDb, setDoc, doc, serverTimestamp);
@@ -107,7 +107,7 @@ async function initializeGamificationConfig(db: any, setDoc: any, doc: any, serv
   }
 }
 
-async function initializeSettings(db: any, getDocs: any, query: any, doc: any) {
+async function initializeSettings(db: any, getDocs: any, query: any, doc: any, serverTimestamp: any) {
   try {
     const settingsRef = doc(db, 'settings', 'store');
     const settings = {
