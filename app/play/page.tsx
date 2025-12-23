@@ -1,7 +1,8 @@
 'use client';
 
-import { getGames } from '@/lib/firebase';
 import { useState, useEffect } from 'react';
+
+export const dynamic = 'force-dynamic';
 
 export default function Play() {
   const [games, setGames] = useState<any[]>([]);
@@ -12,6 +13,7 @@ export default function Play() {
     const fetchGames = async () => {
       try {
         setLoading(true);
+        const { getGames } = await import('@/lib/firebase');
         const data = await getGames();
         setGames(data);
       } catch (err) {

@@ -1,8 +1,9 @@
 'use client';
 
-import { getEvents } from '@/lib/firebase';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
+
+export const dynamic = 'force-dynamic';
 
 export default function Events() {
   const [events, setEvents] = useState<any[]>([]);
@@ -14,6 +15,7 @@ export default function Events() {
     const fetchEvents = async () => {
       try {
         setLoading(true);
+        const { getEvents } = await import('@/lib/firebase');
         const data = await getEvents();
         setEvents(data);
       } catch (err) {

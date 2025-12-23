@@ -7,8 +7,8 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
-import { auth } from '@/lib/firebase';
-import { createOrder, updateUserWallet, addPointHistory, clearUserCart } from '@/lib/firebase';
+
+export const dynamic = 'force-dynamic';
 
 // Extend window type for Razorpay
 declare global {
@@ -64,6 +64,8 @@ export default function CheckoutPage() {
   useEffect(() => {
     const loadWalletData = async () => {
       try {
+        // Lazy load Firebase
+        const { auth } = await import('@/lib/firebase');
         const currentUser = auth.currentUser;
         
         if (!currentUser) {
@@ -218,6 +220,8 @@ export default function CheckoutPage() {
           }
 
           // Get current user
+          // Lazy load Firebase
+          const { auth, createOrder, updateUserWallet, addPointHistory, clearUserCart } = await import('@/lib/firebase');
           const currentUser = auth.currentUser;
           if (!currentUser) {
             throw new Error('User not authenticated');

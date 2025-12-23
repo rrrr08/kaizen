@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getProducts } from '@/lib/firebase';
 import Link from 'next/link';
+
+export const dynamic = 'force-dynamic';
 
 const TarotCard = ({ product, onClick }: any) => {
   return (
@@ -53,6 +54,7 @@ export default function Shop() {
     const fetchProducts = async () => {
       try {
         setLoading(true);
+        const { getProducts } = await import('@/lib/firebase');
         const data = await getProducts();
         setProducts(data);
       } catch (err) {

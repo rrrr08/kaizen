@@ -1,8 +1,9 @@
 'use client';
 
-import { getExperiences } from '@/lib/firebase';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
+
+export const dynamic = 'force-dynamic';
 
 export default function Experiences() {
   const [experiences, setExperiences] = useState<any[]>([]);
@@ -13,6 +14,7 @@ export default function Experiences() {
     const fetchExperiences = async () => {
       try {
         setLoading(true);
+        const { getExperiences } = await import('@/lib/firebase');
         const data = await getExperiences();
         setExperiences(data);
       } catch (err) {
