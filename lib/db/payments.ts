@@ -90,7 +90,7 @@ export async function completeRegistration(
     // Get event capacity info
     const eventDocs = await getDocs(eventsCollection);
     const eventDoc = eventDocs.docs.find((d: any) => d.id === eventId);
-    const capacity = eventDoc?.data()?.capacity || 50;
+    const capacity = (eventDoc?.data() as any)?.capacity || 50;
 
     // Check if waitlisted
     const registrationCount = await getDocs(
