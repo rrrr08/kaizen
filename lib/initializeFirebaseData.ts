@@ -457,7 +457,7 @@ async function initializeOrders(db: any, addDoc: any, serverTimestamp: any) {
 async function initializeUsers(db: any, setDoc: any, doc: any) {
   try {
     console.log('👥 Starting users initialization...');
-    const { collection } = await import('@/lib/firebase');
+    const { collection, getDocs } = await import('@/lib/firebase');
     const usersRef = collection(db, 'users');
     
     const existingUsers = await getDocs(usersRef);
