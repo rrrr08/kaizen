@@ -19,6 +19,11 @@ async function getDb() {
   if (!db) {
     const firebase = await import("@/lib/firebase");
     db = firebase.db;
+    
+    if (!db) {
+      throw new Error('Firebase Firestore is not initialized. Check your Firebase configuration.');
+    }
+    
     registrationsCollection = collection(db, 'event_registrations');
     eventsCollection = collection(db, 'events');
     walletsCollection = collection(db, 'wallets');
@@ -69,9 +74,17 @@ export async function completeRegistration(
   walletPointsUsed: number = 0
 ) {
   try {
+    // Initialize Firebase Firestore first
+    const firebaseDb = await getDb();
+    
+    // Create collection references using returned db
+    const registrations = collection(firebaseDb, 'event_registrations');
+    const events = collection(firebaseDb, 'events');
+    const wallets = collection(firebaseDb, 'wallets');
+    
     // Check if already registered
     const existingReg = query(
-      registrationsCollection,
+      registrations,
       where('eventId', '==', eventId),
       where('userId', '==', userId)
     );
@@ -88,13 +101,13 @@ export async function completeRegistration(
     }
 
     // Get event capacity info
-    const eventDocs = await getDocs(eventsCollection);
+    const eventDocs = await getDocs(events);
     const eventDoc = eventDocs.docs.find((d: any) => d.id === eventId);
     const capacity = (eventDoc?.data() as any)?.capacity || 50;
 
     // Check if waitlisted
     const registrationCount = await getDocs(
-      query(registrationsCollection, where('eventId', '==', eventId), where('status', '==', 'registered'))
+      query(registrations, where('eventId', '==', eventId), where('status', '==', 'registered'))
     );
 
     const waitlisted = registrationCount.size >= capacity;
@@ -111,10 +124,10 @@ export async function completeRegistration(
       updatedAt: serverTimestamp(),
     };
 
-    const regRef = await addDoc(registrationsCollection, registrationData);
+    const regRef = await addDoc(registrations, registrationData);
 
     // Update payment order status
-    await updateDoc(doc(db, 'payment_orders', orderId), {
+    await updateDoc(doc(firebaseDb, 'payment_orders', orderId), {
       status: 'completed',
       registrationId: regRef.id,
       updatedAt: serverTimestamp(),
@@ -124,7 +137,7 @@ export async function completeRegistration(
     if (walletPointsUsed > 0) {
       try {
         const walletSnap = await getDocs(
-          query(walletsCollection, where('userId', '==', userId))
+          query(wallets, where('userId', '==', userId))
         );
         if (!walletSnap.empty) {
           const walletRef = walletSnap.docs[0].ref;
@@ -141,7 +154,7 @@ export async function completeRegistration(
     // Update event registered count if not waitlisted
     if (!waitlisted) {
       try {
-        await updateDoc(doc(db, 'events', eventId), {
+        await updateDoc(doc(firebaseDb, 'events', eventId), {
           registered: increment(1),
           updatedAt: serverTimestamp(),
         });
@@ -166,8 +179,11 @@ export async function completeRegistration(
 
 export async function getUserWallet(userId: string) {
   try {
+    const firebaseDb = await getDb();
+    const wallets = collection(firebaseDb, 'wallets');
+    
     const walletSnap = await getDocs(
-      query(walletsCollection, where('userId', '==', userId))
+      query(wallets, where('userId', '==', userId))
     );
 
     if (walletSnap.empty) {

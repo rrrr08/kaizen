@@ -238,8 +238,12 @@ export default function CheckoutPage() {
             }),
           });
 
+          const verifyData = await verifyResponse.json();
+          console.log('Verify response:', { status: verifyResponse.status, data: verifyData });
+
           if (!verifyResponse.ok) {
-            throw new Error('Payment verification failed');
+            console.error('Payment verification failed:', verifyData);
+            throw new Error(verifyData.error || 'Payment verification failed');
           }
 
           // Get current user
@@ -323,13 +327,21 @@ export default function CheckoutPage() {
         },
       };
 
-      // Open Razorpay checkout
-      if (window.Razorpay) {
-        const razorpay = new (window as any).Razorpay(RazorpayOptions);
-        razorpay.open();
-      } else {
-        throw new Error('Razorpay not loaded');
-      }
+      // Wait for Razorpay script to load
+      let attempts = 0;
+      const waitForRazorpay = () => {
+        if (window.Razorpay) {
+          const razorpay = new (window as any).Razorpay(RazorpayOptions);
+          razorpay.open();
+        } else if (attempts < 10) {
+          attempts++;
+          setTimeout(waitForRazorpay, 300);
+        } else {
+          throw new Error('Razorpay script failed to load. Please refresh the page and try again.');
+        }
+      };
+
+      waitForRazorpay();
     } catch (error) {
       console.error('Payment error:', error);
       let errorMessage = 'Something went wrong. Please try again.';

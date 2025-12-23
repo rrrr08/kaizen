@@ -31,6 +31,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [pendingSync, setPendingSync] = useState(false);
   const [hasMergedCart, setHasMergedCart] = useState(false);
 
+  // Save cart to localStorage whenever items change (for unauthenticated users)
+  useEffect(() => {
+    if (!mounted) return;
+    
+    try {
+      // Always save to localStorage as backup
+      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
+    } catch (error) {
+      console.error('Failed to save cart to localStorage:', error);
+    }
+  }, [items, mounted]);
+
   // Load cart from localStorage or Firebase
   useEffect(() => {
     const loadCart = async () => {

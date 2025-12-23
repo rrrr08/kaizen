@@ -59,8 +59,8 @@ export function LoginForm() {
       // Determine redirect destination
       let finalRedirect = redirectUrl;
       
-      // If checkout intent is set, redirect to checkout
-      if (hasCheckoutIntent) {
+      // If checkout intent is set AND no explicit redirect URL, redirect to checkout
+      if (hasCheckoutIntent && redirectUrl === '/') {
         finalRedirect = '/checkout';
       }
       
@@ -123,8 +123,8 @@ export function LoginForm() {
         // Determine redirect destination
         let finalRedirect = redirectUrl;
         
-        // If checkout intent is set, redirect to checkout
-        if (hasCheckoutIntent) {
+        // If checkout intent is set AND no explicit redirect URL, redirect to checkout
+        if (hasCheckoutIntent && redirectUrl === '/') {
           finalRedirect = '/checkout';
         }
         
