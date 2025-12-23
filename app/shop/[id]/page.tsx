@@ -1,11 +1,12 @@
 'use client';
 
-import { getProductById, getProducts } from '@/lib/firebase';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { useCart } from '@/app/context/CartContext';
 import { useToast } from '@/hooks/use-toast';
+
+export const dynamic = 'force-dynamic';
 
 export default function ProductDetail() {
   const params = useParams();
@@ -21,6 +22,8 @@ export default function ProductDetail() {
     const fetchProduct = async () => {
       try {
         setLoading(true);
+        const { getProductById, getProducts } = await import('@/lib/firebase');
+        
         const productId = typeof params.id === 'string' ? params.id : params.id?.[0] || '';
         if (!productId) {
           setError('Product not found');
