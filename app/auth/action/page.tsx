@@ -3,14 +3,10 @@
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { auth } from "@/lib/firebase";
-import {
-    verifyPasswordResetCode,
-    confirmPasswordReset,
-    applyActionCode,
-} from "firebase/auth";
 import { Loader2 } from "lucide-react";
 import { AuthStyles } from "@/components/auth/auth-styles";
+
+export const dynamic = 'force-dynamic';
 
 function AuthActionPageContent() {
     const router = useRouter();
@@ -81,24 +77,32 @@ function AuthActionPageContent() {
 
         if (mode === "resetPassword" && oobCode) {
             console.log("Handling resetPassword action with code:", oobCode);
-            verifyPasswordResetCode(auth, oobCode)
-                .then((email) => {
+            (async () => {
+                try {
+                    const { auth: authModule } = await import('@/lib/firebase');
+                    const { verifyPasswordResetCode } = await import('firebase/auth');
+                    
+                    const email = await verifyPasswordResetCode(authModule, oobCode);
                     console.log("Password reset code verified for email:", email);
                     setEmailForReset(email);
                     setMessage("Please enter your new password.");
                     setIsVerifying(false);
-                })
-                .catch((err) => {
+                } catch (err) {
                     console.error("Invalid or expired oob code for password reset:", err);
                     setError(
                         "Invalid or expired password reset link. Please try resetting your password again."
                     );
                     setIsVerifying(false);
-                });
+                }
+            })();
         } else if (mode === "verifyEmail" && oobCode) {
             console.log("Handling verifyEmail action with code:", oobCode);
-            applyActionCode(auth, oobCode)
-                .then(async () => {
+            (async () => {
+                try {
+                    const { auth: authModule } = await import('@/lib/firebase');
+                    const { applyActionCode } = await import('firebase/auth');
+                    
+                    await applyActionCode(authModule, oobCode);
                     console.log("Email verification successful");
                     setMessage(
                         "Your email address has been verified successfully! Setting up your profile..."
@@ -108,7 +112,7 @@ function AuthActionPageContent() {
                     // Check if user has completed onboarding
                     try {
                         const { getUserById } = await import('@/lib/firebase');
-                        const user = auth.currentUser;
+                        const user = authModule.currentUser;
 
                         if (user) {
                             const userProfile = await getUserById(user.uid);
@@ -124,14 +128,14 @@ function AuthActionPageContent() {
                     }
 
                     setTimeout(() => router.push("/"), 3000);
-                })
-                .catch((err) => {
+                } catch (err) {
                     console.error("Error verifying email:", err);
                     setError(
                         "Failed to verify email. The link may be invalid, expired, or the email may already be verified. Please try logging in or request a new verification email if needed."
                     );
                     setIsVerifying(false);
-                });
+                }
+            })();
         } else {
             console.error("No valid action detected:", { mode, oobCode });
             setError(
@@ -161,7 +165,10 @@ function AuthActionPageContent() {
         setMessage(null);
 
         try {
-            await confirmPasswordReset(auth, oobCode, newPassword);
+            const { auth: authModule } = await import('@/lib/firebase');
+            const { confirmPasswordReset } = await import('firebase/auth');
+            
+            await confirmPasswordReset(authModule, oobCode, newPassword);
             setMessage(
                 "Your password has been reset successfully! You can now log in with your new password."
             );
