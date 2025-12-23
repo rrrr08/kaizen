@@ -78,7 +78,7 @@ export function getAdminAuth() {
 
 // For compatibility with existing imports
 export const adminDb = {
-  collection: (...args: any[]) => getAdminDb().collection(...args),
+  collection: (path: string) => getAdminDb().collection(path),
 };
 
 export const adminAuth = {
