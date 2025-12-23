@@ -24,7 +24,7 @@ export function NotificationCenter() {
     // Only load notifications if user is authenticated
     const checkAuth = async () => {
       const { auth } = await import('@/lib/firebase');
-      if (auth.currentUser) {
+      if (auth && auth.currentUser) {
         loadNotifications();
 
         // Reload notifications every 30 seconds
@@ -43,7 +43,7 @@ export function NotificationCenter() {
       const { auth } = await import('@/lib/firebase');
       
       // Skip if user not authenticated
-      if (!auth.currentUser) {
+      if (!auth || !auth.currentUser) {
         setNotifications([]);
         setUnreadCount(0);
         return;
@@ -79,7 +79,7 @@ export function NotificationCenter() {
       // Lazy load Firebase
       const { auth } = await import('@/lib/firebase');
       let headers: HeadersInit = {};
-      if (auth.currentUser) {
+      if (auth && auth.currentUser) {
         const idToken = await auth.currentUser.getIdToken();
         headers['Authorization'] = `Bearer ${idToken}`;
       }
@@ -99,7 +99,7 @@ export function NotificationCenter() {
       // Lazy load Firebase
       const { auth } = await import('@/lib/firebase');
       let headers: HeadersInit = {};
-      if (auth.currentUser) {
+      if (auth && auth.currentUser) {
         const idToken = await auth.currentUser.getIdToken();
         headers['Authorization'] = `Bearer ${idToken}`;
       }

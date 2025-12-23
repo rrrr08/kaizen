@@ -66,14 +66,14 @@ export default function CheckoutPage() {
       try {
         // Lazy load Firebase
         const { auth } = await import('@/lib/firebase');
-        const currentUser = auth.currentUser;
         
-        if (!currentUser) {
+        if (!auth || !auth.currentUser) {
           console.error('User not authenticated');
           setWalletPoints(0);
           setIsFirstTime(true);
           return;
         }
+        const currentUser = auth.currentUser;
 
         const { getUserWallet } = await import('@/lib/firebase');
         const firebaseWallet = await getUserWallet(currentUser.uid);

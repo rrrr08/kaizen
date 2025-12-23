@@ -62,7 +62,7 @@ export function SignupForm() {
       await mergeLocalCartWithFirebase();
 
       // Send verification email
-      if (auth.currentUser) {
+      if (auth && auth.currentUser) {
         const actionUrl = `${window.location.origin}/auth/action`;
 
         const actionCodeSettings = {
