@@ -4,6 +4,8 @@ import { Suspense } from "react";
 import { Loader2 } from "lucide-react";
 import { LoginForm } from "@/components/auth/login-form";
 
+export const dynamic = 'force-dynamic';
+
 function LoginPageContent() {
     return <LoginForm />;
 }
