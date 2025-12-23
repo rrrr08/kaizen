@@ -164,6 +164,29 @@ export default function CheckoutPage() {
     setIsProcessing(true);
 
     try {
+      // Validate amount is reasonable (max 1 crore rupees = 10,000,000)
+      const MAX_RAZORPAY_AMOUNT = 10000000;
+      
+      if (finalPrice > MAX_RAZORPAY_AMOUNT) {
+        addToast({
+          title: 'Order Amount Too Large',
+          description: `Order amount (₹${finalPrice.toFixed(2)}) exceeds maximum allowed. Please review your cart.`,
+          variant: 'destructive',
+        });
+        setIsProcessing(false);
+        return;
+      }
+      
+      if (finalPrice <= 0) {
+        addToast({
+          title: 'Invalid Order Amount',
+          description: 'Order amount must be greater than 0.',
+          variant: 'destructive',
+        });
+        setIsProcessing(false);
+        return;
+      }
+
       // Create order in our system and get Razorpay order ID
       const receiptId = `RCP-${Date.now()}`;
       const response = await fetch('/api/payments/create-order', {

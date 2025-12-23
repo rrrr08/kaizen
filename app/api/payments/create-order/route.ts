@@ -15,6 +15,15 @@ async function getRazorpay() {
 
 export async function POST(request: NextRequest) {
   try {
+    // Check if Razorpay credentials are set
+    if (!process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+      console.error('Razorpay credentials not configured');
+      return NextResponse.json(
+        { error: 'Payment gateway not configured. Please contact support.' },
+        { status: 500 }
+      );
+    }
+
     const { amount, currency = 'INR', receipt, notes } = await request.json();
 
     if (!amount || amount <= 0) {
@@ -46,8 +55,9 @@ export async function POST(request: NextRequest) {
     );
   } catch (error) {
     console.error('Razorpay order creation error:', error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
-      { error: 'Failed to create payment order' },
+      { error: 'Failed to create payment order', details: errorMessage },
       { status: 500 }
     );
   }

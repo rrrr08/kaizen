@@ -4,6 +4,15 @@ import { completeRegistration } from '@/lib/db/payments';
 
 export async function POST(request: NextRequest) {
   try {
+    // Check if Razorpay secret is configured
+    if (!process.env.RAZORPAY_KEY_SECRET) {
+      console.error('Razorpay secret not configured');
+      return NextResponse.json(
+        { success: false, error: 'Payment gateway not configured' },
+        { status: 500 }
+      );
+    }
+
     const {
       razorpay_payment_id,
       razorpay_order_id,
@@ -18,7 +27,7 @@ export async function POST(request: NextRequest) {
     // Verify Razorpay signature
     const body = razorpay_order_id + '|' + razorpay_payment_id;
     const expectedSignature = crypto
-      .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET || '')
+      .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
       .update(body)
       .digest('hex');
 
