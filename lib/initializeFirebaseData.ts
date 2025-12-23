@@ -285,9 +285,10 @@ async function initializeProducts(db: any, setDoc: any, doc: any, serverTimestam
   }
 }
 
-async function initializeEvents() {
+async function initializeEvents(db: any, setDoc: any, doc: any, serverTimestamp: any) {
   try {
     console.log('📅 Starting events initialization...');
+    const { collection, getDocs } = await import('@/lib/firebase');
     const eventsRef = collection(db, 'events');
     
     const existingEvents = await getDocs(eventsRef);
@@ -359,9 +360,10 @@ async function initializeEvents() {
   }
 }
 
-async function initializeOrders() {
+async function initializeOrders(db: any, addDoc: any, serverTimestamp: any) {
   try {
     console.log('📦 Starting orders initialization...');
+    const { collection, getDocs } = await import('@/lib/firebase');
     const ordersRef = collection(db, 'orders');
     
     const existingOrders = await getDocs(ordersRef);
@@ -452,9 +454,10 @@ async function initializeOrders() {
   }
 }
 
-async function initializeUsers() {
+async function initializeUsers(db: any, setDoc: any, doc: any) {
   try {
     console.log('👥 Starting users initialization...');
+    const { collection } = await import('@/lib/firebase');
     const usersRef = collection(db, 'users');
     
     const existingUsers = await getDocs(usersRef);
