@@ -93,9 +93,19 @@ if (auth) {
   });
 }
 
+// Helper function to check Firebase initialization
+function ensureFirebaseInit() {
+  if (!app || !auth || !db) {
+    throw new Error('Firebase is not initialized. Please ensure NEXT_PUBLIC_FIREBASE_API_KEY is set.');
+  }
+}
+
 // ProfileUpdateData interface removed for JavaScript conversion
 
 export const createUser = async (email: string, password: string, userData: UserProfile) => {
+  if (!auth) {
+    throw new Error('Firebase authentication is not initialized');
+  }
   const userCredential = await createUserWithEmailAndPassword(
     auth,
     email,
@@ -118,6 +128,9 @@ export const createUser = async (email: string, password: string, userData: User
 };
 
 export const signIn = async (email: string, password: string) => {
+  if (!auth) {
+    throw new Error('Firebase authentication is not initialized');
+  }
   const userCredential = await signInWithEmailAndPassword(auth, email, password);
   const { user } = userCredential;
 
@@ -232,6 +245,9 @@ export const logOut = async () => {
 };
 
 export const createUserProfile = async (userId: string, data: UserProfile) => {
+  if (!db) {
+    throw new Error('Firebase database is not initialized');
+  }
   const userRef = doc(db, "users", userId);
 
   // Initialize with multiavatar if no photoURL provided
@@ -267,26 +283,44 @@ export const createUserProfile = async (userId: string, data: UserProfile) => {
 };
 
 export const checkUserExists = async (userId: string) => {
-  const userRef = doc(db, "users", userId);
-  const userSnap = await getDoc(userRef);
-  return userSnap.exists();
+  try {
+    if (!db) return false;
+    const userRef = doc(db, "users", userId);
+    const userSnap = await getDoc(userRef);
+    return userSnap.exists();
+  } catch (error) {
+    console.error('Error checking user exists:', error);
+    return false;
+  }
 };
 
 export const getUserProfile = async (userId: string): Promise<UserProfile | null> => {
-  const userRef = doc(db, "users", userId);
-  const userSnap = await getDoc(userRef);
+  try {
+    if (!db) {
+      console.warn('Firebase not initialized in getUserProfile');
+      return null;
+    }
+    const userRef = doc(db, "users", userId);
+    const userSnap = await getDoc(userRef);
 
-  if (userSnap.exists()) {
-    return userSnap.data() as UserProfile;
+    if (userSnap.exists()) {
+      return userSnap.data() as UserProfile;
+    }
+
+    return null;
+  } catch (error) {
+    console.error('Error getting user profile:', error);
+    return null;
   }
-
-  return null;
 };
 
 // Alias for getUserProfile for backward compatibility
 export const getUserById = getUserProfile;
 
 export const updateUserProfile = async (userId: string, data: Partial<UserProfile>) => {
+  if (!db) {
+    throw new Error('Firebase database is not initialized');
+  }
   const userRef = doc(db, "users", userId);
 
   const dataToUpdate = {
@@ -878,6 +912,9 @@ export interface GamificationConfig {
 
 export async function getGamificationConfig(): Promise<GamificationConfig> {
   try {
+    if (!db) {
+      throw new Error('Firebase not initialized');
+    }
     const configRef = doc(db, 'settings', 'gamification');
     const configDoc = await getDoc(configRef);
     
@@ -888,7 +925,7 @@ export async function getGamificationConfig(): Promise<GamificationConfig> {
     console.error('Error loading gamification config:', error);
   }
 
-  // Return default if not found
+  // Return default if not found or Firebase not initialized
   return {
     pointsPerRupee: 1,
     firstTimeBonusPoints: 100,
@@ -902,6 +939,9 @@ export async function getGamificationConfig(): Promise<GamificationConfig> {
 }
 
 export async function updateGamificationConfig(config: GamificationConfig) {
+  if (!db) {
+    throw new Error('Firebase not initialized');
+  }
   const configRef = doc(db, 'settings', 'gamification');
   await setDoc(configRef, config);
 }
