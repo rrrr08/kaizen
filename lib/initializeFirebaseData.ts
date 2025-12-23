@@ -288,7 +288,7 @@ async function initializeProducts(db: any, setDoc: any, doc: any, serverTimestam
 async function initializeEvents(db: any, setDoc: any, doc: any, serverTimestamp: any) {
   try {
     console.log('📅 Starting events initialization...');
-    const { collection, getDocs } = await import('@/lib/firebase');
+    const { collection, getDocs, addDoc } = await import('@/lib/firebase');
     const eventsRef = collection(db, 'events');
     
     const existingEvents = await getDocs(eventsRef);
