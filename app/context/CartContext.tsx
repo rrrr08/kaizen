@@ -2,7 +2,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { CartItem, Product } from '@/lib/types';
-import { getUserCart, updateUserCart, clearUserCart } from '@/lib/firebase';
 import { useAuth } from './AuthContext';
 
 interface CartContextType {
@@ -40,6 +39,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
         // User is authenticated
         if (user?.uid) {
+          // Lazy load Firebase functions
+          const { getUserCart, updateUserCart } = await import('@/lib/firebase');
           const cartData = await getUserCart(user.uid);
           
           // Merge local cart with Firebase on first authentication
@@ -106,6 +107,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       try {
         if (user?.uid) {
           // User authenticated - save to Firebase
+          const { updateUserCart } = await import('@/lib/firebase');
           await updateUserCart(user.uid, items);
         } else {
           // User not authenticated - save to localStorage
@@ -149,6 +151,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     if (!user?.uid) return;
 
     try {
+      // Lazy load Firebase functions
+      const { getUserCart, updateUserCart } = await import('@/lib/firebase');
       const localCart = getLocalCart();
       const firebaseCart = await getUserCart(user.uid);
 
@@ -228,6 +232,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setItems([]);
     if (user?.uid) {
       try {
+        // Lazy load Firebase function
+        const { clearUserCart } = await import('@/lib/firebase');
         await clearUserCart(user.uid);
       } catch (error) {
         console.error('Failed to clear cart in Firebase:', error);

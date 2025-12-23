@@ -2,7 +2,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { GamificationConfig, BonusRule, LevelThreshold, CustomerGamificationData } from '@/lib/types';
-import { getGamificationConfig, updateGamificationConfig } from '@/lib/firebase';
 
 interface GamificationContextType {
   config: GamificationConfig;
@@ -71,6 +70,8 @@ export function GamificationProvider({ children }: { children: React.ReactNode }
     const loadConfig = async () => {
       try {
         setIsLoading(true);
+        // Lazy load Firebase function
+        const { getGamificationConfig } = await import('@/lib/firebase');
         const firebaseConfig = await getGamificationConfig();
         if (firebaseConfig) {
           // Merge with default to ensure levelThresholds are present
@@ -98,6 +99,8 @@ export function GamificationProvider({ children }: { children: React.ReactNode }
 
     const saveConfig = async () => {
       try {
+        // Lazy load Firebase function
+        const { updateGamificationConfig } = await import('@/lib/firebase');
         await updateGamificationConfig(config);
       } catch (error) {
         console.error('Failed to save gamification config to Firebase:', error);
