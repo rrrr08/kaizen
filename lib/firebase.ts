@@ -6,6 +6,8 @@ import {
   signOut,
   GoogleAuthProvider,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   onAuthStateChanged,
   sendEmailVerification,
   setPersistence,
@@ -111,8 +113,8 @@ export const signIn = async (email: string, password: string) => {
       if (!userExists) {
         // Create profile if it doesn't exist
         const profileData: UserProfile = {
-          email: user.email,
-          name: user.displayName || user.email,
+          email: user.email || '',
+          name: user.displayName || user.email || 'User',
           role: "member",
           created_at: serverTimestamp(),
           updated_at: serverTimestamp(),
@@ -137,51 +139,64 @@ export const signIn = async (email: string, password: string) => {
 
 export const signInWithGoogle = async () => {
   try {
-    const userCredential = await signInWithPopup(auth, googleProvider);
-    const { user } = userCredential;
-    
-    // Important: Google provides a verified email by default, but we check anyway
-    if (user.email) {
-      const userExists = await checkUserExists(user.uid);
+    // Try popup first
+    try {
+      const userCredential = await signInWithPopup(auth, googleProvider);
+      const { user } = userCredential;
       
-      // For brand new users, we need to create their profile
-      if (!userExists) {
-        const profileData = {
-          email: user.email,
-          name: user.displayName || "",
-          first_name: user.displayName?.split(" ")[0] || "",
-          last_name: user.displayName?.split(" ").slice(1).join(" ") || "",
-          photoURL: user.photoURL,
-          avatar_url: user.photoURL, // Keep both for compatibility
-          role: "member",
-          likedBlogs: [],
-          activity: [],
-          blogCount: 0,
-          created_at: serverTimestamp(),
-          updated_at: serverTimestamp(),
-          last_sign_in_at: serverTimestamp(),
-        };
-        await createUserProfile(user.uid, profileData);
+      // Important: Google provides a verified email by default, but we check anyway
+      if (user.email) {
+        const userExists = await checkUserExists(user.uid);
         
-        // For new Google users, redirect to onboarding
-        window.location.href = `/onboarding`;
-        return userCredential;
+        // For brand new users, we need to create their profile
+        if (!userExists) {
+          const profileData = {
+            email: user.email,
+            name: user.displayName || "",
+            first_name: user.displayName?.split(" ")[0] || "",
+            last_name: user.displayName?.split(" ").slice(1).join(" ") || "",
+            photoURL: user.photoURL,
+            avatar_url: user.photoURL, // Keep both for compatibility
+            role: "member",
+            likedBlogs: [],
+            activity: [],
+            blogCount: 0,
+            created_at: serverTimestamp(),
+            updated_at: serverTimestamp(),
+            last_sign_in_at: serverTimestamp(),
+          };
+          await createUserProfile(user.uid, profileData);
+        } else {
+          // Update the user's last sign-in time
+          const userRef = doc(db, "users", user.uid);
+          await updateDoc(userRef, {
+            last_sign_in_at: serverTimestamp(),
+            updated_at: serverTimestamp()
+          });
+        }
       }
       
-      // Update the user's last sign-in time
-      const userRef = doc(db, "users", user.uid);
-      await updateDoc(userRef, {
-        last_sign_in_at: serverTimestamp(),
-        updated_at: serverTimestamp()
-      });
+      return userCredential;
+    } catch (popupError: any) {
+      // If popup is blocked, fallback to redirect-based auth
+      if (popupError.code === 'auth/popup-blocked') {
+        console.warn('Popup blocked, using redirect-based authentication instead');
+        
+        // Store the redirect path in sessionStorage to retrieve after auth
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem('authRedirectSource', 'google');
+        }
+        
+        // Use redirect instead
+        await signInWithRedirect(auth, googleProvider);
+        
+        // This won't return immediately as the page will redirect
+        return null;
+      }
+      
+      // Re-throw other errors
+      throw popupError;
     }
-    
-    // For existing users, proceed to normal flow
-    const idToken = await user.getIdToken();
-    const redirectUrl = `/api/auth/callback?token=${idToken}`;
-    window.location.href = redirectUrl;
-    
-    return userCredential;
   } catch (error) {
     console.error("Google sign-in error:", error);
     throw error;
@@ -699,10 +714,14 @@ export async function getUserOrders(userId: string) {
   const snapshot = await getDocs(q);
   const orders = snapshot.docs.map(doc => ({
     id: doc.id,
-    ...doc.data(),
+    items: doc.data().items || [],
+    totalPrice: doc.data().totalPrice || 0,
+    totalPoints: doc.data().totalPoints || 0,
+    pointsRedeemed: doc.data().pointsRedeemed || 0,
+    shippingAddress: doc.data().shippingAddress,
     createdAt: doc.data().createdAt?.toDate?.() || new Date(),
-    updatedAt: doc.data().updatedAt?.toDate?.() || new Date(),
-  }));
+    paymentStatus: doc.data().paymentStatus || 'pending',
+  } as any));
   
   // Sort by createdAt on the client side instead
   return orders.sort((a, b) => {
@@ -1047,5 +1066,56 @@ export async function getBlogPostById(id: string) {
   } catch (error) {
     console.error('Error fetching blog post:', error);
     return null;
+  }
+}
+
+/**
+ * Handle Google Sign-In redirect result
+ * Call this in the layout or main app component to complete redirect-based Google auth
+ */
+export async function handleGoogleSignInRedirect() {
+  try {
+    const result = await getRedirectResult(auth);
+    
+    if (result) {
+      const { user } = result;
+      
+      // Create user profile if new user
+      if (user.email) {
+        const userExists = await checkUserExists(user.uid);
+        
+        if (!userExists) {
+          const profileData = {
+            email: user.email,
+            name: user.displayName || "",
+            first_name: user.displayName?.split(" ")[0] || "",
+            last_name: user.displayName?.split(" ").slice(1).join(" ") || "",
+            photoURL: user.photoURL,
+            avatar_url: user.photoURL,
+            role: "member",
+            likedBlogs: [],
+            activity: [],
+            blogCount: 0,
+            created_at: serverTimestamp(),
+            updated_at: serverTimestamp(),
+            last_sign_in_at: serverTimestamp(),
+          };
+          await createUserProfile(user.uid, profileData);
+        } else {
+          // Update last sign-in time
+          const userRef = doc(db, "users", user.uid);
+          await updateDoc(userRef, {
+            last_sign_in_at: serverTimestamp(),
+            updated_at: serverTimestamp()
+          });
+        }
+      }
+      
+      return result;
+    }
+    return null;
+  } catch (error) {
+    console.error("Error handling Google redirect result:", error);
+    throw error;
   }
 }

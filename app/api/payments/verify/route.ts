@@ -1,61 +1,67 @@
-import Razorpay from 'razorpay';
 import crypto from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
-
-const razorpay = new Razorpay({
-  key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
-  key_secret: process.env.RAZORPAY_KEY_SECRET!,
-});
+import { completeRegistration } from '@/lib/db/payments';
 
 export async function POST(request: NextRequest) {
   try {
-    const { paymentId, orderId, signature } = await request.json();
+    const {
+      razorpay_payment_id,
+      razorpay_order_id,
+      razorpay_signature,
+      orderId,
+      eventId,
+      userId,
+      amount,
+      walletPointsUsed,
+    } = await request.json();
 
-    if (!paymentId || !orderId || !signature) {
+    // Verify Razorpay signature
+    const body = razorpay_order_id + '|' + razorpay_payment_id;
+    const expectedSignature = crypto
+      .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET || '')
+      .update(body)
+      .digest('hex');
+
+    if (expectedSignature !== razorpay_signature) {
       return NextResponse.json(
-        { error: 'Missing payment verification details' },
+        { success: false, error: 'Payment verification failed' },
         { status: 400 }
       );
     }
 
-    // Verify signature
-    const hmac = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET!);
-    hmac.update(`${orderId}|${paymentId}`);
-    const generatedSignature = hmac.digest('hex');
-
-    if (generatedSignature !== signature) {
-      return NextResponse.json(
-        { error: 'Payment verification failed - invalid signature' },
-        { status: 400 }
-      );
-    }
-
-    // Fetch payment details from Razorpay for additional verification
-    const paymentDetails = await razorpay.payments.fetch(paymentId);
-
-    if (paymentDetails.status !== 'captured') {
-      return NextResponse.json(
-        { error: 'Payment not captured' },
-        { status: 400 }
-      );
-    }
-
-    return NextResponse.json(
-      {
-        success: true,
-        message: 'Payment verified successfully',
-        paymentId,
+    // If event registration details provided, complete registration
+    if (eventId && userId && orderId) {
+      const result = await completeRegistration(
+        eventId,
+        userId,
         orderId,
-        amount: paymentDetails.amount,
-        currency: paymentDetails.currency,
-        status: paymentDetails.status,
-      },
-      { status: 200 }
-    );
-  } catch (error) {
+        amount || 0,
+        walletPointsUsed || 0
+      );
+
+      return NextResponse.json({
+        success: result.success,
+        message: result.message,
+        registrationId: result.registrationId,
+        waitlisted: result.waitlisted,
+      });
+    }
+
+    // Otherwise, just return success for payment verification
+    return NextResponse.json({
+      success: true,
+      message: 'Payment verified successfully',
+      paymentId: razorpay_payment_id,
+      orderId: razorpay_order_id,
+    });
+  } catch (error: any) {
     console.error('Payment verification error:', error);
     return NextResponse.json(
-      { error: 'Failed to verify payment' },
+      {
+        success: false,
+        error: 'Payment verification failed',
+        message: error.message,
+      },
       { status: 500 }
     );
   }

@@ -6,6 +6,7 @@ import Footer from "@/components/ui/Footer";
 import { CartProvider } from "@/app/context/CartContext";
 import { GamificationProvider } from "@/app/context/GamificationContext";
 import { AuthProvider } from "@/app/context/AuthContext";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -38,15 +39,17 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black text-white`}
       >
-        <AuthProvider>
-          <GamificationProvider>
-            <CartProvider>
-              <Navbar />
-              {children}
-              <Footer />
-            </CartProvider>
-          </GamificationProvider>
-        </AuthProvider>
+        <ErrorBoundary>
+          <AuthProvider>
+            <GamificationProvider>
+              <CartProvider>
+                <Navbar />
+                {children}
+                <Footer />
+              </CartProvider>
+            </GamificationProvider>
+          </AuthProvider>
+        </ErrorBoundary>
       </body>
     </html>
   );

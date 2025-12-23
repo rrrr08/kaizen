@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminAuth, adminDb } from '@/app/api/auth/firebase-admin';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,18 +13,18 @@ export async function POST(request: NextRequest) {
     const decodedClaims = await adminAuth.verifyIdToken(idToken);
 
     // Check if user is admin
-    const userRef = doc(adminDb, 'users', decodedClaims.uid);
-    const userSnap = await getDoc(userRef);
+    const userRef = adminDb.collection('users').doc(decodedClaims.uid);
+    const userSnap = await userRef.get();
     
-    if (!userSnap.exists() || userSnap.data()?.role !== 'admin') {
+    if (!userSnap.exists || userSnap.data()?.role !== 'admin') {
       return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
     }
 
     const body = await request.json();
 
     // Save settings to Firestore
-    const settingsRef = doc(adminDb, 'admin_settings', 'configuration');
-    await setDoc(settingsRef, {
+    const settingsRef = adminDb.collection('settings').doc('store');
+    await settingsRef.set({
       ...body,
       updatedAt: new Date(),
       updatedBy: decodedClaims.uid,

@@ -17,7 +17,7 @@ export default function Error({ error, reset }: ErrorProps) {
           <div className="relative">
             <div className="absolute inset-0 bg-red-500/20 blur-lg rounded-full"></div>
             <div className="relative bg-red-500/10 border border-red-500/30 rounded-full p-6">
-              <AlertCircle size={48} className="text-red-500" />
+              <AlertCircle width={48} height={48} className="text-red-500" />
             </div>
           </div>
         </div>
@@ -56,7 +56,7 @@ export default function Error({ error, reset }: ErrorProps) {
             href="/"
             className="flex items-center justify-center gap-2 px-6 py-3 bg-primary/10 border border-primary/30 text-primary font-header font-bold rounded hover:bg-primary/20 transition-all"
           >
-            <Home size={18} />
+            <Home width={18} height={18} />
             Go Home
           </Link>
         </div>

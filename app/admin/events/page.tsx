@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Calendar, Plus, Edit2, Trash2, Search, MapPin, Users } from 'lucide-react';
 import { getDocs, collection, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
@@ -19,6 +20,7 @@ interface Event {
 }
 
 export default function EventsPage() {
+  const router = useRouter();
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -68,6 +70,32 @@ export default function EventsPage() {
     }
   };
 
+  const handleCreateEvent = () => {
+    router.push('/admin/events/create');
+  };
+
+  const handleEditEvent = (eventId: string) => {
+    router.push(`/admin/events/${eventId}/edit`);
+  };
+
+  const handleViewRegistrations = (eventId: string) => {
+    router.push(`/admin/events/${eventId}/registrations`);
+  };
+
+  const handleDeleteEvent = async (eventId: string) => {
+    if (!window.confirm('Are you sure you want to cancel this event?')) {
+      return;
+    }
+
+    try {
+      await deleteDoc(doc(db, 'events', eventId));
+      setEvents(events.filter(e => e.id !== eventId));
+    } catch (error) {
+      console.error('Error deleting event:', error);
+      alert('Failed to delete event');
+    }
+  };
+
   if (loading) {
     return (
       <div className="p-8 flex items-center justify-center min-h-screen">
@@ -87,7 +115,10 @@ export default function EventsPage() {
           <h1 className="font-display text-5xl font-bold text-white mb-2">Events Management</h1>
           <p className="text-white/60">Organize and manage community events</p>
         </div>
-        <button className="px-6 py-3 bg-amber-500 text-black font-header font-bold rounded hover:bg-amber-400 transition flex items-center gap-2">
+        <button 
+          onClick={handleCreateEvent}
+          className="px-6 py-3 bg-amber-500 text-black font-header font-bold rounded hover:bg-amber-400 transition flex items-center gap-2"
+        >
           <Plus className="w-5 h-5" />
           Create Event
         </button>
@@ -215,14 +246,23 @@ export default function EventsPage() {
 
               {/* Actions */}
               <div className="flex gap-2">
-                <button className="flex-1 px-4 py-2 bg-blue-500/10 border border-blue-500/20 rounded text-blue-400 text-sm font-semibold hover:bg-blue-500/20 transition flex items-center justify-center gap-2">
+                <button 
+                  onClick={() => handleEditEvent(event.id)}
+                  className="flex-1 px-4 py-2 bg-blue-500/10 border border-blue-500/20 rounded text-blue-400 text-sm font-semibold hover:bg-blue-500/20 transition flex items-center justify-center gap-2"
+                >
                   <Edit2 className="w-4 h-4" />
                   Edit
                 </button>
-                <button className="flex-1 px-4 py-2 bg-amber-500/10 border border-amber-500/20 rounded text-amber-400 text-sm font-semibold hover:bg-amber-500/20 transition">
+                <button 
+                  onClick={() => handleViewRegistrations(event.id)}
+                  className="flex-1 px-4 py-2 bg-amber-500/10 border border-amber-500/20 rounded text-amber-400 text-sm font-semibold hover:bg-amber-500/20 transition"
+                >
                   View Registrations
                 </button>
-                <button className="flex-1 px-4 py-2 bg-red-500/10 border border-red-500/20 rounded text-red-400 text-sm font-semibold hover:bg-red-500/20 transition flex items-center justify-center gap-2">
+                <button 
+                  onClick={() => handleDeleteEvent(event.id)}
+                  className="flex-1 px-4 py-2 bg-red-500/10 border border-red-500/20 rounded text-red-400 text-sm font-semibold hover:bg-red-500/20 transition flex items-center justify-center gap-2"
+                >
                   <Trash2 className="w-4 h-4" />
                   Cancel
                 </button>

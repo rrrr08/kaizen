@@ -1,11 +1,44 @@
 'use client';
 
+import { useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Settings, Users, BarChart3, Zap, Bell, ShoppingBag, Home, Package, Calendar, LayoutGrid } from 'lucide-react';
+import { useAuth } from '@/app/context/AuthContext';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { user, loading, isAdmin } = useAuth();
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/auth/login');
+    }
+  }, [user, loading, router]);
+
+  // Redirect to home if not admin
+  useEffect(() => {
+    if (!loading && user && !isAdmin) {
+      router.push('/');
+    }
+  }, [user, loading, isAdmin, router]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-black">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-amber-500/20 border-t-amber-500 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-amber-500">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user || !isAdmin) {
+    return null;
+  }
 
   const adminMenuItems = [
     { href: '/admin/dashboard', label: 'Dashboard', icon: Home },

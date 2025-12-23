@@ -207,9 +207,9 @@ export default function CheckoutPage() {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              paymentId: response.razorpay_payment_id,
-              orderId: response.razorpay_order_id,
-              signature: response.razorpay_signature,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_signature: response.razorpay_signature,
             }),
           });
 
@@ -271,8 +271,9 @@ export default function CheckoutPage() {
 
           clearCart();
           
+          // Use window.location.href for a complete page navigation
           setTimeout(() => {
-            router.push(`/order-confirmation/${orderId_New}`);
+            window.location.href = `/order-confirmation/${orderId_New}`;
           }, 1500);
         },
         prefill: {

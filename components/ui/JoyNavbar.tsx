@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import CartSidebar from './CartSidebar2';
 import { NotificationCenter } from '@/app/components/NotificationCenter';
@@ -14,10 +14,13 @@ interface NavbarProps {
 }
 
 const Navbar: React.FC<NavbarProps> = ({ points = 0, isObsidian = false }) => {
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState<boolean>(false);
+  const [eventsDropdownOpen, setEventsDropdownOpen] = useState<boolean>(false);
+  const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>(null);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [userProfile, setUserProfile] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const eventsDropdownRef = useRef<HTMLDivElement>(null);
   const { user, loading } = useAuth();
 
   // Fetch user profile when user changes
@@ -56,6 +59,21 @@ const Navbar: React.FC<NavbarProps> = ({ points = 0, isObsidian = false }) => {
     }
   }, [user]);
 
+  // Handle click outside to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (eventsDropdownRef.current && !eventsDropdownRef.current.contains(event.target as Node)) {
+        setEventsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      if (hoverTimeout) clearTimeout(hoverTimeout);
+    };
+  }, [hoverTimeout]);
+
   const handleSignOut = async () => {
     try {
       console.log('[JoyNavbar] Signing out...');
@@ -83,8 +101,8 @@ const Navbar: React.FC<NavbarProps> = ({ points = 0, isObsidian = false }) => {
     { label: 'SHOP', href: '/shop' },
     { label: 'EXPERIENCES', href: '/experiences' },
     { label: 'PLAY', href: '/play' },
-    { label: 'EVENTS', href: '/events' },
     { label: 'COMMUNITY', href: '/community' },
+    { label: 'BLOG', href: '/blog' },
     { label: 'ABOUT', href: '/about' },
   ];
 
@@ -116,15 +134,85 @@ const Navbar: React.FC<NavbarProps> = ({ points = 0, isObsidian = false }) => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8 lg:gap-12">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="font-header text-xs font-medium tracking-[0.12em] transition-all duration-300 text-white/70 hover:text-amber-400 hover:drop-shadow-lg"
+            {navItems.map((item) => {
+              // Skip EVENTS from main nav - it has its own dropdown
+              if (item.label === 'EVENTS') return null;
+              
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="font-header text-xs font-medium tracking-[0.12em] transition-all duration-300 text-white/70 hover:text-amber-400 hover:drop-shadow-lg"
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
+
+            {/* Events Dropdown */}
+            <div 
+              className="relative" 
+              ref={eventsDropdownRef}
+              onMouseEnter={() => {
+                if (hoverTimeout) clearTimeout(hoverTimeout);
+                setEventsDropdownOpen(true);
+              }}
+              onMouseLeave={() => {
+                const timeout = setTimeout(() => {
+                  setEventsDropdownOpen(false);
+                }, 200);
+                setHoverTimeout(timeout);
+              }}
+            >
+              <button
+                onClick={() => setEventsDropdownOpen(!eventsDropdownOpen)}
+                className="font-header text-xs font-medium tracking-[0.12em] transition-all duration-300 text-white/70 hover:text-amber-400 hover:drop-shadow-lg flex items-center gap-1"
               >
-                {item.label}
-              </Link>
-            ))}
+                EVENTS
+                <svg
+                  className={`w-3 h-3 transition-transform duration-200 ${eventsDropdownOpen ? 'rotate-180' : ''}`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              {eventsDropdownOpen && (
+                <div 
+                  className="absolute left-1/2 transform -translate-x-1/2 mt-6 w-48 bg-black/95 backdrop-blur-lg border border-white/10 rounded-lg shadow-xl overflow-hidden z-50"
+                  onMouseEnter={() => {
+                    if (hoverTimeout) clearTimeout(hoverTimeout);
+                    setEventsDropdownOpen(true);
+                  }}
+                  onMouseLeave={() => {
+                    const timeout = setTimeout(() => {
+                      setEventsDropdownOpen(false);
+                    }, 100);
+                    setHoverTimeout(timeout);
+                  }}
+                >
+                  <div className="py-2">
+                    <Link
+                      href="/events/upcoming"
+                      className="block px-4 py-3 font-header text-[10px] tracking-[0.2em] text-white/70 hover:text-amber-500 hover:bg-white/5 transition-all border-b border-white/5"
+                      onClick={() => setEventsDropdownOpen(false)}
+                    >
+                      UPCOMING GAME NIGHTS
+                    </Link>
+                    <Link
+                      href="/events/past"
+                      className="block px-4 py-3 font-header text-[10px] tracking-[0.2em] text-white/70 hover:text-amber-500 hover:bg-white/5 transition-all border-b border-white/5"
+                      onClick={() => setEventsDropdownOpen(false)}
+                    >
+                      PAST EVENTS
+                    </Link>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Right Side - Notifications, Points & Toggle */}
@@ -226,6 +314,7 @@ const Navbar: React.FC<NavbarProps> = ({ points = 0, isObsidian = false }) => {
           <button 
             className="md:hidden ml-4"
             onClick={() => setMobileOpen(!mobileOpen)}
+            aria-label="Toggle mobile menu"
           >
             <div className="space-y-1">
               <div className="w-6 h-0.5 bg-amber-500"></div>
@@ -249,6 +338,71 @@ const Navbar: React.FC<NavbarProps> = ({ points = 0, isObsidian = false }) => {
                   {item.label}
                 </Link>
               ))}
+
+              {/* Events Section in Mobile Menu */}
+              <div className="pt-4 border-t border-white/10">
+                <div className="font-header text-[10px] tracking-[0.3em] text-amber-500 mb-4">EVENTS</div>
+                <div className="flex flex-col gap-4 ml-4">
+                  <Link
+                    href="/events/upcoming"
+                    className="font-header text-[9px] tracking-[0.2em] text-white/60 hover:text-amber-500"
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    UPCOMING GAME NIGHTS
+                  </Link>
+                  <Link
+                    href="/events/past"
+                    className="font-header text-[9px] tracking-[0.2em] text-white/60 hover:text-amber-500"
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    PAST EVENTS
+                  </Link>
+                </div>
+              </div>
+
+              {/* Auth Section in Mobile Menu */}
+              <div className="pt-4 border-t border-white/10">
+                {user ? (
+                  <>
+                    <div className="font-header text-[10px] tracking-[0.3em] text-amber-500 mb-4">ACCOUNT</div>
+                    <div className="flex flex-col gap-3 ml-4">
+                      <Link
+                        href="/wallet"
+                        className="font-header text-[9px] tracking-[0.2em] text-white/60 hover:text-amber-500"
+                        onClick={() => setMobileOpen(false)}
+                      >
+                        MY WALLET
+                      </Link>
+                      {isAdmin && (
+                        <Link
+                          href="/admin/dashboard"
+                          className="font-header text-[9px] tracking-[0.2em] text-amber-500"
+                          onClick={() => setMobileOpen(false)}
+                        >
+                          ADMIN PANEL
+                        </Link>
+                      )}
+                      <button
+                        onClick={() => {
+                          handleSignOut();
+                          setMobileOpen(false);
+                        }}
+                        className="text-left font-header text-[9px] tracking-[0.2em] text-red-400 hover:text-red-300"
+                      >
+                        SIGN OUT
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <Link
+                    href="/auth/login"
+                    className="font-header text-[10px] tracking-[0.3em] text-amber-500 hover:text-amber-400"
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    SIGN IN
+                  </Link>
+                )}
+              </div>
             </div>
           </div>
         )}

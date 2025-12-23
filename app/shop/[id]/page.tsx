@@ -21,7 +21,12 @@ export default function ProductDetail() {
     const fetchProduct = async () => {
       try {
         setLoading(true);
-        const productId = typeof params.id === 'string' ? params.id : params.id[0];
+        const productId = typeof params.id === 'string' ? params.id : params.id?.[0] || '';
+        if (!productId) {
+          setError('Product not found');
+          setLoading(false);
+          return;
+        }
         const productData = await getProductById(productId);
         
         if (productData) {
@@ -32,7 +37,8 @@ export default function ProductDetail() {
           const related = allProducts
             .filter((p: any) => 
               p.id !== productData.id && 
-              p.occasion?.some((o: string) => productData.occasion?.includes(o))
+              (productData as any).occasion && 
+              p.occasion?.some((o: string) => (productData as any).occasion?.includes(o))
             )
             .slice(0, 4);
           setRelatedProducts(related);

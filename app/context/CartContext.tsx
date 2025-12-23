@@ -41,17 +41,42 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         // User is authenticated
         if (user?.uid) {
           const cartData = await getUserCart(user.uid);
-          setItems(cartData || []);
           
-          // Merge local cart with Firebase if this is the first load and we have a local cart
+          // Merge local cart with Firebase on first authentication
           if (!hasMergedCart) {
             const localCart = getLocalCart();
-            if (localCart.length > 0 && (!cartData || cartData.length === 0)) {
-              // Merge local items with Firebase
-              await updateUserCart(user.uid, localCart);
-              setItems(localCart);
+            if (localCart.length > 0) {
+              // Merge: combine both carts, preferring higher quantity for duplicate items
+              const mergedCart = [...(cartData || [])];
+              
+              for (const localItem of localCart) {
+                const existingIndex = mergedCart.findIndex(item => item.productId === localItem.productId);
+                if (existingIndex >= 0) {
+                  // Item exists in both - take the higher quantity
+                  mergedCart[existingIndex].quantity = Math.max(
+                    mergedCart[existingIndex].quantity,
+                    localItem.quantity
+                  );
+                } else {
+                  // Item only in local cart - add it
+                  mergedCart.push(localItem);
+                }
+              }
+              
+              // Save merged cart to Firebase and update state
+              await updateUserCart(user.uid, mergedCart);
+              setItems(mergedCart);
+              
+              // Clear local cart since we've merged it
+              saveLocalCart([]);
+            } else {
+              // No local cart, just use Firebase cart
+              setItems(cartData || []);
             }
             setHasMergedCart(true);
+          } else {
+            // Already merged, just load from Firebase
+            setItems(cartData || []);
           }
         } else {
           // User is not authenticated - load from localStorage
