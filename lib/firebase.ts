@@ -167,6 +167,10 @@ export const signIn = async (email: string, password: string) => {
 
 export const signInWithGoogle = async () => {
   try {
+    if (!auth) {
+      throw new Error('Firebase authentication is not initialized');
+    }
+    
     // Try popup first
     try {
       const userCredential = await signInWithPopup(auth, googleProvider);
@@ -232,6 +236,10 @@ export const signInWithGoogle = async () => {
 };
 
 export const logOut = async () => {
+  if (!auth) {
+    console.warn('Firebase auth not initialized, skipping logout');
+    return;
+  }
   await signOut(auth);
 
   try {
@@ -1133,6 +1141,11 @@ export async function getBlogPostById(id: string) {
  */
 export async function handleGoogleSignInRedirect() {
   try {
+    if (!auth) {
+      console.warn('Firebase auth not initialized, skipping Google redirect result check');
+      return null;
+    }
+    
     const result = await getRedirectResult(auth);
     
     if (result) {
