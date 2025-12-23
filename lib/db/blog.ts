@@ -1,4 +1,3 @@
-import { db } from "@/lib/firebase";
 import {
   collection,
   query,
@@ -9,10 +8,21 @@ import {
   doc,
 } from "firebase/firestore";
 
-export const blogCollection = collection(db, 'blog_posts');
+let db: any = null;
+let blogCollection: any = null;
+
+async function getDb() {
+  if (!db) {
+    const firebase = await import("@/lib/firebase");
+    db = firebase.db;
+    blogCollection = collection(db, 'blog_posts');
+  }
+  return db;
+}
 
 export async function getBlogPosts(filter?: { category?: string }) {
   try {
+    await getDb();
     let q: any;
     
     if (filter?.category && filter.category !== 'all') {

@@ -1,4 +1,3 @@
-import { db } from "@/lib/firebase";
 import {
   collection,
   addDoc,
@@ -11,9 +10,23 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 
-export const registrationsCollection = collection(db, 'event_registrations');
-export const eventsCollection = collection(db, 'events');
-export const walletsCollection = collection(db, 'wallets');
+let db: any = null;
+let registrationsCollection: any = null;
+let eventsCollection: any = null;
+let walletsCollection: any = null;
+
+async function getDb() {
+  if (!db) {
+    const firebase = await import("@/lib/firebase");
+    db = firebase.db;
+    registrationsCollection = collection(db, 'event_registrations');
+    eventsCollection = collection(db, 'events');
+    walletsCollection = collection(db, 'wallets');
+  }
+  return db;
+}
+
+export { registrationsCollection, eventsCollection, walletsCollection };
 
 export async function createPaymentOrder(
   eventId: string,
@@ -22,6 +35,7 @@ export async function createPaymentOrder(
   walletPointsUsed: number = 0
 ) {
   try {
+    const firebaseDb = await getDb();
     // Create payment order record in Firestore (for tracking)
     const orderData = {
       eventId,
@@ -33,7 +47,7 @@ export async function createPaymentOrder(
       updatedAt: serverTimestamp(),
     };
 
-    const orderRef = await addDoc(collection(db, 'payment_orders'), orderData);
+    const orderRef = await addDoc(collection(firebaseDb, 'payment_orders'), orderData);
 
     return {
       success: true,
