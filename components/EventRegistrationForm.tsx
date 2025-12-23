@@ -57,7 +57,9 @@ export default function EventRegistrationForm({
     } catch (err) {
       console.error('Error loading wallet:', err);
       // Set default wallet on error
-      setWallet({ points: 0, userId: user.uid });
+      if (user?.uid) {
+        setWallet({ points: 0, userId: user.uid });
+      }
     }
   };
 
