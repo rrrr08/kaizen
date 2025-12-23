@@ -76,6 +76,8 @@ export function NotificationCenter() {
 
   async function markAsRead(id: string) {
     try {
+      // Lazy load Firebase
+      const { auth } = await import('@/lib/firebase');
       let headers: HeadersInit = {};
       if (auth.currentUser) {
         const idToken = await auth.currentUser.getIdToken();
@@ -94,6 +96,8 @@ export function NotificationCenter() {
 
   async function dismiss(id: string) {
     try {
+      // Lazy load Firebase
+      const { auth } = await import('@/lib/firebase');
       let headers: HeadersInit = {};
       if (auth.currentUser) {
         const idToken = await auth.currentUser.getIdToken();
