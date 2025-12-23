@@ -63,20 +63,35 @@ if (process.env.NODE_ENV !== 'production') {
   });
 }
 
-if (!firebaseConfig.apiKey) {
-  throw new Error('Firebase API key is missing');
+// Initialize Firebase app - only throws if trying to actually use it without proper config
+let app: any;
+try {
+  if (!firebaseConfig.apiKey) {
+    throw new Error('Firebase API key is missing');
+  }
+  app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+} catch (error) {
+  if (typeof window !== 'undefined') {
+    // Client-side: defer the error to when Firebase is actually used
+    console.warn('Firebase initialization deferred:', error);
+    app = null;
+  } else {
+    // Server-side: allow error to propagate
+    throw error;
+  }
 }
 
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-const auth = getAuth(app);
-const db = getFirestore(app);
-const storage = getStorage(app);
+const auth = app ? getAuth(app) : (null as any);
+const db = app ? getFirestore(app) : (null as any);
+const storage = app ? getStorage(app) : (null as any);
 const googleProvider = new GoogleAuthProvider();
 
 // Enable persistence (LOCAL is default, but let's make it explicit)
-setPersistence(auth, browserLocalPersistence).catch((error) => {
-  console.error('Error setting persistence:', error);
-});
+if (auth) {
+  setPersistence(auth, browserLocalPersistence).catch((error) => {
+    console.error('Error setting persistence:', error);
+  });
+}
 
 // ProfileUpdateData interface removed for JavaScript conversion
 
