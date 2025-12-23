@@ -79,6 +79,7 @@ export function getAdminAuth() {
 // For compatibility with existing imports
 export const adminDb = {
   collection: (path: string) => getAdminDb().collection(path),
+  batch: () => getAdminDb().batch(),
 };
 
 export const adminAuth = {
