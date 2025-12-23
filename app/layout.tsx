@@ -35,7 +35,6 @@ export default function RootLayout({
           src="https://checkout.razorpay.com/v1/checkout.js"
           async
           defer
-          onLoad="window.RazorpayReady = true"
         ></script>
       </head>
       <body
