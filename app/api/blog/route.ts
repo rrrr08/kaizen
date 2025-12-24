@@ -5,10 +5,12 @@ export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const category = searchParams.get('category');
+    const status = searchParams.get('status'); // 'all' to include drafts
 
-    const posts = await getBlogPosts(
-      category ? { category } : undefined
-    );
+    const posts = await getBlogPosts({
+      ...(category ? { category } : {}),
+      includeUnpublished: status === 'all',
+    });
 
     return NextResponse.json({
       success: true,

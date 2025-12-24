@@ -11,23 +11,36 @@ import {
 
 export const blogCollection = collection(db, 'blog_posts');
 
-export async function getBlogPosts(filter?: { category?: string }) {
+export async function getBlogPosts(filter?: { category?: string; includeUnpublished?: boolean }) {
   try {
     let q: any;
     
+    const includeUnpublished = !!filter?.includeUnpublished;
+
     if (filter?.category && filter.category !== 'all') {
-      q = query(
-        blogCollection,
-        where('category', '==', filter.category),
-        where('published', '==', true),
-        orderBy('publishedAt', 'desc')
-      );
+      q = includeUnpublished
+        ? query(
+            blogCollection,
+            where('category', '==', filter.category),
+            orderBy('createdAt', 'desc')
+          )
+        : query(
+            blogCollection,
+            where('category', '==', filter.category),
+            where('published', '==', true),
+            orderBy('publishedAt', 'desc')
+          );
     } else {
-      q = query(
-        blogCollection,
-        where('published', '==', true),
-        orderBy('publishedAt', 'desc')
-      );
+      q = includeUnpublished
+        ? query(
+            blogCollection,
+            orderBy('createdAt', 'desc')
+          )
+        : query(
+            blogCollection,
+            where('published', '==', true),
+            orderBy('publishedAt', 'desc')
+          );
     }
 
     const snapshot = await getDocs(q);

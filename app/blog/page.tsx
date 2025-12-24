@@ -26,7 +26,7 @@ export default function Blog() {
             setLoading(true);
             setError(null);
 
-            const response = await fetch('/api/blog');
+            const response = await fetch(`/api/blog?status=all`);
 
             if (!response.ok) {
                 throw new Error(`Failed to fetch blog posts: ${response.status}`);
@@ -118,9 +118,9 @@ export default function Blog() {
                     </div>
                 </section>
 
-                {/* SECTION 3 — CATEGORIES FILTER */}
+                {/* SECTION 3 — FILTERS */}
                 <div className="mb-20 sticky top-24 z-40 bg-black/95 backdrop-blur py-4 border-b border-white/10 overflow-x-auto">
-                    <div className="flex gap-8 min-w-max">
+                    <div className="flex items-center gap-8 min-w-max">
                         {categories.map((cat) => (
                             <button
                                 key={cat}
