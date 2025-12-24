@@ -122,7 +122,7 @@ export default function AdminBlogPage() {
 
   const onAdd = () => {
     setEditingId(null);
-    setForm({ title: "", excerpt: "", content: "", category: CATEGORIES[0], image: "", published: false });
+    setForm({ title: "", excerpt: "", content: "", category: CATEGORIES[0], image: "" });
     setShowForm(true);
   };
 
