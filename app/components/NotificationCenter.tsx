@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { Bell, X } from 'lucide-react';
 import Link from 'next/link';
-import { auth } from '@/lib/firebase';
 
 interface InAppNotification {
   id: string;
@@ -23,20 +22,28 @@ export function NotificationCenter() {
 
   useEffect(() => {
     // Only load notifications if user is authenticated
-    if (auth.currentUser) {
-      loadNotifications();
+    const checkAuth = async () => {
+      const { auth } = await import('@/lib/firebase');
+      if (auth && auth.currentUser) {
+        loadNotifications();
 
-      // Reload notifications every 30 seconds
-      const interval = setInterval(loadNotifications, 30000);
+        // Reload notifications every 30 seconds
+        const interval = setInterval(loadNotifications, 30000);
 
-      return () => clearInterval(interval);
-    }
+        return () => clearInterval(interval);
+      }
+    };
+
+    checkAuth();
   }, []);
 
   async function loadNotifications() {
     try {
+      // Lazy load Firebase
+      const { auth } = await import('@/lib/firebase');
+      
       // Skip if user not authenticated
-      if (!auth.currentUser) {
+      if (!auth || !auth.currentUser) {
         setNotifications([]);
         setUnreadCount(0);
         return;
@@ -69,8 +76,10 @@ export function NotificationCenter() {
 
   async function markAsRead(id: string) {
     try {
+      // Lazy load Firebase
+      const { auth } = await import('@/lib/firebase');
       let headers: HeadersInit = {};
-      if (auth.currentUser) {
+      if (auth && auth.currentUser) {
         const idToken = await auth.currentUser.getIdToken();
         headers['Authorization'] = `Bearer ${idToken}`;
       }
@@ -87,8 +96,10 @@ export function NotificationCenter() {
 
   async function dismiss(id: string) {
     try {
+      // Lazy load Firebase
+      const { auth } = await import('@/lib/firebase');
       let headers: HeadersInit = {};
-      if (auth.currentUser) {
+      if (auth && auth.currentUser) {
         const idToken = await auth.currentUser.getIdToken();
         headers['Authorization'] = `Bearer ${idToken}`;
       }

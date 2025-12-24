@@ -1,13 +1,29 @@
-import Razorpay from 'razorpay';
 import { NextRequest, NextResponse } from 'next/server';
 
-const razorpay = new Razorpay({
-  key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
-  key_secret: process.env.RAZORPAY_KEY_SECRET!,
-});
+let razorpayInstance: any = null;
+
+async function getRazorpay() {
+  if (!razorpayInstance) {
+    const Razorpay = (await import('razorpay')).default;
+    razorpayInstance = new Razorpay({
+      key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
+      key_secret: process.env.RAZORPAY_KEY_SECRET!,
+    });
+  }
+  return razorpayInstance;
+}
 
 export async function POST(request: NextRequest) {
   try {
+    // Check if Razorpay credentials are set
+    if (!process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+      console.error('Razorpay credentials not configured');
+      return NextResponse.json(
+        { error: 'Payment gateway not configured. Please contact support.' },
+        { status: 500 }
+      );
+    }
+
     const { amount, currency = 'INR', receipt, notes } = await request.json();
 
     if (!amount || amount <= 0) {
@@ -20,6 +36,7 @@ export async function POST(request: NextRequest) {
     // Amount should be in paise (multiply by 100)
     const razorpayAmount = Math.round(amount * 100);
 
+    const razorpay = await getRazorpay();
     const order = await razorpay.orders.create({
       amount: razorpayAmount,
       currency,
@@ -38,8 +55,9 @@ export async function POST(request: NextRequest) {
     );
   } catch (error) {
     console.error('Razorpay order creation error:', error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
-      { error: 'Failed to create payment order' },
+      { error: 'Failed to create payment order', details: errorMessage },
       { status: 500 }
     );
   }

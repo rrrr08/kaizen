@@ -5,7 +5,6 @@ import Link from 'next/link';
 import CartSidebar from './CartSidebar2';
 import { NotificationCenter } from '@/app/components/NotificationCenter';
 import { useAuth } from '@/app/context/AuthContext';
-import { getUserProfile, logOut, checkUserIsAdmin } from '@/lib/firebase';
 import { ChevronDown, LogOut, Home, Settings } from 'lucide-react';
 
 interface NavbarProps {
@@ -34,24 +33,27 @@ const Navbar: React.FC<NavbarProps> = ({ points = 0, isObsidian = false }) => {
     
     if (user) {
       console.log('[JoyNavbar] Fetching user profile for:', user.uid);
-      getUserProfile(user.uid)
-        .then(profile => {
-          console.log('[JoyNavbar] User profile fetched:', {
-            name: profile?.first_name || profile?.name,
-            role: profile?.role,
-            email: profile?.email
-          });
-          setUserProfile(profile);
-        })
-        .catch(error => console.error('[JoyNavbar] Error fetching user profile:', error));
+      // Lazy load Firebase functions
+      import('@/lib/firebase').then(({ getUserProfile, checkUserIsAdmin }) => {
+        getUserProfile(user.uid)
+          .then(profile => {
+            console.log('[JoyNavbar] User profile fetched:', {
+              name: profile?.first_name || profile?.name,
+              role: profile?.role,
+              email: profile?.email
+            });
+            setUserProfile(profile);
+          })
+          .catch(error => console.error('[JoyNavbar] Error fetching user profile:', error));
 
-      // Check if user is admin
-      checkUserIsAdmin(user.uid)
-        .then(admin => {
-          console.log('[JoyNavbar] Admin check result for', user.uid, ':', admin);
-          setIsAdmin(admin);
-        })
-        .catch(error => console.error('[JoyNavbar] Error checking admin status:', error));
+        // Check if user is admin
+        checkUserIsAdmin(user.uid)
+          .then(admin => {
+            console.log('[JoyNavbar] Admin check result for', user.uid, ':', admin);
+            setIsAdmin(admin);
+          })
+          .catch(error => console.error('[JoyNavbar] Error checking admin status:', error));
+      });
     } else {
       console.log('[JoyNavbar] Clearing user profile and admin status');
       setUserProfile(null);
@@ -77,6 +79,8 @@ const Navbar: React.FC<NavbarProps> = ({ points = 0, isObsidian = false }) => {
   const handleSignOut = async () => {
     try {
       console.log('[JoyNavbar] Signing out...');
+      // Lazy load Firebase function
+      const { logOut } = await import('@/lib/firebase');
       await logOut();
       setUserProfile(null);
       setIsProfileMenuOpen(false);

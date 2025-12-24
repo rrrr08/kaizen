@@ -4,8 +4,8 @@ import { useEffect, useState } from 'react';
 import { useGamification } from '@/app/context/GamificationContext';
 import Link from 'next/link';
 import { Wallet as WalletIcon, TrendingUp, Gift } from 'lucide-react';
-import { auth } from '@/lib/firebase';
-import { getUserWallet, getUserOrders } from '@/lib/firebase';
+
+export const dynamic = 'force-dynamic';
 
 interface WalletData {
   totalPoints: number;
@@ -23,6 +23,8 @@ export default function WalletPage() {
   useEffect(() => {
     const loadWallet = async () => {
       try {
+        // Lazy load Firebase
+        const { auth, getUserWallet, getUserOrders } = await import('@/lib/firebase');
         const currentUser = auth.currentUser;
         if (!currentUser) {
           console.error('User not authenticated. Please log in to view wallet.');

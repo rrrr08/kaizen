@@ -4,8 +4,9 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/app/context/AuthContext';
-import { getUserOrders } from '@/lib/firebase';
 import { Package, ArrowRight, Home } from 'lucide-react';
+
+export const dynamic = 'force-dynamic';
 
 interface OrderItem {
   productId: string;
@@ -51,6 +52,7 @@ export default function OrdersPage() {
     try {
       setLoading(true);
       if (user?.uid) {
+        const { getUserOrders } = await import('@/lib/firebase');
         const userOrders = await getUserOrders(user.uid);
         setOrders((userOrders || []) as Order[]);
       }

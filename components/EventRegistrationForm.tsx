@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { User } from 'firebase/auth';
-import { getUserWallet } from '@/lib/firebase';
 import { createPaymentOrder, completeRegistration } from '@/lib/db/payments';
 import { useGamification } from '@/app/context/GamificationContext';
 
@@ -50,14 +49,18 @@ export default function EventRegistrationForm({
 
   const loadWallet = async () => {
     try {
-      if (!user) return;
+      if (!user?.uid) return;
+      // Lazy load Firebase function
+      const { getUserWallet } = await import('@/lib/firebase');
       const walletData = await getUserWallet(user.uid);
       // If wallet doesn't exist, create a default one with 0 points
       setWallet(walletData || { points: 0, userId: user.uid });
     } catch (err) {
       console.error('Error loading wallet:', err);
       // Set default wallet on error
-      setWallet({ points: 0, userId: user.uid });
+      if (user?.uid) {
+        setWallet({ points: 0, userId: user.uid });
+      }
     }
   };
 

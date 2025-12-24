@@ -4,39 +4,36 @@
  * Run once via: http://localhost:3000/api/initialize-firebase
  */
 
-import {
-  db,
-  setDoc,
-  doc,
-  collection,
-  getDocs,
-  addDoc,
-  serverTimestamp,
-  query,
-  limit,
-} from './firebase';
-
 export async function initializeFirebaseData() {
   try {
     console.log('🚀 Starting Firebase initialization...');
+    
+    // Lazy load Firebase
+    const { 
+      setDoc, doc, getDocs, addDoc, serverTimestamp, query, limit, db: firebaseDb 
+    } = await import('@/lib/firebase');
+
+    if (!firebaseDb) {
+      throw new Error('Firebase not initialized');
+    }
 
     // 1. Initialize Gamification Config
-    await initializeGamificationConfig();
+    await initializeGamificationConfig(firebaseDb, setDoc, doc, serverTimestamp);
 
     // 2. Initialize Mock Settings
-    await initializeSettings();
+    await initializeSettings(firebaseDb, getDocs, query, doc, serverTimestamp);
 
     // 3. Initialize Products
-    await initializeProducts();
+    await initializeProducts(firebaseDb, setDoc, doc, serverTimestamp);
 
     // 4. Initialize Events
-    await initializeEvents();
+    await initializeEvents(firebaseDb, setDoc, doc, serverTimestamp);
 
     // 5. Initialize Orders
-    await initializeOrders();
+    await initializeOrders(firebaseDb, addDoc, serverTimestamp);
 
     // 6. Initialize Users
-    await initializeUsers();
+    await initializeUsers(firebaseDb, setDoc, doc, addDoc);
 
     console.log('✅ Firebase initialization complete!');
     return { success: true, message: 'Firebase initialized successfully' };
@@ -46,7 +43,7 @@ export async function initializeFirebaseData() {
   }
 }
 
-async function initializeGamificationConfig() {
+async function initializeGamificationConfig(db: any, setDoc: any, doc: any, serverTimestamp: any) {
   try {
     const configRef = doc(db, 'settings', 'gamification');
     const config = {
@@ -110,7 +107,7 @@ async function initializeGamificationConfig() {
   }
 }
 
-async function initializeSettings() {
+async function initializeSettings(db: any, getDocs: any, query: any, doc: any, serverTimestamp: any) {
   try {
     const settingsRef = doc(db, 'settings', 'store');
     const settings = {
@@ -125,6 +122,7 @@ async function initializeSettings() {
       updatedAt: serverTimestamp(),
     };
 
+    const { setDoc } = await import('@/lib/firebase');
     await setDoc(settingsRef, settings);
     console.log('✅ Store settings initialized');
   } catch (error) {
@@ -133,9 +131,10 @@ async function initializeSettings() {
   }
 }
 
-async function initializeProducts() {
+async function initializeProducts(db: any, setDoc: any, doc: any, serverTimestamp: any) {
   try {
     console.log('📦 Starting product initialization...');
+    const { collection, getDocs, addDoc } = await import('@/lib/firebase');
     const productsRef = collection(db, 'products');
     
     // Check if products already exist
@@ -286,9 +285,10 @@ async function initializeProducts() {
   }
 }
 
-async function initializeEvents() {
+async function initializeEvents(db: any, setDoc: any, doc: any, serverTimestamp: any) {
   try {
     console.log('📅 Starting events initialization...');
+    const { collection, getDocs, addDoc } = await import('@/lib/firebase');
     const eventsRef = collection(db, 'events');
     
     const existingEvents = await getDocs(eventsRef);
@@ -360,9 +360,10 @@ async function initializeEvents() {
   }
 }
 
-async function initializeOrders() {
+async function initializeOrders(db: any, addDoc: any, serverTimestamp: any) {
   try {
     console.log('📦 Starting orders initialization...');
+    const { collection, getDocs } = await import('@/lib/firebase');
     const ordersRef = collection(db, 'orders');
     
     const existingOrders = await getDocs(ordersRef);
@@ -453,9 +454,10 @@ async function initializeOrders() {
   }
 }
 
-async function initializeUsers() {
+async function initializeUsers(db: any, setDoc: any, doc: any, addDoc: any) {
   try {
     console.log('👥 Starting users initialization...');
+    const { collection, getDocs } = await import('@/lib/firebase');
     const usersRef = collection(db, 'users');
     
     const existingUsers = await getDocs(usersRef);

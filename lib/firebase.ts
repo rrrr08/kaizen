@@ -63,24 +63,59 @@ if (process.env.NODE_ENV !== 'production') {
   });
 }
 
-if (!firebaseConfig.apiKey) {
-  throw new Error('Firebase API key is missing');
+// Initialize Firebase app - only throws if trying to actually use it without proper config
+let app: any;
+try {
+  if (!firebaseConfig.apiKey) {
+    throw new Error('Firebase API key is missing');
+  }
+  app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+} catch (error) {
+  if (typeof window !== 'undefined') {
+    // Client-side: defer the error to when Firebase is actually used
+    console.warn('Firebase initialization deferred:', error);
+    app = null;
+  } else {
+    // Server-side: allow error to propagate
+    throw error;
+  }
 }
 
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-const auth = getAuth(app);
-const db = getFirestore(app);
-const storage = getStorage(app);
+const auth = app ? getAuth(app) : (null as any);
+const db = app ? getFirestore(app) : (null as any);
+const storage = app ? getStorage(app) : (null as any);
 const googleProvider = new GoogleAuthProvider();
 
 // Enable persistence (LOCAL is default, but let's make it explicit)
-setPersistence(auth, browserLocalPersistence).catch((error) => {
-  console.error('Error setting persistence:', error);
-});
+if (auth) {
+  setPersistence(auth, browserLocalPersistence).catch((error) => {
+    console.error('Error setting persistence:', error);
+  });
+}
+
+// Helper function to check Firebase initialization
+function ensureFirebaseInit() {
+  if (!app || !auth || !db) {
+    throw new Error('Firebase is not initialized. Please ensure NEXT_PUBLIC_FIREBASE_API_KEY is set.');
+  }
+}
+
+// Helper to get initialized Firestore instance
+export async function getFirebaseDb() {
+  if (db) return db;
+  
+  const firebase = await import('@/lib/firebase');
+  if (firebase.db) return firebase.db;
+  
+  throw new Error('Firebase Firestore not initialized');
+}
 
 // ProfileUpdateData interface removed for JavaScript conversion
 
 export const createUser = async (email: string, password: string, userData: UserProfile) => {
+  if (!auth) {
+    throw new Error('Firebase authentication is not initialized');
+  }
   const userCredential = await createUserWithEmailAndPassword(
     auth,
     email,
@@ -103,6 +138,9 @@ export const createUser = async (email: string, password: string, userData: User
 };
 
 export const signIn = async (email: string, password: string) => {
+  if (!auth) {
+    throw new Error('Firebase authentication is not initialized');
+  }
   const userCredential = await signInWithEmailAndPassword(auth, email, password);
   const { user } = userCredential;
 
@@ -139,6 +177,10 @@ export const signIn = async (email: string, password: string) => {
 
 export const signInWithGoogle = async () => {
   try {
+    if (!auth) {
+      throw new Error('Firebase authentication is not initialized');
+    }
+    
     // Try popup first
     try {
       const userCredential = await signInWithPopup(auth, googleProvider);
@@ -204,6 +246,10 @@ export const signInWithGoogle = async () => {
 };
 
 export const logOut = async () => {
+  if (!auth) {
+    console.warn('Firebase auth not initialized, skipping logout');
+    return;
+  }
   await signOut(auth);
 
   try {
@@ -217,6 +263,9 @@ export const logOut = async () => {
 };
 
 export const createUserProfile = async (userId: string, data: UserProfile) => {
+  if (!db) {
+    throw new Error('Firebase database is not initialized');
+  }
   const userRef = doc(db, "users", userId);
 
   // Initialize with multiavatar if no photoURL provided
@@ -252,26 +301,44 @@ export const createUserProfile = async (userId: string, data: UserProfile) => {
 };
 
 export const checkUserExists = async (userId: string) => {
-  const userRef = doc(db, "users", userId);
-  const userSnap = await getDoc(userRef);
-  return userSnap.exists();
+  try {
+    if (!db) return false;
+    const userRef = doc(db, "users", userId);
+    const userSnap = await getDoc(userRef);
+    return userSnap.exists();
+  } catch (error) {
+    console.error('Error checking user exists:', error);
+    return false;
+  }
 };
 
 export const getUserProfile = async (userId: string): Promise<UserProfile | null> => {
-  const userRef = doc(db, "users", userId);
-  const userSnap = await getDoc(userRef);
+  try {
+    if (!db) {
+      console.warn('Firebase not initialized in getUserProfile');
+      return null;
+    }
+    const userRef = doc(db, "users", userId);
+    const userSnap = await getDoc(userRef);
 
-  if (userSnap.exists()) {
-    return userSnap.data() as UserProfile;
+    if (userSnap.exists()) {
+      return userSnap.data() as UserProfile;
+    }
+
+    return null;
+  } catch (error) {
+    console.error('Error getting user profile:', error);
+    return null;
   }
-
-  return null;
 };
 
 // Alias for getUserProfile for backward compatibility
 export const getUserById = getUserProfile;
 
 export const updateUserProfile = async (userId: string, data: Partial<UserProfile>) => {
+  if (!db) {
+    throw new Error('Firebase database is not initialized');
+  }
   const userRef = doc(db, "users", userId);
 
   const dataToUpdate = {
@@ -300,7 +367,8 @@ export const checkUserIsAdmin = async (userId: string) => {
   }
 };
 
-if (typeof window !== "undefined") {
+// Set up auth state listener only if Firebase is initialized
+if (typeof window !== "undefined" && auth) {
   onAuthStateChanged(auth, async (user) => {
     if (user) {
       try {
@@ -334,11 +402,13 @@ if (typeof window !== "undefined") {
           }
         } else {
           // Update last sign in for existing users
-          const userRef = doc(db, "users", user.uid);
-          await updateDoc(userRef, {
-            last_sign_in_at: serverTimestamp(),
-            updated_at: serverTimestamp()
-          });
+          if (db) {
+            const userRef = doc(db, "users", user.uid);
+            await updateDoc(userRef, {
+              last_sign_in_at: serverTimestamp(),
+              updated_at: serverTimestamp()
+            });
+          }
         }
       } catch (error) {
         console.error(
@@ -394,6 +464,12 @@ export async function updateProduct(productId: string, product: Partial<Product>
 }
 
 export async function deleteProduct(productId: string) {
+  if (!db) {
+    const firebase = await import('@/lib/firebase');
+    const firebaseDb = firebase.db;
+    if (!firebaseDb) throw new Error('Firebase not initialized');
+    return await deleteDoc(doc(firebaseDb, 'products', productId));
+  }
   await deleteDoc(doc(db, 'products', productId));
 }
 
@@ -619,7 +695,8 @@ export const updateGoogleIntegration = async (
 // ===== WALLET & POINTS MANAGEMENT =====
 
 export async function updateUserWallet(userId: string, pointsToAdd: number) {
-  const userRef = doc(db, 'users', userId);
+  const firebaseDb = await getFirebaseDb();
+  const userRef = doc(firebaseDb, 'users', userId);
   const userDoc = await getDoc(userRef);
   
   if (!userDoc.exists()) {
@@ -638,7 +715,8 @@ export async function updateUserWallet(userId: string, pointsToAdd: number) {
 }
 
 export async function getUserWallet(userId: string) {
-  const userRef = doc(db, 'users', userId);
+  const firebaseDb = await getFirebaseDb();
+  const userRef = doc(firebaseDb, 'users', userId);
   const userDoc = await getDoc(userRef);
   
   if (!userDoc.exists()) {
@@ -706,8 +784,9 @@ export async function createOrder(
 }
 
 export async function getUserOrders(userId: string) {
+  const firebaseDb = await getFirebaseDb();
   const q = query(
-    collection(db, 'orders'),
+    collection(firebaseDb, 'orders'),
     where('userId', '==', userId)
   );
 
@@ -732,7 +811,8 @@ export async function getUserOrders(userId: string) {
 }
 
 export async function getOrderById(orderId: string) {
-  const orderRef = doc(db, 'orders', orderId);
+  const firebaseDb = await getFirebaseDb();
+  const orderRef = doc(firebaseDb, 'orders', orderId);
   const orderDoc = await getDoc(orderRef);
   
   if (!orderDoc.exists()) {
@@ -749,7 +829,8 @@ export async function getOrderById(orderId: string) {
 // ===== CART MANAGEMENT =====
 
 export async function updateUserCart(userId: string, cartItems: any[]) {
-  const userRef = doc(db, 'users', userId);
+  const firebaseDb = await getFirebaseDb();
+  const userRef = doc(firebaseDb, 'users', userId);
   
   await updateDoc(userRef, {
     cart: cartItems,
@@ -759,7 +840,8 @@ export async function updateUserCart(userId: string, cartItems: any[]) {
 }
 
 export async function getUserCart(userId: string) {
-  const userRef = doc(db, 'users', userId);
+  const firebaseDb = await getFirebaseDb();
+  const userRef = doc(firebaseDb, 'users', userId);
   const userDoc = await getDoc(userRef);
   
   if (!userDoc.exists()) {
@@ -770,7 +852,8 @@ export async function getUserCart(userId: string) {
 }
 
 export async function clearUserCart(userId: string) {
-  const userRef = doc(db, 'users', userId);
+  const firebaseDb = await getFirebaseDb();
+  const userRef = doc(firebaseDb, 'users', userId);
   
   await updateDoc(userRef, {
     cart: [],
@@ -793,7 +876,8 @@ export interface NotificationHistory {
 }
 
 export async function getNotificationHistory() {
-  const q = query(collection(db, 'notifications'), orderBy('sentAt', 'desc'));
+  const firebaseDb = await getFirebaseDb();
+  const q = query(collection(firebaseDb, 'notifications'), orderBy('sentAt', 'desc'));
   const snapshot = await getDocs(q);
   return snapshot.docs.map(doc => ({
     id: doc.id,
@@ -802,7 +886,8 @@ export async function getNotificationHistory() {
 }
 
 export async function addNotification(notification: Omit<NotificationHistory, 'id' | 'sentAt'> & { sentAt?: string }) {
-  const notifRef = collection(db, 'notifications');
+  const firebaseDb = await getFirebaseDb();
+  const notifRef = collection(firebaseDb, 'notifications');
   const docRef = await addDoc(notifRef, {
     ...notification,
     sentAt: notification.sentAt || new Date().toISOString(),
@@ -828,7 +913,8 @@ export interface Campaign {
 }
 
 export async function getCampaigns() {
-  const q = query(collection(db, 'campaigns'), orderBy('createdAt', 'desc'));
+  const firebaseDb = await getFirebaseDb();
+  const q = query(collection(firebaseDb, 'campaigns'), orderBy('createdAt', 'desc'));
   const snapshot = await getDocs(q);
   return snapshot.docs.map(doc => ({
     id: doc.id,
@@ -837,7 +923,8 @@ export async function getCampaigns() {
 }
 
 export async function addCampaign(campaign: Omit<Campaign, 'id' | 'deliveredCount' | 'interactionCount'>) {
-  const campaignRef = collection(db, 'campaigns');
+  const firebaseDb = await getFirebaseDb();
+  const campaignRef = collection(firebaseDb, 'campaigns');
   const docRef = await addDoc(campaignRef, {
     ...campaign,
     deliveredCount: 0,
@@ -863,7 +950,13 @@ export interface GamificationConfig {
 
 export async function getGamificationConfig(): Promise<GamificationConfig> {
   try {
-    const configRef = doc(db, 'settings', 'gamification');
+    // Use the module-level db variable directly, don't re-import
+    const firebaseDb = db;
+    if (!firebaseDb) {
+      console.warn('Firebase Firestore not initialized - using defaults');
+      throw new Error('Firebase not initialized');
+    }
+    const configRef = doc(firebaseDb, 'settings', 'gamification');
     const configDoc = await getDoc(configRef);
     
     if (configDoc.exists()) {
@@ -873,7 +966,7 @@ export async function getGamificationConfig(): Promise<GamificationConfig> {
     console.error('Error loading gamification config:', error);
   }
 
-  // Return default if not found
+  // Return default if not found or Firebase not initialized
   return {
     pointsPerRupee: 1,
     firstTimeBonusPoints: 100,
@@ -887,8 +980,19 @@ export async function getGamificationConfig(): Promise<GamificationConfig> {
 }
 
 export async function updateGamificationConfig(config: GamificationConfig) {
-  const configRef = doc(db, 'settings', 'gamification');
-  await setDoc(configRef, config);
+  try {
+    // Use the module-level db variable directly, don't re-import
+    const firebaseDb = db;
+    if (!firebaseDb) {
+      console.warn('Firebase Firestore not initialized');
+      throw new Error('Firebase not initialized');
+    }
+    const configRef = doc(firebaseDb, 'settings', 'gamification');
+    await setDoc(configRef, config);
+  } catch (error) {
+    console.error('Failed to save gamification config to Firebase:', error);
+    throw error;
+  }
 }
 
 // ============================================
@@ -900,7 +1004,8 @@ export async function updateGamificationConfig(config: GamificationConfig) {
  */
 export async function getProducts() {
   try {
-    const q = query(collection(db, 'products'));
+    const firebaseDb = await getFirebaseDb();
+    const q = query(collection(firebaseDb, 'products'));
     const snapshot = await getDocs(q);
     return snapshot.docs.map(doc => ({
       id: doc.id,
@@ -917,7 +1022,8 @@ export async function getProducts() {
  */
 export async function getProductById(id: string) {
   try {
-    const docRef = doc(db, 'products', id);
+    const firebaseDb = await getFirebaseDb();
+    const docRef = doc(firebaseDb, 'products', id);
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
       return { id: docSnap.id, ...docSnap.data() };
@@ -934,7 +1040,8 @@ export async function getProductById(id: string) {
  */
 export async function getEvents() {
   try {
-    const q = query(collection(db, 'events'), orderBy('date', 'asc'));
+    const firebaseDb = await getFirebaseDb();
+    const q = query(collection(firebaseDb, 'events'), orderBy('date', 'asc'));
     const snapshot = await getDocs(q);
     return snapshot.docs.map(doc => ({
       id: doc.id,
@@ -951,7 +1058,8 @@ export async function getEvents() {
  */
 export async function getEventById(id: string) {
   try {
-    const docRef = doc(db, 'events', id);
+    const firebaseDb = await getFirebaseDb();
+    const docRef = doc(firebaseDb, 'events', id);
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
       return { id: docSnap.id, ...docSnap.data() };
@@ -968,7 +1076,8 @@ export async function getEventById(id: string) {
  */
 export async function getGames() {
   try {
-    const q = query(collection(db, 'games'));
+    const firebaseDb = await getFirebaseDb();
+    const q = query(collection(firebaseDb, 'games'));
     const snapshot = await getDocs(q);
     return snapshot.docs.map(doc => ({
       id: doc.id,
@@ -985,7 +1094,8 @@ export async function getGames() {
  */
 export async function getExperiences() {
   try {
-    const q = query(collection(db, 'experiences'));
+    const firebaseDb = await getFirebaseDb();
+    const q = query(collection(firebaseDb, 'experiences'));
     const snapshot = await getDocs(q);
     return snapshot.docs.map(doc => ({
       id: doc.id,
@@ -1075,6 +1185,11 @@ export async function getBlogPostById(id: string) {
  */
 export async function handleGoogleSignInRedirect() {
   try {
+    if (!auth) {
+      console.warn('Firebase auth not initialized, skipping Google redirect result check');
+      return null;
+    }
+    
     const result = await getRedirectResult(auth);
     
     if (result) {

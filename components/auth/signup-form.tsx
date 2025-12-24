@@ -4,8 +4,6 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Eye, EyeOff, Mail, Lock, User, Loader2 } from 'lucide-react';
-import { createUser, signInWithGoogle, auth } from '@/lib/firebase';
-import { sendEmailVerification } from 'firebase/auth';
 import { USER_ROLES } from '@/lib/roles';
 import { useCart } from '@/app/context/CartContext';
 
@@ -47,6 +45,10 @@ export function SignupForm() {
     }
 
     try {
+      // Lazy load Firebase
+      const { createUser, auth } = await import('@/lib/firebase');
+      const { sendEmailVerification } = await import('firebase/auth');
+
       // Create user in Firebase
       await createUser(email, password, {
         email: email,
@@ -60,7 +62,7 @@ export function SignupForm() {
       await mergeLocalCartWithFirebase();
 
       // Send verification email
-      if (auth.currentUser) {
+      if (auth && auth.currentUser) {
         const actionUrl = `${window.location.origin}/auth/action`;
 
         const actionCodeSettings = {
@@ -116,6 +118,9 @@ export function SignupForm() {
     setError(null);
 
     try {
+      // Lazy load Firebase
+      const { signInWithGoogle } = await import('@/lib/firebase');
+
       const userCredential = await signInWithGoogle();
 
       // If redirect is used instead of popup, the function returns null

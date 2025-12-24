@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Eye, EyeOff, Mail, Lock, Loader2 } from 'lucide-react';
-import { signIn, signInWithGoogle, getUserProfile } from '@/lib/firebase';
 import { useCart } from '@/app/context/CartContext';
 
 export function LoginForm() {
@@ -28,6 +27,9 @@ export function LoginForm() {
     setError(null);
 
     try {
+      // Lazy load Firebase
+      const { signIn, getUserProfile } = await import('@/lib/firebase');
+
       const userCredential = await signIn(email, password);
       const user = userCredential.user;
 
@@ -57,8 +59,8 @@ export function LoginForm() {
       // Determine redirect destination
       let finalRedirect = redirectUrl;
       
-      // If checkout intent is set, redirect to checkout
-      if (hasCheckoutIntent) {
+      // If checkout intent is set AND no explicit redirect URL, redirect to checkout
+      if (hasCheckoutIntent && redirectUrl === '/') {
         finalRedirect = '/checkout';
       }
       
@@ -95,6 +97,9 @@ export function LoginForm() {
     setError(null);
 
     try {
+      // Lazy load Firebase
+      const { signInWithGoogle, getUserProfile } = await import('@/lib/firebase');
+
       const userCredential = await signInWithGoogle();
 
       // If redirect is used instead of popup, the function returns null
@@ -118,8 +123,8 @@ export function LoginForm() {
         // Determine redirect destination
         let finalRedirect = redirectUrl;
         
-        // If checkout intent is set, redirect to checkout
-        if (hasCheckoutIntent) {
+        // If checkout intent is set AND no explicit redirect URL, redirect to checkout
+        if (hasCheckoutIntent && redirectUrl === '/') {
           finalRedirect = '/checkout';
         }
         

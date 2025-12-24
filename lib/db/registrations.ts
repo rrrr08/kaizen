@@ -1,4 +1,3 @@
-import { db } from "@/lib/firebase";
 import {
   collection,
   addDoc,
@@ -10,12 +9,14 @@ import {
   increment,
   serverTimestamp,
 } from "firebase/firestore";
-
-export const registrationsCollection = collection(db, 'event_registrations');
-export const eventsCollection = collection(db, 'events');
+import { getFirebaseDb } from "@/lib/firebase";
 
 export async function registerForEvent(eventId: string, userId: string) {
   try {
+    const database = await getFirebaseDb();
+    const registrationsCollection = collection(database, 'event_registrations');
+    const eventsCollection = collection(database, 'events');
+    
     // Check if user is already registered
     const existingReg = query(
       registrationsCollection,
@@ -34,31 +35,13 @@ export async function registerForEvent(eventId: string, userId: string) {
       };
     }
 
-    // Get event details
-    const eventRef = doc(db, 'events', eventId);
-    const eventSnap = await (async () => {
-      const snap = await getDocs(
-        query(eventsCollection, where(doc(db, 'events', eventId).path.split('/')[1], '==', eventId))
-      );
-      return snap.docs[0];
-    })().catch(async () => {
-      const snap = await getDocs(eventsCollection);
-      return snap.docs.find((d: any) => d.id === eventId);
-    });
-
-    // Simpler approach - just get the event doc directly
-    const eventDoc = await (async () => {
-      try {
-        const docRef = doc(db, 'events', eventId);
-        const snap = await getDocs(
-          query(collection(db, 'events'), where('__name__', '==', eventId))
-        );
-        if (!snap.empty) return snap.docs[0].data();
-        return null;
-      } catch {
-        return null;
-      }
-    })();
+    // Get event details - simpler approach
+    const eventDoc = await getDocs(
+      query(eventsCollection, where('__name__', '==', eventId))
+    ).then(snap => {
+      if (!snap.empty) return snap.docs[0].data();
+      return null;
+    }).catch(() => null);
 
     // Check capacity - determine if waitlisted
     const registrationCount = await getDocs(
@@ -86,7 +69,7 @@ export async function registerForEvent(eventId: string, userId: string) {
     // Update event registered count if not waitlisted
     if (!waitlisted) {
       try {
-        await updateDoc(doc(db, 'events', eventId), {
+        await updateDoc(doc(database, 'events', eventId), {
           registered: increment(1),
         });
       } catch (error) {
@@ -110,6 +93,8 @@ export async function registerForEvent(eventId: string, userId: string) {
 
 export async function getEventRegistrations(eventId: string) {
   try {
+    const database = await getFirebaseDb();
+    const registrationsCollection = collection(database, 'event_registrations');
     const q = query(
       registrationsCollection,
       where('eventId', '==', eventId)
@@ -131,6 +116,8 @@ export async function getEventRegistrations(eventId: string) {
 
 export async function getUserEventRegistrations(userId: string) {
   try {
+    const database = await getFirebaseDb();
+    const registrationsCollection = collection(database, 'event_registrations');
     const q = query(
       registrationsCollection,
       where('userId', '==', userId)
@@ -152,14 +139,15 @@ export async function getUserEventRegistrations(userId: string) {
 
 export async function cancelRegistration(registrationId: string, eventId: string) {
   try {
-    await updateDoc(doc(db, 'event_registrations', registrationId), {
+    const database = await getFirebaseDb();
+    await updateDoc(doc(database, 'event_registrations', registrationId), {
       status: 'cancelled',
       updatedAt: serverTimestamp(),
     });
 
     // Decrement event registered count
     try {
-      await updateDoc(doc(db, 'events', eventId), {
+      await updateDoc(doc(database, 'events', eventId), {
         registered: increment(-1),
       });
     } catch (error) {

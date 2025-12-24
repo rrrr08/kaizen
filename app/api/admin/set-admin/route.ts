@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { adminDb, adminAuth } from '@/app/api/auth/firebase-admin';
 
 /**
  * Development endpoint to promote a user to admin
@@ -7,6 +6,7 @@ import { adminDb, adminAuth } from '@/app/api/auth/firebase-admin';
  */
 export async function POST(request: NextRequest) {
   try {
+    const { adminDb, adminAuth } = await import('@/app/api/auth/firebase-admin');
     const { email } = await request.json();
 
     if (!email) {

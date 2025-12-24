@@ -4,8 +4,8 @@ import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { CheckCircle } from 'lucide-react';
-import { auth } from '@/lib/firebase';
-import { getOrderById } from '@/lib/firebase';
+
+export const dynamic = 'force-dynamic';
 
 interface Order {
   id: string;
@@ -24,6 +24,7 @@ export default function OrderConfirmationPage() {
   useEffect(() => {
     const loadOrder = async () => {
       try {
+        const { getOrderById } = await import('@/lib/firebase');
         const orderId = params.id as string;
         
         // Load from Firebase only

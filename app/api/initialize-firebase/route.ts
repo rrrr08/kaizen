@@ -1,8 +1,8 @@
-import { initializeFirebaseData } from '@/lib/initializeFirebaseData';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
   try {
+    const { initializeFirebaseData } = await import('@/lib/initializeFirebaseData');
     const result = await initializeFirebaseData();
     return NextResponse.json(result, { status: 200 });
   } catch (error) {
@@ -19,6 +19,7 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
+    const { initializeFirebaseData } = await import('@/lib/initializeFirebaseData');
     const result = await initializeFirebaseData();
     return NextResponse.json(result, { status: 200 });
   } catch (error) {

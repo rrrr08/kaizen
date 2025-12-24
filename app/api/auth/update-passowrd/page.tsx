@@ -2,10 +2,10 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { auth } from "@/lib/firebase";
-import { confirmPasswordReset, verifyPasswordResetCode } from "firebase/auth";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
+
+export const dynamic = 'force-dynamic';
 
 function UpdatePasswordPageContent() {
     const router = useRouter();
@@ -24,17 +24,23 @@ function UpdatePasswordPageContent() {
         if (oobCode) {
             setActionCode(oobCode);
             setVerifyingCode(true);
-            verifyPasswordResetCode(auth, oobCode)
-                .then((email) => {
-                    setMessage(`Updating password for ${email}. Please enter your new password.`);
-                    setVerifiedActionCode(true);
-                })
-                .catch((err) => {
-                    const firebaseError = err as { message: string };
-                    setError(firebaseError.message || "Invalid or expired password reset link. Please try resetting your password again.");
-                }).finally(() => {
-                    setVerifyingCode(false);
-                });
+            
+            // Lazy load Firebase
+            import('@/lib/firebase').then(({ auth }) => {
+              import('firebase/auth').then(({ verifyPasswordResetCode }) => {
+                verifyPasswordResetCode(auth, oobCode)
+                    .then((email) => {
+                        setMessage(`Updating password for ${email}. Please enter your new password.`);
+                        setVerifiedActionCode(true);
+                    })
+                    .catch((err) => {
+                        const firebaseError = err as { message: string };
+                        setError(firebaseError.message || "Invalid or expired password reset link. Please try resetting your password again.");
+                    }).finally(() => {
+                        setVerifyingCode(false);
+                    });
+              });
+            });
         } else {
             setError("No password reset code provided. Please use the link from your email.");
             setVerifyingCode(false);
@@ -64,6 +70,10 @@ function UpdatePasswordPageContent() {
         setMessage(null);
 
         try {
+            // Lazy load Firebase
+            const { auth } = await import('@/lib/firebase');
+            const { confirmPasswordReset } = await import('firebase/auth');
+            
             await confirmPasswordReset(auth, actionCode, password);
             setMessage("Password updated successfully. You can now log in with your new password.");
             setTimeout(() => {

@@ -1,4 +1,3 @@
-import { db } from "@/lib/firebase";
 import {
   collection,
   addDoc,
@@ -10,10 +9,7 @@ import {
   increment,
   serverTimestamp,
 } from "firebase/firestore";
-
-export const registrationsCollection = collection(db, 'event_registrations');
-export const eventsCollection = collection(db, 'events');
-export const walletsCollection = collection(db, 'wallets');
+import { getFirebaseDb } from "@/lib/firebase";
 
 export async function createPaymentOrder(
   eventId: string,
@@ -22,6 +18,7 @@ export async function createPaymentOrder(
   walletPointsUsed: number = 0
 ) {
   try {
+    const firebaseDb = await getFirebaseDb();
     // Create payment order record in Firestore (for tracking)
     const orderData = {
       eventId,
@@ -33,7 +30,7 @@ export async function createPaymentOrder(
       updatedAt: serverTimestamp(),
     };
 
-    const orderRef = await addDoc(collection(db, 'payment_orders'), orderData);
+    const orderRef = await addDoc(collection(firebaseDb, 'payment_orders'), orderData);
 
     return {
       success: true,
@@ -55,9 +52,17 @@ export async function completeRegistration(
   walletPointsUsed: number = 0
 ) {
   try {
+    // Initialize Firebase Firestore first
+    const firebaseDb = await getFirebaseDb();
+    
+    // Create collection references using returned db
+    const registrations = collection(firebaseDb, 'event_registrations');
+    const events = collection(firebaseDb, 'events');
+    const wallets = collection(firebaseDb, 'wallets');
+    
     // Check if already registered
     const existingReg = query(
-      registrationsCollection,
+      registrations,
       where('eventId', '==', eventId),
       where('userId', '==', userId)
     );
@@ -74,13 +79,13 @@ export async function completeRegistration(
     }
 
     // Get event capacity info
-    const eventDocs = await getDocs(eventsCollection);
+    const eventDocs = await getDocs(events);
     const eventDoc = eventDocs.docs.find((d: any) => d.id === eventId);
-    const capacity = eventDoc?.data()?.capacity || 50;
+    const capacity = (eventDoc?.data() as any)?.capacity || 50;
 
     // Check if waitlisted
     const registrationCount = await getDocs(
-      query(registrationsCollection, where('eventId', '==', eventId), where('status', '==', 'registered'))
+      query(registrations, where('eventId', '==', eventId), where('status', '==', 'registered'))
     );
 
     const waitlisted = registrationCount.size >= capacity;
@@ -97,10 +102,10 @@ export async function completeRegistration(
       updatedAt: serverTimestamp(),
     };
 
-    const regRef = await addDoc(registrationsCollection, registrationData);
+    const regRef = await addDoc(registrations, registrationData);
 
     // Update payment order status
-    await updateDoc(doc(db, 'payment_orders', orderId), {
+    await updateDoc(doc(firebaseDb, 'payment_orders', orderId), {
       status: 'completed',
       registrationId: regRef.id,
       updatedAt: serverTimestamp(),
@@ -110,7 +115,7 @@ export async function completeRegistration(
     if (walletPointsUsed > 0) {
       try {
         const walletSnap = await getDocs(
-          query(walletsCollection, where('userId', '==', userId))
+          query(wallets, where('userId', '==', userId))
         );
         if (!walletSnap.empty) {
           const walletRef = walletSnap.docs[0].ref;
@@ -127,7 +132,7 @@ export async function completeRegistration(
     // Update event registered count if not waitlisted
     if (!waitlisted) {
       try {
-        await updateDoc(doc(db, 'events', eventId), {
+        await updateDoc(doc(firebaseDb, 'events', eventId), {
           registered: increment(1),
           updatedAt: serverTimestamp(),
         });
@@ -152,8 +157,11 @@ export async function completeRegistration(
 
 export async function getUserWallet(userId: string) {
   try {
+    const firebaseDb = await getFirebaseDb();
+    const wallets = collection(firebaseDb, 'wallets');
+    
     const walletSnap = await getDocs(
-      query(walletsCollection, where('userId', '==', userId))
+      query(wallets, where('userId', '==', userId))
     );
 
     if (walletSnap.empty) {

@@ -7,8 +7,8 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
-import { auth } from '@/lib/firebase';
-import { createOrder, updateUserWallet, addPointHistory, clearUserCart } from '@/lib/firebase';
+
+export const dynamic = 'force-dynamic';
 
 // Extend window type for Razorpay
 declare global {
@@ -64,14 +64,16 @@ export default function CheckoutPage() {
   useEffect(() => {
     const loadWalletData = async () => {
       try {
-        const currentUser = auth.currentUser;
+        // Lazy load Firebase
+        const { auth } = await import('@/lib/firebase');
         
-        if (!currentUser) {
+        if (!auth || !auth.currentUser) {
           console.error('User not authenticated');
           setWalletPoints(0);
           setIsFirstTime(true);
           return;
         }
+        const currentUser = auth.currentUser;
 
         const { getUserWallet } = await import('@/lib/firebase');
         const firebaseWallet = await getUserWallet(currentUser.uid);
@@ -162,6 +164,29 @@ export default function CheckoutPage() {
     setIsProcessing(true);
 
     try {
+      // Validate amount is reasonable (max 1 crore rupees = 10,000,000)
+      const MAX_RAZORPAY_AMOUNT = 10000000;
+      
+      if (finalPrice > MAX_RAZORPAY_AMOUNT) {
+        addToast({
+          title: 'Order Amount Too Large',
+          description: `Order amount (₹${finalPrice.toFixed(2)}) exceeds maximum allowed. Please review your cart.`,
+          variant: 'destructive',
+        });
+        setIsProcessing(false);
+        return;
+      }
+      
+      if (finalPrice <= 0) {
+        addToast({
+          title: 'Invalid Order Amount',
+          description: 'Order amount must be greater than 0.',
+          variant: 'destructive',
+        });
+        setIsProcessing(false);
+        return;
+      }
+
       // Create order in our system and get Razorpay order ID
       const receiptId = `RCP-${Date.now()}`;
       const response = await fetch('/api/payments/create-order', {
@@ -213,11 +238,17 @@ export default function CheckoutPage() {
             }),
           });
 
+          const verifyData = await verifyResponse.json();
+          console.log('Verify response:', { status: verifyResponse.status, data: verifyData });
+
           if (!verifyResponse.ok) {
-            throw new Error('Payment verification failed');
+            console.error('Payment verification failed:', verifyData);
+            throw new Error(verifyData.error || 'Payment verification failed');
           }
 
           // Get current user
+          // Lazy load Firebase
+          const { auth, createOrder, updateUserWallet, addPointHistory, clearUserCart } = await import('@/lib/firebase');
           const currentUser = auth.currentUser;
           if (!currentUser) {
             throw new Error('User not authenticated');
@@ -296,13 +327,21 @@ export default function CheckoutPage() {
         },
       };
 
-      // Open Razorpay checkout
-      if (window.Razorpay) {
-        const razorpay = new (window as any).Razorpay(RazorpayOptions);
-        razorpay.open();
-      } else {
-        throw new Error('Razorpay not loaded');
-      }
+      // Wait for Razorpay script to load
+      let attempts = 0;
+      const waitForRazorpay = () => {
+        if (window.Razorpay) {
+          const razorpay = new (window as any).Razorpay(RazorpayOptions);
+          razorpay.open();
+        } else if (attempts < 10) {
+          attempts++;
+          setTimeout(waitForRazorpay, 300);
+        } else {
+          throw new Error('Razorpay script failed to load. Please refresh the page and try again.');
+        }
+      };
+
+      waitForRazorpay();
     } catch (error) {
       console.error('Payment error:', error);
       let errorMessage = 'Something went wrong. Please try again.';

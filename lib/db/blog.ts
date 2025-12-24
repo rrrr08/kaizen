@@ -1,4 +1,3 @@
-import { db } from "@/lib/firebase";
 import {
   collection,
   query,
@@ -8,11 +7,12 @@ import {
   getDoc,
   doc,
 } from "firebase/firestore";
-
-export const blogCollection = collection(db, 'blog_posts');
+import { getFirebaseDb } from "@/lib/firebase";
 
 export async function getBlogPosts(filter?: { category?: string; includeUnpublished?: boolean }) {
   try {
+    const database = await getFirebaseDb();
+    const blogCollection = collection(database, 'blog_posts');
     let q: any;
     
     const includeUnpublished = !!filter?.includeUnpublished;
@@ -104,7 +104,8 @@ function getMockBlogPosts(filter?: { category?: string }) {
 
 export async function getBlogPostById(postId: string) {
   try {
-    const ref = doc(db, "blog_posts", postId);
+    const database = await getFirebaseDb();
+    const ref = doc(database, "blog_posts", postId);
     const snap = await getDoc(ref);
 
     if (!snap.exists()) {

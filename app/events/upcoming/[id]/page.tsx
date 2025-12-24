@@ -5,9 +5,9 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { GameEvent } from '@/lib/types';
 import { splitDateTime } from '@/lib/utils';
-import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
 import EventRegistrationForm from '@/components/EventRegistrationForm';
+
+export const dynamic = 'force-dynamic';
 
 export default function UpcomingEventDetail() {
   const { id } = useParams<{ id: string }>();
@@ -19,11 +19,16 @@ export default function UpcomingEventDetail() {
   const [showRegistrationForm, setShowRegistrationForm] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-    });
+    (async () => {
+      const { auth } = await import('@/lib/firebase');
+      const { onAuthStateChanged } = await import('firebase/auth');
+      
+      const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+        setUser(currentUser);
+      });
 
-    return () => unsubscribe();
+      return () => unsubscribe();
+    })();
   }, []);
 
   useEffect(() => {
