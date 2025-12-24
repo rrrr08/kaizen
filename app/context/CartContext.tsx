@@ -112,10 +112,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   // Save cart to Firebase when user is authenticated, or localStorage when not
   useEffect(() => {
-    if (!mounted || pendingSync) return;
+    if (!mounted) return;
 
-    setPendingSync(true);
     const timer = setTimeout(async () => {
+      if (pendingSync) return; // Skip if already syncing
+      
+      setPendingSync(true);
       try {
         if (user?.uid) {
           // User authenticated - save to Firebase
@@ -137,7 +139,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }, 500); // Debounce by 500ms
 
     return () => clearTimeout(timer);
-  }, [items, mounted, user?.uid, pendingSync]);
+  }, [items, mounted, user?.uid]);
 
   const getLocalCart = (): CartItem[] => {
     if (typeof window === 'undefined') return [];
