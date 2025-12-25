@@ -3,21 +3,22 @@
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { auth } from "@/lib/firebase";
-import { onAuthStateChanged, sendEmailVerification } from "firebase/auth";
 import { Loader2 } from "lucide-react";
+
+export const dynamic = 'force-dynamic';
 
 function VerifyPageContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const emailFromQuery = searchParams.get("email") || "";
-    const redirectTo = searchParams.get("redirectTo") || "/";
+    const redirectUrl = searchParams.get("redirect") || searchParams.get("redirectTo") || "/";
 
     const [error, setError] = useState<string | null>(null);
     const [message, setMessage] = useState<string | null>(null);
     const [resending, setResending] = useState<boolean>(false);
     const [sessionChecking, setSessionChecking] = useState<boolean>(true);
     const [currentUserEmail, setCurrentUserEmail] = useState<string | null>(null);
+    const [emailVerified, setEmailVerified] = useState<boolean>(false);
 
     useEffect(() => {
         // Get all URL parameters
@@ -32,32 +33,43 @@ function VerifyPageContent() {
     }, [router]);
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
-            setSessionChecking(true);
-            if (user) {
-                setCurrentUserEmail(user.email);
-                if (user.emailVerified) {
-                    setMessage("Your email is already verified! Redirecting...");
-                    setTimeout(() => {
-                        router.push(redirectTo || '/');
-                    }, 2000);
+        // Lazy load Firebase
+        import('@/lib/firebase').then(({ auth }) => {
+          import('firebase/auth').then(({ onAuthStateChanged }) => {
+            const unsubscribe = onAuthStateChanged(auth, (user) => {
+                setSessionChecking(true);
+                if (user) {
+                    setCurrentUserEmail(user.email);
+                    setEmailVerified(user.emailVerified);
+                    if (user.emailVerified) {
+                        setMessage("Your email is already verified! Redirecting...");
+                        setTimeout(() => {
+                            router.push(decodeURIComponent(redirectUrl) || '/');
+                        }, 2000);
+                    } else {
+                        setMessage("Please verify your email. If you received a code, enter it below, or request a new verification email.");
+                    }
                 } else {
-                    setMessage("Please verify your email. If you received a code, enter it below, or request a new verification email.");
+                    setCurrentUserEmail(null);
+                    setEmailVerified(false);
+                    if (!emailFromQuery) {
+                        setError("No user session found. Please log in or ensure you have an email in the link to verify.");
+                    } else {
+                        setMessage(`Attempting to verify for ${emailFromQuery}. If you received a code, enter it below.`);
+                    }
                 }
-            } else {
-                setCurrentUserEmail(null);
-                if (!emailFromQuery) {
-                    setError("No user session found. Please log in or ensure you have an email in the link to verify.");
-                } else {
-                    setMessage(`Attempting to verify for ${emailFromQuery}. If you received a code, enter it below.`);
-                }
-            }
-            setSessionChecking(false);
+                setSessionChecking(false);
+            });
+            return () => unsubscribe();
+          });
         });
-        return () => unsubscribe();
-    }, [router, redirectTo, emailFromQuery]);
+    }, [router, redirectUrl, emailFromQuery]);
 
     const handleResendOTP = async () => {
+        // Lazy load Firebase
+        const { auth } = await import('@/lib/firebase');
+        const { sendEmailVerification } = await import('firebase/auth');
+        
         const targetEmail = auth.currentUser?.email || emailFromQuery;
         if (!targetEmail) {
             setError("Email is required to resend verification link.");
@@ -119,7 +131,7 @@ function VerifyPageContent() {
                     </div>
                 )}
 
-                {auth.currentUser && !auth.currentUser.emailVerified && (
+                {currentUserEmail && !emailVerified && (
                     <div className="mt-6 text-center text-sm text-gray-500">
                         <p>
                             Didn&apos;t receive a verification email?{" "}

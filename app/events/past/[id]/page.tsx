@@ -119,7 +119,7 @@ export default function EventDetail() {
                 <div className="space-y-6">
                   {event.testimonials.map((t, i) => (
                     <blockquote key={i} className="border-l-2 border-amber-500 pl-6 text-white/70 font-serif italic">
-                      “{t.quote}”
+                      "{t.quote}"
                       <footer className="mt-2 text-white/40 text-sm not-italic">
                         — {t.name}{t.role ? `, ${t.role}` : ''}
                       </footer>

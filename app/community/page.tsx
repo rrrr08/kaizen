@@ -1,18 +1,77 @@
 'use client';
 
-import { TESTIMONIALS, GAMES, EVENTS } from '@/lib/constants';
+import { TESTIMONIALS, GAMES } from '@/lib/constants';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function Community() {
+  const [events, setEvents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [eventFilter, setEventFilter] = useState('All');
 
+  useEffect(() => {
+    fetchEvents();
+  }, []);
+
+  const fetchEvents = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await fetch('/api/events/upcoming');
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch events: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (data.success) {
+        setEvents(data.events);
+      } else {
+        setError(data.error || 'Failed to load events');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to load events');
+      console.error('Error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
   const filteredEvents = eventFilter === 'All'
-    ? EVENTS
-    : EVENTS.filter(e => e.price === 0 ? eventFilter === 'Free' : eventFilter === 'Paid');
+    ? events
+    : events.filter(e => e.price === 0 ? eventFilter === 'Free' : eventFilter === 'Paid');
+
+  if (loading) {
+    return (
+      <div className="min-h-screen pt-28 pb-16 flex items-center justify-center">
+        <div className="text-amber-500 font-header tracking-[0.3em] animate-pulse">
+          LOADING COMMUNITY...
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen pt-28 pb-16 flex flex-col items-center justify-center gap-4">
+        <div className="text-red-500 font-header tracking-widest text-center">
+          {error}
+        </div>
+        <button 
+          onClick={fetchEvents}
+          className="px-6 py-2 border border-amber-500 text-amber-500 hover:bg-amber-500/10 transition-all"
+        >
+          TRY AGAIN
+        </button>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen pt-28 pb-16">
+    <div className="min-h-screen pt-32 pb-16 bg-black text-white selection:bg-amber-500/30">
       <div className="max-w-7xl mx-auto px-6 md:px-12">
         {/* Header */}
         <div className="mb-20 border-b border-white/5 pb-12">
@@ -45,7 +104,6 @@ export default function Community() {
               ))}
             </div>
           </div>
-
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
             {filteredEvents.map(event => (
               <Link key={event.id} href={`/events/${event.id}`}>
@@ -58,7 +116,6 @@ export default function Community() {
                       className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
                     />
                   </div>
-
                   {/* Event Info */}
                   <div className="space-y-4">
                     <div>
@@ -72,7 +129,6 @@ export default function Community() {
                         {event.description}
                       </p>
                     </div>
-
                     <div className="flex items-center justify-between pt-4 border-t border-white/5">
                       <div className="text-white/40 text-xs font-serif">{event.location}</div>
                       <div>
@@ -95,7 +151,6 @@ export default function Community() {
             </div>
           )}
         </section>
-
 
         {/* --- DIGITAL COMMUNITY SECTION --- */}
         <section className="mb-32">
@@ -171,8 +226,8 @@ export default function Community() {
                     className="w-12 h-12 rounded-full grayscale"
                   />
                   <div>
-                    <p className="font-header text-[9px] tracking-[0.3em] text-amber-500">{testimonial.author.toUpperCase()}</p>
-                    <p className="text-white/40 font-serif text-xs">{testimonial.occasion}</p>
+                    <p className="font-header text-sm">{testimonial.author}</p>
+                    <p className="text-white/50 text-xs font-serif italic">{testimonial.occasion}</p>
                   </div>
                 </div>
               </div>
@@ -180,9 +235,9 @@ export default function Community() {
           </div>
         </div>
 
-        {/* CTA Section */}
+        {/* Final CTA */}
         <div className="text-center py-16 border-t border-white/10">
-          <h2 className="font-header text-4xl md:text-5xl mb-6">Ready to Join?</h2>
+          <h2 className="font-header text-3xl md:text-4xl mb-6">Ready to Join?</h2>
           <p className="text-white/60 font-serif italic text-lg mb-8 max-w-2xl mx-auto">
             Create your account and start earning points, engaging with the community, and discovering endless joy.
           </p>
@@ -197,7 +252,7 @@ export default function Community() {
               href="/play"
               className="px-8 py-4 border border-amber-500 text-amber-500 font-header text-[10px] tracking-[0.4em] hover:bg-amber-500/10 transition-all rounded-sm"
             >
-              EXPLORE GAMES
+              PLAY NOW
             </Link>
           </div>
         </div>

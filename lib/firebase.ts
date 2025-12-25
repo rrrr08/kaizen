@@ -6,8 +6,12 @@ import {
   signOut,
   GoogleAuthProvider,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   onAuthStateChanged,
   sendEmailVerification,
+  setPersistence,
+  browserLocalPersistence,
 } from "firebase/auth";
 
 import {
@@ -59,19 +63,59 @@ if (process.env.NODE_ENV !== 'production') {
   });
 }
 
-if (!firebaseConfig.apiKey) {
-  throw new Error('Firebase API key is missing');
+// Initialize Firebase app - only throws if trying to actually use it without proper config
+let app: any;
+try {
+  if (!firebaseConfig.apiKey) {
+    throw new Error('Firebase API key is missing');
+  }
+  app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+} catch (error) {
+  if (typeof window !== 'undefined') {
+    // Client-side: defer the error to when Firebase is actually used
+    console.warn('Firebase initialization deferred:', error);
+    app = null;
+  } else {
+    // Server-side: allow error to propagate
+    throw error;
+  }
 }
 
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-const auth = getAuth(app);
-const db = getFirestore(app);
-const storage = getStorage(app);
+const auth = app ? getAuth(app) : (null as any);
+const db = app ? getFirestore(app) : (null as any);
+const storage = app ? getStorage(app) : (null as any);
 const googleProvider = new GoogleAuthProvider();
+
+// Enable persistence (LOCAL is default, but let's make it explicit)
+if (auth) {
+  setPersistence(auth, browserLocalPersistence).catch((error) => {
+    console.error('Error setting persistence:', error);
+  });
+}
+
+// Helper function to check Firebase initialization
+function ensureFirebaseInit() {
+  if (!app || !auth || !db) {
+    throw new Error('Firebase is not initialized. Please ensure NEXT_PUBLIC_FIREBASE_API_KEY is set.');
+  }
+}
+
+// Helper to get initialized Firestore instance
+export async function getFirebaseDb() {
+  if (db) return db;
+  
+  const firebase = await import('@/lib/firebase');
+  if (firebase.db) return firebase.db;
+  
+  throw new Error('Firebase Firestore not initialized');
+}
 
 // ProfileUpdateData interface removed for JavaScript conversion
 
 export const createUser = async (email: string, password: string, userData: UserProfile) => {
+  if (!auth) {
+    throw new Error('Firebase authentication is not initialized');
+  }
   const userCredential = await createUserWithEmailAndPassword(
     auth,
     email,
@@ -94,56 +138,107 @@ export const createUser = async (email: string, password: string, userData: User
 };
 
 export const signIn = async (email: string, password: string) => {
-  return signInWithEmailAndPassword(auth, email, password);
-};
+  if (!auth) {
+    throw new Error('Firebase authentication is not initialized');
+  }
+  const userCredential = await signInWithEmailAndPassword(auth, email, password);
+  const { user } = userCredential;
 
-export const signInWithGoogle = async () => {
-  try {
-    const userCredential = await signInWithPopup(auth, googleProvider);
-    const { user } = userCredential;
-    
-    // Important: Google provides a verified email by default, but we check anyway
-    if (user.email) {
+  // Ensure user profile exists in Firestore
+  if (user) {
+    try {
       const userExists = await checkUserExists(user.uid);
-      
-      // For brand new users, we need to create their profile
       if (!userExists) {
-        const profileData = {
-          email: user.email,
-          name: user.displayName || "",
-          first_name: user.displayName?.split(" ")[0] || "",
-          last_name: user.displayName?.split(" ").slice(1).join(" ") || "",
-          photoURL: user.photoURL,
-          avatar_url: user.photoURL, // Keep both for compatibility
+        // Create profile if it doesn't exist
+        const profileData: UserProfile = {
+          email: user.email || '',
+          name: user.displayName || user.email || 'User',
           role: "member",
-          likedBlogs: [],
-          activity: [],
-          blogCount: 0,
           created_at: serverTimestamp(),
           updated_at: serverTimestamp(),
           last_sign_in_at: serverTimestamp(),
         };
         await createUserProfile(user.uid, profileData);
-        
-        // For new Google users, redirect to onboarding
-        window.location.href = `/onboarding`;
-        return userCredential;
+      } else {
+        // Update last sign-in time
+        const userRef = doc(db, "users", user.uid);
+        await updateDoc(userRef, {
+          last_sign_in_at: serverTimestamp(),
+          updated_at: serverTimestamp()
+        });
       }
-      
-      // Update the user's last sign-in time
-      const userRef = doc(db, "users", user.uid);
-      await updateDoc(userRef, {
-        last_sign_in_at: serverTimestamp(),
-        updated_at: serverTimestamp()
-      });
+    } catch (error) {
+      console.error("Error syncing user profile on sign-in:", error);
+    }
+  }
+
+  return userCredential;
+};
+
+export const signInWithGoogle = async () => {
+  try {
+    if (!auth) {
+      throw new Error('Firebase authentication is not initialized');
     }
     
-    // For existing users, proceed to normal flow
-    const idToken = await user.getIdToken();
-    const redirectUrl = `/api/auth/callback?token=${idToken}`;
-    window.location.href = redirectUrl;
-    
-    return userCredential;
+    // Try popup first
+    try {
+      const userCredential = await signInWithPopup(auth, googleProvider);
+      const { user } = userCredential;
+      
+      // Important: Google provides a verified email by default, but we check anyway
+      if (user.email) {
+        const userExists = await checkUserExists(user.uid);
+        
+        // For brand new users, we need to create their profile
+        if (!userExists) {
+          const profileData = {
+            email: user.email,
+            name: user.displayName || "",
+            first_name: user.displayName?.split(" ")[0] || "",
+            last_name: user.displayName?.split(" ").slice(1).join(" ") || "",
+            photoURL: user.photoURL,
+            avatar_url: user.photoURL, // Keep both for compatibility
+            role: "member",
+            likedBlogs: [],
+            activity: [],
+            blogCount: 0,
+            created_at: serverTimestamp(),
+            updated_at: serverTimestamp(),
+            last_sign_in_at: serverTimestamp(),
+          };
+          await createUserProfile(user.uid, profileData);
+        } else {
+          // Update the user's last sign-in time
+          const userRef = doc(db, "users", user.uid);
+          await updateDoc(userRef, {
+            last_sign_in_at: serverTimestamp(),
+            updated_at: serverTimestamp()
+          });
+        }
+      }
+      
+      return userCredential;
+    } catch (popupError: any) {
+      // If popup is blocked, fallback to redirect-based auth
+      if (popupError.code === 'auth/popup-blocked') {
+        console.warn('Popup blocked, using redirect-based authentication instead');
+        
+        // Store the redirect path in sessionStorage to retrieve after auth
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem('authRedirectSource', 'google');
+        }
+        
+        // Use redirect instead
+        await signInWithRedirect(auth, googleProvider);
+        
+        // This won't return immediately as the page will redirect
+        return null;
+      }
+      
+      // Re-throw other errors
+      throw popupError;
+    }
   } catch (error) {
     console.error("Google sign-in error:", error);
     throw error;
@@ -151,6 +246,10 @@ export const signInWithGoogle = async () => {
 };
 
 export const logOut = async () => {
+  if (!auth) {
+    console.warn('Firebase auth not initialized, skipping logout');
+    return;
+  }
   await signOut(auth);
 
   try {
@@ -164,6 +263,9 @@ export const logOut = async () => {
 };
 
 export const createUserProfile = async (userId: string, data: UserProfile) => {
+  if (!db) {
+    throw new Error('Firebase database is not initialized');
+  }
   const userRef = doc(db, "users", userId);
 
   // Initialize with multiavatar if no photoURL provided
@@ -199,26 +301,44 @@ export const createUserProfile = async (userId: string, data: UserProfile) => {
 };
 
 export const checkUserExists = async (userId: string) => {
-  const userRef = doc(db, "users", userId);
-  const userSnap = await getDoc(userRef);
-  return userSnap.exists();
+  try {
+    if (!db) return false;
+    const userRef = doc(db, "users", userId);
+    const userSnap = await getDoc(userRef);
+    return userSnap.exists();
+  } catch (error) {
+    console.error('Error checking user exists:', error);
+    return false;
+  }
 };
 
 export const getUserProfile = async (userId: string): Promise<UserProfile | null> => {
-  const userRef = doc(db, "users", userId);
-  const userSnap = await getDoc(userRef);
+  try {
+    if (!db) {
+      console.warn('Firebase not initialized in getUserProfile');
+      return null;
+    }
+    const userRef = doc(db, "users", userId);
+    const userSnap = await getDoc(userRef);
 
-  if (userSnap.exists()) {
-    return userSnap.data() as UserProfile;
+    if (userSnap.exists()) {
+      return userSnap.data() as UserProfile;
+    }
+
+    return null;
+  } catch (error) {
+    console.error('Error getting user profile:', error);
+    return null;
   }
-
-  return null;
 };
 
 // Alias for getUserProfile for backward compatibility
 export const getUserById = getUserProfile;
 
 export const updateUserProfile = async (userId: string, data: Partial<UserProfile>) => {
+  if (!db) {
+    throw new Error('Firebase database is not initialized');
+  }
   const userRef = doc(db, "users", userId);
 
   const dataToUpdate = {
@@ -232,11 +352,23 @@ export const updateUserProfile = async (userId: string, data: Partial<UserProfil
 };
 
 export const checkUserIsAdmin = async (userId: string) => {
-  const profile = await getUserProfile(userId);
-  return profile?.role === "admin";
+  try {
+    const profile = await getUserProfile(userId);
+    console.log('[Firebase] checkUserIsAdmin - Profile:', {
+      uid: userId,
+      role: profile?.role,
+      email: profile?.email,
+      isAdmin: profile?.role === "admin"
+    });
+    return profile?.role === "admin";
+  } catch (error) {
+    console.error('[Firebase] Error in checkUserIsAdmin:', error);
+    return false;
+  }
 };
 
-if (typeof window !== "undefined") {
+// Set up auth state listener only if Firebase is initialized
+if (typeof window !== "undefined" && auth) {
   onAuthStateChanged(auth, async (user) => {
     if (user) {
       try {
@@ -270,11 +402,13 @@ if (typeof window !== "undefined") {
           }
         } else {
           // Update last sign in for existing users
-          const userRef = doc(db, "users", user.uid);
-          await updateDoc(userRef, {
-            last_sign_in_at: serverTimestamp(),
-            updated_at: serverTimestamp()
-          });
+          if (db) {
+            const userRef = doc(db, "users", user.uid);
+            await updateDoc(userRef, {
+              last_sign_in_at: serverTimestamp(),
+              updated_at: serverTimestamp()
+            });
+          }
         }
       } catch (error) {
         console.error(
@@ -330,6 +464,12 @@ export async function updateProduct(productId: string, product: Partial<Product>
 }
 
 export async function deleteProduct(productId: string) {
+  if (!db) {
+    const firebase = await import('@/lib/firebase');
+    const firebaseDb = firebase.db;
+    if (!firebaseDb) throw new Error('Firebase not initialized');
+    return await deleteDoc(doc(firebaseDb, 'products', productId));
+  }
   await deleteDoc(doc(db, 'products', productId));
 }
 
@@ -551,3 +691,546 @@ export const updateGoogleIntegration = async (
     updated_at: serverTimestamp(),
   });
 };
+
+// ===== WALLET & POINTS MANAGEMENT =====
+
+export async function updateUserWallet(userId: string, pointsToAdd: number) {
+  const firebaseDb = await getFirebaseDb();
+  const userRef = doc(firebaseDb, 'users', userId);
+  const userDoc = await getDoc(userRef);
+  
+  if (!userDoc.exists()) {
+    throw new Error('User not found');
+  }
+
+  const currentPoints = userDoc.data()?.points || 0;
+  const newPoints = currentPoints + pointsToAdd;
+
+  await updateDoc(userRef, {
+    points: newPoints,
+    updated_at: serverTimestamp(),
+  });
+
+  return newPoints;
+}
+
+export async function getUserWallet(userId: string) {
+  const firebaseDb = await getFirebaseDb();
+  const userRef = doc(firebaseDb, 'users', userId);
+  const userDoc = await getDoc(userRef);
+  
+  if (!userDoc.exists()) {
+    return { points: 0, history: [] };
+  }
+
+  const data = userDoc.data();
+  return {
+    points: data?.points || 0,
+    history: data?.pointHistory || [],
+  };
+}
+
+export async function addPointHistory(
+  userId: string,
+  points: number,
+  activity: string,
+  orderId?: string
+) {
+  const userRef = doc(db, 'users', userId);
+  const historyEntry = {
+    date: new Date().toISOString(),
+    points,
+    activity,
+    orderId: orderId || null,
+  };
+
+  await updateDoc(userRef, {
+    pointHistory: arrayUnion(historyEntry),
+    updated_at: serverTimestamp(),
+  });
+}
+
+// ===== ORDERS MANAGEMENT =====
+
+export async function createOrder(
+  userId: string,
+  orderData: {
+    items: any[];
+    totalPrice: number;
+    totalPoints: number;
+    paymentId: string;
+    shippingAddress?: any;
+  }
+) {
+  const orderId = Date.now().toString();
+  
+  const order = {
+    id: orderId,
+    userId,
+    items: orderData.items,
+    totalPrice: orderData.totalPrice,
+    totalPoints: orderData.totalPoints,
+    paymentId: orderData.paymentId,
+    shippingAddress: orderData.shippingAddress || {},
+    status: 'completed',
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  };
+
+  const orderRef = doc(db, 'orders', orderId);
+  await setDoc(orderRef, order);
+
+  return orderId;
+}
+
+export async function getUserOrders(userId: string) {
+  const firebaseDb = await getFirebaseDb();
+  const q = query(
+    collection(firebaseDb, 'orders'),
+    where('userId', '==', userId)
+  );
+
+  const snapshot = await getDocs(q);
+  const orders = snapshot.docs.map(doc => ({
+    id: doc.id,
+    items: doc.data().items || [],
+    totalPrice: doc.data().totalPrice || 0,
+    totalPoints: doc.data().totalPoints || 0,
+    pointsRedeemed: doc.data().pointsRedeemed || 0,
+    shippingAddress: doc.data().shippingAddress,
+    createdAt: doc.data().createdAt?.toDate?.() || new Date(),
+    paymentStatus: doc.data().paymentStatus || 'pending',
+  } as any));
+  
+  // Sort by createdAt on the client side instead
+  return orders.sort((a, b) => {
+    const dateA = a.createdAt instanceof Date ? a.createdAt : new Date(a.createdAt);
+    const dateB = b.createdAt instanceof Date ? b.createdAt : new Date(b.createdAt);
+    return dateB.getTime() - dateA.getTime();
+  });
+}
+
+export async function getOrderById(orderId: string) {
+  const firebaseDb = await getFirebaseDb();
+  const orderRef = doc(firebaseDb, 'orders', orderId);
+  const orderDoc = await getDoc(orderRef);
+  
+  if (!orderDoc.exists()) {
+    return null;
+  }
+
+  return {
+    id: orderDoc.id,
+    ...orderDoc.data(),
+    createdAt: orderDoc.data().createdAt?.toDate?.() || new Date(),
+  };
+}
+
+// ===== CART MANAGEMENT =====
+
+export async function updateUserCart(userId: string, cartItems: any[]) {
+  const firebaseDb = await getFirebaseDb();
+  const userRef = doc(firebaseDb, 'users', userId);
+  
+  await updateDoc(userRef, {
+    cart: cartItems,
+    cartUpdatedAt: serverTimestamp(),
+    updated_at: serverTimestamp(),
+  });
+}
+
+export async function getUserCart(userId: string) {
+  const firebaseDb = await getFirebaseDb();
+  const userRef = doc(firebaseDb, 'users', userId);
+  const userDoc = await getDoc(userRef);
+  
+  if (!userDoc.exists()) {
+    return [];
+  }
+
+  return userDoc.data()?.cart || [];
+}
+
+export async function clearUserCart(userId: string) {
+  const firebaseDb = await getFirebaseDb();
+  const userRef = doc(firebaseDb, 'users', userId);
+  
+  await updateDoc(userRef, {
+    cart: [],
+    cartUpdatedAt: serverTimestamp(),
+    updated_at: serverTimestamp(),
+  });
+}
+
+// ===== NOTIFICATIONS MANAGEMENT =====
+
+export interface NotificationHistory {
+  id: string;
+  title: string;
+  message: string;
+  type: 'info' | 'success' | 'offer' | 'warning';
+  recipientType: 'all' | 'specific';
+  recipientCount: number;
+  sentAt: string;
+  actionUrl?: string;
+}
+
+export async function getNotificationHistory() {
+  const firebaseDb = await getFirebaseDb();
+  const q = query(collection(firebaseDb, 'notifications'), orderBy('sentAt', 'desc'));
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data()
+  })) as NotificationHistory[];
+}
+
+export async function addNotification(notification: Omit<NotificationHistory, 'id' | 'sentAt'> & { sentAt?: string }) {
+  const firebaseDb = await getFirebaseDb();
+  const notifRef = collection(firebaseDb, 'notifications');
+  const docRef = await addDoc(notifRef, {
+    ...notification,
+    sentAt: notification.sentAt || new Date().toISOString(),
+    createdAt: serverTimestamp(),
+  });
+  return docRef.id;
+}
+
+// ===== CAMPAIGNS MANAGEMENT =====
+
+export interface Campaign {
+  id: string;
+  title: string;
+  message: string;
+  status: string;
+  recipientCount: number;
+  deliveredCount: number;
+  interactionCount: number;
+  createdAt: string;
+  image?: string;
+  actionUrl?: string;
+  priority?: string;
+}
+
+export async function getCampaigns() {
+  const firebaseDb = await getFirebaseDb();
+  const q = query(collection(firebaseDb, 'campaigns'), orderBy('createdAt', 'desc'));
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data()
+  })) as Campaign[];
+}
+
+export async function addCampaign(campaign: Omit<Campaign, 'id' | 'deliveredCount' | 'interactionCount'>) {
+  const firebaseDb = await getFirebaseDb();
+  const campaignRef = collection(firebaseDb, 'campaigns');
+  const docRef = await addDoc(campaignRef, {
+    ...campaign,
+    deliveredCount: 0,
+    interactionCount: 0,
+    createdAt: new Date().toISOString(),
+  });
+  return docRef.id;
+}
+
+// ===== GAMIFICATION CONFIG =====
+
+export interface GamificationConfig {
+  pointsPerRupee: number;
+  firstTimeBonusPoints: number;
+  firstTimeThreshold: number;
+  redeemRate: number;
+  maxRedeemPercent: number;
+  referralBonus: number;
+  birthdayBonus: number;
+  bonusRules: any[];
+  levelThresholds?: any[];
+}
+
+export async function getGamificationConfig(): Promise<GamificationConfig> {
+  try {
+    // Use the module-level db variable directly, don't re-import
+    const firebaseDb = db;
+    if (!firebaseDb) {
+      console.warn('Firebase Firestore not initialized - using defaults');
+      throw new Error('Firebase not initialized');
+    }
+    const configRef = doc(firebaseDb, 'settings', 'gamification');
+    const configDoc = await getDoc(configRef);
+    
+    if (configDoc.exists()) {
+      return configDoc.data() as GamificationConfig;
+    }
+  } catch (error) {
+    console.error('Error loading gamification config:', error);
+  }
+
+  // Return default if not found or Firebase not initialized
+  return {
+    pointsPerRupee: 1,
+    firstTimeBonusPoints: 100,
+    firstTimeThreshold: 500,
+    redeemRate: 0.5,
+    maxRedeemPercent: 50,
+    referralBonus: 50,
+    birthdayBonus: 100,
+    bonusRules: [],
+  };
+}
+
+export async function updateGamificationConfig(config: GamificationConfig) {
+  try {
+    // Use the module-level db variable directly, don't re-import
+    const firebaseDb = db;
+    if (!firebaseDb) {
+      console.warn('Firebase Firestore not initialized');
+      throw new Error('Firebase not initialized');
+    }
+    const configRef = doc(firebaseDb, 'settings', 'gamification');
+    await setDoc(configRef, config);
+  } catch (error) {
+    console.error('Failed to save gamification config to Firebase:', error);
+    throw error;
+  }
+}
+
+// ============================================
+// DATA FETCH FUNCTIONS (For Pages)
+// ============================================
+
+/**
+ * Fetch all products from Firestore
+ */
+export async function getProducts() {
+  try {
+    const firebaseDb = await getFirebaseDb();
+    const q = query(collection(firebaseDb, 'products'));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+  } catch (error) {
+    console.error('Error fetching products:', error);
+    return [];
+  }
+}
+
+/**
+ * Fetch single product by ID
+ */
+export async function getProductById(id: string) {
+  try {
+    const firebaseDb = await getFirebaseDb();
+    const docRef = doc(firebaseDb, 'products', id);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      return { id: docSnap.id, ...docSnap.data() };
+    }
+    return null;
+  } catch (error) {
+    console.error('Error fetching product:', error);
+    return null;
+  }
+}
+
+/**
+ * Fetch all events from Firestore
+ */
+export async function getEvents() {
+  try {
+    const firebaseDb = await getFirebaseDb();
+    const q = query(collection(firebaseDb, 'events'), orderBy('date', 'asc'));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+  } catch (error) {
+    console.error('Error fetching events:', error);
+    return [];
+  }
+}
+
+/**
+ * Fetch single event by ID
+ */
+export async function getEventById(id: string) {
+  try {
+    const firebaseDb = await getFirebaseDb();
+    const docRef = doc(firebaseDb, 'events', id);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      return { id: docSnap.id, ...docSnap.data() };
+    }
+    return null;
+  } catch (error) {
+    console.error('Error fetching event:', error);
+    return null;
+  }
+}
+
+/**
+ * Fetch all games from Firestore
+ */
+export async function getGames() {
+  try {
+    const firebaseDb = await getFirebaseDb();
+    const q = query(collection(firebaseDb, 'games'));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+  } catch (error) {
+    console.error('Error fetching games:', error);
+    return [];
+  }
+}
+
+/**
+ * Fetch all experiences from Firestore
+ */
+export async function getExperiences() {
+  try {
+    const firebaseDb = await getFirebaseDb();
+    const q = query(collection(firebaseDb, 'experiences'));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+  } catch (error) {
+    console.error('Error fetching experiences:', error);
+    return [];
+  }
+}
+
+/**
+ * Fetch single experience by ID
+ */
+export async function getExperienceById(id: string) {
+  try {
+    const docRef = doc(db, 'experiences', id);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      return { id: docSnap.id, ...docSnap.data() };
+    }
+    return null;
+  } catch (error) {
+    console.error('Error fetching experience:', error);
+    return null;
+  }
+}
+
+/**
+ * Fetch all testimonials from Firestore
+ */
+export async function getTestimonials() {
+  try {
+    const q = query(collection(db, 'testimonials'));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+  } catch (error) {
+    console.error('Error fetching testimonials:', error);
+    return [];
+  }
+}
+
+/**
+ * Fetch all blog posts from Firestore
+ */
+export async function getBlogPosts() {
+  try {
+    const q = query(
+      collection(db, 'blog_posts'),
+      where('published', '==', true),
+      orderBy('createdAt', 'desc')
+    );
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+  } catch (error) {
+    console.error('Error fetching blog posts:', error);
+    return [];
+  }
+}
+
+/**
+ * Fetch single blog post by ID
+ */
+export async function getBlogPostById(id: string) {
+  try {
+    const docRef = doc(db, 'blog_posts', id);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      return { id: docSnap.id, ...docSnap.data() };
+    }
+    return null;
+  } catch (error) {
+    console.error('Error fetching blog post:', error);
+    return null;
+  }
+}
+
+/**
+ * Handle Google Sign-In redirect result
+ * Call this in the layout or main app component to complete redirect-based Google auth
+ */
+export async function handleGoogleSignInRedirect() {
+  try {
+    if (!auth) {
+      console.warn('Firebase auth not initialized, skipping Google redirect result check');
+      return null;
+    }
+    
+    const result = await getRedirectResult(auth);
+    
+    if (result) {
+      const { user } = result;
+      
+      // Create user profile if new user
+      if (user.email) {
+        const userExists = await checkUserExists(user.uid);
+        
+        if (!userExists) {
+          const profileData = {
+            email: user.email,
+            name: user.displayName || "",
+            first_name: user.displayName?.split(" ")[0] || "",
+            last_name: user.displayName?.split(" ").slice(1).join(" ") || "",
+            photoURL: user.photoURL,
+            avatar_url: user.photoURL,
+            role: "member",
+            likedBlogs: [],
+            activity: [],
+            blogCount: 0,
+            created_at: serverTimestamp(),
+            updated_at: serverTimestamp(),
+            last_sign_in_at: serverTimestamp(),
+          };
+          await createUserProfile(user.uid, profileData);
+        } else {
+          // Update last sign-in time
+          const userRef = doc(db, "users", user.uid);
+          await updateDoc(userRef, {
+            last_sign_in_at: serverTimestamp(),
+            updated_at: serverTimestamp()
+          });
+        }
+      }
+      
+      return result;
+    }
+    return null;
+  } catch (error) {
+    console.error("Error handling Google redirect result:", error);
+    throw error;
+  }
+}

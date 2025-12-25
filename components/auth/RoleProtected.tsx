@@ -2,9 +2,6 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { onAuthStateChanged, User } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
-import { auth, db } from '@/lib/firebase';
 import { isValidRole } from '@/lib/roles';
 
 /**
@@ -29,71 +26,100 @@ const RoleProtected = ({
 }: RoleProtectedProps) => {
   const [loading, setLoading] = useState(true);
   const [hasAccess, setHasAccess] = useState(false);
-  const [user, setUser] = useState<(User & { role?: string }) | null>(null);
+  const [user, setUser] = useState<any>(null);
   const router = useRouter();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (authUser) => {
-      if (!authUser) {
-        setHasAccess(false);
-        setLoading(false);
-        if (redirectTo) {
-          router.push(redirectTo);
-        }
-        return;
-      }
+    let isMounted = true;
 
+    const setupAuth = async () => {
       try {
-        // Fetch user profile from Firestore to get role
-        const userDoc = await getDoc(doc(db, 'users', authUser.uid));
+        // Lazy load Firebase
+        const { auth, db } = await import('@/lib/firebase');
+        const { onAuthStateChanged } = await import('firebase/auth');
+        const { doc, getDoc } = await import('firebase/firestore');
 
-        if (!userDoc.exists()) {
-          console.error('User profile not found');
-          setHasAccess(false);
-          setLoading(false);
-          if (redirectTo) {
-            router.push(redirectTo);
+        const unsubscribe = onAuthStateChanged(auth, async (authUser) => {
+          if (!isMounted) return;
+
+          if (!authUser) {
+            setHasAccess(false);
+            setLoading(false);
+            if (redirectTo) {
+              router.push(redirectTo);
+            }
+            return;
           }
-          return;
-        }
 
-        const userData = userDoc.data();
-        const userRole = userData.role;
+          try {
+            // Fetch user profile from Firestore to get role
+            const userDoc = await getDoc(doc(db, 'users', authUser.uid));
 
-        // Validate user role
-        if (!isValidRole(userRole)) {
-          console.error('Invalid user role:', userRole);
-          setHasAccess(false);
-          setLoading(false);
-          if (redirectTo) {
-            router.push(redirectTo);
+            if (!isMounted) return;
+
+            if (!userDoc.exists()) {
+              console.error('User profile not found');
+              setHasAccess(false);
+              setLoading(false);
+              if (redirectTo) {
+                router.push(redirectTo);
+              }
+              return;
+            }
+
+            const userData = userDoc.data();
+            const userRole = userData.role;
+
+            // Validate user role
+            if (!isValidRole(userRole)) {
+              console.error('Invalid user role:', userRole);
+              setHasAccess(false);
+              setLoading(false);
+              if (redirectTo) {
+                router.push(redirectTo);
+              }
+              return;
+            }
+
+            // Check if user's role is in allowed roles
+            const access = allowedRoles.length === 0 || allowedRoles.includes(userRole);
+
+            setUser({ ...authUser, role: userRole });
+            setHasAccess(access);
+            setLoading(false);
+
+            // Redirect if no access
+            if (!access && redirectTo) {
+              router.push('/unauthorized');
+            }
+
+          } catch (error) {
+            console.error('Error checking user role:', error);
+            if (isMounted) {
+              setHasAccess(false);
+              setLoading(false);
+              if (redirectTo) {
+                router.push(redirectTo);
+              }
+            }
           }
-          return;
-        }
+        });
 
-        // Check if user's role is in allowed roles
-        const access = allowedRoles.length === 0 || allowedRoles.includes(userRole);
-
-        setUser({ ...authUser, role: userRole });
-        setHasAccess(access);
-        setLoading(false);
-
-        // Redirect if no access
-        if (!access && redirectTo) {
-          router.push('/unauthorized');
-        }
-
+        return unsubscribe;
       } catch (error) {
-        console.error('Error checking user role:', error);
-        setHasAccess(false);
-        setLoading(false);
-        if (redirectTo) {
-          router.push(redirectTo);
+        console.error('Error setting up auth:', error);
+        if (isMounted) {
+          setLoading(false);
         }
       }
-    });
+    };
 
-    return () => unsubscribe();
+    setupAuth().then((unsubscribe) => {
+      return () => {
+        isMounted = false;
+        if (unsubscribe) unsubscribe();
+      };
+    });
   }, [allowedRoles, redirectTo, router]);
 
   // Show loading state

@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { PRODUCTS, EVENTS } from '@/lib/constants';
 import { ArrowRight, Star, Heart, Trophy, Users, Puzzle, Calendar, ShoppingBag, MapPin, Gift, Crown, Info } from 'lucide-react';
 import { splitDateTime } from '@/lib/utils';
+
 export default function Home() {
   return (
     <div className="relative min-h-screen bg-black overflow-x-hidden">
@@ -116,7 +117,7 @@ export default function Home() {
           <div className="group relative h-[500px] border border-white/10 bg-white/[0.02] hover:bg-white/[0.05] transition-all duration-500 overflow-hidden flex flex-col justify-between">
             <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/90 z-10"></div>
             <Image
-              src="https://images.unsplash.com/photo-1514525253440-b393452de23e?q=80&w=2074&auto=format&fit=crop"
+              src="https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=2070&auto=format&fit=crop"
               alt="Occasions"
               fill
               className="object-cover opacity-50 group-hover:scale-105 transition-transform duration-700 grayscale group-hover:grayscale-0"
@@ -348,4 +349,3 @@ export default function Home() {
     </div>
   );
 }
-

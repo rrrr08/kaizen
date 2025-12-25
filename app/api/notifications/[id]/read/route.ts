@@ -1,0 +1,52 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { adminAuth, adminDb } from '@/app/api/auth/firebase-admin';
+import { cookies } from 'next/headers';
+
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    const { id } = await params;
+    const cookieStore = await cookies();
+    const sessionCookie = cookieStore.get('__session')?.value;
+    
+    let userId: string | null = null;
+
+    if (sessionCookie) {
+      const decodedClaims = await adminAuth.verifySessionCookie(sessionCookie);
+      userId = decodedClaims.uid;
+    } else {
+      const authHeader = request.headers.get('authorization');
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
+      const idToken = authHeader.substring(7);
+      const decodedClaims = await adminAuth.verifyIdToken(idToken);
+      userId = decodedClaims.uid;
+    }
+
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const notifRef = adminDb
+      .collection('users')
+      .doc(userId)
+      .collection('notifications')
+      .doc(id);
+    
+    const notif = await notifRef.get();
+
+    if (!notif.exists) {
+      return NextResponse.json({ error: 'Notification not found' }, { status: 404 });
+    }
+
+    await notifRef.update({ read: true });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Error marking notification as read:', error);
+    return NextResponse.json(
+      { error: 'Failed to mark notification as read' },
+      { status: 500 }
+    );
+  }
+}

@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { updateGoogleIntegration } from '@/lib/firebase';
 
 export async function GET(request: NextRequest) {
   console.log(' Google OAuth callback started');
@@ -62,10 +61,11 @@ if (!tokenResponse.ok) {
     }
     console.log(' Token exchange successful');
 
-const tokens = await tokenResponse.json();
+    const tokens = await tokenResponse.json();
     console.log(' Tokens received:', { accessToken: tokens.access_token });
 
-    // Store tokens in Firestore
+    // Store tokens in Firestore using dynamic import to avoid build-time client SDK issues
+    const { updateGoogleIntegration } = await import('@/lib/firebase');
     await updateGoogleIntegration(state, tokens);
     console.log(' Tokens stored successfully in Firestore');
 

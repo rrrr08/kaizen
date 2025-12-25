@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
-import { PRODUCTS } from '@/lib/constants';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+
+export const dynamic = 'force-dynamic';
 
 const TarotCard = ({ product, onClick }: any) => {
   return (
@@ -19,15 +20,19 @@ const TarotCard = ({ product, onClick }: any) => {
         <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80"></div>
 
         <div className="absolute bottom-12 left-6 md:left-8 right-6 md:right-8 text-center">
-          <div className="text-amber-500 font-header text-[9px] tracking-[0.5em] mb-4 opacity-0 group-hover:opacity-100 transition-all">
-            {product.mood.toUpperCase()}
-          </div>
+          {product.mood && (
+            <div className="text-amber-500 font-header text-[9px] tracking-[0.5em] mb-4 opacity-0 group-hover:opacity-100 transition-all">
+              {product.mood.toUpperCase()}
+            </div>
+          )}
           <h3 className="font-header text-2xl mb-1 tracking-wider uppercase text-white group-hover:text-amber-400 transition-colors">
             {product.name}
           </h3>
-          <div className="font-serif italic text-white/40 text-sm">
-            {product.players}
-          </div>
+          {product.players && (
+            <div className="font-serif italic text-white/40 text-sm">
+              {product.players}
+            </div>
+          )}
         </div>
       </div>
       
@@ -39,12 +44,33 @@ const TarotCard = ({ product, onClick }: any) => {
 };
 
 export default function Shop() {
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState('All');
   const categories = ['All', 'Party', 'Family', 'Strategy', 'Adults Only'];
 
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        const { getProducts } = await import('@/lib/firebase');
+        const data = await getProducts();
+        setProducts(data);
+      } catch (err) {
+        console.error('Error fetching products:', err);
+        setError('Failed to load products');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchProducts();
+  }, []);
+
   const filteredProducts = filter === 'All' 
-    ? PRODUCTS 
-    : PRODUCTS.filter(p => p.occasion.includes(filter) || p.badges.some(b => b.toLowerCase().includes(filter.toLowerCase())));
+    ? products 
+    : products.filter(p => p.occasion?.includes(filter) || p.badges?.some((b: string) => b.toLowerCase().includes(filter.toLowerCase())));
 
   return (
     <div className="min-h-screen pt-28 pb-16">
@@ -74,16 +100,35 @@ export default function Shop() {
           </div>
         </div>
 
-        {/* Products Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
-          {filteredProducts.map(product => (
-            <Link key={product.id} href={`/shop/${product.id}`}>
-              <TarotCard product={product} />
-            </Link>
-          ))}
-        </div>
+        {/* Loading State */}
+        {loading && (
+          <div className="flex items-center justify-center py-24">
+            <div className="text-center">
+              <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-amber-500 mb-4"></div>
+              <p className="text-white/60 font-header text-[10px] tracking-[0.4em]">LOADING REPOSITORY...</p>
+            </div>
+          </div>
+        )}
 
-        {filteredProducts.length === 0 && (
+        {/* Error State */}
+        {error && !loading && (
+          <div className="text-center py-24">
+            <p className="text-red-500 font-header text-[10px] tracking-[0.4em]">{error}</p>
+          </div>
+        )}
+
+        {/* Products Grid */}
+        {!loading && !error && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+            {filteredProducts.map(product => (
+              <Link key={product.id} href={`/shop/${product.id}`}>
+                <TarotCard product={product} />
+              </Link>
+            ))}
+          </div>
+        )}
+
+        {!loading && !error && filteredProducts.length === 0 && (
           <div className="text-center py-24">
             <p className="text-white/60 font-header text-[10px] tracking-[0.4em]">NO ITEMS FOUND</p>
           </div>

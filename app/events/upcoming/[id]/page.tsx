@@ -5,6 +5,9 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { GameEvent } from '@/lib/types';
 import { splitDateTime } from '@/lib/utils';
+import EventRegistrationForm from '@/components/EventRegistrationForm';
+
+export const dynamic = 'force-dynamic';
 
 export default function UpcomingEventDetail() {
   const { id } = useParams<{ id: string }>();
@@ -12,6 +15,21 @@ export default function UpcomingEventDetail() {
   const [event, setEvent] = useState<GameEvent | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [user, setUser] = useState<any>(null);
+  const [showRegistrationForm, setShowRegistrationForm] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      const { auth } = await import('@/lib/firebase');
+      const { onAuthStateChanged } = await import('firebase/auth');
+      
+      const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+        setUser(currentUser);
+      });
+
+      return () => unsubscribe();
+    })();
+  }, []);
 
   useEffect(() => {
     if (!id) return;
@@ -149,6 +167,7 @@ export default function UpcomingEventDetail() {
               </div>
 
               <button
+                onClick={() => setShowRegistrationForm(true)}
                 disabled={isFull}
                 className={`w-full px-6 py-4 font-header text-[10px] tracking-[0.4em] rounded-sm transition-all ${
                   isFull
@@ -162,6 +181,19 @@ export default function UpcomingEventDetail() {
           </div>
         </div>
       </div>
+
+      {/* Registration Form Modal */}
+      {showRegistrationForm && event && (
+        <EventRegistrationForm
+          event={event}
+          user={user}
+          onSuccess={() => {
+            setShowRegistrationForm(false);
+            setEvent({ ...event, registered: event.registered + 1 });
+          }}
+          onClose={() => setShowRegistrationForm(false)}
+        />
+      )}
     </div>
   );
 }

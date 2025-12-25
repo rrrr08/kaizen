@@ -1,0 +1,182 @@
+import {
+  collection,
+  addDoc,
+  query,
+  where,
+  getDocs,
+  updateDoc,
+  doc,
+  increment,
+  serverTimestamp,
+} from "firebase/firestore";
+import { getFirebaseDb } from "@/lib/firebase";
+
+export async function createPaymentOrder(
+  eventId: string,
+  userId: string,
+  amount: number,
+  walletPointsUsed: number = 0
+) {
+  try {
+    const firebaseDb = await getFirebaseDb();
+    // Create payment order record in Firestore (for tracking)
+    const orderData = {
+      eventId,
+      userId,
+      amount,
+      walletPointsUsed,
+      status: 'pending', // pending, completed, failed, cancelled
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    };
+
+    const orderRef = await addDoc(collection(firebaseDb, 'payment_orders'), orderData);
+
+    return {
+      success: true,
+      orderId: orderRef.id,
+      amount,
+      walletPointsUsed,
+    };
+  } catch (error) {
+    console.error('Error creating payment order:', error);
+    throw error;
+  }
+}
+
+export async function completeRegistration(
+  eventId: string,
+  userId: string,
+  orderId: string,
+  amount: number,
+  walletPointsUsed: number = 0
+) {
+  try {
+    // Initialize Firebase Firestore first
+    const firebaseDb = await getFirebaseDb();
+    
+    // Create collection references using returned db
+    const registrations = collection(firebaseDb, 'event_registrations');
+    const events = collection(firebaseDb, 'events');
+    const wallets = collection(firebaseDb, 'wallets');
+    
+    // Check if already registered
+    const existingReg = query(
+      registrations,
+      where('eventId', '==', eventId),
+      where('userId', '==', userId)
+    );
+
+    const existingSnapshot = await getDocs(existingReg);
+
+    if (!existingSnapshot.empty) {
+      return {
+        success: false,
+        waitlisted: false,
+        message: 'You are already registered for this event',
+        alreadyRegistered: true
+      };
+    }
+
+    // Get event capacity info
+    const eventDocs = await getDocs(events);
+    const eventDoc = eventDocs.docs.find((d: any) => d.id === eventId);
+    const capacity = (eventDoc?.data() as any)?.capacity || 50;
+
+    // Check if waitlisted
+    const registrationCount = await getDocs(
+      query(registrations, where('eventId', '==', eventId), where('status', '==', 'registered'))
+    );
+
+    const waitlisted = registrationCount.size >= capacity;
+
+    // Create registration
+    const registrationData = {
+      eventId,
+      userId,
+      orderId,
+      amountPaid: amount,
+      walletPointsUsed,
+      status: waitlisted ? 'waitlisted' : 'registered',
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    };
+
+    const regRef = await addDoc(registrations, registrationData);
+
+    // Update payment order status
+    await updateDoc(doc(firebaseDb, 'payment_orders', orderId), {
+      status: 'completed',
+      registrationId: regRef.id,
+      updatedAt: serverTimestamp(),
+    });
+
+    // Deduct wallet points if used
+    if (walletPointsUsed > 0) {
+      try {
+        const walletSnap = await getDocs(
+          query(wallets, where('userId', '==', userId))
+        );
+        if (!walletSnap.empty) {
+          const walletRef = walletSnap.docs[0].ref;
+          await updateDoc(walletRef, {
+            points: increment(-walletPointsUsed),
+            updatedAt: serverTimestamp(),
+          });
+        }
+      } catch (error) {
+        console.error('Error updating wallet:', error);
+      }
+    }
+
+    // Update event registered count if not waitlisted
+    if (!waitlisted) {
+      try {
+        await updateDoc(doc(firebaseDb, 'events', eventId), {
+          registered: increment(1),
+          updatedAt: serverTimestamp(),
+        });
+      } catch (error) {
+        console.error('Error updating event count:', error);
+      }
+    }
+
+    return {
+      success: true,
+      waitlisted,
+      message: waitlisted ? 'Added to waitlist' : 'Successfully registered',
+      registrationId: regRef.id,
+      eventId,
+      userId,
+    };
+  } catch (error) {
+    console.error('Error completing registration:', error);
+    throw error;
+  }
+}
+
+export async function getUserWallet(userId: string) {
+  try {
+    const firebaseDb = await getFirebaseDb();
+    const wallets = collection(firebaseDb, 'wallets');
+    
+    const walletSnap = await getDocs(
+      query(wallets, where('userId', '==', userId))
+    );
+
+    if (walletSnap.empty) {
+      return null;
+    }
+
+    const data = walletSnap.docs[0].data() as any;
+    return {
+      id: walletSnap.docs[0].id,
+      ...data,
+      createdAt: data.createdAt?.toDate(),
+      updatedAt: data.updatedAt?.toDate(),
+    };
+  } catch (error) {
+    console.error('Error getting wallet:', error);
+    throw error;
+  }
+}

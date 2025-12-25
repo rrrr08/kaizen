@@ -1,71 +1,85 @@
 'use client';
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 
+const categories = [
+    'All',
+    'Gameplay Guides',
+    'Strategy & Tips',
+    'Event Stories',
+    'Community & Trips',
+    'Behind the Scenes'
+];
+
 export default function Blog() {
+    const [blogPosts, setBlogPosts] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const [activeCategory, setActiveCategory] = useState('All');
 
-    const categories = [
-        'All',
-        'Gameplay Guides',
-        'Strategy & Tips',
-        'Event Stories',
-        'Community & Trips',
-        'Behind the Scenes'
-    ];
+    useEffect(() => {
+        fetchBlogPosts();
+    }, []);
 
-    const blogPosts = [
-        {
-            id: 1,
-            title: 'Murder Mystery Game Night at Primarc Pecan HQ',
-            excerpt: 'A night of suspense, strategy, and unexpected betrayals. Here’s how our latest corporate event unfolded.',
-            category: 'Event Stories',
-            image: 'https://images.unsplash.com/photo-1511882150382-421056ac8ba7?q=80&w=2070&auto=format&fit=crop',
-            readTime: '5 min read'
-        },
-        {
-            id: 2,
-            title: 'How to play Dead Man’s Deck?',
-            excerpt: 'Master the high seas with this comprehensive guide to our most popular pirate strategy game.',
-            category: 'Gameplay Guides',
-            image: 'https://images.unsplash.com/photo-1606167668584-78701c57f13d?q=80&w=2070&auto=format&fit=crop',
-            readTime: '8 min read'
-        },
-        {
-            id: 3,
-            title: 'Haus of Joy: A play-trip to Udaipur',
-            excerpt: 'What happens when you take 20 gamers to the City of Lakes? Pure, unadulterated joy.',
-            category: 'Community & Trips',
-            image: 'https://images.unsplash.com/photo-1596206354433-2ba3778263eb?q=80&w=2070&auto=format&fit=crop',
-            readTime: '6 min read'
-        },
-        {
-            id: 4,
-            title: 'Understanding Power Cards in "Kingdoms"',
-            excerpt: 'Don’t just play—dominate. A deep dive into the mechanics that turn the tide of battle.',
-            category: 'Strategy & Tips',
-            image: 'https://images.unsplash.com/photo-1632501641765-e568d28b0015?q=80&w=1974&auto=format&fit=crop',
-            readTime: '4 min read'
-        },
-        {
-            id: 5,
-            title: 'From Sketch to Box: The Design Process',
-            excerpt: 'Ever wondered how a game is born? Peek inside our design studio.',
-            category: 'Behind the Scenes',
-            image: 'https://images.unsplash.com/photo-1600861194942-f883de0dfe96?q=80&w=2069&auto=format&fit=crop',
-            readTime: '7 min read'
+    const fetchBlogPosts = async () => {
+        try {
+            setLoading(true);
+            setError(null);
+
+            const response = await fetch(`/api/blog?status=all`);
+
+            if (!response.ok) {
+                throw new Error(`Failed to fetch blog posts: ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            if (data.success) {
+                setBlogPosts(data.posts || []);
+            } else {
+                setError(data.error || 'Failed to load blog posts');
+            }
+        } catch (err: any) {
+            setError(err.message || 'Failed to load blog posts');
+            console.error('Error:', err);
+        } finally {
+            setLoading(false);
         }
-    ];
+    };
 
     const filteredPosts = activeCategory === 'All'
         ? blogPosts
         : blogPosts.filter(post => post.category === activeCategory);
 
+    if (loading) {
+        return (
+            <div className="min-h-screen pt-28 pb-16 flex items-center justify-center">
+                <div className="text-amber-500 font-header tracking-[0.3em] animate-pulse">
+                    LOADING BLOG POSTS...
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="min-h-screen pt-28 pb-16 flex flex-col items-center justify-center gap-4">
+                <div className="text-red-500 font-header tracking-widest text-center">
+                    {error}
+                </div>
+                <button 
+                    onClick={fetchBlogPosts}
+                    className="px-6 py-2 border border-amber-500 text-amber-500 hover:bg-amber-500/10 transition-all"
+                >
+                    TRY AGAIN
+                </button>
+            </div>
+        );
+    }
+
     return (
         <div className="min-h-screen pt-32 pb-16 bg-black text-white font-sans selection:bg-amber-500/30">
             <div className="max-w-7xl mx-auto px-6 md:px-12">
-
                 {/* SECTION 1 — HERO */}
                 <div className="text-center mb-24 max-w-4xl mx-auto">
                     <p className="text-amber-500 font-header text-xs tracking-[0.4em] mb-6 uppercase">The Joy Juncture</p>
@@ -104,17 +118,17 @@ export default function Blog() {
                     </div>
                 </section>
 
-                {/* SECTION 3 — CATEGORIES FILTER */}
+                {/* SECTION 3 — FILTERS */}
                 <div className="mb-20 sticky top-24 z-40 bg-black/95 backdrop-blur py-4 border-b border-white/10 overflow-x-auto">
-                    <div className="flex gap-8 min-w-max">
+                    <div className="flex items-center gap-8 min-w-max">
                         {categories.map((cat) => (
                             <button
                                 key={cat}
                                 onClick={() => setActiveCategory(cat)}
                                 className={`font-header text-[10px] tracking-[0.2em] uppercase transition-all pb-1 ${activeCategory === cat
-                                        ? 'text-amber-500 border-b-2 border-amber-500'
-                                        : 'text-white/40 hover:text-white'
-                                    }`}
+                                    ? 'text-amber-500 border-b-2 border-amber-500'
+                                    : 'text-white/40 hover:text-white'
+                                }`}
                             >
                                 {cat}
                             </button>
@@ -187,7 +201,6 @@ export default function Blog() {
                             VIEW FULL GALLERY
                         </Link>
                     </div>
-
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         {[
                             'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?q=80&w=2032&auto=format&fit=crop',
@@ -209,11 +222,10 @@ export default function Blog() {
                 <section className="mb-32 bg-neutral-900 text-white rounded-sm p-12 text-center relative overflow-hidden border border-white/5">
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-amber-500/10 blur-[150px] rounded-full pointer-events-none"></div>
                     <div className="relative z-10 max-w-3xl mx-auto">
-                        <span className="text-amber-500 font-header text-[10px] tracking-[0.4em] mb-4 block uppercase animate-pulse">Earn while you learn</span>
+                        <span className="text-amber-500 font-header text-[10px] tracking-[0.4em] mb-4 block animate-pulse">Earn while you learn</span>
                         <h2 className="font-header text-3xl md:text-5xl mb-8 leading-tight">
-                            “Reading, learning, and playing <br /> earns you points.”
+                            "Reading, learning, and playing <br /> earns you points."
                         </h2>
-
                         <div className="flex justify-center gap-8 mb-12 flex-wrap">
                             {[
                                 { action: 'Read a Guide', points: '+5 PTS' },
@@ -226,7 +238,6 @@ export default function Blog() {
                                 </div>
                             ))}
                         </div>
-
                         <div className="flex flex-col sm:flex-row gap-6 justify-center">
                             <Link
                                 href="/auth/signup"
@@ -248,7 +259,7 @@ export default function Blog() {
                 <div className="text-center py-16 border-t border-white/10">
                     <h2 className="font-header text-4xl md:text-5xl mb-6 text-white">Still curious?</h2>
                     <p className="text-white/60 font-serif italic text-xl mb-10 max-w-2xl mx-auto">
-                        “There’s always another game, story, or moment waiting.”
+                        "There's always another game, story, or moment waiting."
                     </p>
                     <div className="flex flex-col sm:flex-row gap-6 justify-center">
                         <Link
@@ -265,7 +276,6 @@ export default function Blog() {
                         </Link>
                     </div>
                 </div>
-
             </div>
         </div>
     );

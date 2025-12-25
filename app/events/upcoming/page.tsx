@@ -4,12 +4,33 @@ import { useState, useEffect } from 'react';
 import { GameEvent } from '@/lib/types';
 import { splitDateTime } from '@/lib/utils';
 import Link from 'next/link';
+import EventRegistrationForm from '@/components/EventRegistrationForm';
 
+export const dynamic = 'force-dynamic';
 
 export default function UpcomingEvents() {
+  const [user, setUser] = useState<any>(null);
   const [events, setEvents] = useState<GameEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedEventForRegistration, setSelectedEventForRegistration] = useState<GameEvent | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      const { auth } = await import('@/lib/firebase');
+      const { onAuthStateChanged } = await import('firebase/auth');
+      
+      const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+        setUser(currentUser);
+      });
+
+      return () => unsubscribe();
+    })();
+  }, []);
+
+  useEffect(() => {
+    fetchEvents();
+  }, []);
 
   useEffect(() => {
     fetchEvents();
@@ -19,15 +40,15 @@ export default function UpcomingEvents() {
     try {
       setLoading(true);
       setError(null);
-      
+
       const response = await fetch('/api/events/upcoming');
-      
+
       if (!response.ok) {
         throw new Error(`Failed to fetch events: ${response.status}`);
       }
-      
+
       const data = await response.json();
-      
+
       if (data.success) {
         setEvents(data.events);
       } else {
@@ -41,35 +62,16 @@ export default function UpcomingEvents() {
     }
   };
 
-  const handleRegister = async (eventId: string, event: GameEvent) => {
-    try {
-      const userId = 'temp-user-id';
-      
-      const response = await fetch('/api/events/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ eventId, userId })
-      });
-      
-      const data = await response.json();
-      
-      if (data.success) {
-        if (data.waitlisted) {
-          alert('Added to waitlist!');
-        } else {
-          alert('Successfully registered!');
-          // Update local state to show new registration count
-          setEvents(prev => prev.map(e => 
-            e.id === eventId ? { ...e, registered: e.registered + 1 } : e
-          ));
-        }
-      } else {
-        alert(data.error || 'Registration failed');
-      }
-    } catch (err) {
-      alert('Registration failed. Please try again.');
-      console.error('Registration error:', err);
-    }
+  const handleRegister = (event: GameEvent) => {
+    setSelectedEventForRegistration(event);
+  };
+
+  const handleRegistrationSuccess = () => {
+    setSelectedEventForRegistration(null);
+    // Update events list to reflect registration
+    setEvents(prev => prev.map(e => 
+      e.id === selectedEventForRegistration?.id ? { ...e, registered: e.registered + 1 } : e
+    ));
   };
 
   if (loading) {
@@ -166,7 +168,11 @@ export default function UpcomingEvents() {
 
                 <div className="w-full text-center pt-4">
                   <button 
-                    onClick={() => {handleRegister(event.id, event)}}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleRegister(event);
+                    }}
                     className="w-full px-6 py-3 border border-amber-500 text-amber-500 font-header text-[9px] tracking-[0.3em] hover:bg-amber-500/10 transition-all rounded-sm disabled:opacity-50 disabled:cursor-not-allowed"
                     disabled={event.registered >= event.capacity}
                   >
@@ -186,6 +192,16 @@ export default function UpcomingEvents() {
           </div>
         )}
       </div>
+
+      {/* Registration Form Modal */}
+      {selectedEventForRegistration && (
+        <EventRegistrationForm
+          event={selectedEventForRegistration}
+          user={user}
+          onSuccess={handleRegistrationSuccess}
+          onClose={() => setSelectedEventForRegistration(null)}
+        />
+      )}
     </div>
   );
 }

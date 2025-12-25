@@ -1,8 +1,32 @@
 'use client';
 
-import { GAMES } from '@/lib/constants';
+import { useState, useEffect } from 'react';
+
+export const dynamic = 'force-dynamic';
 
 export default function Play() {
+  const [games, setGames] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchGames = async () => {
+      try {
+        setLoading(true);
+        const { getGames } = await import('@/lib/firebase');
+        const data = await getGames();
+        setGames(data);
+      } catch (err) {
+        console.error('Error fetching games:', err);
+        setError('Failed to load games');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchGames();
+  }, []);
+
   return (
     <div className="min-h-screen pt-28 pb-16">
       <div className="max-w-7xl mx-auto px-6 md:px-12">
@@ -80,25 +104,49 @@ export default function Play() {
           </div>
         </div>
 
-        {/* Game List */}
-        <div className="mb-24">
-          <h2 className="font-header text-3xl md:text-4xl mb-8">Available Games</h2>
-          <div className="space-y-4">
-            {GAMES.map(game => (
-              <div key={game.id} className="border border-white/10 p-6 rounded-sm hover:border-amber-500/40 transition-all flex justify-between items-center cursor-pointer group">
-                <div>
-                  <p className="font-header text-[10px] tracking-[0.3em] text-amber-500 mb-2">{game.category.toUpperCase()}</p>
-                  <h3 className="font-header text-lg group-hover:text-amber-400 transition-colors">{game.title}</h3>
-                  <p className="text-white/50 font-serif italic text-sm mt-2">{game.description}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-amber-500 font-serif italic text-2xl">+{game.points}</p>
-                  <p className="text-white/40 font-header text-[8px] tracking-widest mt-2">PTS</p>
-                </div>
-              </div>
-            ))}
+        {/* Loading State */}
+        {loading && (
+          <div className="flex items-center justify-center py-24">
+            <div className="text-center">
+              <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-amber-500 mb-4"></div>
+              <p className="text-white/60 font-header text-[10px] tracking-[0.4em]">LOADING GAMES...</p>
+            </div>
           </div>
-        </div>
+        )}
+
+        {/* Error State */}
+        {error && !loading && (
+          <div className="text-center py-24">
+            <p className="text-red-500 font-header text-[10px] tracking-[0.4em]">{error}</p>
+          </div>
+        )}
+
+        {/* Game List */}
+        {!loading && !error && (
+          <div className="mb-24">
+            <h2 className="font-header text-3xl md:text-4xl mb-8">Available Games</h2>
+            <div className="space-y-4">
+              {games.map(game => (
+                <div key={game.id} className="border border-white/10 p-6 rounded-sm hover:border-amber-500/40 transition-all flex justify-between items-center cursor-pointer group">
+                  <div>
+                    <p className="font-header text-[10px] tracking-[0.3em] text-amber-500 mb-2">{(game.category || 'GAME').toUpperCase()}</p>
+                    <h3 className="font-header text-lg group-hover:text-amber-400 transition-colors">{game.title || game.name}</h3>
+                    <p className="text-white/50 font-serif italic text-sm mt-2">{game.description}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-amber-500 font-serif italic text-2xl">+{game.points || 10}</p>
+                    <p className="text-white/40 font-header text-[8px] tracking-widest mt-2">PTS</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            {games.length === 0 && (
+              <div className="text-center py-12">
+                <p className="text-white/60 font-header text-[10px] tracking-[0.4em]">NO GAMES AVAILABLE</p>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Leaderboard Section */}
         <div className="mb-24">

@@ -1,0 +1,41 @@
+# 🚀 QUICK FIX: Production Firebase Errors
+
+## The Problem
+Your Vercel deployment is missing Firebase environment variables.
+
+## The Solution (5 minutes)
+
+### 1. Go to Vercel Console
+https://vercel.com/dashboard → kaizen project → Settings → Environment Variables
+
+### 2. Add These 8 Variables (Copy from .env.local)
+
+```
+NEXT_PUBLIC_FIREBASE_API_KEY=AIzaSyD7S6QWd6reHEt1TEtTow7ZnTA4VV4Y1q4
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=gwoc-e598b.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=gwoc-e598b
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=gwoc-e598b.firebasestorage.app
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=594368440316
+NEXT_PUBLIC_FIREBASE_APP_ID=1:594368440316:web:4b1ded550d642ecb047479
+NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=G-RP5NQZV91B
+NEXT_PUBLIC_FIREBASE_VAPID_KEY=BLKUHkaG-bG2WouBWfosIQzd5_liy1mz7dxrxvThTVHseXN5BWe5e6WWhxrBL40a2OdAh31d0QMyA2AWhDFx07U
+```
+
+### 3. Add Private Variables (Mark as Encrypted)
+
+```
+RAZORPAY_KEY_SECRET=P2tOk5wux22YyCwDezvTuUy7
+FIREBASE_ADMIN_TYPE=service_account
+FIREBASE_ADMIN_PROJECT_ID=gwoc-e598b
+FIREBASE_ADMIN_PRIVATE_KEY_ID=90afc97a4ba5ea6f658a90bbf711dd4f571c3c17
+FIREBASE_ADMIN_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCXzMyFWVKMRGs+\nKJQL43pHLjx0sO9UuMVl3tGx0KWjp7YLsaup0ZZcMWFVnf40xY9Bd012EyWGqZxC\nLT495OwoJ1LUiwq2jBM4ur9K4vcjHtuq42xq6K4f9yhkcRrJy9CLz/krP4eRc60E\nn/zQY/O37R/INSvgttT/SPLnogaYcquA+k+ckqXJh4iOk4OQQEn4Sb7DMGJFBwg5\n7TvUCBn6hsFUArf0mqqkvMee42UZRuKrFwU8rXZh9Js1QxlyHuTtTfK5VOOBr4rF\nGm2ZQpLR5RWLk7qrp/Wg7BZ5evwUY1+lSIk+sMZt7k7IMkPvrUt1lFORcQDxCted\njFTgHcHxAgMBAAECggEABYK5p3seQimPL5jbRAG4bApXh0Bvlcal4tx3hhIeGz5w\nv0SuR8pMIDFqOEiVpH6KBG1Dbn6EMZrpaWUZUfekI5KG4SChjU4xOfFclag+4sNh\nY9cg9dIX1SD8skXBXFNF8Tdl8x4Zqqv1e1of/EQuoi4NZfAZNU2J1rEkIUjKXsEX\nlqhQR9YM1UfB+RxN3r6zNTFqltsKQO1gAJLDt6SQ9Fp6yC9SY1gwLKWR8ExTS8uu\nwOoQgzAbZM9UUBDQn9EgZ30a7JFRmIDOsivmsI0GaqA1lod1TCa3OoUXFmmscBH+\nNEWhDxOquSNMyZIMB2jm0PEdHyMnmKMvfSZhIvy3iQKBgQDRCMi37rzKq2t47syT\nDCAOXClNZ6pAFO8PeaLMybO6k63z/rRrt3mibZOKb3z0lLertT1rBiYZINk42vHC\nd/mlpw4nHz7PeADkXd3S5Oul6OLAljyD9b3NAs6rNl/plV3/Z3g4SzI4Xi6StOcB\n4rygfBfuSxcHIL+31L4ai4PEmQKBgQC56ARMaItIVsr+3aHYeaCKYu+gy2BacM2B\nPLRWVCC9ZrgvFf9Zmp0wo1RFVjdd4EeLy2grlXY00XH9tx/qkRkvccX/otRo3+3t\nAZvtoX/bt8fk5DoV5LvctJ+UZJUYoVOneQbLdiBiQulYNQuSz5nEll1U/IGhEFqa\n93qabxZnGQKBgANbzcXOyy/Cc1adF6JhNn6kknFQ8hZXf8PS43/A2edsigX6mLGG\nYCjw88bspahUX2Md5V+72I7czUCxm+LRBKzZs0uDoAG7XuBMdcz2qqaeyE3p3A0O\nvL73hZSQqhfZs4nwAql849CuCreGupN4Limx9Lx6bmNJ7mqou2k3xqU5AoGAXyz5\nhmS/afmFU5YEFd+u4Splo9x7J9I4Y8HAUbIgUNcV1IVehXEyqIP10Mmi7tyzxE4O\ntsF+Euxnf40ROfWu/yswQwAJ3udF1+DLA4169/HO1NBDLJI923Bdgos8CbAOM98y\nK1f+nE/FRvNhSXgfMRYKEkhz1RGaUVwB2K6muYECgYB7ieOGIOSIdpg50uillDwO\nlmvRf1ZUPUXDLrwrQbz0Hpkxf3cpiU8i9KlSK08s7LgNyEf+Y08BoUEJL1l8bUNx\npx1XU8yhmNdbtkgV86pPz1gScx0fVkedaa6dC9Qmp3eYMYaEkRxw1A9JWrAWJfBC\nhKw+0pTiPd+qXt8GNaq+1A==\n-----END PRIVATE KEY-----\n"
+FIREBASE_ADMIN_CLIENT_EMAIL=firebase-adminsdk-fbsvc@gwoc-e598b.iam.gserviceaccount.com
+FIREBASE_ADMIN_CLIENT_ID=114496868590446399385
+```
+
+### 4. Redeploy
+Go to **Deployments** tab → Click latest → **Redeploy**
+
+## Done! 🎉
+
+Your app will load Firebase correctly and all errors will be fixed.

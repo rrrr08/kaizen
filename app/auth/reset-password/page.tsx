@@ -2,12 +2,12 @@
 
 import { useState, Suspense } from "react";
 import Link from "next/link";
-import { auth } from "@/lib/firebase";
-import { sendPasswordResetEmail } from "firebase/auth";
 import { Loader2, Mail, ArrowLeft, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+
+export const dynamic = 'force-dynamic';
 
 function ResetPasswordPageContent() {
     const [email, setEmail] = useState<string>("");
@@ -21,6 +21,10 @@ function ResetPasswordPageContent() {
         setError(null);
 
         try {
+            // Lazy load Firebase
+            const { auth } = await import('@/lib/firebase');
+            const { sendPasswordResetEmail } = await import('firebase/auth');
+            
             await sendPasswordResetEmail(auth, email, {
                 url: `${window.location.origin}/auth/action`,
                 handleCodeInApp: true,
