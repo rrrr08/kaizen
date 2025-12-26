@@ -112,14 +112,19 @@ export default function Community() {
               <Link key={event.id} href={`/events/${event.id}`}>
                 <div className="group cursor-pointer bg-white border-2 border-black p-4 rounded-[20px] neo-shadow hover:scale-[1.02] transition-transform">
                   {/* Event Image */}
-                  <div className="aspect-video overflow-hidden rounded-[15px] mb-6 border-2 border-black">
-                    <img
-                      src={event.image}
-                      alt={event.title}
-                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
-                    />
+                  <div className="aspect-video overflow-hidden rounded-[15px] mb-6 border-2 border-black bg-gray-100 relative">
+                    {event.image ? (
+                      <img
+                        src={event.image}
+                        alt={event.title}
+                        className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-black/20 font-black text-sm uppercase tracking-widest">
+                        No Image
+                      </div>
+                    )}
                   </div>
-                  {/* Event Info */}
                   <div className="space-y-4 px-2">
                     <div>
                       <div className="bg-[#6C5CE7] text-white px-2 py-1 rounded inline-block font-black text-[8px] tracking-[0.2em] mb-3 uppercase">
