@@ -19,7 +19,7 @@ export default function PastEvents() {
       setLoading(true);
       setError(null);
 
-      const response = await fetch('/api/events/past');
+      const response = await fetch('/api/events?status=past');
 
       if (!response.ok) {
         throw new Error(`Failed to fetch events: ${response.status}`);

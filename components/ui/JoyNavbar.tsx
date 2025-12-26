@@ -2,7 +2,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import CartSidebar from './CartSidebar2';
 import { NotificationCenter } from '@/app/components/NotificationCenter';
 import { useAuth } from '@/app/context/AuthContext';
@@ -17,13 +16,11 @@ const Navbar: React.FC<NavbarProps> = ({ points = 0, isObsidian = false }) => {
   const [mobileOpen, setMobileOpen] = useState<boolean>(false);
   const [eventsDropdownOpen, setEventsDropdownOpen] = useState<boolean>(false);
   const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>(null);
-
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [userProfile, setUserProfile] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const eventsDropdownRef = useRef<HTMLDivElement>(null);
   const { user, loading } = useAuth();
-  const router = useRouter();
 
   // Fetch user profile when user changes
   useEffect(() => {
@@ -33,7 +30,7 @@ const Navbar: React.FC<NavbarProps> = ({ points = 0, isObsidian = false }) => {
       loading,
       timestamp: new Date().toLocaleTimeString()
     });
-
+    
     if (user) {
       console.log('[JoyNavbar] Fetching user profile for:', user.uid);
       // Lazy load Firebase functions
@@ -88,7 +85,6 @@ const Navbar: React.FC<NavbarProps> = ({ points = 0, isObsidian = false }) => {
       setUserProfile(null);
       setIsProfileMenuOpen(false);
       console.log('[JoyNavbar] Signed out successfully');
-      router.push('/');
     } catch (error) {
       console.error('[JoyNavbar] Error signing out:', error);
     }
@@ -116,13 +112,14 @@ const Navbar: React.FC<NavbarProps> = ({ points = 0, isObsidian = false }) => {
 
   return (
     <>
-      <nav className={`fixed top-0 left-0 w-full z-[100] h-24 flex items-center px-8 md:px-12 transition-all duration-500 ${isObsidian ? 'brightness-[0.85]' : ''
-        }`}>
+      <nav className={`fixed top-0 left-0 w-full z-[100] h-24 flex items-center px-8 md:px-12 transition-all duration-500 ${
+        isObsidian ? 'brightness-[0.85]' : ''
+      }`}>
         <div className="absolute inset-0 bg-gradient-to-b from-black/80 to-transparent pointer-events-none"></div>
-
+        
         <div className="relative w-full flex items-center justify-between">
           {/* Logo - Premium Design */}
-          <Link
+          <Link 
             href="/"
             className="flex items-center gap-3 cursor-pointer group"
           >
@@ -131,7 +128,7 @@ const Navbar: React.FC<NavbarProps> = ({ points = 0, isObsidian = false }) => {
               <div className="absolute inset-0 bg-gradient-to-br from-amber-400 to-amber-600 rounded-lg opacity-20 group-hover:opacity-30 transition-all duration-300 glow-gold-hover"></div>
               <div className="text-2xl font-display font-bold text-amber-400 group-hover:text-amber-300 transition-all">✦</div>
             </div>
-
+            
             {/* Logo Text */}
             <div className="flex flex-col">
               <span className="font-display text-xl font-bold tracking-[0.15em] text-white group-hover:text-amber-300 transition-all duration-300">JOY</span>
@@ -144,7 +141,7 @@ const Navbar: React.FC<NavbarProps> = ({ points = 0, isObsidian = false }) => {
             {navItems.map((item) => {
               // Skip EVENTS from main nav - it has its own dropdown
               if (item.label === 'EVENTS') return null;
-
+              
               return (
                 <Link
                   key={item.href}
@@ -157,8 +154,8 @@ const Navbar: React.FC<NavbarProps> = ({ points = 0, isObsidian = false }) => {
             })}
 
             {/* Events Dropdown */}
-            <div
-              className="relative"
+            <div 
+              className="relative" 
               ref={eventsDropdownRef}
               onMouseEnter={() => {
                 if (hoverTimeout) clearTimeout(hoverTimeout);
@@ -188,7 +185,7 @@ const Navbar: React.FC<NavbarProps> = ({ points = 0, isObsidian = false }) => {
               </button>
 
               {eventsDropdownOpen && (
-                <div
+                <div 
                   className="absolute left-1/2 transform -translate-x-1/2 mt-6 w-48 bg-black/95 backdrop-blur-lg border border-white/10 rounded-lg shadow-xl overflow-hidden z-50"
                   onMouseEnter={() => {
                     if (hoverTimeout) clearTimeout(hoverTimeout);
@@ -255,8 +252,9 @@ const Navbar: React.FC<NavbarProps> = ({ points = 0, isObsidian = false }) => {
                   </div>
                   <ChevronDown
                     size={16}
-                    className={`text-amber-500 transition-transform ${isProfileMenuOpen ? 'rotate-180' : ''
-                      }`}
+                    className={`text-amber-500 transition-transform ${
+                      isProfileMenuOpen ? 'rotate-180' : ''
+                    }`}
                   />
                 </button>
 
@@ -307,7 +305,7 @@ const Navbar: React.FC<NavbarProps> = ({ points = 0, isObsidian = false }) => {
                 <span className="font-header text-xs font-medium tracking-[0.1em] text-amber-400 hover:text-amber-300">SIGN IN</span>
               </Link>
             )}
-
+            
             {!user && points > 0 && (
               <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-500/10 border border-emerald-400/30 glow-emerald">
                 <div className="font-header text-lg font-bold text-emerald-400">{points}</div>
@@ -317,7 +315,7 @@ const Navbar: React.FC<NavbarProps> = ({ points = 0, isObsidian = false }) => {
           </div>
 
           {/* Mobile Menu Button */}
-          <button
+          <button 
             className="md:hidden ml-4"
             onClick={() => setMobileOpen(!mobileOpen)}
             aria-label="Toggle mobile menu"
@@ -413,7 +411,7 @@ const Navbar: React.FC<NavbarProps> = ({ points = 0, isObsidian = false }) => {
           </div>
         )}
       </nav>
-
+      
       {/* Cart Sidebar */}
       <CartSidebar />
     </>

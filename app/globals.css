@@ -275,6 +275,100 @@ html {
   scroll-behavior: smooth;
 }
 
+
+/* ===============================
+   Luxury Form Inputs (Dark Mode)
+   =============================== */
+
+.lux-input {
+  position: relative;
+  width: 100%;
+}
+
+.lux-input input,
+.lux-input textarea {
+  width: 100%;
+  background: linear-gradient(
+    180deg,
+    rgba(255,255,255,0.04),
+    rgba(255,255,255,0.015)
+  );
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 14px;
+  padding: 16px 18px;
+  color: #f5f1e8;
+  font-size: 0.95rem;
+  outline: none;
+  box-shadow:
+    inset 0 1px 1px rgba(255,255,255,0.06),
+    0 8px 20px rgba(0,0,0,0.35);
+  transition: all 0.3s ease;
+}
+
+/* Hover: soft light response */
+.lux-input input:hover,
+.lux-input textarea:hover {
+  border-color: rgba(254,154,0,0.4);
+  box-shadow:
+    inset 0 1px 1px rgba(255,255,255,0.08),
+    0 10px 28px rgba(0,0,0,0.45);
+}
+
+/* Focus: premium accent glow */
+.lux-input input:focus,
+.lux-input textarea:focus {
+  border-color: #fe9a00;
+  box-shadow:
+    inset 0 1px 1px rgba(255,255,255,0.1),
+    0 0 0 1px rgba(254,154,0,0.3),
+    0 0 24px rgba(254,154,0,0.25),
+    0 16px 40px rgba(0,0,0,0.6);
+}
+
+/* Floating label */
+.lux-input label {
+  position: absolute;
+  left: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(245,241,232,0.5);
+  pointer-events: none;
+  transition: all 0.25s ease;
+  background: linear-gradient(
+    to bottom,
+    rgba(15,20,25,0.9),
+    rgba(15,20,25,0.7)
+  );
+  padding: 0 6px;
+}
+
+/* Label floats when active */
+.lux-input input:focus + label,
+.lux-input textarea:focus + label,
+.lux-input input:not(:placeholder-shown) + label,
+.lux-input textarea:not(:placeholder-shown) + label {
+  top: -8px;
+  font-size: 0.65rem;
+  color: #fe9a00;
+}
+
+/* Textarea height polish */
+.lux-input textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+/* Disabled state */
+.lux-input input:disabled,
+.lux-input textarea:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+
 ::-webkit-scrollbar {
   width: 6px;
 }

@@ -23,7 +23,7 @@ export default function EventDetail() {
       setLoading(true);
       setError(null);
 
-      const res = await fetch(`/api/events/past/${id}`);
+      const res = await fetch(`/api/events/${id}`);
       if (!res.ok) throw new Error(`Failed to fetch event (${res.status})`);
 
       const data = await res.json();

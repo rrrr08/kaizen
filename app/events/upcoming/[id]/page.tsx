@@ -41,7 +41,7 @@ export default function UpcomingEventDetail() {
       setLoading(true);
       setError(null);
 
-      const res = await fetch(`/api/events/upcoming/${id}`);
+      const res = await fetch(`/api/events/${id}`);
       if (!res.ok) throw new Error(`Failed to fetch event (${res.status})`);
 
       const data = await res.json();
@@ -103,11 +103,11 @@ export default function UpcomingEventDetail() {
 
             {/* Image */}
             <div className="aspect-video overflow-hidden rounded-sm border border-white/10 bg-white/5 mb-8">
-              <img
+              {event.image && <img
                 src={event.image}
                 alt={event.title}
                 className="w-full h-full object-cover"
-              />
+              />}
             </div>
 
             {/* Description */}

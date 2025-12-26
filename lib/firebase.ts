@@ -1036,42 +1036,6 @@ export async function getProductById(id: string) {
 }
 
 /**
- * Fetch all events from Firestore
- */
-export async function getEvents() {
-  try {
-    const firebaseDb = await getFirebaseDb();
-    const q = query(collection(firebaseDb, 'events'), orderBy('date', 'asc'));
-    const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
-  } catch (error) {
-    console.error('Error fetching events:', error);
-    return [];
-  }
-}
-
-/**
- * Fetch single event by ID
- */
-export async function getEventById(id: string) {
-  try {
-    const firebaseDb = await getFirebaseDb();
-    const docRef = doc(firebaseDb, 'events', id);
-    const docSnap = await getDoc(docRef);
-    if (docSnap.exists()) {
-      return { id: docSnap.id, ...docSnap.data() };
-    }
-    return null;
-  } catch (error) {
-    console.error('Error fetching event:', error);
-    return null;
-  }
-}
-
-/**
  * Fetch all games from Firestore
  */
 export async function getGames() {

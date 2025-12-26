@@ -32,16 +32,12 @@ export default function UpcomingEvents() {
     fetchEvents();
   }, []);
 
-  useEffect(() => {
-    fetchEvents();
-  }, []);
-
   const fetchEvents = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      const response = await fetch('/api/events/upcoming');
+      const response = await fetch('/api/events?status=upcoming');
 
       if (!response.ok) {
         throw new Error(`Failed to fetch events: ${response.status}`);
@@ -123,11 +119,11 @@ export default function UpcomingEvents() {
             <div key={event.id} className="group">
               {/* Event Image */}
               <div className="aspect-video overflow-hidden rounded-sm mb-6 border border-white/5 group-hover:border-amber-500/40 transition-all bg-white/5">
-                <img 
+              {event.image !== "" && <img 
                   src={event.image}
                   alt={event.title}
                   className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500 group-hover:scale-105"
-                />
+                />}
               </div>
 
               {/* Event Info */}

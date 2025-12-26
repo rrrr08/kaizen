@@ -3,72 +3,52 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Calendar, Plus, Edit2, Trash2, Search, MapPin, Users } from 'lucide-react';
-import { getDocs, collection, deleteDoc, doc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
-
-interface Event {
-  id: string;
-  title: string;
-  date: string;
-  time: string;
-  location: string;
-  capacity: number;
-  registered: number;
-  status: 'upcoming' | 'ongoing' | 'completed';
-  description: string;
-  image: string;
-}
+import { deleteDoc, doc } from 'firebase/firestore';
+import { GameEvent } from '@/lib/types';
+import { splitDateTime } from '@/lib/utils';
+import { getFirebaseDb } from '@/lib/firebase';
 
 export default function EventsPage() {
   const router = useRouter();
-  const [events, setEvents] = useState<Event[]>([]);
+  const [events, setEvents] = useState<GameEvent[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'upcoming' | 'ongoing' | 'completed'>('all');
+  const [statusFilter, setStatusFilter] = useState<'upcoming' | 'past'>('upcoming');
 
   useEffect(() => {
     loadEvents();
-  }, []);
+  }, [statusFilter]);
 
   const loadEvents = async () => {
     try {
-      const querySnapshot = await getDocs(collection(db, 'events'));
-      const eventsData = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      } as Event));
-      setEvents(eventsData);
-    } catch (error) {
-      console.error('Error fetching events:', error);
-      setEvents([]);
+      const response = await fetch(`/api/events?status=${statusFilter}`);
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch events: ${statusFilter}`);
+      }
+
+      const eventData = await response.json();
+
+      if (eventData.success) {
+        setEvents(eventData.events);
+      } else {
+        setError(eventData.error || 'Failed to load events');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to load upcoming events');
+      console.error('Error:', err);
     } finally {
       setLoading(false);
     }
   };
 
-  const filteredEvents = events.filter(event => {
-    const matchesSearch = event.title.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || event.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
+  const filteredEvents = events;
 
   const totalEvents = filteredEvents.length;
   const totalRegistrations = filteredEvents.reduce((sum, e) => sum + e.registered, 0);
   const totalCapacity = filteredEvents.reduce((sum, e) => sum + e.capacity, 0);
   const occupancyRate = totalCapacity > 0 ? Math.round((totalRegistrations / totalCapacity) * 100) : 0;
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'upcoming':
-        return 'bg-blue-500/10 border-blue-500/20 text-blue-400';
-      case 'ongoing':
-        return 'bg-green-500/10 border-green-500/20 text-green-400';
-      case 'completed':
-        return 'bg-gray-500/10 border-gray-500/20 text-gray-400';
-      default:
-        return 'bg-white/5 border-white/10 text-white/60';
-    }
-  };
 
   const handleCreateEvent = () => {
     router.push('/admin/events/create');
@@ -88,8 +68,17 @@ export default function EventsPage() {
     }
 
     try {
-      await deleteDoc(doc(db, 'events', eventId));
-      setEvents(events.filter(e => e.id !== eventId));
+      const res = await fetch(`/api/events/${eventId}`, {
+        method: 'DELETE',
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Failed to delete event');
+      }
+
+      setEvents(prev => prev.filter(e => e.id !== eventId));
     } catch (error) {
       console.error('Error deleting event:', error);
       alert('Failed to delete event');
@@ -107,6 +96,22 @@ export default function EventsPage() {
     );
   }
 
+  if (error) {
+    return (
+      <div className="min-h-screen pt-28 pb-16 flex flex-col items-center justify-center gap-4">
+        <div className="text-red-500 font-header tracking-widest text-center">
+          {error}
+        </div>
+        <button
+          onClick={loadEvents}
+          className="px-6 py-2 border border-amber-500 text-amber-500 hover:bg-amber-500/10 transition-all"
+        >
+          TRY AGAIN
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="p-8 pb-16">
       {/* Header */}
@@ -115,7 +120,7 @@ export default function EventsPage() {
           <h1 className="font-display text-5xl font-bold text-white mb-2">Events Management</h1>
           <p className="text-white/60">Organize and manage community events</p>
         </div>
-        <button 
+        <button
           onClick={handleCreateEvent}
           className="px-6 py-3 bg-amber-500 text-black font-header font-bold rounded hover:bg-amber-400 transition flex items-center gap-2"
         >
@@ -167,10 +172,8 @@ export default function EventsPage() {
               onChange={(e) => setStatusFilter(e.target.value as any)}
               className="w-full bg-white/5 border border-white/10 rounded px-4 py-2 text-white focus:border-amber-500 outline-none transition"
             >
-              <option value="all">All Events</option>
               <option value="upcoming">Upcoming</option>
-              <option value="ongoing">Ongoing</option>
-              <option value="completed">Completed</option>
+              <option value="past">Past</option>
             </select>
           </div>
         </div>
@@ -185,11 +188,11 @@ export default function EventsPage() {
           >
             {/* Image */}
             <div className="w-full md:w-64 h-48 md:h-auto bg-white/5 flex-shrink-0 overflow-hidden">
-              <img
+              {event.image !== "" && <img
                 src={event.image}
                 alt={event.title}
                 className="w-full h-full object-cover"
-              />
+              />}
             </div>
 
             {/* Content */}
@@ -200,9 +203,6 @@ export default function EventsPage() {
                     <h3 className="font-display text-2xl font-bold text-white mb-2">{event.title}</h3>
                     <p className="text-white/60 text-sm mb-4">{event.description}</p>
                   </div>
-                  <span className={`inline-flex px-3 py-1 rounded-full text-xs font-semibold border whitespace-nowrap ${getStatusColor(event.status)}`}>
-                    {event.status}
-                  </span>
                 </div>
 
                 {/* Event Details */}
@@ -211,8 +211,8 @@ export default function EventsPage() {
                     <p className="text-white/60 text-xs mb-1 flex items-center gap-1">
                       <Calendar className="w-3 h-3" /> Date
                     </p>
-                    <p className="text-white font-semibold">{new Date(event.date).toLocaleDateString()}</p>
-                    <p className="text-white/60 text-xs">{event.time}</p>
+                    <p className="text-white font-semibold">{splitDateTime(event.datetime).date}</p>
+                    <p className="text-white/60 text-xs">{splitDateTime(event.datetime).time}</p>
                   </div>
                   <div>
                     <p className="text-white/60 text-xs mb-1 flex items-center gap-1">
@@ -246,20 +246,20 @@ export default function EventsPage() {
 
               {/* Actions */}
               <div className="flex gap-2">
-                <button 
+                <button
                   onClick={() => handleEditEvent(event.id)}
                   className="flex-1 px-4 py-2 bg-blue-500/10 border border-blue-500/20 rounded text-blue-400 text-sm font-semibold hover:bg-blue-500/20 transition flex items-center justify-center gap-2"
                 >
                   <Edit2 className="w-4 h-4" />
                   Edit
                 </button>
-                <button 
+                <button
                   onClick={() => handleViewRegistrations(event.id)}
                   className="flex-1 px-4 py-2 bg-amber-500/10 border border-amber-500/20 rounded text-amber-400 text-sm font-semibold hover:bg-amber-500/20 transition"
                 >
                   View Registrations
                 </button>
-                <button 
+                <button
                   onClick={() => handleDeleteEvent(event.id)}
                   className="flex-1 px-4 py-2 bg-red-500/10 border border-red-500/20 rounded text-red-400 text-sm font-semibold hover:bg-red-500/20 transition flex items-center justify-center gap-2"
                 >

@@ -5,8 +5,35 @@ import Image from 'next/image';
 import { PRODUCTS, EVENTS } from '@/lib/constants';
 import { ArrowRight, Star, Heart, Trophy, Users, Puzzle, Calendar, ShoppingBag, MapPin, Gift, Crown, Info } from 'lucide-react';
 import { splitDateTime } from '@/lib/utils';
+import { GameEvent } from '@/lib/types';
+import { useEffect, useState } from 'react';
 
 export default function Home() {
+  const [events, setEvents] = useState<GameEvent[]>([]);
+  const [loadingEvents, setLoadingEvents] = useState(true);
+  const [eventError, setEventError] = useState<string | null>(null);
+  useEffect(() => {
+    async function fetchEvents() {
+      try {
+        setLoadingEvents(true);
+        const res = await fetch('/api/events?status=upcoming');
+
+        if (!res.ok) {
+          throw new Error('Failed to fetch events');
+        }
+
+        const data = await res.json();
+        setEvents(data.events);
+      } catch (err: any) {
+        console.error(err);
+        setEventError(err.message);
+      } finally {
+        setLoadingEvents(false);
+      }
+    }
+
+    fetchEvents();
+  }, []);
   return (
     <div className="relative min-h-screen bg-black overflow-x-hidden">
       <div className="grain-overlay"></div>
@@ -184,17 +211,32 @@ export default function Home() {
             </div>
             <h3 className="font-header text-xl text-white mb-6">Upcoming Events</h3>
             <div className="space-y-6">
-              {EVENTS.slice(0, 3).map(event => (
-                <div key={event.id} className="flex justify-between items-center border-b border-white/5 pb-4 last:border-0 hover:pl-2 transition-all">
+            {loadingEvents ? (
+              <p className="text-white/40 text-sm">Loading events...</p>
+            ) : (
+              events.slice(0, 3).map((event) => (
+                <div
+                  key={event.id}
+                  className="flex justify-between items-center border-b border-white/5 pb-4 last:border-0 hover:pl-2 transition-all"
+                >
                   <div>
                     <p className="text-white font-medium">{event.title}</p>
-                    <p className="text-white/40 text-xs mt-1 font-header">{event.date}</p>
+                    <p className="text-white/40 text-xs mt-1 font-header">
+                      {splitDateTime(event.datetime).date}
+                    </p>
+                    <p className="text-white/40 text-xs font-header">
+                      {event.location}
+                    </p>
                   </div>
-                  <ArrowRight size={14} className="text-white/20 -rotate-45" />
+                  <span className="text-gold text-xs font-header">
+                    ₹{event.price}
+                  </span>
                 </div>
-              ))}
+              ))
+            )}
+
             </div>
-            <Link href="/events" className="mt-8 block w-full py-3 text-center border border-white/20 text-xs font-header tracking-widest hover:bg-white hover:text-black transition-all">
+            <Link href="/events/upcoming" className="mt-8 block w-full py-3 text-center border border-white/20 text-xs font-header tracking-widest hover:bg-white hover:text-black transition-all">
               RESERVE A SEAT
             </Link>
           </div>

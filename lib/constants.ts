@@ -150,8 +150,6 @@ export const EVENTS: GameEvent[] = [
   {
     id: 'e1',
     title: "The Grand Opening Soiree",
-    date: "2025-01-15",
-    time: "7:00 PM",
     datetime: new Date("2025-01-15T19:00:00Z"),
     location: "The Heritage Manor, Downtown",
     price: 599,
@@ -159,15 +157,12 @@ export const EVENTS: GameEvent[] = [
     image: "https://picsum.photos/seed/event1/800/400",
     capacity: 100,
     registered: 67,
-    status: "upcoming",
     createdAt: new Date("2024-12-01T10:00:00Z"),
     updatedAt: new Date("2024-12-10T14:30:00Z")
   },
   {
     id: 'e2',
     title: "Masterclass: Game Design Workshop",
-    date: "2025-01-22",
-    time: "11:00 AM",
     datetime: new Date("2025-01-22T11:00:00Z"),
     location: "The Creative Hub, City Center",
     price: 0,
@@ -175,15 +170,12 @@ export const EVENTS: GameEvent[] = [
     image: "https://picsum.photos/seed/workshop/800/400",
     capacity: 40,
     registered: 32,
-    status: "upcoming",
     createdAt: new Date("2024-11-20T09:15:00Z"),
     updatedAt: new Date("2024-12-05T11:45:00Z")
   },
   {
     id: 'e3',
     title: "Friday Night Tournament Series",
-    date: "2025-01-17",
-    time: "6:00 PM",
     datetime: new Date("2025-01-17T18:00:00Z"),
     location: "Joy Juncture Studio",
     price: 299,
@@ -191,15 +183,12 @@ export const EVENTS: GameEvent[] = [
     image: "https://picsum.photos/seed/tournament/800/400",
     capacity: 50,
     registered: 45,
-    status: "upcoming",
     createdAt: new Date("2024-11-25T13:20:00Z"),
     updatedAt: new Date("2024-12-12T16:10:00Z")
   },
   {
     id: 'e4',
     title: "Family Game Night",
-    date: "2025-01-18",
-    time: "5:00 PM",
     datetime: new Date("2025-01-18T17:00:00Z"),
     location: "Community Center",
     price: 199,
@@ -207,15 +196,12 @@ export const EVENTS: GameEvent[] = [
     image: "https://picsum.photos/seed/family/800/400",
     capacity: 60,
     registered: 38,
-    status: "upcoming",
     createdAt: new Date("2024-11-28T15:45:00Z"),
     updatedAt: new Date("2024-12-08T10:20:00Z")
   },
   {
     id: 'e5',
     title: "Corporate Team Building Experience",
-    date: "2025-02-01",
-    time: "3:00 PM",
     datetime: new Date("2025-02-01T15:00:00Z"),
     location: "Luxury Business Lounge",
     price: 1299,
@@ -223,15 +209,12 @@ export const EVENTS: GameEvent[] = [
     image: "https://picsum.photos/seed/corporate/800/400",
     capacity: 120,
     registered: 0,
-    status: "upcoming",
     createdAt: new Date("2024-12-05T09:00:00Z"),
     updatedAt: new Date("2024-12-05T09:00:00Z")
   },
   {
     id: 'e6',
     title: "Puzzle & Riddles Championship",
-    date: "2025-02-10",
-    time: "7:00 PM",
     datetime: new Date("2025-02-10T19:00:00Z"),
     location: "Joy Juncture Studio",
     price: 399,
@@ -239,7 +222,6 @@ export const EVENTS: GameEvent[] = [
     image: "https://picsum.photos/seed/puzzle/800/400",
     capacity: 45,
     registered: 29,
-    status: "upcoming",
     createdAt: new Date("2024-11-30T12:30:00Z"),
     updatedAt: new Date("2024-12-09T14:15:00Z")
   },
@@ -247,8 +229,6 @@ export const EVENTS: GameEvent[] = [
   {
     id: 'e7',
     title: "Vintage Board Game Retro Night",
-    date: "2024-12-10",
-    time: "6:30 PM",
     datetime: new Date("2024-12-10T18:30:00Z"),
     location: "Retro Arcade Lounge",
     price: 349,
@@ -256,15 +236,12 @@ export const EVENTS: GameEvent[] = [
     image: "https://picsum.photos/seed/vintage/800/400",
     capacity: 80,
     registered: 72,
-    status: "past",
     createdAt: new Date("2024-10-15T11:00:00Z"),
     updatedAt: new Date("2024-12-11T09:45:00Z")
   },
   {
     id: 'e8',
     title: "Strategy Games Workshop",
-    date: "2024-11-25",
-    time: "2:00 PM",
     datetime: new Date("2024-11-25T14:00:00Z"),
     location: "Strategy Club House",
     price: 0,
@@ -272,15 +249,12 @@ export const EVENTS: GameEvent[] = [
     image: "https://picsum.photos/seed/strategy/800/400",
     capacity: 35,
     registered: 35,
-    status: "past",
     createdAt: new Date("2024-10-10T14:20:00Z"),
     updatedAt: new Date("2024-11-26T10:30:00Z")
   },
   {
     id: 'e9',
     title: "Charity Game Marathon",
-    date: "2024-12-03",
-    time: "12:00 PM",
     datetime: new Date("2024-12-03T12:00:00Z"),
     location: "Joy Juncture Main Hall",
     price: 0,
@@ -288,7 +262,6 @@ export const EVENTS: GameEvent[] = [
     image: "https://picsum.photos/seed/charity/800/400",
     capacity: 150,
     registered: 128,
-    status: "past",
     createdAt: new Date("2024-09-20T08:45:00Z"),
     updatedAt: new Date("2024-12-04T18:20:00Z")
   }

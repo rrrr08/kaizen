@@ -16,24 +16,22 @@ export interface Product {
 export interface GameEvent {
   id: string;
   title: string;
-  date: string;
-  time: string;
   datetime: Date;
   location: string;
   price: number;
   description: string;
-  image: string;
+  image?: string;
   capacity: number;
   registered: number;
-  status: "upcoming" | "past";
   createdAt: Date;
   updatedAt: Date;
 
-  // past-only enrichments
+  // 👇 past-only enrichments
   highlights?: EventHighlight[];
   gallery?: string[];
   testimonials?: EventTestimonial[];
 }
+
 
 export interface EventHighlight {
   icon?: string; // optional emoji or icon key
