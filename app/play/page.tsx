@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
 
@@ -58,13 +59,13 @@ export default function Play() {
                 <li>→ Correct answers = points</li>
               </ul>
             </div>
-            <button className="w-full px-6 py-3 bg-amber-500/10 text-amber-500 font-header text-[9px] tracking-[0.3em] hover:bg-amber-500/20 transition-all rounded-sm">
+            <Link href="/play/sudoku" className="block w-full text-center px-6 py-3 bg-amber-500/10 text-amber-500 font-header text-[9px] tracking-[0.3em] hover:bg-amber-500/20 transition-all rounded-sm">
               PLAY NOW
-            </button>
+            </Link>
           </div>
 
           {/* Riddles */}
-          <div className="border border-white/10 p-8 rounded-sm hover:border-amber-500/40 transition-all group cursor-pointer">
+          <div className="border border-white/10 p-8 rounded-sm hover:border-amber-500/40 transition-all group cursor-pointer relative">
             <h3 className="font-header text-[10px] tracking-[0.6em] text-amber-500 mb-4 uppercase">Riddles</h3>
             <p className="text-white/60 font-serif italic mb-6">Answer & Reveal</p>
             <p className="text-white/70 font-serif text-sm mb-6 leading-relaxed">
@@ -78,9 +79,9 @@ export default function Play() {
                 <li>→ Points for correct guesses</li>
               </ul>
             </div>
-            <button className="w-full px-6 py-3 bg-amber-500/10 text-amber-500 font-header text-[9px] tracking-[0.3em] hover:bg-amber-500/20 transition-all rounded-sm">
+            <Link href="/play/riddles" className="block w-full text-center px-6 py-3 bg-amber-500/10 text-amber-500 font-header text-[9px] tracking-[0.3em] hover:bg-amber-500/20 transition-all rounded-sm">
               PLAY NOW
-            </button>
+            </Link>
           </div>
 
           {/* Puzzles */}

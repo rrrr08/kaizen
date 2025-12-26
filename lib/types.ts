@@ -29,7 +29,7 @@ export interface GameEvent {
   createdAt: Date;
   updatedAt: Date;
 
-  // 👇 past-only enrichments
+  // past-only enrichments
   highlights?: EventHighlight[];
   gallery?: string[];
   testimonials?: EventTestimonial[];
@@ -72,8 +72,26 @@ export interface UserProfile {
   created_at?: any;
   updated_at?: any;
   last_sign_in_at?: any;
-  points?: number;
-  wallet?: number;
+  
+  // Gamification & Economy
+  points?: number; // @deprecated use balance (JP)
+  wallet?: number; // @deprecated use balance (JP)
+  
+  balance: number; // Joy Points (JP) - Spendable
+  xp: number;      // Experience Points (XP) - Status/Tier
+  
+  streak?: {
+    count: number;
+    last_active_date: string; // ISO Date string
+    freeze_count: number;
+  };
+  
+  daily_stats?: {
+    last_spin_date?: string; // ISO Date string
+    eggs_found: number;
+    last_egg_date?: string; // To reset egg count daily
+  };
+
   history?: { date: string; points: number; activity: string }[];
 }
 
