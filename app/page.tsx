@@ -268,13 +268,13 @@ export default function Home() {
             </div>
             <div className="space-y-6 md:translate-y-12">
               <div className="aspect-square relative overflow-hidden rounded-sm grayscale hover:grayscale-0 transition-all duration-700">
-                <Image src="https://images.unsplash.com/photo-1551739440-5dd934d3a95a?q=80&w=1964&auto=format&fit=crop" alt="Event moment" fill className="object-cover" />
+                <Image src="https://images.unsplash.com/photo-1511882150382-421056c89033?q=80&w=2071&auto=format&fit=crop" alt="Event moment" fill className="object-cover" />
               </div>
               <blockquote className="text-white/70 font-serif italic text-sm text-center">"Everyone stayed longer than planned. Games that actually brought people together."</blockquote>
             </div>
             <div className="space-y-6">
               <div className="aspect-square relative overflow-hidden rounded-sm grayscale hover:grayscale-0 transition-all duration-700">
-                <Image src="https://images.unsplash.com/photo-1570215778401-2bfa6743e493?q=80&w=2070&auto=format&fit=crop" alt="Event moment" fill className="object-cover" />
+                <Image src="https://images.unsplash.com/photo-1632501641765-e568d28b0015?q=80&w=1974&auto=format&fit=crop" alt="Event moment" fill className="object-cover" />
               </div>
               <blockquote className="text-white/70 font-serif italic text-sm text-center">"A hidden gem for board game lovers. Calculated joy."</blockquote>
             </div>

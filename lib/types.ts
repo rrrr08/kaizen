@@ -16,6 +16,8 @@ export interface Product {
 export interface GameEvent {
   id: string;
   title: string;
+  date: string;
+  time: string;
   datetime: Date;
   location: string;
   price: number;
