@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import Hero from '@/components/ui/Hero';
 import BentoGrid from '@/components/ui/BentoGrid';
 import ProductCard from '@/components/ui/ProductCard';
-import { Product } from '@/lib/joy-constants';
+import { Product } from '@/lib/types';
 import { GameEvent } from '@/lib/types';
 
 // Dummy data for featured products
@@ -19,7 +19,11 @@ const featuredProducts: Product[] = [
     players: '3-4',
     time: '120m',
     mood: 'Strategic',
-    badges: ['Staff Pick', 'Collector Edition']
+    badges: ['Staff Pick', 'Collector Edition'],
+    description: 'Explore the vast galaxy in this simplified Catan variant designed for space exploration enthusiasts.',
+    story: 'The year is 2700. Humanity has taken to the stars. You are the leader of a faction seeking to establish a foothold in the galaxy.',
+    howToPlay: 'Roll dice to gather resources, trade with other players, and build your starships to explore new plan',
+    occasion: ['Game Night', 'Strategy Session']
   },
   {
     id: '2',
@@ -29,7 +33,11 @@ const featuredProducts: Product[] = [
     players: '2-5',
     time: '15m',
     mood: 'Chaotic Fun',
-    badges: ['Bestseller', 'First-time Friendly']
+    badges: ['Bestseller', 'First-time Friendly'],
+    description: 'A kitty-powered version of Russian Roulette. Players draw cards until someone draws an Exploding Kitten.',
+    story: 'In a world where kittens explore grenades, only one can survive.',
+    howToPlay: 'Draw cards. Don\'t explode. Use defuse cards and other actions to avoid the kittens.',
+    occasion: ['Party', 'Ice Breaker']
   },
   {
     id: '3',
@@ -39,7 +47,11 @@ const featuredProducts: Product[] = [
     players: '3-6',
     time: '30m',
     mood: 'Creative',
-    badges: ['Family Favorite']
+    badges: ['Family Favorite'],
+    description: 'An illustrated game of creative guesswork, where your imagination unlocks the tale.',
+    story: 'A picture is worth a thousand words. Can you guess which picture matches the storyteller\'s phrase?',
+    howToPlay: 'One player acts as the storyteller and gives a clue. Others choose a card that best matches. Vote for the correct card.',
+    occasion: ['Family Night', 'Creative Workshop']
   }
 ];
 

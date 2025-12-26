@@ -56,6 +56,8 @@ export function SignupForm() {
         last_name: lastName,
         name: `${firstName} ${lastName}`.trim(),
         role: USER_ROLES.MEMBER,
+        balance: 0,
+        xp: 0,
       });
 
       // Merge local cart with Firebase after signup

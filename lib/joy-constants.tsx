@@ -19,17 +19,4 @@ export const FloatingPatterns = () => (
     </div>
 );
 
-export interface Product {
-    id: string;
-    name: string;
-    price: number;
-    image: string;
-    players: string;
-    time: string;
-    mood: string;
-    description?: string;
-    occasion?: string[];
-    story?: string;
-    howToPlay?: string;
-    badges: string[];
-}
+
