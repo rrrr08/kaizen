@@ -90,24 +90,24 @@ const UserManagementPage = () => {
 
   return (
     <RoleProtected allowedRoles={[USER_ROLES.ADMIN]}>
-      <div className="min-h-screen bg-gradient-to-br from-black to-slate-900 pt-24 pb-8 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-[#FFFDF5] pb-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="text-center mb-8 border-b border-amber-500/10 pb-12"
+            className="text-center mb-12 border-b-2 border-black pb-8"
           >
             <div className="flex items-center justify-center mb-4">
-              <div className="p-3 bg-gradient-to-r from-emerald-600 to-emerald-700 rounded-lg">
+              <div className="p-3 bg-[#6C5CE7] rounded-xl border-2 border-black neo-shadow">
                 <Users className="w-8 h-8 text-white" />
               </div>
             </div>
-            <h1 className="text-5xl font-header font-bold text-amber-500 mb-4 tracking-tight">
-              USER MANAGEMENT
+            <h1 className="text-5xl font-header font-black text-black mb-2 tracking-tighter uppercase">
+              User Management
             </h1>
-            <p className="text-lg text-white/60 max-w-2xl mx-auto font-header">
+            <p className="text-lg text-black/60 max-w-2xl mx-auto font-medium">
               Manage user accounts, roles, and permissions across the platform.
             </p>
           </motion.div>
@@ -117,16 +117,16 @@ const UserManagementPage = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="mb-6"
+            className="mb-8"
           >
             <div className="relative max-w-md mx-auto lg:mx-0">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/40 w-5 h-5" />
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-black/40 w-5 h-5" />
               <input
                 type="text"
-                placeholder="Search users by name or email..."
+                placeholder="Search users..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-amber-500/20 rounded-lg bg-slate-800/40 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-300 backdrop-blur-sm"
+                className="w-full pl-12 pr-4 py-3 border-2 border-black rounded-xl bg-white text-black placeholder-black/40 focus:outline-none focus:ring-0 neo-shadow transition-all duration-300 font-bold"
               />
             </div>
           </motion.div>
@@ -136,21 +136,21 @@ const UserManagementPage = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="bg-slate-800/40 rounded-lg border border-amber-500/20 overflow-hidden backdrop-blur-sm"
+            className="bg-white rounded-xl border-2 border-black overflow-hidden neo-shadow"
           >
             {loading ? (
-              <div className="flex items-center justify-center py-12">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-500"></div>
-                <span className="ml-3 text-amber-500/60">Loading users...</span>
+              <div className="flex flex-col items-center justify-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#FFD93D] border-t-black mb-4"></div>
+                <span className="text-black font-black uppercase tracking-widest text-xs">Loading users...</span>
               </div>
             ) : (
               <Table>
-                <TableHeader>
-                  <TableRow className="border-b border-amber-500/10">
-                    <TableHead className="font-semibold text-amber-500">User</TableHead>
-                    <TableHead className="font-semibold text-amber-500">Email</TableHead>
-                    <TableHead className="font-semibold text-amber-500">Role</TableHead>
-                    <TableHead className="font-semibold text-amber-500">Actions</TableHead>
+                <TableHeader className="bg-black text-white">
+                  <TableRow className="border-b-2 border-black hover:bg-black">
+                    <TableHead className="font-black text-white uppercase tracking-wider py-4">User</TableHead>
+                    <TableHead className="font-black text-white uppercase tracking-wider py-4">Email</TableHead>
+                    <TableHead className="font-black text-white uppercase tracking-wider py-4">Role</TableHead>
+                    <TableHead className="font-black text-white uppercase tracking-wider py-4">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -160,34 +160,36 @@ const UserManagementPage = () => {
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ duration: 0.3, delay: index * 0.05 }}
-                      className="hover:bg-slate-700/30 transition-colors border-b border-amber-500/5"
+                      className="border-b-2 border-black/5 hover:bg-[#FFFDF5] transition-colors"
                     >
-                      <TableCell>
+                      <TableCell className="py-4">
                         <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 bg-gradient-to-r from-amber-500 to-amber-600 rounded-full flex items-center justify-center text-black font-medium">
+                          <div className="w-10 h-10 bg-[#FFD93D] rounded-full border-2 border-black flex items-center justify-center text-black font-black shadow-[2px_2px_0px_rgba(0,0,0,1)]">
                             {user.name?.charAt(0)?.toUpperCase() || '?'}
                           </div>
                           <div>
-                            <div className="font-medium text-white">{user.name || 'No Name'}</div>
-                            <div className="text-sm text-white/60">
-                              {user.created_at ? new Date(user.created_at.toDate()).toLocaleDateString() : 'Unknown date'}
+                            <div className="font-bold text-black">{user.name || 'No Name'}</div>
+                            <div className="text-xs text-black/60 font-medium uppercase tracking-wide">
+                              Joined {user.created_at ? new Date(user.created_at.toDate()).toLocaleDateString() : 'N/A'}
                             </div>
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell className="text-white/80">{user.email}</TableCell>
+                      <TableCell className="text-black font-medium">{user.email}</TableCell>
                       <TableCell>
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getRoleColor(user.role)}`}>
-                          <span className="mr-1">{getRoleIcon(user.role)}</span>
+                        <span className={`inline-flex items-center px-3 py-1 rounded-lg text-xs font-black uppercase tracking-wider border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,0.1)] ${user.role === 'admin' ? 'bg-[#FF7675] text-black' :
+                            user.role === 'manager' ? 'bg-[#00B894] text-black' : 'bg-gray-100 text-black/60'
+                          }`}>
+                          <span className="mr-2">{getRoleIcon(user.role)}</span>
                           {ROLE_LABELS[user.role] || 'Unknown'}
                         </span>
                       </TableCell>
                       <TableCell>
                         <button
                           onClick={() => openDialog(user)}
-                          className="inline-flex items-center px-3 py-2 bg-amber-500/20 text-amber-400 rounded-lg hover:bg-amber-500/30 transition-colors duration-200 text-sm font-medium border border-amber-500/30"
+                          className="inline-flex items-center px-4 py-2 bg-white text-black rounded-lg hover:bg-black hover:text-white transition-all duration-200 text-xs font-black uppercase tracking-wider border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
                         >
-                          <Edit3 className="w-4 h-4 mr-1" />
+                          <Edit3 className="w-3 h-3 mr-2" />
                           Edit Role
                         </button>
                       </TableCell>
@@ -198,9 +200,11 @@ const UserManagementPage = () => {
             )}
 
             {!loading && filteredUsers.length === 0 && (
-              <div className="text-center py-12">
-                <Users className="w-12 h-12 text-white/20 mx-auto mb-4" />
-                <p className="text-white/60">
+              <div className="text-center py-16 bg-[#FFFDF5]">
+                <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-black border-dashed">
+                  <Users className="w-8 h-8 text-black/40" />
+                </div>
+                <p className="text-black font-black uppercase tracking-widest">
                   {searchTerm ? 'No users found matching your search.' : 'No users found.'}
                 </p>
               </div>
@@ -210,53 +214,53 @@ const UserManagementPage = () => {
           {/* Role Edit Dialog */}
           {selectedUser && (
             <Dialog open={true} onOpenChange={() => setSelectedUser(null)}>
-              <DialogContent className="sm:max-w-md bg-slate-800 border border-amber-500/20">
-                <DialogHeader>
-                  <DialogTitle className="flex items-center space-x-2 text-white">
-                    <Shield className="w-5 h-5 text-amber-500" />
+              <DialogContent className="sm:max-w-md bg-white border-4 border-black neo-shadow p-0 overflow-hidden">
+                <DialogHeader className="p-6 bg-[#FFD93D] border-b-4 border-black">
+                  <DialogTitle className="flex items-center space-x-2 text-black font-black text-2xl uppercase tracking-tighter">
+                    <Shield className="w-6 h-6" />
                     <span>Edit User Role</span>
                   </DialogTitle>
                 </DialogHeader>
-                <div className="space-y-4">
-                  <div className="flex items-center space-x-3 p-4 bg-slate-700/50 rounded-lg border border-amber-500/10">
-                    <div className="w-12 h-12 bg-gradient-to-r from-amber-500 to-amber-600 rounded-full flex items-center justify-center text-black font-medium">
+                <div className="p-6 space-y-6">
+                  <div className="flex items-center space-x-4 p-4 bg-[#FFFDF5] rounded-xl border-2 border-black">
+                    <div className="w-12 h-12 bg-[#6C5CE7] rounded-full flex items-center justify-center text-white font-black border-2 border-black neo-shadow">
                       {selectedUser.name?.charAt(0)?.toUpperCase() || '?'}
                     </div>
                     <div>
-                      <div className="font-medium text-white">{selectedUser.name || 'No Name'}</div>
-                      <div className="text-sm text-white/60">{selectedUser.email}</div>
+                      <div className="font-black text-black text-lg">{selectedUser.name || 'No Name'}</div>
+                      <div className="text-sm text-black/60 font-bold">{selectedUser.email}</div>
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-amber-500 mb-2">
+                    <label className="block text-sm font-black text-black uppercase tracking-widest mb-3">
                       Select New Role
                     </label>
                     <select
                       value={newRole}
                       onChange={(e) => setNewRole(e.target.value)}
-                      className="w-full p-3 border border-amber-500/20 bg-slate-700/50 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                      className="w-full p-4 border-2 border-black bg-white text-black rounded-xl focus:outline-none neo-shadow font-bold appearance-none cursor-pointer hover:bg-gray-50 transition-colors"
                     >
                       {Object.entries(ROLE_LABELS).map(([value, label]) => (
-                        <option key={value} value={value}>
-                          {getRoleIcon(value)} {label}
+                        <option key={value} value={value} className="font-bold">
+                          {label}
                         </option>
                       ))}
                     </select>
                   </div>
                 </div>
-                <DialogFooter className="flex space-x-2">
+                <DialogFooter className="p-6 bg-gray-50 border-t-2 border-black flex gap-3">
                   <DialogClose asChild>
-                    <button className="flex items-center px-4 py-2 text-white/60 bg-slate-700/50 rounded-lg hover:bg-slate-700 transition-colors border border-white/10">
-                      <X className="w-4 h-4 mr-1" />
+                    <button className="flex-1 flex items-center justify-center px-4 py-3 text-black bg-white rounded-xl hover:bg-gray-100 transition-colors border-2 border-black font-black uppercase tracking-wide text-xs">
+                      <X className="w-4 h-4 mr-2" />
                       Cancel
                     </button>
                   </DialogClose>
                   <button
                     onClick={handleRoleChange}
-                    className="flex items-center px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
+                    className="flex-[2] flex items-center justify-center px-4 py-3 bg-[#00B894] text-black rounded-xl hover:bg-[#00A383] transition-colors border-2 border-black neo-shadow active:translate-y-[2px] active:translate-x-[2px] active:shadow-none font-black uppercase tracking-wide text-xs"
                   >
-                    <Check className="w-4 h-4 mr-1" />
+                    <Check className="w-4 h-4 mr-2" />
                     Save Changes
                   </button>
                 </DialogFooter>

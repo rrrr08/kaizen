@@ -2,9 +2,16 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Github, Twitter, Instagram, Youtube } from 'lucide-react';
 
 const Footer = () => {
+  const pathname = usePathname();
+
+  if (pathname.startsWith('/admin')) {
+    return null;
+  }
+
   return (
     <footer className="bg-[#FFFDF5] border-t-2 border-black py-20 px-6">
       <div className="container mx-auto grid grid-cols-1 md:grid-cols-4 gap-12">

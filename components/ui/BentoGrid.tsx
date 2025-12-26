@@ -11,7 +11,7 @@ const journeys = [
         desc: 'Curation for your living room table.',
         icon: "🏠",
         color: 'bg-white',
-        gridClass: 'md:col-span-2 md:row-span-2',
+        gridClass: 'md:col-span-2 md:row-span-1 min-h-[400px]',
         image: 'https://images.unsplash.com/photo-1610890716171-6b1bb98ffd09?auto=format&fit=crop&q=80&w=800'
     },
     {
@@ -21,8 +21,8 @@ const journeys = [
         icon: "👥",
         color: 'bg-[#6C5CE7]',
         textColor: 'text-white',
-        gridClass: 'md:col-span-1 md:row-span-3',
-        image: 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&q=80&w=800',
+        gridClass: 'md:col-span-1 md:row-span-1 min-h-[400px]',
+        image: 'https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?auto=format&fit=crop&q=80&w=800',
         tag: '📅 Next Event: Friday'
     },
     {
@@ -31,7 +31,7 @@ const journeys = [
         desc: 'Parties, Weddings & Corporate Fun.',
         icon: "🎉",
         color: 'bg-[#FFD93D]',
-        gridClass: 'md:col-span-2 md:row-span-1',
+        gridClass: 'md:col-span-1 md:row-span-1 min-h-[400px]',
         image: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?auto=format&fit=crop&q=80&w=800'
     },
     {
@@ -41,7 +41,7 @@ const journeys = [
         icon: "💎",
         color: 'bg-[#00B894]',
         textColor: 'text-white',
-        gridClass: 'md:col-span-1 md:row-span-1',
+        gridClass: 'md:col-span-2 md:row-span-1 min-h-[400px]',
         image: 'https://images.unsplash.com/photo-1557683316-973673baf926?auto=format&fit=crop&q=80&w=800'
     }
 ];
@@ -60,7 +60,7 @@ const BentoGrid: React.FC = () => {
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 md:grid-rows-3 gap-8 h-auto md:h-[900px] group/container">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 group/container">
                     {journeys.map((item) => (
                         <motion.div
                             key={item.id}
@@ -69,12 +69,12 @@ const BentoGrid: React.FC = () => {
                 neo-border-thick neo-shadow rounded-[40px] overflow-hidden group/item transition-all duration-500
                 hover:!grayscale-0 group-hover/container:grayscale group-hover/container:opacity-70 hover:!opacity-100`}
                         >
-                            <div className="absolute inset-0 w-full h-full opacity-10 group-hover/item:opacity-40 transition-opacity duration-500">
+                            <div className="absolute inset-0 w-full h-full opacity-20 group-hover/item:opacity-40 transition-opacity duration-500">
                                 <Image
                                     src={item.image}
                                     alt={item.title}
                                     fill
-                                    className="object-cover"
+                                    className="object-cover object-center"
                                 />
                             </div>
 

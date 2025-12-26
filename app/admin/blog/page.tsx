@@ -202,37 +202,37 @@ export default function AdminBlogPage() {
 
   if (loading) {
     return (
-      <div className="p-8 flex items-center justify-center min-h-screen">
+      <div className="p-8 flex items-center justify-center min-h-screen bg-[#FFFDF5]">
         <div className="text-center">
-          <div className="w-12 h-12 border-4 border-amber-500/20 border-t-amber-500 rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-amber-500">Loading posts...</p>
+          <div className="w-12 h-12 border-4 border-[#FFD93D] border-t-black rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-black font-black uppercase tracking-widest">Loading posts...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="p-8 pb-16">
+    <div className="p-8 pb-16 min-h-screen bg-[#FFFDF5]">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-8 border-b-2 border-black pb-8">
         <div>
-          <h1 className="font-display text-5xl font-bold text-white mb-2">Blog Management</h1>
-          <p className="text-white/60">Create, edit, publish and manage blog posts</p>
+          <h1 className="font-header text-5xl font-black text-black mb-2 uppercase tracking-tighter">Blog Management</h1>
+          <p className="text-black/60 font-bold text-lg">Create, edit, and manage blog posts</p>
         </div>
         <button
           onClick={onAdd}
-          className="px-6 py-3 bg-amber-500 text-black font-header font-bold rounded hover:bg-amber-400 transition flex items-center gap-2"
+          className="px-6 py-3 bg-[#FFD93D] text-black font-black uppercase tracking-wide rounded-xl border-2 border-black neo-shadow hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all flex items-center gap-2"
         >
-          <Plus className="w-5 h-5" />
+          <Plus className="w-5 h-5" strokeWidth={3} />
           New Post
         </button>
       </div>
 
       {/* Filters */}
-      <div className="bg-black/40 border border-white/10 rounded-lg p-6 mb-8">
+      <div className="bg-white border-2 border-black rounded-xl p-6 mb-8 neo-shadow">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-white/60 text-sm mb-2">
+            <label className="block text-black font-black text-xs uppercase tracking-widest mb-2">
               <Search className="w-4 h-4 inline mr-2" />
               Search
             </label>
@@ -241,58 +241,72 @@ export default function AdminBlogPage() {
               placeholder="Title, excerpt, category..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-white/5 border border-white/10 rounded px-4 py-2 text-white placeholder-white/40 focus:border-amber-500 outline-none transition"
+              className="w-full bg-[#FFFDF5] border-2 border-black rounded-xl px-4 py-3 text-black placeholder-black/30 focus:outline-none focus:ring-0 font-bold transition-all"
             />
           </div>
           <div>
-            <label className="block text-white/60 text-sm mb-2">Category</label>
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className="w-full bg-white/5 border border-white/10 rounded px-4 py-2 text-white focus:border-amber-500 outline-none transition"
-            >
-              <option value="all">All</option>
-              {CATEGORIES.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
+            <label className="block text-black font-black text-xs uppercase tracking-widest mb-2">Category</label>
+            <div className="relative">
+              <select
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                className="w-full bg-[#FFFDF5] border-2 border-black rounded-xl px-4 py-3 text-black focus:outline-none font-bold appearance-none cursor-pointer"
+              >
+                <option value="all">All</option>
+                {CATEGORIES.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M2.5 4.5L6 8L9.5 4.5" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
       {/* List */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {filtered.map((post) => (
-          <div key={post.id} className="bg-black/40 border border-white/10 rounded-lg overflow-hidden">
-            <div className="relative h-40 bg-white/5">
+          <div key={post.id} className="bg-white border-2 border-black rounded-[25px] overflow-hidden hover:translate-x-[2px] hover:-translate-y-[2px] transition-transform duration-300 neo-shadow">
+            <div className="relative h-56 bg-gray-100 border-b-2 border-black">
               {post.image ? (
                 <img src={post.image} alt={post.title} className="w-full h-full object-cover" />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-white/30">
-                  <ImageIcon className="w-10 h-10" />
+                <div className="w-full h-full flex items-center justify-center text-black/20 bg-gray-50">
+                  <ImageIcon className="w-16 h-16" />
                 </div>
               )}
+              <div className="absolute top-4 left-4">
+                <span className="px-3 py-1 bg-black text-white text-xs font-black uppercase tracking-wider rounded-lg border-2 border-black shadow-[2px_2px_0px_#FFD93D]">
+                  {post.category}
+                </span>
+              </div>
             </div>
-            <div className="p-6">
-              <h3 className="font-display text-xl font-bold text-white mb-1">{post.title}</h3>
-              <p className="text-white/60 text-sm mb-3">{post.excerpt}</p>
-              <div className="flex items-center justify-between text-xs text-white/50 mb-4">
-                <span>{post.category}</span>
+            <div className="p-8">
+              <h3 className="font-header text-2xl font-black text-black mb-3 line-clamp-2 uppercase tracking-tight leading-none">{post.title}</h3>
+              <p className="text-black/60 text-sm font-bold mb-6 line-clamp-2">{post.excerpt}</p>
+
+              <div className="flex items-center justify-between text-xs font-black uppercase tracking-widest text-black/40 mb-6 pb-6 border-b-2 border-black/5">
+                <span>By {post.author ? post.author.split('@')[0] : 'Admin'}</span>
                 <span>{post.updatedAt ? `Updated ${new Date(post.updatedAt).toLocaleDateString()}` : ''}</span>
               </div>
-              <div className="flex gap-2">
+
+              <div className="flex gap-4">
                 <button
                   onClick={() => onEdit(post)}
-                  className="flex-1 px-3 py-2 bg-blue-500/10 border border-blue-500/20 rounded text-blue-400 text-sm font-semibold hover:bg-blue-500/20 transition flex items-center justify-center gap-2"
+                  className="flex-1 px-4 py-3 bg-[#6C5CE7] border-2 border-black rounded-xl text-white text-sm font-black uppercase tracking-wide hover:bg-[#5849be] transition-all flex items-center justify-center gap-2 neo-shadow-sm active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
                 >
                   <Edit2 className="w-4 h-4" />
                   Edit
                 </button>
                 <button
                   onClick={() => onDelete(post.id)}
-                  className="flex-1 px-3 py-2 bg-red-500/10 border border-red-500/20 rounded text-red-400 text-sm font-semibold hover:bg-red-500/20 transition flex items-center justify-center gap-2"
+                  className="flex-1 px-4 py-3 bg-[#FF7675]/20 border-2 border-[#FF7675] rounded-xl text-[#D63031] text-sm font-black uppercase tracking-wide hover:bg-[#FF7675] hover:text-black hover:border-black transition-all flex items-center justify-center gap-2"
                 >
                   <Trash2 className="w-4 h-4" />
                   Delete
@@ -304,92 +318,104 @@ export default function AdminBlogPage() {
       </div>
 
       {filtered.length === 0 && (
-        <div className="text-center py-12 text-white/60">No posts found</div>
+        <div className="text-center py-20 bg-white border-2 border-black rounded-[30px] border-dashed">
+          <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6 border-2 border-black">
+            <ImageIcon className="w-10 h-10 text-black/20" />
+          </div>
+          <p className="text-black font-black uppercase tracking-widest text-lg">No posts found</p>
+          <p className="text-black/40 font-bold mt-2">Start writing your first blog post!</p>
+        </div>
       )}
 
       {/* Modal */}
       {showForm && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-          <div className="bg-black border border-white/10 rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between p-6 border-b border-white/10 sticky top-0 bg-black">
-              <h2 className="font-display text-2xl font-bold text-white">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-[#FFFDF5] border-4 border-black rounded-[20px] max-w-3xl w-full max-h-[90vh] overflow-y-auto neo-shadow-lg">
+            <div className="flex items-center justify-between p-6 border-b-4 border-black bg-[#FFD93D] sticky top-0 z-10">
+              <h2 className="font-header text-3xl font-black text-black uppercase tracking-tighter">
                 {editingId ? "Edit Post" : "New Post"}
               </h2>
-              <button onClick={() => setShowForm(false)} className="text-white/60 hover:text-white transition">
+              <button onClick={() => setShowForm(false)} className="bg-black text-white p-2 rounded-lg hover:rotate-90 transition duration-300">
                 <X className="w-6 h-6" />
               </button>
             </div>
 
-            <form onSubmit={onSubmit} className="p-6 space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-white/60 text-sm mb-2">Title *</label>
+            <form onSubmit={onSubmit} className="p-8 space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="md:col-span-2">
+                  <label className="block text-black font-black text-xs uppercase tracking-widest mb-2">Title *</label>
                   <input
                     value={form.title}
                     onChange={(e) => setForm({ ...form, title: e.target.value })}
-                    className="w-full bg-white/5 border border-white/10 rounded px-4 py-2 text-white placeholder-white/40 focus:border-amber-500 outline-none transition"
-                    placeholder="Enter title"
+                    className="w-full bg-white border-2 border-black rounded-xl px-4 py-3 text-black placeholder-black/30 focus:outline-none focus:ring-0 focus:shadow-[4px_4px_0px_#000] transition-shadow font-bold text-lg"
+                    placeholder="Enter catchy title"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-white/60 text-sm mb-2">Category *</label>
-                  <select
-                    value={form.category}
-                    onChange={(e) => setForm({ ...form, category: e.target.value })}
-                    className="w-full bg-white/5 border border-white/10 rounded px-4 py-2 text-white focus:border-amber-500 outline-none transition"
-                  >
-                    {CATEGORIES.map((c) => (
-                      <option key={c} value={c}>
-                        {c}
-                      </option>
-                    ))}
-                  </select>
+                  <label className="block text-black font-black text-xs uppercase tracking-widest mb-2">Category *</label>
+                  <div className="relative">
+                    <select
+                      value={form.category}
+                      onChange={(e) => setForm({ ...form, category: e.target.value })}
+                      className="w-full bg-white border-2 border-black rounded-xl px-4 py-3 text-black focus:outline-none focus:shadow-[4px_4px_0px_#000] font-bold appearance-none transition-shadow cursor-pointer"
+                    >
+                      {CATEGORIES.map((c) => (
+                        <option key={c} value={c}>
+                          {c}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M2.5 4.5L6 8L9.5 4.5" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </div>
+                  </div>
                 </div>
-                <div className="md:col-span-2">
-                  <label className="block text-white/60 text-sm mb-2">Excerpt *</label>
-                  <input
-                    value={form.excerpt}
-                    onChange={(e) => setForm({ ...form, excerpt: e.target.value })}
-                    className="w-full bg-white/5 border border-white/10 rounded px-4 py-2 text-white placeholder-white/40 focus:border-amber-500 outline-none transition"
-                    placeholder="Short summary"
-                    required
-                  />
-                </div>
-                <div className="md:col-span-2">
-                  <label className="block text-white/60 text-sm mb-2">Content *</label>
-                  <textarea
-                    value={form.content}
-                    onChange={(e) => setForm({ ...form, content: e.target.value })}
-                    className="w-full min-h-48 bg-white/5 border border-white/10 rounded px-4 py-2 text-white placeholder-white/40 focus:border-amber-500 outline-none transition"
-                    placeholder="Write the full content here"
-                    required
-                  />
-                </div>
-                <div className="md:col-span-2">
-                  <label className="block text-white/60 text-sm mb-2">Header Image URL</label>
+                <div>
+                  <label className="block text-black font-black text-xs uppercase tracking-widest mb-2">Header Image URL</label>
                   <input
                     value={form.image}
                     onChange={(e) => setForm({ ...form, image: e.target.value })}
-                    className="w-full bg-white/5 border border-white/10 rounded px-4 py-2 text-white placeholder-white/40 focus:border-amber-500 outline-none transition"
+                    className="w-full bg-white border-2 border-black rounded-xl px-4 py-3 text-black placeholder-black/30 focus:outline-none focus:shadow-[4px_4px_0px_#000] transition-shadow font-bold"
                     placeholder="https://..."
                   />
                 </div>
-                {/* Publish controls removed */}
+                <div className="md:col-span-2">
+                  <label className="block text-black font-black text-xs uppercase tracking-widest mb-2">Excerpt *</label>
+                  <input
+                    value={form.excerpt}
+                    onChange={(e) => setForm({ ...form, excerpt: e.target.value })}
+                    className="w-full bg-white border-2 border-black rounded-xl px-4 py-3 text-black placeholder-black/30 focus:outline-none focus:shadow-[4px_4px_0px_#000] transition-shadow font-bold"
+                    placeholder="Short summary for the card"
+                    required
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-black font-black text-xs uppercase tracking-widest mb-2">Content *</label>
+                  <textarea
+                    value={form.content}
+                    onChange={(e) => setForm({ ...form, content: e.target.value })}
+                    className="w-full min-h-64 bg-white border-2 border-black rounded-xl px-4 py-3 text-black placeholder-black/30 focus:outline-none focus:shadow-[4px_4px_0px_#000] transition-shadow font-medium leading-relaxed"
+                    placeholder="Write the full content here..."
+                    required
+                  />
+                </div>
               </div>
 
-              <div className="flex justify-end gap-3 pt-2">
+              <div className="flex justify-end gap-4 pt-6 border-t-2 border-black/10">
                 <button
                   type="button"
                   onClick={() => setShowForm(false)}
-                  className="px-4 py-2 bg-white/5 border border-white/10 rounded text-white/80 hover:bg-white/10 transition"
+                  className="px-6 py-3 bg-white border-2 border-black rounded-xl text-black font-black uppercase tracking-widest hover:bg-gray-100 transition"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-6 py-2 bg-amber-500 text-black font-header font-bold rounded hover:bg-amber-400 transition disabled:opacity-50"
+                  className="px-8 py-3 bg-[#00B894] text-black font-black uppercase tracking-widest rounded-xl border-2 border-black neo-shadow hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all disabled:opacity-50"
                 >
                   {submitting ? "Saving..." : editingId ? "Save Changes" : "Create Post"}
                 </button>

@@ -87,10 +87,10 @@ export default function EventsPage() {
 
   if (loading) {
     return (
-      <div className="p-8 flex items-center justify-center min-h-screen">
+      <div className="p-8 flex items-center justify-center min-h-screen bg-[#FFFDF5]">
         <div className="text-center">
-          <div className="w-12 h-12 border-4 border-amber-500/20 border-t-amber-500 rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-amber-500">Loading events...</p>
+          <div className="w-12 h-12 border-4 border-[#FFD93D] border-t-black rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-black font-black uppercase tracking-widest">Loading events...</p>
         </div>
       </div>
     );
@@ -113,47 +113,47 @@ export default function EventsPage() {
   }
 
   return (
-    <div className="p-8 pb-16">
+    <div className="p-8 pb-16 min-h-screen bg-[#FFFDF5]">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-8 border-b-2 border-black pb-8">
         <div>
-          <h1 className="font-display text-5xl font-bold text-white mb-2">Events Management</h1>
-          <p className="text-white/60">Organize and manage community events</p>
+          <h1 className="font-header text-5xl font-black text-black mb-2 uppercase tracking-tighter">Events Management</h1>
+          <p className="text-black/60 font-bold text-lg">Organize and manage community events</p>
         </div>
         <button
           onClick={handleCreateEvent}
-          className="px-6 py-3 bg-amber-500 text-black font-header font-bold rounded hover:bg-amber-400 transition flex items-center gap-2"
+          className="px-6 py-3 bg-[#FFD93D] text-black font-black uppercase tracking-wide rounded-xl border-2 border-black neo-shadow hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all flex items-center gap-2"
         >
-          <Plus className="w-5 h-5" />
+          <Plus className="w-5 h-5" strokeWidth={3} />
           Create Event
         </button>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div className="bg-gradient-to-br from-purple-500/10 to-transparent border border-purple-500/20 rounded-lg p-6">
-          <p className="text-white/60 text-sm mb-2">Total Events</p>
-          <p className="font-display text-4xl font-bold text-purple-400">{totalEvents}</p>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+        <div className="bg-[#6C5CE7] border-2 border-black rounded-[20px] p-6 neo-shadow hover:-translate-y-1 transition-transform">
+          <p className="text-white text-xs font-black uppercase tracking-widest mb-2">Total Events</p>
+          <p className="font-header text-5xl font-black text-white">{totalEvents}</p>
         </div>
-        <div className="bg-gradient-to-br from-blue-500/10 to-transparent border border-blue-500/20 rounded-lg p-6">
-          <p className="text-white/60 text-sm mb-2">Total Registrations</p>
-          <p className="font-display text-4xl font-bold text-blue-400">{totalRegistrations}</p>
+        <div className="bg-[#FF7675] border-2 border-black rounded-[20px] p-6 neo-shadow hover:-translate-y-1 transition-transform">
+          <p className="text-black text-xs font-black uppercase tracking-widest mb-2">Registrations</p>
+          <p className="font-header text-5xl font-black text-black">{totalRegistrations}</p>
         </div>
-        <div className="bg-gradient-to-br from-green-500/10 to-transparent border border-green-500/20 rounded-lg p-6">
-          <p className="text-white/60 text-sm mb-2">Total Capacity</p>
-          <p className="font-display text-4xl font-bold text-green-400">{totalCapacity}</p>
+        <div className="bg-[#74B9FF] border-2 border-black rounded-[20px] p-6 neo-shadow hover:-translate-y-1 transition-transform">
+          <p className="text-black text-xs font-black uppercase tracking-widest mb-2">Capacity</p>
+          <p className="font-header text-5xl font-black text-black">{totalCapacity}</p>
         </div>
-        <div className="bg-gradient-to-br from-amber-500/10 to-transparent border border-amber-500/20 rounded-lg p-6">
-          <p className="text-white/60 text-sm mb-2">Occupancy Rate</p>
-          <p className="font-display text-4xl font-bold text-amber-400">{occupancyRate}%</p>
+        <div className="bg-[#00B894] border-2 border-black rounded-[20px] p-6 neo-shadow hover:-translate-y-1 transition-transform">
+          <p className="text-black text-xs font-black uppercase tracking-widest mb-2">Occupancy Rate</p>
+          <p className="font-header text-5xl font-black text-black">{occupancyRate}%</p>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="bg-black/40 border border-white/10 rounded-lg p-6 mb-8">
+      <div className="bg-white border-2 border-black rounded-xl p-6 mb-8 neo-shadow">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-white/60 text-sm mb-2">
+            <label className="block text-black font-black text-xs uppercase tracking-widest mb-2">
               <Search className="w-4 h-4 inline mr-2" />
               Search Events
             </label>
@@ -162,19 +162,26 @@ export default function EventsPage() {
               placeholder="Event name..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-white/5 border border-white/10 rounded px-4 py-2 text-white placeholder-white/40 focus:border-amber-500 outline-none transition"
+              className="w-full bg-[#FFFDF5] border-2 border-black rounded-xl px-4 py-3 text-black placeholder-black/30 focus:outline-none focus:ring-0 font-bold transition-all"
             />
           </div>
           <div>
-            <label className="block text-white/60 text-sm mb-2">Filter by Status</label>
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as any)}
-              className="w-full bg-white/5 border border-white/10 rounded px-4 py-2 text-white focus:border-amber-500 outline-none transition"
-            >
-              <option value="upcoming">Upcoming</option>
-              <option value="past">Past</option>
-            </select>
+            <label className="block text-black font-black text-xs uppercase tracking-widest mb-2">Filter by Status</label>
+            <div className="relative">
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value as any)}
+                className="w-full bg-[#FFFDF5] border-2 border-black rounded-xl px-4 py-3 text-black focus:outline-none font-bold appearance-none cursor-pointer"
+              >
+                <option value="upcoming">Upcoming</option>
+                <option value="past">Past</option>
+              </select>
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M2.5 4.5L6 8L9.5 4.5" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -184,84 +191,93 @@ export default function EventsPage() {
         {filteredEvents.map((event) => (
           <div
             key={event.id}
-            className="bg-black/40 border border-white/10 rounded-lg overflow-hidden hover:border-amber-500/50 transition flex flex-col md:flex-row"
+            className="bg-white border-2 border-black rounded-[25px] overflow-hidden hover:translate-x-1 hover:-translate-y-1 transition-transform duration-300 neo-shadow group flex flex-col md:flex-row"
           >
             {/* Image */}
-            <div className="w-full md:w-64 h-48 md:h-auto bg-white/5 flex-shrink-0 overflow-hidden">
-              {event.image !== "" && <img
-                src={event.image}
-                alt={event.title}
-                className="w-full h-full object-cover"
-              />}
+            <div className="w-full md:w-80 h-64 md:h-auto bg-gray-100 flex-shrink-0 overflow-hidden border-b-2 md:border-b-0 md:border-r-2 border-black relative">
+              {event.image !== "" ? (
+                <img
+                  src={event.image}
+                  alt={event.title}
+                  className="w-full h-full object-cover group-hover:scale-110 transition duration-500"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                  <Calendar className="w-12 h-12 text-black/20" />
+                </div>
+              )}
+              <div className="absolute top-4 left-4">
+                <span className={`px-3 py-1 text-black text-xs font-black uppercase tracking-wider rounded-lg border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] ${statusFilter === 'upcoming' ? 'bg-[#00B894]' : 'bg-gray-300'}`}>
+                  {statusFilter === 'upcoming' ? 'Upcoming' : 'Past'}
+                </span>
+              </div>
             </div>
 
             {/* Content */}
             <div className="flex-1 p-8 flex flex-col justify-between">
               <div>
-                <div className="flex items-start justify-between gap-4 mb-4">
-                  <div>
-                    <h3 className="font-display text-2xl font-bold text-white mb-2">{event.title}</h3>
-                    <p className="text-white/60 text-sm mb-4">{event.description}</p>
-                  </div>
+                <div className="mb-6">
+                  <h3 className="font-header text-3xl font-black text-black mb-2 uppercase tracking-tight">{event.title}</h3>
+                  <p className="text-black/60 text-sm font-medium leading-relaxed">{event.description}</p>
                 </div>
 
                 {/* Event Details */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                  <div>
-                    <p className="text-white/60 text-xs mb-1 flex items-center gap-1">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                  <div className="bg-[#FFFDF5] p-3 rounded-xl border-2 border-black">
+                    <p className="text-black/40 text-xs font-black uppercase tracking-wider mb-1 flex items-center gap-1">
                       <Calendar className="w-3 h-3" /> Date
                     </p>
-                    <p className="text-white font-semibold">{splitDateTime(event.datetime).date}</p>
-                    <p className="text-white/60 text-xs">{splitDateTime(event.datetime).time}</p>
+                    <p className="text-black font-black">{splitDateTime(event.datetime).date}</p>
+                    <p className="text-black/60 text-xs font-bold">{splitDateTime(event.datetime).time}</p>
                   </div>
-                  <div>
-                    <p className="text-white/60 text-xs mb-1 flex items-center gap-1">
+                  <div className="bg-[#FFFDF5] p-3 rounded-xl border-2 border-black">
+                    <p className="text-black/40 text-xs font-black uppercase tracking-wider mb-1 flex items-center gap-1">
                       <MapPin className="w-3 h-3" /> Location
                     </p>
-                    <p className="text-white font-semibold text-sm">{event.location}</p>
+                    <p className="text-black font-black text-sm truncate" title={event.location}>{event.location}</p>
                   </div>
-                  <div>
-                    <p className="text-white/60 text-xs mb-1">Capacity</p>
-                    <p className="text-white font-semibold">{event.capacity}</p>
+                  <div className="bg-[#FFFDF5] p-3 rounded-xl border-2 border-black">
+                    <p className="text-black/40 text-xs font-black uppercase tracking-wider mb-1">Capacity</p>
+                    <p className="text-black font-black">{event.capacity}</p>
                   </div>
-                  <div>
-                    <p className="text-white/60 text-xs mb-1 flex items-center gap-1">
+                  <div className="bg-[#FFFDF5] p-3 rounded-xl border-2 border-black">
+                    <p className="text-black/40 text-xs font-black uppercase tracking-wider mb-1 flex items-center gap-1">
                       <Users className="w-3 h-3" /> Registered
                     </p>
-                    <p className="text-amber-400 font-semibold">{event.registered}</p>
-                    <p className="text-white/60 text-xs">{Math.round((event.registered / event.capacity) * 100)}% full</p>
+                    <p className="text-[#00B894] font-black">{event.registered}</p>
+                    <p className="text-black/40 text-xs font-bold">{Math.round((event.registered / event.capacity) * 100)}% full</p>
                   </div>
                 </div>
 
                 {/* Registration Bar */}
                 <div className="mb-6">
-                  <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
+                  <div className="w-full h-4 bg-gray-100 rounded-full overflow-hidden border-2 border-black">
                     <div
-                      className="h-full bg-gradient-to-r from-amber-500 to-amber-400"
-                      style={{ width: `${(event.registered / event.capacity) * 100}%` }}
+                      className="h-full bg-[#FFD93D] border-r-2 border-black"
+                      style={{ width: `${Math.min((event.registered / event.capacity) * 100, 100)}%` }}
                     ></div>
                   </div>
                 </div>
               </div>
 
               {/* Actions */}
-              <div className="flex gap-2">
+              <div className="flex gap-4 pt-6 border-t-2 border-black/5">
                 <button
                   onClick={() => handleEditEvent(event.id)}
-                  className="flex-1 px-4 py-2 bg-blue-500/10 border border-blue-500/20 rounded text-blue-400 text-sm font-semibold hover:bg-blue-500/20 transition flex items-center justify-center gap-2"
+                  className="flex-1 px-4 py-3 bg-white border-2 border-black rounded-xl text-black text-sm font-black uppercase tracking-wide hover:bg-black hover:text-white transition-all flex items-center justify-center gap-2 neo-shadow-sm active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
                 >
                   <Edit2 className="w-4 h-4" />
                   Edit
                 </button>
                 <button
                   onClick={() => handleViewRegistrations(event.id)}
-                  className="flex-1 px-4 py-2 bg-amber-500/10 border border-amber-500/20 rounded text-amber-400 text-sm font-semibold hover:bg-amber-500/20 transition"
+                  className="flex-1 px-4 py-3 bg-[#6C5CE7] border-2 border-black rounded-xl text-white text-sm font-black uppercase tracking-wide hover:bg-[#5849be] transition-all neo-shadow-sm active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
                 >
-                  View Registrations
+                  Registrations
                 </button>
                 <button
                   onClick={() => handleDeleteEvent(event.id)}
-                  className="flex-1 px-4 py-2 bg-red-500/10 border border-red-500/20 rounded text-red-400 text-sm font-semibold hover:bg-red-500/20 transition flex items-center justify-center gap-2"
+                  className="flex-1 px-4 py-3 bg-[#FF7675]/20 border-2 border-[#FF7675] rounded-xl text-[#D63031] text-sm font-black uppercase tracking-wide hover:bg-[#FF7675] hover:text-white hover:border-black transition-all flex items-center justify-center gap-2"
                 >
                   <Trash2 className="w-4 h-4" />
                   Cancel
@@ -273,9 +289,12 @@ export default function EventsPage() {
       </div>
 
       {filteredEvents.length === 0 && (
-        <div className="text-center py-12">
-          <Calendar className="w-12 h-12 text-white/20 mx-auto mb-4" />
-          <p className="text-white/60">No events found</p>
+        <div className="text-center py-20 bg-white border-2 border-black rounded-[30px] border-dashed">
+          <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6 border-2 border-black">
+            <Calendar className="w-10 h-10 text-black/20" />
+          </div>
+          <p className="text-black font-black uppercase tracking-widest text-lg">No events found</p>
+          <p className="text-black/40 font-bold mt-2">Create a new event to get started</p>
         </div>
       )}
     </div>

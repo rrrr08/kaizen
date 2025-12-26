@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Coins, ShoppingBag, Menu, X, User, LogOut, Settings, LayoutDashboard } from 'lucide-react';
+import { Coins, ShoppingBag, Menu, X, User, LogOut, Settings, LayoutDashboard, ChevronDown } from 'lucide-react';
 import { useCart } from '@/app/context/CartContext';
 import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
 import { doc, getDoc, getFirestore } from 'firebase/firestore';
@@ -78,6 +78,54 @@ const Navbar: React.FC = () => {
         {/* Desktop Menu */}
         <div className="relative hidden lg:flex bg-white/50 p-1.5 rounded-full border-2 border-black items-center shadow-[4px_4px_0px_rgba(0,0,0,0.1)]">
           {navItems.map((item, idx) => {
+            if (item.name === 'Events') {
+              const isActive = pathname.startsWith('/events');
+              return (
+                <DropdownMenu.Root key={item.path}>
+                  <DropdownMenu.Trigger asChild>
+                    <button
+                      className={`relative px-5 py-2 rounded-full text-sm font-black uppercase tracking-wider transition-colors duration-300 z-10 flex items-center gap-1 outline-none ${isActive ? 'text-white' : 'text-black hover:bg-black/5'}`}
+                      onMouseEnter={() => setHoveredIndex(idx)}
+                      onMouseLeave={() => setHoveredIndex(null)}
+                    >
+                      {isActive && (
+                        <motion.div
+                          layoutId="activeNav"
+                          className="absolute inset-0 bg-black rounded-full -z-10"
+                          transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+                        />
+                      )}
+                      {item.name}
+                      <ChevronDown size={14} strokeWidth={3} className={isActive ? "text-white" : "text-black"} />
+                    </button>
+                  </DropdownMenu.Trigger>
+                  <DropdownMenu.Portal>
+                    <DropdownMenu.Content
+                      className="w-48 bg-white border-2 border-black rounded-xl p-2 neo-shadow z-[60] data-[side=bottom]:animate-slideUpAndFade"
+                      sideOffset={10}
+                    >
+                      <DropdownMenu.Item className="group">
+                        <Link
+                          href="/events/upcoming"
+                          className="flex items-center gap-2 px-3 py-2 text-sm font-black text-black rounded-lg hover:bg-[#FFD93D] hover:text-black hover:border-black transition-colors border-2 border-transparent uppercase tracking-wide"
+                        >
+                          Upcoming
+                        </Link>
+                      </DropdownMenu.Item>
+                      <DropdownMenu.Item className="group mt-1">
+                        <Link
+                          href="/events/past"
+                          className="flex items-center gap-2 px-3 py-2 text-sm font-black text-black rounded-lg hover:bg-[#6C5CE7] hover:text-white transition-colors border-2 border-transparent uppercase tracking-wide"
+                        >
+                          Past Events
+                        </Link>
+                      </DropdownMenu.Item>
+                    </DropdownMenu.Content>
+                  </DropdownMenu.Portal>
+                </DropdownMenu.Root>
+              );
+            }
+
             const isActive = pathname.startsWith(item.path);
             return (
               <Link
@@ -233,16 +281,39 @@ const Navbar: React.FC = () => {
             className="fixed inset-0 top-[80px] z-40 bg-[#FFFDF5] p-6 lg:hidden overflow-y-auto"
           >
             <div className="flex flex-col gap-4">
-              {navItems.map((item) => (
-                <Link
-                  key={item.path}
-                  href={item.path}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="text-4xl font-black text-black hover:text-[#6C5CE7] uppercase tracking-tighter"
-                >
-                  {item.name}
-                </Link>
-              ))}
+              {navItems.map((item) => {
+                if (item.name === 'Events') {
+                  return (
+                    <div key={item.path} className="flex flex-col gap-2">
+                      <span className="text-4xl font-black text-black/40 uppercase tracking-tighter">Events</span>
+                      <Link
+                        href="/events/upcoming"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="text-2xl font-black text-black hover:text-[#FFD93D] uppercase tracking-tighter pl-4"
+                      >
+                        → Upcoming
+                      </Link>
+                      <Link
+                        href="/events/past"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="text-2xl font-black text-black hover:text-[#6C5CE7] uppercase tracking-tighter pl-4"
+                      >
+                        → Past
+                      </Link>
+                    </div>
+                  );
+                }
+                return (
+                  <Link
+                    key={item.path}
+                    href={item.path}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="text-4xl font-black text-black hover:text-[#6C5CE7] uppercase tracking-tighter"
+                  >
+                    {item.name}
+                  </Link>
+                );
+              })}
               {isAdmin && (
                 <Link
                   href="/admin"

@@ -140,67 +140,76 @@ export default function PushNotificationsPage() {
   }
 
   return (
-    <div className="min-h-screen pt-28 pb-16 bg-background">
+    <div className="min-h-screen pt-28 pb-16 bg-[#FFFDF5]">
       <div className="max-w-6xl mx-auto px-6 md:px-12">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 rounded-lg bg-primary/20 flex items-center justify-center">
-              <Bell className="w-6 h-6 text-primary" />
+        <div className="mb-12 border-b-2 border-black pb-8">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="w-16 h-16 rounded-xl bg-[#6C5CE7] border-2 border-black flex items-center justify-center neo-shadow">
+              <Bell className="w-8 h-8 text-white" />
             </div>
             <div>
-              <h1 className="font-display text-3xl font-bold">Push Notifications</h1>
-              <p className="text-muted-foreground">Send mobile notifications to users in real-time</p>
+              <h1 className="font-header text-5xl font-black text-black uppercase tracking-tighter">Push Notifications</h1>
+              <p className="text-black/60 font-bold text-lg">Send mobile notifications to users in real-time</p>
             </div>
           </div>
         </div>
 
-        <Tabs defaultValue="send" className="space-y-6">
-          <TabsList className="grid grid-cols-3 w-full">
-            <TabsTrigger value="send" className="flex items-center gap-2">
-              <Send className="w-4 h-4" />
+        <Tabs defaultValue="send" className="space-y-8">
+          <TabsList className="grid grid-cols-3 w-full bg-transparent gap-4 h-auto p-0">
+            <TabsTrigger
+              value="send"
+              className="flex items-center gap-2 bg-white border-2 border-black rounded-xl py-4 data-[state=active]:bg-[#FFD93D] data-[state=active]:text-black font-black uppercase tracking-widest text-black/40 hover:bg-gray-50 transition-all shadow-[4px_4px_0px_rgba(0,0,0,1)] data-[state=active]:shadow-none data-[state=active]:translate-x-[2px] data-[state=active]:translate-y-[2px]"
+            >
+              <Send className="w-4 h-4" strokeWidth={3} />
               Send Notification
             </TabsTrigger>
-            <TabsTrigger value="scheduled" className="flex items-center gap-2">
-              <Clock className="w-4 h-4" />
+            <TabsTrigger
+              value="scheduled"
+              className="flex items-center gap-2 bg-white border-2 border-black rounded-xl py-4 data-[state=active]:bg-[#00B894] data-[state=active]:text-black font-black uppercase tracking-widest text-black/40 hover:bg-gray-50 transition-all shadow-[4px_4px_0px_rgba(0,0,0,1)] data-[state=active]:shadow-none data-[state=active]:translate-x-[2px] data-[state=active]:translate-y-[2px]"
+            >
+              <Clock className="w-4 h-4" strokeWidth={3} />
               Scheduled
             </TabsTrigger>
-            <TabsTrigger value="analytics" className="flex items-center gap-2">
-              <BarChart3 className="w-4 h-4" />
+            <TabsTrigger
+              value="analytics"
+              className="flex items-center gap-2 bg-white border-2 border-black rounded-xl py-4 data-[state=active]:bg-[#FF7675] data-[state=active]:text-black font-black uppercase tracking-widest text-black/40 hover:bg-gray-50 transition-all shadow-[4px_4px_0px_rgba(0,0,0,1)] data-[state=active]:shadow-none data-[state=active]:translate-x-[2px] data-[state=active]:translate-y-[2px]"
+            >
+              <BarChart3 className="w-4 h-4" strokeWidth={3} />
               Analytics
             </TabsTrigger>
           </TabsList>
 
           {/* Send Notification Tab */}
           <TabsContent value="send">
-            <div className="glass-card p-8 rounded-lg max-w-2xl">
+            <div className="bg-white border-2 border-black rounded-[25px] p-8 max-w-2xl neo-shadow">
               <form onSubmit={handleSendCampaign} className="space-y-6">
                 {/* Title Input */}
                 <div>
-                  <label className="block text-sm font-header font-semibold mb-2">
-                    Title <span className="text-destructive">*</span>
+                  <label className="block text-black font-black text-xs uppercase tracking-widest mb-2">
+                    Title <span className="text-[#FF7675]">*</span>
                   </label>
                   <div className="relative">
-                    <Input
+                    <input
                       type="text"
                       name="title"
                       value={formData.title}
                       onChange={handleInputChange}
                       placeholder="e.g., Flash Sale - 50% Off!"
                       maxLength={65}
-                      className="pr-12"
+                      className="w-full bg-[#FFFDF5] border-2 border-black rounded-xl px-4 py-3 text-black placeholder-black/30 focus:outline-none focus:neo-shadow-sm transition-all font-bold pr-16"
                     />
-                    <span className="absolute right-3 top-3 text-xs text-muted-foreground">
+                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-black text-black/40">
                       {formData.title.length}/65
                     </span>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1">Maximum 65 characters</p>
+                  <p className="text-xs text-black/40 font-bold mt-1 uppercase tracking-wide">Maximum 65 characters</p>
                 </div>
 
                 {/* Message Input */}
                 <div>
-                  <label className="block text-sm font-header font-semibold mb-2">
-                    Message <span className="text-destructive">*</span>
+                  <label className="block text-black font-black text-xs uppercase tracking-widest mb-2">
+                    Message <span className="text-[#FF7675]">*</span>
                   </label>
                   <div className="relative">
                     <Textarea
@@ -210,119 +219,125 @@ export default function PushNotificationsPage() {
                       placeholder="e.g., Get 50% off on selected games this weekend only!"
                       maxLength={240}
                       rows={4}
-                      className="resize-none pr-12"
+                      className="w-full bg-[#FFFDF5] border-2 border-black rounded-xl px-4 py-3 text-black placeholder-black/30 focus:outline-none focus:neo-shadow-sm transition-all resize-none font-medium leading-relaxed pr-16"
                     />
-                    <span className="absolute right-3 bottom-3 text-xs text-muted-foreground">
+                    <span className="absolute right-4 bottom-4 text-xs font-black text-black/40">
                       {formData.message.length}/240
                     </span>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1">Maximum 240 characters</p>
+                  <p className="text-xs text-black/40 font-bold mt-1 uppercase tracking-wide">Maximum 240 characters</p>
                 </div>
 
                 {/* Image URL */}
                 <div>
-                  <label className="block text-sm font-header font-semibold mb-2">
+                  <label className="block text-black font-black text-xs uppercase tracking-widest mb-2">
                     Image URL (Optional)
                   </label>
-                  <Input
+                  <input
                     type="url"
                     name="image"
                     value={formData.image}
                     onChange={handleInputChange}
                     placeholder="https://example.com/image.jpg"
+                    className="w-full bg-[#FFFDF5] border-2 border-black rounded-xl px-4 py-3 text-black placeholder-black/30 focus:outline-none focus:neo-shadow-sm transition-all font-bold"
                   />
-                  <p className="text-xs text-muted-foreground mt-1">Recommended size: 1024x1024px</p>
+                  <p className="text-xs text-black/40 font-bold mt-1 uppercase tracking-wide">Recommended size: 1024x1024px</p>
                 </div>
 
                 {/* Action URL */}
                 <div>
-                  <label className="block text-sm font-header font-semibold mb-2">
+                  <label className="block text-black font-black text-xs uppercase tracking-widest mb-2">
                     Action URL (Where to go when clicked)
                   </label>
-                  <Input
+                  <input
                     type="url"
                     name="actionUrl"
                     value={formData.actionUrl}
                     onChange={handleInputChange}
                     placeholder="https://joyjuncture.com/shop"
+                    className="w-full bg-[#FFFDF5] border-2 border-black rounded-xl px-4 py-3 text-black placeholder-black/30 focus:outline-none focus:neo-shadow-sm transition-all font-bold"
                   />
                 </div>
 
                 {/* Priority */}
                 <div>
-                  <label className="block text-sm font-header font-semibold mb-2">Priority</label>
-                  <Select value={formData.priority} onValueChange={(value) => 
-                    setFormData((prev) => ({ ...prev, priority: value }))
-                  }>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="high">High (Immediate)</SelectItem>
-                      <SelectItem value="normal">Normal (Batched)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <p className="text-xs text-muted-foreground mt-1">
+                  <label className="block text-black font-black text-xs uppercase tracking-widest mb-2">Priority</label>
+                  <div className="relative">
+                    <Select value={formData.priority} onValueChange={(value) =>
+                      setFormData((prev) => ({ ...prev, priority: value }))
+                    }>
+                      <SelectTrigger className="w-full bg-[#FFFDF5] border-2 border-black rounded-xl px-4 py-3 text-black font-bold focus:ring-0 focus:ring-offset-0 h-auto">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white border-2 border-black rounded-xl neo-shadow">
+                        <SelectItem value="high" className="font-bold focus:bg-[#FFD93D] focus:text-black cursor-pointer">High (Immediate)</SelectItem>
+                        <SelectItem value="normal" className="font-bold focus:bg-[#FFD93D] focus:text-black cursor-pointer">Normal (Batched)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <p className="text-xs text-black/40 font-bold mt-1 uppercase tracking-wide">
                     High priority shows immediately. Normal respects quiet hours.
                   </p>
                 </div>
 
                 {/* Recipient Segment */}
                 <div>
-                  <label className="block text-sm font-header font-semibold mb-2">
+                  <label className="block text-black font-black text-xs uppercase tracking-widest mb-2">
                     Send To
                   </label>
-                  <Select value={formData.recipientSegment} onValueChange={(value) => 
-                    setFormData((prev) => ({ ...prev, recipientSegment: value }))
-                  }>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Users</SelectItem>
-                      <SelectItem value="first-time">First-Time Customers</SelectItem>
-                      <SelectItem value="loyal">Loyal Users (Level 3+)</SelectItem>
-                      <SelectItem value="inactive">Inactive (No purchase in 30 days)</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <div className="relative">
+                    <Select value={formData.recipientSegment} onValueChange={(value) =>
+                      setFormData((prev) => ({ ...prev, recipientSegment: value }))
+                    }>
+                      <SelectTrigger className="w-full bg-[#FFFDF5] border-2 border-black rounded-xl px-4 py-3 text-black font-bold focus:ring-0 focus:ring-offset-0 h-auto">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white border-2 border-black rounded-xl neo-shadow">
+                        <SelectItem value="all" className="font-bold focus:bg-[#FFD93D] focus:text-black cursor-pointer">All Users</SelectItem>
+                        <SelectItem value="first-time" className="font-bold focus:bg-[#FFD93D] focus:text-black cursor-pointer">First-Time Customers</SelectItem>
+                        <SelectItem value="loyal" className="font-bold focus:bg-[#FFD93D] focus:text-black cursor-pointer">Loyal Users (Level 3+)</SelectItem>
+                        <SelectItem value="inactive" className="font-bold focus:bg-[#FFD93D] focus:text-black cursor-pointer">Inactive (No purchase in 30 days)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
 
                 {/* Schedule */}
                 <div>
-                  <label className="block text-sm font-header font-semibold mb-2">
+                  <label className="block text-black font-black text-xs uppercase tracking-widest mb-2">
                     Schedule (Leave empty to send now)
                   </label>
-                  <Input
+                  <input
                     type="datetime-local"
                     name="scheduledFor"
                     value={formData.scheduledFor}
                     onChange={handleInputChange}
+                    className="w-full bg-[#FFFDF5] border-2 border-black rounded-xl px-4 py-3 text-black font-bold focus:outline-none focus:neo-shadow-sm transition-all"
                   />
                 </div>
 
                 {/* Recipient Preview */}
-                <div className="p-4 bg-secondary/10 border border-secondary/20 rounded-lg">
-                  <p className="text-sm font-header font-semibold flex items-center gap-2">
+                <div className="p-4 bg-[#FFD93D]/10 border-2 border-[#FFD93D] border-dashed rounded-xl">
+                  <p className="text-sm font-black text-black flex items-center gap-2 uppercase tracking-wide">
                     <Users className="w-4 h-4" />
                     Recipient Preview
                   </p>
-                  <p className="text-sm text-muted-foreground mt-2">
+                  <p className="text-sm text-black/60 font-bold mt-2">
                     This will reach approximately all subscribed users in the "{formData.recipientSegment}" segment.
                   </p>
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex gap-3">
-                  <Button
+                <div className="flex gap-4 pt-4">
+                  <button
                     type="submit"
                     disabled={loading || !formData.title || !formData.message}
-                    className="flex-1"
+                    className="flex-1 px-6 py-4 bg-[#00B894] text-black font-black uppercase tracking-widest rounded-xl border-2 border-black neo-shadow hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                   >
                     {loading ? 'Sending...' : 'Send Notification'}
-                  </Button>
-                  <Button
+                  </button>
+                  <button
                     type="button"
-                    variant="outline"
                     onClick={() => setFormData({
                       title: '',
                       message: '',
@@ -332,34 +347,35 @@ export default function PushNotificationsPage() {
                       recipientSegment: 'all',
                       scheduledFor: '',
                     })}
+                    className="px-6 py-4 bg-white text-black font-black uppercase tracking-widest rounded-xl border-2 border-black hover:bg-gray-50 transition-all"
                   >
                     Clear
-                  </Button>
+                  </button>
                 </div>
               </form>
             </div>
 
             {/* Recent Campaigns */}
             <div className="mt-12">
-              <h2 className="font-display text-2xl font-bold mb-6">Recent Campaigns</h2>
+              <h2 className="font-header text-3xl font-black text-black mb-8 uppercase tracking-tighter">Recent Campaigns</h2>
               {campaigns.length === 0 ? (
-                <div className="glass-card p-12 rounded-lg text-center text-muted-foreground">
-                  <Bell className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>No campaigns sent yet</p>
+                <div className="bg-white border-2 border-black border-dashed rounded-[25px] p-12 text-center">
+                  <Bell className="w-12 h-12 text-black/20 mx-auto mb-4" />
+                  <p className="text-black/40 font-black uppercase tracking-widest">No campaigns sent yet</p>
                 </div>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {campaigns.slice(0, 5).map((campaign) => (
                     <div
                       key={campaign.id}
-                      className="glass-card p-4 rounded-lg flex justify-between items-start"
+                      className="bg-white border-2 border-black rounded-xl p-6 flex justify-between items-start hover:neo-shadow transition-all"
                     >
                       <div className="flex-1">
-                        <h3 className="font-header font-semibold">{campaign.title}</h3>
-                        <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                        <h3 className="font-header text-xl font-black text-black uppercase tracking-tight">{campaign.title}</h3>
+                        <p className="text-sm text-black/60 font-bold mt-2 line-clamp-2">
                           {campaign.message}
                         </p>
-                        <div className="flex gap-4 mt-3 text-xs text-muted-foreground">
+                        <div className="flex gap-6 mt-4 text-xs font-black text-black/40 uppercase tracking-widest">
                           <span>📧 {campaign.recipientCount} recipients</span>
                           <span>✓ {campaign.deliveredCount} delivered</span>
                           <span>👁️ {campaign.interactionCount} clicks</span>
@@ -367,17 +383,16 @@ export default function PushNotificationsPage() {
                       </div>
                       <div className="text-right">
                         <span
-                          className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
-                            campaign.status === 'sent'
-                              ? 'bg-secondary/20 text-secondary'
+                          className={`inline-block px-3 py-1 rounded-lg border-2 border-black text-xs font-black uppercase tracking-wider ${campaign.status === 'sent'
+                              ? 'bg-[#00B894] text-black'
                               : campaign.status === 'scheduled'
-                              ? 'bg-primary/20 text-primary'
-                              : 'bg-muted text-muted-foreground'
-                          }`}
+                                ? 'bg-[#FFD93D] text-black'
+                                : 'bg-gray-100 text-black'
+                            }`}
                         >
                           {campaign.status.charAt(0).toUpperCase() + campaign.status.slice(1)}
                         </span>
-                        <p className="text-xs text-muted-foreground mt-2">
+                        <p className="text-xs text-black/40 font-bold mt-2 uppercase tracking-wide">
                           {new Date(campaign.createdAt).toLocaleDateString()}
                         </p>
                       </div>
@@ -390,10 +405,10 @@ export default function PushNotificationsPage() {
 
           {/* Scheduled Tab */}
           <TabsContent value="scheduled">
-            <div className="glass-card p-12 rounded-lg text-center">
-              <Clock className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-50" />
-              <p className="text-muted-foreground">No scheduled campaigns</p>
-              <p className="text-sm text-muted-foreground mt-2">
+            <div className="bg-white border-2 border-black rounded-[25px] p-12 text-center neo-shadow">
+              <Clock className="w-16 h-16 text-black/20 mx-auto mb-4" />
+              <p className="text-black font-black uppercase tracking-widest text-lg">No scheduled campaigns</p>
+              <p className="text-sm text-black/60 font-bold mt-2">
                 Schedule a notification in the "Send Notification" tab to see it here
               </p>
             </div>
@@ -401,10 +416,10 @@ export default function PushNotificationsPage() {
 
           {/* Analytics Tab */}
           <TabsContent value="analytics">
-            <div className="glass-card p-12 rounded-lg text-center">
-              <BarChart3 className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-50" />
-              <p className="text-muted-foreground">Analytics data will appear here</p>
-              <p className="text-sm text-muted-foreground mt-2">
+            <div className="bg-white border-2 border-black rounded-[25px] p-12 text-center neo-shadow">
+              <BarChart3 className="w-16 h-16 text-black/20 mx-auto mb-4" />
+              <p className="text-black font-black uppercase tracking-widest text-lg">Analytics data will appear here</p>
+              <p className="text-sm text-black/60 font-bold mt-2">
                 Send notifications to see delivery and engagement statistics
               </p>
             </div>
