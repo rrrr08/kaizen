@@ -3,15 +3,19 @@ export interface Product {
   name: string;
   price: number;
   stock?: number;
-  description: string;
-  story: string;
-  howToPlay: string;
+  description?: string;
+  story?: string;
+  howToPlay?: string;
   players: string;
-  occasion: string[];
+  occasion?: string[];
   mood: string;
   image: string;
   badges: string[];
   time?: string;
+  category?: string;
+  cost?: number;
+  rating?: number;
+  sales?: number;
 }
 
 export interface GameEvent {
@@ -26,8 +30,6 @@ export interface GameEvent {
   registered: number;
   createdAt: Date;
   updatedAt: Date;
-
-  // 👇 past-only enrichments
   highlights?: EventHighlight[];
   gallery?: string[];
   testimonials?: EventTestimonial[];
@@ -107,7 +109,6 @@ export interface Conversation {
   user_id: string;
   user_email: string;
   messages?: any[];
-  difyConversationId?: string;
   createdAt: Date;
   updatedAt: Date;
 }

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Calendar, MapPin, DollarSign, Image as ImageIcon, FileText, Star, Film, MessageSquare, Plus } from 'lucide-react';
 
 export default function CreateEventPage() {
   const router = useRouter();
@@ -80,113 +81,124 @@ export default function CreateEventPage() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-16">
-      {/* HEADER */}
-      <div className="mb-14">
-        <h1 className="text-4xl font-display gradient-gold">
-          Create Event
-        </h1>
-        <p className="text-muted-foreground mt-3 max-w-xl">
-          Design a premium experience for the Joy Juncture community.
-        </p>
-      </div>
+    <div className="min-h-screen bg-[#050505] text-white pt-12 pb-24 px-8">
+      <div className="max-w-4xl mx-auto">
+        {/* HEADER */}
+        <div className="mb-12 border-b-2 border-[#333] pb-8">
+          <h1 className="text-4xl font-arcade text-[#FFD400] text-shadow-glow mb-2">
+            INITIATE_EVENT_PROTOCOL
+          </h1>
+          <p className="text-gray-500 font-mono text-xs uppercase tracking-widest">
+            Define parameters for new engagement opportunity.
+          </p>
+        </div>
 
-      <form onSubmit={handleSubmit} className="space-y-16">
+        <form onSubmit={handleSubmit} className="space-y-8">
 
-        {/* BASIC INFO */}
-        <Section title="Basic Information">
-          <Field label="Event Title" name="title" onChange={handleChange} />
-          <Field
-            label="Description"
-            name="description"
-            textarea
-            onChange={handleChange}
-          />
-          <Field
-            label="Cover Image URL"
-            name="image"
-            onChange={handleChange}
-          />
-        </Section>
-
-        {/* TIME & LOCATION */}
-        <Section title="Time & Location">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* BASIC INFO */}
+          <Section title="MISSION_DATA" icon={<FileText className="w-4 h-4 text-[#FFD400]" />}>
+            <Field label="OPERATION_CODENAME (Title)" name="title" icon={<FileText className="w-3 h-3" />} onChange={handleChange} />
             <Field
-              label="Date & Time"
-              name="datetime"
-              type="datetime-local"
-              onChange={handleChange}
-            />
-            <Field
-              label="Location"
-              name="location"
-              onChange={handleChange}
-            />
-          </div>
-        </Section>
-
-        {/* PRICING */}
-        <Section title="Pricing & Capacity">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Field
-              label="Price (₹)"
-              name="price"
-              type="number"
-              onChange={handleChange}
-            />
-            <Field
-              label="Capacity"
-              name="capacity"
-              type="number"
-              onChange={handleChange}
-            />
-            <Field
-              label="Already Registered"
-              name="registered"
-              type="number"
-              onChange={handleChange}
-            />
-          </div>
-        </Section>
-
-        {/* PAST EVENT ONLY */}
-        {isPast && (
-          <Section title="Past Event Enhancements" accent>
-            <Field
-              label="Highlights (one per line)"
-              name="highlights"
+              label="MISSION_BRIEF (Description)"
+              name="description"
+              icon={<MessageSquare className="w-3 h-3" />}
               textarea
               onChange={handleChange}
             />
             <Field
-              label="Gallery Image URLs"
-              name="gallery"
-              textarea
-              onChange={handleChange}
-            />
-            <Field
-              label="Testimonials"
-              name="testimonials"
-              textarea
+              label="VISUAL_ASSET_URL (Image)"
+              name="image"
+              icon={<ImageIcon className="w-3 h-3" />}
               onChange={handleChange}
             />
           </Section>
-        )}
 
-        {/* SUBMIT */}
-        <div className="pt-6">
-          <button
-            type="submit"
-            disabled={loading}
-            className="px-12 py-3 rounded-full font-header-bold
-              bg-[#fe9a00] text-black
-              hover:scale-[1.02] transition-all glow-gold"
-          >
-            {loading ? 'Publishing…' : 'Publish Event'}
-          </button>
-        </div>
-      </form>
+          {/* TIME & LOCATION */}
+          <Section title="COORDINATES & TIMING" icon={<MapPin className="w-4 h-4 text-[#00B894]" />}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Field
+                label="T-MINUS (Date & Time)"
+                name="datetime"
+                type="datetime-local"
+                icon={<Calendar className="w-3 h-3" />}
+                onChange={handleChange}
+              />
+              <Field
+                label="SECTOR_LOCATION"
+                name="location"
+                icon={<MapPin className="w-3 h-3" />}
+                onChange={handleChange}
+              />
+            </div>
+          </Section>
+
+          {/* PRICING */}
+          <Section title="RESOURCE_ALLOCATION" icon={<DollarSign className="w-4 h-4 text-blue-400" />}>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Field
+                label="ENTRY_COST (₹)"
+                name="price"
+                type="number"
+                icon={<DollarSign className="w-3 h-3" />}
+                onChange={handleChange}
+              />
+              <Field
+                label="MAX_UNIT_CAPACITY"
+                name="capacity"
+                type="number"
+                icon={<Star className="w-3 h-3" />}
+                onChange={handleChange}
+              />
+              <Field
+                label="DEPLOYED_UNITS (Registered)"
+                name="registered"
+                type="number"
+                icon={<Star className="w-3 h-3" />}
+                onChange={handleChange}
+              />
+            </div>
+          </Section>
+
+          {/* PAST EVENT ONLY */}
+          {isPast && (
+            <Section title="ARCHIVE_ENHANCEMENTS" accent icon={<Film className="w-4 h-4 text-purple-400" />}>
+              <Field
+                label="MISSION_HIGHLIGHTS (One per line)"
+                name="highlights"
+                textarea
+                icon={<Star className="w-3 h-3" />}
+                onChange={handleChange}
+              />
+              <Field
+                label="GALLERY_DATA_LINKS (One per line)"
+                name="gallery"
+                textarea
+                icon={<ImageIcon className="w-3 h-3" />}
+                onChange={handleChange}
+              />
+              <Field
+                label="OPERATIVE_DEBRIEFS (Testimonials)"
+                name="testimonials"
+                textarea
+                icon={<MessageSquare className="w-3 h-3" />}
+                onChange={handleChange}
+              />
+            </Section>
+          )}
+
+          {/* SUBMIT */}
+          <div className="pt-8 border-t border-[#333] flex justify-end">
+            <button
+              type="submit"
+              disabled={loading}
+              className="px-12 py-4 bg-[#FFD400] text-black font-arcade text-sm uppercase tracking-widest hover:bg-[#FFE066] transition-all flex items-center gap-3 group border border-[#FFD400]"
+            >
+              {loading ? 'EXECUTING...' : 'INITIATE_LAUNCH'}
+              <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform" />
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }
@@ -197,19 +209,23 @@ function Section({
   title,
   children,
   accent,
+  icon
 }: {
   title: string;
   children: React.ReactNode;
   accent?: boolean;
+  icon?: React.ReactNode;
 }) {
   return (
     <div
-      className={`glass-card p-8 rounded-xl space-y-6
-        ${accent ? 'border-[#fe9a00]/40' : ''}`}
+      className={`bg-[#080808] border-2 ${accent ? 'border-purple-500/30' : 'border-[#333]'} rounded-[4px] p-8 space-y-6 hover:border-[#FFD400]/20 transition-colors`}
     >
-      <h2 className="text-xl font-header tracking-wide uppercase">
-        {title}
-      </h2>
+      <div className="flex items-center gap-3 border-b border-[#222] pb-4 mb-2">
+        {icon && <div className="p-1.5 bg-[#111] rounded-sm border border-[#333]">{icon}</div>}
+        <h2 className={`text-lg font-arcade tracking-widest uppercase ${accent ? 'text-purple-400' : 'text-gray-300'}`}>
+          {title}
+        </h2>
+      </div>
       {children}
     </div>
   );
@@ -221,6 +237,7 @@ function Field({
   type = 'text',
   textarea,
   onChange,
+  icon
 }: {
   label: string;
   name: string;
@@ -229,24 +246,29 @@ function Field({
   onChange: (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => void;
+  icon?: React.ReactNode;
 }) {
   return (
-    <div className="lux-input">
+    <div className="group">
+      <label className="block text-[#00B894] font-mono text-[10px] uppercase tracking-widest mb-2 group-hover:text-[#FFD400] transition-colors flex items-center gap-2">
+        {icon}
+        {label}
+      </label>
       {textarea ? (
         <textarea
           name={name}
-          placeholder=" "
+          rows={4}
+          className="w-full bg-[#111] border border-[#333] rounded-sm px-4 py-3 text-white font-mono focus:border-[#FFD400] focus:outline-none transition-colors text-sm"
           onChange={onChange}
         />
       ) : (
         <input
           type={type}
           name={name}
-          placeholder=" "
+          className="w-full bg-[#111] border border-[#333] rounded-sm px-4 py-3 text-white font-mono focus:border-[#FFD400] focus:outline-none transition-colors text-sm"
           onChange={onChange}
         />
       )}
-      <label>{label}</label>
     </div>
   );
 }

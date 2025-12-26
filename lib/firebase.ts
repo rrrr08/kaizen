@@ -157,6 +157,8 @@ export const signIn = async (email: string, password: string) => {
           created_at: serverTimestamp(),
           updated_at: serverTimestamp(),
           last_sign_in_at: serverTimestamp(),
+          balance: 0,
+          xp: 0,
         };
         await createUserProfile(user.uid, profileData);
       } else {
@@ -206,6 +208,8 @@ export const signInWithGoogle = async () => {
             created_at: serverTimestamp(),
             updated_at: serverTimestamp(),
             last_sign_in_at: serverTimestamp(),
+            balance: 0,
+            xp: 0,
           };
           await createUserProfile(user.uid, profileData);
         } else {
@@ -388,6 +392,8 @@ if (typeof window !== "undefined" && auth) {
             created_at: serverTimestamp(),
             updated_at: serverTimestamp(),
             last_sign_in_at: serverTimestamp(),
+            balance: 0,
+            xp: 0,
           };
           await createUserProfile(
             user.uid,
@@ -597,7 +603,6 @@ export const getConversationsForUser = async (user_id: string) => {
       id: docSnap.id,
       user_id: data.user_id,
       user_email: data.user_email,
-      difyConversationId: data.difyConversationId || undefined,
       createdAt: safeTimestampToDate(data.createdAt),
       updatedAt: safeTimestampToDate(data.updatedAt),
     });
@@ -619,7 +624,6 @@ export const getAllConversations = async (limitCount = 50) => {
       id: docSnap.id,
       user_id: data.user_id,
       user_email: data.user_email,
-      difyConversationId: data.difyConversationId || undefined,
       createdAt: safeTimestampToDate(data.createdAt),
       updatedAt: safeTimestampToDate(data.updatedAt),
     });
@@ -643,7 +647,6 @@ export const getConversationWithMessages = async (conversationId: string): Promi
       user_id: data.user_id,
       user_email: data.user_email,
       messages,
-      difyConversationId: data.difyConversationId || undefined,
       createdAt: safeTimestampToDate(data.createdAt),
       updatedAt: safeTimestampToDate(data.updatedAt),
     };
@@ -656,16 +659,7 @@ export const deleteConversation = async (conversationId: string) => {
   await deleteDoc(conversationRef);
 };
 
-export const updateConversationDifyId = async (
-  firebaseConversationId: string,
-  difyConversationId: string
-) => {
-  const conversationRef = doc(db, "conversations", firebaseConversationId);
-  await updateDoc(conversationRef, {
-    difyConversationId: difyConversationId,
-    updatedAt: serverTimestamp(),
-  });
-};
+
 
 // Google Calendar Integration
 export const updateGoogleIntegration = async (
@@ -1175,6 +1169,8 @@ export async function handleGoogleSignInRedirect() {
             likedBlogs: [],
             activity: [],
             blogCount: 0,
+            balance: 0,
+            xp: 0,
             created_at: serverTimestamp(),
             updated_at: serverTimestamp(),
             last_sign_in_at: serverTimestamp(),

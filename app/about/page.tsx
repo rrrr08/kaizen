@@ -41,10 +41,9 @@ export default function About() {
 
   if (loading) {
     return (
-      <div className="min-h-screen pt-28 pb-16 flex items-center justify-center bg-[#FFFDF5]">
+      <div className="min-h-screen pt-28 pb-16 flex items-center justify-center bg-black">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[#FFD93D] border-t-black mb-4"></div>
-          <p className="text-black/60 font-black text-xs tracking-[0.4em]">LOADING ABOUT...</p>
+          <div className="inline-block animate-pulse font-arcade text-[#FF8C00] tracking-[0.4em]">LOADING_STORY_DATA...</div>
         </div>
       </div>
     );
@@ -52,36 +51,40 @@ export default function About() {
 
   if (error) {
     return (
-      <div className="min-h-screen pt-28 pb-16 flex flex-col items-center justify-center gap-4 bg-[#FFFDF5]">
-        <div className="text-red-500 font-black tracking-widest text-center">
-          {error}
+      <div className="min-h-screen pt-28 pb-16 flex flex-col items-center justify-center gap-4 bg-black">
+        <div className="text-red-500 font-arcade tracking-widest text-center uppercase">
+          ERROR: {error}
         </div>
         <button
           onClick={fetchAboutData}
-          className="px-6 py-2 border-2 border-black text-black hover:bg-black hover:text-white transition-all font-black text-xs tracking-widest rounded-lg"
+          className="px-6 py-2 border border-[#FF8C00] text-[#FF8C00] hover:bg-[#FF8C00] hover:text-black transition-all font-arcade text-xs tracking-widest uppercase"
         >
-          TRY AGAIN
+          RETRY_CONNECTION
         </button>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen pt-32 pb-16 bg-[#FFFDF5] text-[#2D3436] selection:bg-[#FFD93D]/50 font-sans">
-      <div className="max-w-7xl mx-auto px-6 md:px-12">
+    <div className="min-h-screen pt-32 pb-16 bg-black text-white selection:bg-[#FF8C00]/50 font-sans relative overflow-hidden">
+      {/* Background Decor */}
+      <div className="absolute inset-0 pixel-grid opacity-20 pointer-events-none"></div>
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#00B894]/10 rounded-full blur-[100px] pointer-events-none"></div>
+
+      <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
         {/* SECTION 1 — PAGE HERO */}
         <section className="mb-32">
-          <div className="text-[#6C5CE7] font-black text-sm tracking-[0.2em] mb-4 uppercase font-header">Our Story</div>
-          <h1 className="font-header text-6xl md:text-8xl tracking-tighter mb-8 leading-none text-black">
-            OUR <br /><span className="text-[#FFD93D] drop-shadow-[2px_2px_0px_#000] italic font-serif">(accidentally awesome)</span> STORY
+          <div className="text-[#FF8C00] font-arcade text-xs tracking-[0.2em] mb-4 uppercase inline-block border border-[#FF8C00] px-3 py-1">Mission Log // 001</div>
+          <h1 className="font-arcade text-6xl md:text-8xl tracking-tighter mb-8 leading-none text-white text-3d-orange">
+            OUR <br /><span className="text-[#00B894] italic font-serif">ORIGIN STORY</span>
           </h1>
-          <p className="text-black/80 font-bold text-xl max-w-3xl leading-relaxed">
+          <p className="text-gray-400 font-bold text-xl max-w-3xl leading-relaxed font-sans">
             A digital playground built on the belief that games are more than products—they're moments, memories, and shared joy.
           </p>
-          <div className="max-w-2xl border-l-4 border-black pl-8 py-2 mt-8">
-            <p className="text-black/70 font-medium italic text-xl md:text-2xl leading-relaxed">
+          <div className="max-w-2xl border-l-4 border-[#FF8C00] pl-8 py-2 mt-8">
+            <p className="text-gray-300 font-medium italic text-xl md:text-2xl leading-relaxed font-sans">
               Honestly? There's no dramatic lifelong passion story here.
-              Just two people who realized they're pretty good at creating chaos, laughter, and the kind of competitive tension that turns friends into frenemies.
+              Just two agents who realized they're pretty good at creating chaos, laughter, and the kind of competitive tension that turns friends into frenemies.
             </p>
           </div>
         </section>
@@ -89,15 +92,15 @@ export default function About() {
         {/* SECTION 2 — HOW IT ALL STARTED (FOUNDERS' JOURNEY) */}
         <section className="grid grid-cols-1 lg:grid-cols-12 gap-12 mb-32 items-center">
           <div className="lg:col-span-12">
-            <h2 className="font-black text-sm tracking-[0.2em] text-[#00B894] mb-8 uppercase font-header">How It All Started</h2>
+            <h2 className="font-arcade text-sm tracking-[0.2em] text-[#00B894] mb-8 uppercase">Introduction_Sequence</h2>
             <div className="space-y-8 max-w-4xl">
-              <p className="text-black/80 font-medium text-lg leading-relaxed">
+              <p className="text-gray-400 font-medium text-lg leading-relaxed font-sans">
                 Instead of sticking to the 'safe' family businesses (textiles and electricals — thrilling, right?), we decided to channel our inner entrepreneurs.
               </p>
-              <p className="text-black font-black text-xl italic border-l-4 border-[#FFD93D] pl-6 py-2 bg-yellow-50/50 rounded-r-lg">
-                Spoiler: we didn't know what we were doing.
+              <p className="text-[#FF8C00] font-arcade text-lg italic border-l-4 border-[#FF8C00] pl-6 py-2 bg-[#FF8C00]/10 rounded-r-lg">
+                SPOILER: WE_DID_NOT_HAVE_CLEARANCE.
               </p>
-              <p className="text-black/80 font-medium text-lg leading-relaxed">
+              <p className="text-gray-400 font-medium text-lg leading-relaxed font-sans">
                 But we did know how to make people laugh. And argue. And then laugh again.
                 <br />
                 Now here we are — turning random ideas into something real, fun, and (fingers crossed) successful.
@@ -107,17 +110,17 @@ export default function About() {
         </section>
 
         {/* SECTION 3 — WHY GAMES? (THE WHY) */}
-        <section className="mb-32 py-24 border-y-2 border-black relative overflow-hidden bg-white neo-pattern">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-[#FFD93D]/20 blur-[100px] rounded-full pointer-events-none"></div>
+        <section className="mb-32 py-24 border-y border-[#333] relative overflow-hidden bg-[#111]">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-[#FF8C00]/20 blur-[100px] rounded-full pointer-events-none"></div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center relative z-10">
             <div>
-              <h2 className="font-header text-5xl md:text-6xl mb-6 text-black">Why Games?</h2>
+              <h2 className="font-arcade text-5xl md:text-6xl mb-6 text-white text-3d-purple">WHY GAMES?</h2>
             </div>
             <div>
-              <p className="text-black/90 font-bold italic text-2xl leading-loose">
+              <p className="text-gray-300 font-bold italic text-2xl leading-loose font-sans">
                 Our goal? To make games that bring people together.
                 <br />
-                <span className="text-[#6C5CE7]">Because let's be honest — nothing bonds people like arguing over rules or laughing at someone's questionable strategy.</span>
+                <span className="text-[#00B894]">Because let's be honest — nothing bonds people like arguing over rules or laughing at someone's questionable strategy.</span>
               </p>
             </div>
           </div>
@@ -125,16 +128,16 @@ export default function About() {
 
         {/* SECTION 4 — OUR MISSION & BELIEF */}
         <section className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-32">
-          <div className="bg-white p-12 rounded-[20px] border-2 border-black neo-shadow hover:scale-[1.02] transition-transform group">
-            <h3 className="font-black text-sm tracking-[0.2em] text-[#FF7675] mb-6 uppercase font-header">Our Mission</h3>
-            <p className="text-2xl md:text-3xl font-header leading-tight text-black group-hover:text-[#FF7675] transition-colors">
+          <div className="bg-[#111] p-12 arcade-card-3d border border-[#333] hover:scale-[1.02] transition-transform group">
+            <h3 className="font-arcade text-sm tracking-[0.2em] text-[#FFD400] mb-6 uppercase">Mission_Protocol</h3>
+            <p className="text-2xl md:text-3xl font-sans leading-tight text-white group-hover:text-[#FFD400] transition-colors">
               Spread the magic of tabletop games wherever we go and build a culture that's all about fun.
             </p>
           </div>
 
-          <div className="bg-[#FFD93D] p-12 rounded-[20px] border-2 border-black neo-shadow flex flex-col justify-center shadow-[4px_4px_0px_#000]">
-            <h3 className="font-black text-sm tracking-[0.2em] text-black mb-6 uppercase font-header">We Believe</h3>
-            <p className="text-black font-black italic text-2xl space-y-2 leading-relaxed">
+          <div className="bg-[#FF8C00] p-12 arcade-card-3d border border-[#FF8C00] flex flex-col justify-center shadow-[0_0_20px_rgba(255,140,0,0.5)]">
+            <h3 className="font-arcade text-black font-black text-sm tracking-[0.2em] mb-6 uppercase">Core_Belief_System</h3>
+            <p className="text-black font-black italic text-2xl space-y-2 leading-relaxed font-sans">
               "Games aren't just products.<br />
               They're moments.<br />
               They're memories.<br />
@@ -145,7 +148,7 @@ export default function About() {
 
         {/* SECTION 5 — OUR PHILOSOPHY */}
         <section className="mb-32">
-          <h2 className="font-header text-4xl mb-16 text-center text-black">Our Philosophy</h2>
+          <h2 className="font-arcade text-4xl mb-16 text-center text-white uppercase text-3d-green">Our Philosophy</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               {
@@ -161,10 +164,10 @@ export default function About() {
                 text: "Whether you're 10 or 100, there's a Joy Juncture game for you."
               }
             ].map((item, idx) => (
-              <div key={idx} className="text-center p-8 border-2 border-transparent hover:border-black hover:bg-white hover:neo-shadow hover:rounded-[20px] transition-all duration-300">
-                <div className="w-4 h-4 bg-[#00B894] mx-auto mb-6 rounded-none rotate-45 border border-black"></div>
-                <h3 className="font-black text-sm tracking-[0.2em] uppercase mb-4 text-black font-header">{item.title}</h3>
-                <p className="text-black/70 font-medium italic">{item.text}</p>
+              <div key={idx} className="text-center p-8 border border-[#333] hover:border-[#00B894] hover:bg-[#111] hover:shadow-[0_0_15px_rgba(0,184,148,0.3)] transition-all duration-300 bg-black">
+                <div className="w-4 h-4 bg-[#00B894] mx-auto mb-6 rounded-none rotate-45 shadow-[0_0_10px_#00B894]"></div>
+                <h3 className="font-arcade text-sm tracking-[0.2em] uppercase mb-4 text-[#00B894]">{item.title}</h3>
+                <p className="text-gray-400 font-medium italic font-sans">{item.text}</p>
               </div>
             ))}
           </div>
@@ -172,13 +175,13 @@ export default function About() {
 
         {/* SECTION 6 — MEET THE MINDS BEHIND THE MADNESS */}
         <section className="mb-32">
-          <h2 className="font-header text-4xl md:text-5xl mb-16 text-center text-black">Meet the Minds <br /> Behind the Madness</h2>
+          <h2 className="font-arcade text-4xl md:text-5xl mb-16 text-center text-white text-3d-purple uppercase">Architects of<br /> The Simulation</h2>
 
           <div className="space-y-12 mb-12">
             <div>
-              <h2 className="font-black text-sm tracking-[0.2em] text-[#6C5CE7] mb-6 uppercase font-header">Founder's Journey</h2>
-              <h3 className="font-header text-3xl md:text-4xl mb-6 text-black">Why Joy Juncture Started</h3>
-              <div className="space-y-6 text-black/80 font-medium leading-relaxed max-w-4xl">
+              <h2 className="font-arcade text-sm tracking-[0.2em] text-[#6C5CE7] mb-6 uppercase">Founder's Journey</h2>
+              <h3 className="font-arcade text-3xl md:text-4xl mb-6 text-white uppercase">Why Joy Juncture Started</h3>
+              <div className="space-y-6 text-gray-300 font-medium leading-relaxed max-w-4xl font-sans">
                 <p>
                   Joy Juncture was born from a simple observation: in a world obsessed with digital isolation, people crave real connections and shared moments of joy. Games, in their purest form, are vehicles for these moments.
                 </p>
@@ -195,51 +198,51 @@ export default function About() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-4xl mx-auto">
             {/* Founder 1 */}
             <div className="group relative">
-              <div className="aspect-[4/5] bg-white border-2 border-black rounded-[20px] overflow-hidden mb-6 neo-shadow group-hover:scale-[1.02] transition-transform duration-300">
-                {/* Placeholder for Founder Image - You can replace src with real images later */}
-                <div className="w-full h-full bg-[#FFD93D] flex items-center justify-center relative overflow-hidden">
+              <div className="aspect-[4/5] bg-[#111] border border-[#333] overflow-hidden mb-6 arcade-card-3d group-hover:scale-[1.02] transition-transform duration-300">
+                {/* Placeholder for Founder Image */}
+                <div className="w-full h-full bg-[#FF8C00] flex items-center justify-center relative overflow-hidden">
                   <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#000000_1px,transparent_1px)] [background-size:16px_16px]"></div>
-                  <span className="text-black font-header text-8xl opacity-20">KP</span>
+                  <span className="text-black font-arcade text-8xl opacity-20">KP</span>
                 </div>
               </div>
-              <h3 className="font-header text-3xl mb-1 text-black">Khushi Poddar</h3>
-              <p className="text-[#FF7675] font-black text-xs tracking-[0.3em] uppercase mb-4 bg-black/5 inline-block px-2 py-1 rounded">Dreamer-in-Chief</p>
-              <p className="text-black/70 font-bold text-sm">Brings ideas to life, chaos included.</p>
+              <h3 className="font-arcade text-3xl mb-1 text-white uppercase">Khushi Poddar</h3>
+              <p className="text-[#FF8C00] font-arcade text-xs tracking-[0.3em] uppercase mb-4 bg-[#FF8C00]/10 inline-block px-2 py-1 border border-[#FF8C00]/30">Dreamer-in-Chief</p>
+              <p className="text-gray-400 font-bold text-sm font-sans">Brings ideas to life, chaos included.</p>
             </div>
 
             {/* Founder 2 */}
             <div className="group relative">
-              <div className="aspect-[4/5] bg-white border-2 border-black rounded-[20px] overflow-hidden mb-6 neo-shadow group-hover:scale-[1.02] transition-transform duration-300">
+              <div className="aspect-[4/5] bg-[#111] border border-[#333] overflow-hidden mb-6 arcade-card-3d group-hover:scale-[1.02] transition-transform duration-300">
                 {/* Placeholder for Founder Image */}
                 <div className="w-full h-full bg-[#00B894] flex items-center justify-center relative overflow-hidden">
                   <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#000000_1px,transparent_1px)] [background-size:16px_16px]"></div>
-                  <span className="text-black font-header text-8xl opacity-20">MP</span>
+                  <span className="text-black font-arcade text-8xl opacity-20">MP</span>
                 </div>
               </div>
-              <h3 className="font-header text-3xl mb-1 text-black">Muskan Poddar</h3>
-              <p className="text-[#6C5CE7] font-black text-xs tracking-[0.3em] uppercase mb-4 bg-black/5 inline-block px-2 py-1 rounded">Design Whiz</p>
-              <p className="text-black/70 font-bold text-sm">Makes sure every card, board, and token looks as good as it feels.</p>
+              <h3 className="font-arcade text-3xl mb-1 text-white uppercase">Muskan Poddar</h3>
+              <p className="text-[#00B894] font-arcade text-xs tracking-[0.3em] uppercase mb-4 bg-[#00B894]/10 inline-block px-2 py-1 border border-[#00B894]/30">Design Whiz</p>
+              <p className="text-gray-400 font-bold text-sm font-sans">Makes sure every card, board, and token looks as good as it feels.</p>
             </div>
           </div>
         </section>
 
         {/* SECTION 7 — WHY CHOOSE JOY JUNCTURE? */}
-        <section className="text-center py-20 border-t-2 border-black/10">
-          <p className="font-header text-3xl md:text-5xl mb-12 text-black leading-tight">
+        <section className="text-center py-20 border-t border-[#333]">
+          <p className="font-arcade text-3xl md:text-5xl mb-12 text-white leading-tight uppercase text-3d-orange">
             "Because life is too short for boring evenings."
           </p>
           <div className="flex flex-col sm:flex-row gap-6 justify-center">
             <Link
               href="/shop"
-              className="px-8 py-4 bg-black text-white font-black text-xs tracking-[0.4em] hover:bg-[#6C5CE7] hover:scale-110 transition-all rounded-xl shadow-[4px_4px_0px_rgba(0,0,0,0.2)]"
+              className="px-8 py-4 bg-[#FF8C00] text-black font-arcade text-xs tracking-[0.4em] hover:bg-white transition-all border-b-4 border-[#A0522D] active:border-b-0 active:translate-y-1 uppercase"
             >
-              EXPLORE GAMES
+              EXPLORE_GAMES
             </Link>
             <Link
               href="/community"
-              className="px-8 py-4 bg-[#FFD93D] text-black border-2 border-black font-black text-xs tracking-[0.4em] neo-shadow hover:scale-110 transition-all rounded-xl"
+              className="px-8 py-4 bg-transparent text-[#FF8C00] border border-[#FF8C00] font-arcade text-xs tracking-[0.4em] hover:bg-[#FF8C00] hover:text-black transition-all uppercase"
             >
-              JOIN THE FUN
+              JOIN_THE_FUN
             </Link>
           </div>
         </section>

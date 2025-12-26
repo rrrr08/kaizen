@@ -1,12 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { BarChart3, Users, ShoppingBag, TrendingUp, Clock, Zap } from 'lucide-react';
+import { Users, ShoppingBag, TrendingUp, Clock, Zap } from 'lucide-react';
+import { LoadingScreen } from '@/components/ui/loading-screen';
 import { useAuth } from '@/app/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { getDocs, collection, query, orderBy, limit } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import Link from 'next/link';
+
+
 
 interface DashboardStats {
   totalUsers: number;
@@ -112,148 +114,156 @@ export default function AdminDashboard() {
   };
 
   if (loading) {
-    return (
-      <div className="p-8 flex items-center justify-center min-h-[calc(100vh-80px)] bg-[#FFFDF5]">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-black border-t-[#FFD93D] rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-black font-black uppercase tracking-widest">Loading dashboard...</p>
-        </div>
-      </div>
-    );
+    return <LoadingScreen message="LOADING_SYSTEM_METRICS..." />;
   }
 
   return (
-    <div className="p-8 pb-16 min-h-screen bg-[#FFFDF5]">
+    <div className="pb-16 min-h-screen text-white">
       {/* Header */}
-      <div className="mb-12 border-b-2 border-black pb-8">
-        <h1 className="font-header text-6xl font-black text-black mb-2">DASHBOARD</h1>
-        <p className="text-black/60 font-bold text-xl">Platform overview and analytics</p>
+      <div className="mb-12 border-b-2 border-[#333] pb-8 flex justify-between items-end">
+        <div>
+          <h1 className="font-arcade text-5xl text-white mb-2 text-3d-orange">COMMAND_CENTER</h1>
+          <p className="text-gray-500 font-sans text-lg tracking-wide uppercase">Platform overview and analytics</p>
+        </div>
+        <div className="bg-[#111] border border-[#333] px-4 py-2 rounded text-xs font-mono text-gray-400">
+          SYSTEM_STATUS: <span className="text-[#00B894]">ONLINE</span>
+        </div>
       </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
         {/* Total Users */}
-        <div className="bg-[#6C5CE7] border-2 border-black rounded-[20px] p-6 neo-shadow hover:-translate-y-1 transition-transform">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-black text-white text-sm uppercase tracking-wider">Total Users</h3>
-            <div className="bg-white p-2 rounded-lg border-2 border-black">
-              <Users className="w-5 h-5 text-black" />
+        <div className="relative group">
+          <div className="absolute inset-0 bg-[#6C5CE7]/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <div className="bg-[#080808] border border-[#333] group-hover:border-[#6C5CE7] transition-all p-6 h-full relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-16 h-16 bg-[#6C5CE7]/10 -mr-8 -mt-8 rounded-full blur-xl"></div>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-arcade text-gray-400 text-xs tracking-widest uppercase">Total Users</h3>
+              <Users className="w-5 h-5 text-[#6C5CE7]" />
             </div>
+            <p className="font-arcade text-4xl text-white mb-2">{stats?.totalUsers.toLocaleString()}</p>
+            <p className="text-[#6C5CE7] text-xs font-mono">+{stats?.monthlyGrowth}% this month</p>
           </div>
-          <p className="font-header text-5xl font-black text-white mb-2">{stats?.totalUsers.toLocaleString()}</p>
-          <p className="text-white font-bold text-sm bg-black/20 inline-block px-2 py-1 rounded">+{stats?.monthlyGrowth}% this month</p>
         </div>
 
         {/* Total Orders */}
-        <div className="bg-[#00B894] border-2 border-black rounded-[20px] p-6 neo-shadow hover:-translate-y-1 transition-transform">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-black text-black text-sm uppercase tracking-wider">Total Orders</h3>
-            <div className="bg-white p-2 rounded-lg border-2 border-black">
-              <ShoppingBag className="w-5 h-5 text-black" />
+        <div className="relative group">
+          <div className="absolute inset-0 bg-[#00B894]/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <div className="bg-[#080808] border border-[#333] group-hover:border-[#00B894] transition-all p-6 h-full relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-16 h-16 bg-[#00B894]/10 -mr-8 -mt-8 rounded-full blur-xl"></div>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-arcade text-gray-400 text-xs tracking-widest uppercase">Total Orders</h3>
+              <ShoppingBag className="w-5 h-5 text-[#00B894]" />
             </div>
+            <p className="font-arcade text-4xl text-white mb-2">{stats?.totalOrders.toLocaleString()}</p>
+            <p className="text-[#00B894] text-xs font-mono">₹{(stats?.totalRevenue || 0).toLocaleString()} Revenue</p>
           </div>
-          <p className="font-header text-5xl font-black text-black mb-2">{stats?.totalOrders.toLocaleString()}</p>
-          <p className="text-black font-bold text-sm bg-white/30 inline-block px-2 py-1 rounded">₹{(stats?.totalRevenue || 0).toLocaleString()} Revenue</p>
         </div>
 
         {/* Average Order Value */}
-        <div className="bg-[#FF7675] border-2 border-black rounded-[20px] p-6 neo-shadow hover:-translate-y-1 transition-transform">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-black text-black text-sm uppercase tracking-wider">Avg Order Value</h3>
-            <div className="bg-white p-2 rounded-lg border-2 border-black">
-              <TrendingUp className="w-5 h-5 text-black" />
+        <div className="relative group">
+          <div className="absolute inset-0 bg-[#FF7675]/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <div className="bg-[#080808] border border-[#333] group-hover:border-[#FF7675] transition-all p-6 h-full relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-16 h-16 bg-[#FF7675]/10 -mr-8 -mt-8 rounded-full blur-xl"></div>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-arcade text-gray-400 text-xs tracking-widest uppercase">Avg Order Value</h3>
+              <TrendingUp className="w-5 h-5 text-[#FF7675]" />
             </div>
+            <p className="font-arcade text-4xl text-white mb-2">₹{stats?.averageOrderValue.toLocaleString()}</p>
+            <p className="text-[#FF7675] text-xs font-mono">Per transaction</p>
           </div>
-          <p className="font-header text-5xl font-black text-black mb-2">₹{stats?.averageOrderValue.toLocaleString()}</p>
-          <p className="text-black font-bold text-sm bg-white/30 inline-block px-2 py-1 rounded">Per transaction</p>
         </div>
 
         {/* Active Users */}
-        <div className="bg-[#FFD93D] border-2 border-black rounded-[20px] p-6 neo-shadow hover:-translate-y-1 transition-transform">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-black text-black text-sm uppercase tracking-wider">Active Users</h3>
-            <div className="bg-white p-2 rounded-lg border-2 border-black">
-              <Clock className="w-5 h-5 text-black" />
+        <div className="relative group">
+          <div className="absolute inset-0 bg-[#FFD400]/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <div className="bg-[#080808] border border-[#333] group-hover:border-[#FFD400] transition-all p-6 h-full relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-16 h-16 bg-[#FFD400]/10 -mr-8 -mt-8 rounded-full blur-xl"></div>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-arcade text-gray-400 text-xs tracking-widest uppercase">Active Users</h3>
+              <Clock className="w-5 h-5 text-[#FFD400]" />
             </div>
+            <p className="font-arcade text-4xl text-white mb-2">{stats?.activeUsers.toLocaleString()}</p>
+            <p className="text-[#FFD400] text-xs font-mono">Last 24 hours</p>
           </div>
-          <p className="font-header text-5xl font-black text-black mb-2">{stats?.activeUsers.toLocaleString()}</p>
-          <p className="text-black font-bold text-sm bg-white/30 inline-block px-2 py-1 rounded">Last 24 hours</p>
         </div>
       </div>
 
       {/* Points Statistics */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12">
-        <div className="bg-white border-2 border-black rounded-[20px] p-8 neo-shadow">
-          <div className="flex items-center gap-4 mb-6">
-            <div className="bg-[#FFD93D] p-3 rounded-xl border-2 border-black">
-              <Zap className="w-6 h-6 text-black" fill="black" />
+        <div className="bg-[#080808] border border-[#333] p-8 relative overflow-hidden group">
+          <div className="absolute top-0 left-0 w-1 h-full bg-[#FFD400] opacity-50 group-hover:opacity-100 transition-opacity"></div>
+          <div className="flex items-center gap-4 mb-6 relative z-10">
+            <div className="bg-[#FFD400]/20 p-3 rounded border border-[#FFD400]/50">
+              <Zap className="w-6 h-6 text-[#FFD400]" />
             </div>
-            <h3 className="font-header text-black text-3xl font-black">Points Issued</h3>
+            <h3 className="font-arcade text-white text-2xl">Points Issued</h3>
           </div>
-          <p className="font-header text-6xl font-black text-black mb-4">
+          <p className="font-arcade text-5xl text-[#FFD400] mb-4 text-shadow-glow">
             {(stats?.totalPointsIssued || 0).toLocaleString()}
           </p>
-          <div className="space-y-3">
-            <p className="text-black/60 font-bold uppercase tracking-wide text-xs">Total points given to users</p>
-            <div className="w-full bg-gray-100 rounded-full h-4 border-2 border-black">
-              <div className="bg-[#FFD93D] h-full rounded-l-full border-r-2 border-black" style={{ width: '75%' }}></div>
+          <div className="space-y-3 relative z-10">
+            <p className="text-gray-500 font-mono text-xs uppercase">Total system currency distributed</p>
+            <div className="w-full bg-[#1A1A1A] h-2">
+              <div className="bg-[#FFD400] h-full shadow-[0_0_10px_#FFD400]" style={{ width: '75%' }}></div>
             </div>
           </div>
         </div>
 
-        <div className="bg-white border-2 border-black rounded-[20px] p-8 neo-shadow">
-          <div className="flex items-center gap-4 mb-6">
-            <div className="bg-[#00B894] p-3 rounded-xl border-2 border-black">
-              <Zap className="w-6 h-6 text-black" fill="black" />
+        <div className="bg-[#080808] border border-[#333] p-8 relative overflow-hidden group">
+          <div className="absolute top-0 left-0 w-1 h-full bg-[#00B894] opacity-50 group-hover:opacity-100 transition-opacity"></div>
+          <div className="flex items-center gap-4 mb-6 relative z-10">
+            <div className="bg-[#00B894]/20 p-3 rounded border border-[#00B894]/50">
+              <Zap className="w-6 h-6 text-[#00B894]" />
             </div>
-            <h3 className="font-header text-black text-3xl font-black">Points Redeemed</h3>
+            <h3 className="font-arcade text-white text-2xl">Points Redeemed</h3>
           </div>
-          <p className="font-header text-6xl font-black text-black mb-4">
+          <p className="font-arcade text-5xl text-[#00B894] mb-4 text-shadow-glow">
             {(stats?.totalPointsRedeemed || 0).toLocaleString()}
           </p>
-          <div className="space-y-3">
-            <p className="text-black/60 font-bold uppercase tracking-wide text-xs">Points used for discounts</p>
-            <div className="w-full bg-gray-100 rounded-full h-4 border-2 border-black">
-              <div className="bg-[#00B894] h-full rounded-l-full border-r-2 border-black" style={{ width: '18%' }}></div>
+          <div className="space-y-3 relative z-10">
+            <p className="text-gray-500 font-mono text-xs uppercase">Currency utilized for upgrades</p>
+            <div className="w-full bg-[#1A1A1A] h-2">
+              <div className="bg-[#00B894] h-full shadow-[0_0_10px_#00B894]" style={{ width: '18%' }}></div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Recent Orders */}
-      <div className="bg-white border-2 border-black rounded-[25px] p-8 neo-shadow">
-        <h2 className="font-header text-3xl font-black text-black mb-8 flex items-center gap-3">
-          <ShoppingBag className="w-8 h-8 text-black" />
-          RECENT ORDERS
-        </h2>
+      <div className="bg-[#080808] border border-[#333] p-8 relative overflow-hidden">
+        <div className="flex items-center gap-3 mb-8 border-b border-[#333] pb-4">
+          <ShoppingBag className="w-6 h-6 text-[#FFD400]" />
+          <h2 className="font-arcade text-2xl text-white">RECENT_TRANSACTIONS</h2>
+        </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b-2 border-black">
-                <th className="py-4 px-4 text-black/50 font-black uppercase tracking-wider text-xs">Order ID</th>
-                <th className="py-4 px-4 text-black/50 font-black uppercase tracking-wider text-xs">Amount</th>
-                <th className="py-4 px-4 text-black/50 font-black uppercase tracking-wider text-xs">Status</th>
-                <th className="py-4 px-4 text-black/50 font-black uppercase tracking-wider text-xs">Date</th>
+              <tr className="border-b border-[#333]">
+                <th className="py-4 px-4 text-gray-500 font-arcade text-xs tracking-widest uppercase">ID</th>
+                <th className="py-4 px-4 text-gray-500 font-arcade text-xs tracking-widest uppercase">Amount</th>
+                <th className="py-4 px-4 text-gray-500 font-arcade text-xs tracking-widest uppercase">Status</th>
+                <th className="py-4 px-4 text-gray-500 font-arcade text-xs tracking-widest uppercase">Date</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="font-mono text-sm">
               {recentOrders.map((order) => (
-                <tr key={order.id} className="border-b-2 border-black/10 hover:bg-[#FFFDF5] transition">
-                  <td className="py-4 px-4 text-black font-bold font-mono text-sm">{order.id}</td>
-                  <td className="py-4 px-4 text-black font-black text-lg">₹{order.totalPrice.toLocaleString()}</td>
+                <tr key={order.id} className="border-b border-[#333]/50 hover:bg-[#111] transition-colors group">
+                  <td className="py-4 px-4 text-[#FFD400] group-hover:text-white transition-colors">#{order.id.slice(0, 8)}...</td>
+                  <td className="py-4 px-4 text-white">₹{order.totalPrice.toLocaleString()}</td>
                   <td className="py-4 px-4">
-                    <span className="inline-flex px-3 py-1 bg-[#00B894] border-2 border-black rounded-lg text-black text-xs font-black uppercase shadow-[2px_2px_0px_rgba(0,0,0,0.1)]">
-                      ✓ Completed
+                    <span className="inline-flex px-2 py-1 bg-[#00B894]/20 border border-[#00B894] text-[#00B894] text-[10px] uppercase tracking-wider">
+                      COMPLETED
                     </span>
                   </td>
-                  <td className="py-4 px-4 text-black/60 font-bold text-sm">
+                  <td className="py-4 px-4 text-gray-500">
                     {new Date(order.createdAt).toLocaleDateString()}
                   </td>
                 </tr>
               ))}
               {recentOrders.length === 0 && (
                 <tr>
-                  <td colSpan={4} className="py-8 text-center text-black/40 font-bold">No orders found.</td>
+                  <td colSpan={4} className="py-12 text-center text-gray-600 font-arcade">NO_TRANSACTION_DATA_FOUND</td>
                 </tr>
               )}
             </tbody>
@@ -263,3 +273,4 @@ export default function AdminDashboard() {
     </div>
   );
 }
+

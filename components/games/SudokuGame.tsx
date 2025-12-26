@@ -104,7 +104,8 @@ const SudokuGame: React.FC = () => {
         confetti({
             particleCount: 150,
             spread: 70,
-            origin: { y: 0.6 }
+            origin: { y: 0.6 },
+            colors: ['#FF8C00', '#FFD400', '#FFFFFF']
         });
 
         await awardPoints(REWARDS.SUDOKU.EASY, 'Sudoku Win');
@@ -118,38 +119,41 @@ const SudokuGame: React.FC = () => {
     };
 
     return (
-        <div className="flex flex-col items-center gap-8">
+        <div className="flex flex-col items-center gap-8 arcade-card-3d p-8 bg-black">
             {/* HUD */}
-            <div className="flex items-center gap-8 text-white/80 font-header tracking-widest text-sm">
+            <div className="flex items-center gap-8 text-white font-arcade text-xs tracking-widest bg-[#1A1A1A] px-6 py-2 border border-[#333]">
                 <div className="flex items-center gap-2">
-                    <Clock size={16} className="text-amber-500" />
-                    <span>{formatTime(timer)}</span>
+                    <Clock size={16} className="text-[#FF8C00]" />
+                    <span>TIMER: {formatTime(timer)}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                    <AlertCircle size={16} className={mistakes > 2 ? 'text-red-500' : 'text-white/40'} />
-                    <span>MISTAKES: {mistakes}/3</span>
+                    <AlertCircle size={16} className={mistakes > 2 ? 'text-red-500' : 'text-gray-500'} />
+                    <span className={mistakes > 2 ? 'text-red-500' : ''}>ERRORS: {mistakes}/3</span>
                 </div>
             </div>
 
             {/* WIN STATE */}
             {isWon && (
-                <div className="animate-in zoom-in duration-300 bg-emerald-500/20 border border-emerald-500 p-8 rounded text-center">
-                    <Trophy className="w-12 h-12 text-emerald-400 mx-auto mb-4" />
-                    <h2 className="text-2xl font-bold text-white mb-2">PUZZLE SOLVED!</h2>
-                    <p className="text-emerald-400 font-header tracking-widest text-sm">+{REWARDS.SUDOKU.EASY} POINTS EARNED</p>
+                <div className="animate-in zoom-in duration-300 bg-[#FFD400]/10 border-2 border-[#FFD400] p-8 text-center shadow-[0_0_20px_rgba(255,212,0,0.3)]">
+                    <Trophy className="w-12 h-12 text-[#FFD400] mx-auto mb-4" />
+                    <h2 className="text-2xl font-arcade text-white mb-2 uppercase text-3d-yellow">System Solved!</h2>
+                    <p className="text-[#FFD400] font-arcade tracking-widest text-xs">+{REWARDS.SUDOKU.EASY} TOKENS CREDITED</p>
                 </div>
             )}
 
             {/* GRID */}
-            <div className="grid grid-cols-9 border-2 border-white/20 bg-black/40 shadow-2xl">
+            <div className="grid grid-cols-9 border-4 border-[#333] bg-black shadow-[8px_8px_0px_#111] p-1 relative">
+                {/* Scanline overlay for grid */}
+                <div className="absolute inset-0 pointer-events-none scanlines opacity-50 z-10"></div>
+
                 {board.map((row, rIndex) => (
                     row.map((cell, cIndex) => {
                         const isInitial = INITIAL_BOARD[rIndex][cIndex] !== 0;
                         const isError = cell !== 0 && cell !== SOLUTION[rIndex][cIndex];
 
                         // Borders for 3x3 subgrids
-                        const borderRight = (cIndex + 1) % 3 === 0 && cIndex !== 8 ? 'border-r-2 border-white/20' : 'border-r border-white/10';
-                        const borderBottom = (rIndex + 1) % 3 === 0 && rIndex !== 8 ? 'border-b-2 border-white/20' : 'border-b border-white/10';
+                        const borderRight = (cIndex + 1) % 3 === 0 && cIndex !== 8 ? 'border-r-2 border-[#FF8C00]/50' : 'border-r border-[#333]';
+                        const borderBottom = (rIndex + 1) % 3 === 0 && rIndex !== 8 ? 'border-b-2 border-[#FF8C00]/50' : 'border-b border-[#333]';
 
                         return (
                             <input
@@ -160,12 +164,12 @@ const SudokuGame: React.FC = () => {
                                 onChange={(e) => handleCellChange(rIndex, cIndex, e.target.value)}
                                 disabled={isInitial || isWon || !isActive}
                                 className={`
-                    w-8 h-8 md:w-12 md:h-12 text-center text-lg md:text-xl font-bold focus:outline-none focus:bg-amber-500/20
-                    ${isInitial ? 'bg-white/5 text-white/40 cursor-not-allowed' : 'bg-transparent text-white'}
-                    ${isError ? 'text-red-500 bg-red-500/10' : ''}
-                    ${borderRight} ${borderBottom}
-                    transition-colors
-                 `}
+                                    w-8 h-8 md:w-12 md:h-12 text-center text-lg md:text-xl font-arcade z-20 relative
+                                    ${isInitial ? 'text-[#FFD400] bg-[#111] cursor-not-allowed' : 'bg-black text-white focus:bg-[#FF8C00]/20'}
+                                    ${isError ? 'text-red-500 bg-red-900/20' : ''}
+                                    ${borderRight} ${borderBottom}
+                                    focus:outline-none transition-colors
+                                `}
                             />
                         );
                     })
@@ -175,18 +179,18 @@ const SudokuGame: React.FC = () => {
             {!isActive && !isWon && (
                 <button
                     onClick={handleStart}
-                    className="px-8 py-3 bg-amber-500 text-black font-header tracking-widest text-sm hover:scale-105 transition-transform"
+                    className="px-8 py-3 bg-[#FF8C00] text-black font-arcade text-sm border-b-4 border-[#A0522D] active:border-b-0 active:translate-y-1 hover:bg-white transition-all uppercase"
                 >
-                    START GAME
+                    INITIALIZE_GRID
                 </button>
             )}
 
             {isActive && (
                 <button
                     onClick={handleStart}
-                    className="text-white/40 text-xs flex items-center gap-2 hover:text-white transition-colors"
+                    className="text-gray-500 text-[10px] font-arcade flex items-center gap-2 hover:text-white transition-colors uppercase border border-gray-800 px-4 py-2 hover:border-[#FFD400]"
                 >
-                    <RefreshCcw size={12} /> RESTART
+                    <RefreshCcw size={12} /> REBOOT_SYSTEM
                 </button>
             )}
         </div>

@@ -4,8 +4,10 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/app/context/AuthContext';
-import { Package, ArrowRight, Home, ExternalLink } from 'lucide-react';
+import { Package, ArrowRight, Home } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { LoadingScreen } from '@/components/ui/loading-screen';
+import { ErrorScreen } from '@/components/ui/error-screen';
 
 export const dynamic = 'force-dynamic';
 
@@ -52,6 +54,7 @@ export default function OrdersPage() {
   const loadOrders = async () => {
     try {
       setLoading(true);
+      setError(null);
       if (user?.uid) {
         const { getUserOrders } = await import('@/lib/firebase');
         const userOrders = await getUserOrders(user.uid);
@@ -59,21 +62,18 @@ export default function OrdersPage() {
       }
     } catch (err) {
       console.error('Error loading orders:', err);
-      setError('Failed to load orders');
+      setError('Failed to retrieve order history.');
     } finally {
       setLoading(false);
     }
   };
 
   if (authLoading || loading) {
-    return (
-      <div className="min-h-screen bg-[#FFFDF5] flex items-center justify-center pt-24">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-black border-t-[#FFD93D] rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-black font-black text-xs tracking-[0.2em]">FETCHING HISTORY...</p>
-        </div>
-      </div>
-    );
+    return <LoadingScreen message="ACCESSING_PURCHASE_LOGS..." />;
+  }
+
+  if (error) {
+    return <ErrorScreen message={error} reset={loadOrders} />;
   }
 
   if (!user) {
@@ -81,49 +81,43 @@ export default function OrdersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FFFDF5] pt-32 pb-16 px-4 md:px-8 text-[#2D3436]">
+    <div className="min-h-screen bg-black text-white pt-32 pb-16 px-4 md:px-8 selection:bg-[#FF8C00] selection:text-black">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="mb-12 border-b-2 border-black pb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+        <div className="mb-12 border-b-2 border-[#333] pb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
           <div>
-            <h1 className="font-header text-6xl md:text-7xl font-black text-black leading-none mb-2">
-              MY ORDERS
+            <h1 className="font-arcade text-5xl md:text-7xl text-white leading-none mb-2 text-3d-orange">
+              MY_ORDERS
             </h1>
-            <p className="text-black/60 font-bold text-lg">
-              History of your acquired loot.
+            <p className="text-gray-500 font-sans text-lg tracking-wide uppercase">
+              Acquisition Log & Transaction History
             </p>
           </div>
 
-          <div className="bg-[#FFD93D] px-6 py-3 border-2 border-black rounded-[15px] neo-shadow rotate-1">
-            <span className="font-black text-xl text-black block">{orders.length}</span>
-            <span className="text-[10px] font-black uppercase tracking-widest text-black/70">Total Orders</span>
+          <div className="bg-[#111] px-6 py-3 border border-[#FF8C00] rounded-sm shadow-[0_0_10px_rgba(255,140,0,0.3)]">
+            <span className="font-arcade text-2xl text-[#FF8C00] block">{orders.length}</span>
+            <span className="text-[10px] font-mono uppercase tracking-widest text-gray-400">Total Acquisitions</span>
           </div>
         </div>
 
-        {error && (
-          <div className="bg-[#FF7675] border-2 border-black rounded-[15px] p-4 mb-8 text-black font-bold neo-shadow">
-            ⚠️ {error}
-          </div>
-        )}
-
         {orders.length === 0 ? (
           // Empty State
-          <div className="bg-white border-2 border-black rounded-[25px] p-16 text-center neo-shadow">
-            <div className="w-24 h-24 bg-[#FFD93D] rounded-full flex items-center justify-center border-3 border-black neo-shadow mx-auto mb-8">
-              <Package className="w-10 h-10 text-black" strokeWidth={2.5} />
+          <div className="bg-[#080808] border border-[#333] rounded-sm p-16 text-center">
+            <div className="w-24 h-24 bg-[#1A1A1A] rounded-full flex items-center justify-center border border-[#333] mx-auto mb-8">
+              <Package className="w-10 h-10 text-[#FF8C00]" strokeWidth={1.5} />
             </div>
-            <h2 className="font-header text-4xl font-black text-black mb-4">
-              NO ORDERS YET
+            <h2 className="font-arcade text-3xl text-white mb-4">
+              NO_LOGS_FOUND
             </h2>
-            <p className="text-black/60 mb-8 max-w-md mx-auto font-medium">
-              Your inventory is empty! Visit the repository to find some treasures.
+            <p className="text-gray-500 mb-8 max-w-md mx-auto font-mono text-sm">
+              Your inventory is empty. Access the vault to acquire new assets.
             </p>
             <Link
               href="/shop"
-              className="inline-flex items-center gap-3 px-8 py-4 bg-black text-white font-black text-sm tracking-widest rounded-[15px] border-2 border-transparent hover:bg-[#6C5CE7] hover:-translate-y-1 transition-all neo-shadow shadow-black/20 uppercase"
+              className="inline-flex items-center gap-3 px-8 py-4 bg-[#FF8C00] text-black font-arcade text-xs tracking-[0.2em] rounded-sm hover:bg-white transition-all border-b-4 border-[#A0522D] active:border-b-0 active:translate-y-1 uppercase"
             >
               <Home className="w-4 h-4" />
-              Start Shopping
+              ACCESS_VAULT
             </Link>
           </div>
         ) : (
@@ -138,26 +132,29 @@ export default function OrdersPage() {
               >
                 <Link
                   href={`/order-confirmation/${order.id}`}
-                  className="block bg-white border-2 border-black rounded-[20px] p-6. md:p-8 hover:translate-x-[-4px] hover:translate-y-[-4px] hover:shadow-[8px_8px_0px_#000] transition-all duration-200 neo-shadow"
+                  className="block bg-[#080808] border border-[#333] hover:border-[#FF8C00] rounded-sm p-6 md:p-8 transition-all duration-300 relative overflow-hidden"
                 >
-                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+                  {/* Hover Glow */}
+                  <div className="absolute inset-0 bg-[#FF8C00]/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
+
+                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 relative z-10">
                     {/* Left Section - Order Info */}
                     <div className="flex-1">
-                      <div className="flex items-center gap-4 mb-4">
-                        <div className="bg-[#FFD93D] p-2 rounded-lg border-2 border-black">
-                          <Package className="w-6 h-6 text-black" />
+                      <div className="flex items-center gap-4 mb-6">
+                        <div className="bg-[#1A1A1A] p-3 rounded-sm border border-[#333] group-hover:border-[#FF8C00]/50 transition-colors">
+                          <Package className="w-6 h-6 text-[#FF8C00]" />
                         </div>
                         <div>
-                          <p className="text-black/40 text-[10px] font-black uppercase tracking-[0.2em] mb-1">Order ID</p>
-                          <p className="font-mono text-lg font-bold text-black break-all leading-none">{order.id.slice(0, 8)}...</p>
+                          <p className="text-gray-600 text-[10px] font-mono uppercase tracking-widest mb-1">Transaction ID</p>
+                          <p className="font-arcade text-lg text-white break-all leading-none tracking-widest">#{order.id.slice(0, 8)}</p>
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-6">
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-8">
                         {/* Order Date */}
                         <div>
-                          <p className="text-black/40 text-[10px] font-black uppercase tracking-[0.2em] mb-1">Date</p>
-                          <p className="text-black font-bold text-sm">
+                          <p className="text-gray-600 text-[10px] font-mono uppercase tracking-widest mb-1">Date</p>
+                          <p className="text-gray-300 font-sans text-sm">
                             {order.createdAt
                               ? new Date(order.createdAt).toLocaleDateString('en-US', {
                                 month: 'short',
@@ -170,40 +167,40 @@ export default function OrdersPage() {
 
                         {/* Items Count */}
                         <div>
-                          <p className="text-black/40 text-[10px] font-black uppercase tracking-[0.2em] mb-1">Items</p>
-                          <p className="text-black font-bold text-sm">
-                            {order.items?.length || 0} items
+                          <p className="text-gray-600 text-[10px] font-mono uppercase tracking-widest mb-1">Payload</p>
+                          <p className="text-gray-300 font-sans text-sm">
+                            {order.items?.length || 0} ITEMS
                           </p>
                         </div>
 
                         {/* Status */}
                         <div>
-                          <p className="text-black/40 text-[10px] font-black uppercase tracking-[0.2em] mb-1">Status</p>
-                          <span className="inline-flex items-center px-2 py-0.5 bg-[#00B894] border-2 border-black rounded-md text-white text-[10px] font-black uppercase">
-                            Paid
+                          <p className="text-gray-600 text-[10px] font-mono uppercase tracking-widest mb-1">Status</p>
+                          <span className="inline-flex items-center px-2 py-0.5 bg-[#00B894]/20 border border-[#00B894] rounded-sm text-[#00B894] text-[10px] font-arcade tracking-wider uppercase">
+                            COMPLETED
                           </span>
                         </div>
                       </div>
                     </div>
 
                     {/* Right Section - Price & Points */}
-                    <div className="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-center border-t-2 md:border-t-0 md:border-l-2 border-black/5 md:pl-8 pt-4 md:pt-0 gap-4">
+                    <div className="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-center border-t md:border-t-0 md:border-l border-[#333] md:pl-8 pt-4 md:pt-0 gap-4">
                       <div>
-                        <p className="text-black/40 text-[10px] font-black uppercase tracking-[0.2em] mb-1 text-right">Total</p>
-                        <p className="font-header text-4xl font-black text-black">
-                          ₹{order.totalPrice}
+                        <p className="text-gray-600 text-[10px] font-mono uppercase tracking-widest mb-1 text-right">Total Value</p>
+                        <p className="font-arcade text-3xl text-white">
+                          ₹{order.totalPrice.toLocaleString()}
                         </p>
                       </div>
 
-                      <div className="flex items-center gap-2 text-black/40 group-hover:text-[#6C5CE7] transition-colors font-black text-xs uppercase tracking-widest">
-                        View Receipt <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                      <div className="flex items-center gap-2 text-[#FF8C00] font-arcade text-[10px] uppercase tracking-[0.2em] group-hover:translate-x-1 transition-transform">
+                        ACCESS_RECEIPT <ArrowRight className="w-4 h-4" />
                       </div>
                     </div>
                   </div>
                 </Link>
                 {/* Absolute points badge */}
                 {order.totalPoints > 0 && (
-                  <div className="absolute -top-3 -right-3 bg-[#6C5CE7] text-white px-3 py-1 border-2 border-black rounded-full font-black text-xs neo-shadow shadow-black rotate-3 z-10">
+                  <div className="absolute top-4 right-4 bg-[#6C5CE7] text-white px-3 py-1 border border-white/20 rounded-sm font-arcade text-[10px] shadow-[0_0_10px_#6C5CE7] z-20">
                     +{order.totalPoints} XP
                   </div>
                 )}

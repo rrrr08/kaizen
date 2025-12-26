@@ -1,265 +1,210 @@
-'use client';
+"use client";
+import React, { useState, useEffect } from 'react';
+import { generateDailyPuzzle } from '@/lib/geminiService';
+import { useAuth } from '@/app/context/AuthContext';
+import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import { UserProfile } from '@/lib/types';
+import { LoadingScreen } from '@/components/ui/loading-screen';
 
-import { TESTIMONIALS, GAMES } from '@/lib/constants';
-import Link from 'next/link';
-import { useState, useEffect } from 'react';
-
-export default function Community() {
-  const [events, setEvents] = useState<any[]>([]);
+const Community: React.FC = () => {
+  const { user, userProfile } = useAuth();
+  const [puzzle, setPuzzle] = useState<{ riddle: string, answer: string } | null>(null);
+  const [userAnswer, setUserAnswer] = useState('');
+  const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [eventFilter, setEventFilter] = useState('All');
+  const [leaderboard, setLeaderboard] = useState<UserProfile[]>([]);
 
   useEffect(() => {
-    fetchEvents();
+    const fetchData = async () => {
+      try {
+        const [puzzleData, leaderboardSnapshot] = await Promise.all([
+          generateDailyPuzzle(),
+          getDocs(query(collection(db, 'users'), orderBy('xp', 'desc'), limit(5)))
+        ]);
+
+        setPuzzle(puzzleData);
+
+        const leaderboardData = leaderboardSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        })) as UserProfile[];
+        setLeaderboard(leaderboardData);
+
+      } catch (e) {
+        console.error("Failed to fetch community data", e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
   }, []);
 
-  const fetchEvents = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const response = await fetch('/api/events?status=upcoming');
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch events: ${response.status}`);
-      }
-
-      const data = await response.json();
-
-      if (data.success) {
-        setEvents(data.events);
-      } else {
-        setError(data.error || 'Failed to load events');
-      }
-    } catch (err: any) {
-      setError(err.message || 'Failed to load events');
-      console.error('Error:', err);
-    } finally {
-      setLoading(false);
+  const handleSubmit = () => {
+    if (puzzle && userAnswer.toLowerCase().trim().includes(puzzle.answer.toLowerCase().trim())) {
+      setMessage("✅ ACCESS GRANTED! +250 TOKENS ADDED.");
+      // TODO: Call API to add tokens
+    } else {
+      setMessage("❌ ERROR: INCORRECT DATA. TRY AGAIN.");
     }
   };
 
-  const filteredEvents = eventFilter === 'All'
-    ? events
-    : events.filter(e => e.price === 0 ? eventFilter === 'Free' : eventFilter === 'Paid');
-
-  if (loading) {
-    return (
-      <div className="min-h-screen pt-28 pb-16 flex items-center justify-center bg-[#FFFDF5]">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[#FFD93D] border-t-black mb-4"></div>
-          <p className="text-black/60 font-black text-xs tracking-[0.4em]">LOADING COMMUNITY...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen pt-28 pb-16 flex flex-col items-center justify-center gap-4 bg-[#FFFDF5]">
-        <div className="text-red-500 font-black tracking-widest text-center">
-          {error}
-        </div>
-        <button
-          onClick={fetchEvents}
-          className="px-6 py-2 border-2 border-black text-black hover:bg-black hover:text-white transition-all font-black text-xs tracking-widest rounded-lg"
-        >
-          TRY AGAIN
-        </button>
-      </div>
-    );
-  }
+  if (loading) return <LoadingScreen message="CONNECTING_TO_HUB..." />;
 
   return (
-    <div className="min-h-screen pt-32 pb-16 bg-[#FFFDF5] text-[#2D3436] selection:bg-[#FFD93D]/50">
-      <div className="max-w-7xl mx-auto px-6 md:px-12">
-        {/* Header */}
-        <div className="mb-20 border-b-2 border-black pb-12">
-          <div className="text-[#6C5CE7] font-black text-sm tracking-[0.2em] mb-4 uppercase font-display">Events & Community Hub</div>
-          <h1 className="font-header text-6xl md:text-8xl tracking-tighter mb-8 text-[#2D3436]">
-            PLAY, GATHER & <br /><span className="text-[#FFD93D] drop-shadow-[2px_2px_0px_#000] italic font-serif">BELONG</span>
-          </h1>
-          <p className="text-black/70 font-bold text-xl max-w-3xl leading-relaxed">
-            The heart of Joy Juncture. Discover local meets, join our digital tribe, and earn rewards for simply having fun.
-          </p>
-        </div>
-
-        {/* --- EVENTS SECTION (Merged) --- */}
-        <section className="mb-32">
-          <div className="flex flex-col md:flex-row items-end justify-between gap-8 mb-12">
-            <div>
-              <h2 className="font-header text-4xl md:text-5xl mb-2 text-black">Upcoming Events</h2>
-              <p className="text-black/60 font-bold text-lg">Soirees, workshops, and tournaments near you.</p>
-            </div>
-            <div className="flex gap-4 md:gap-4">
-              {['All', 'Free', 'Paid'].map(cat => (
-                <button
-                  key={cat}
-                  onClick={() => setEventFilter(cat)}
-                  className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all neo-border neo-shadow ${eventFilter === cat
-                    ? 'bg-[#FFD93D] text-black scale-105'
-                    : 'bg-white text-black hover:bg-gray-50'
-                    }`}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
-            {filteredEvents.map(event => (
-              <Link key={event.id} href={`/events/${event.id}`}>
-                <div className="group cursor-pointer bg-white border-2 border-black p-4 rounded-[20px] neo-shadow hover:scale-[1.02] transition-transform">
-                  {/* Event Image */}
-                  <div className="aspect-video overflow-hidden rounded-[15px] mb-6 border-2 border-black">
-                    <img
-                      src={event.image}
-                      alt={event.title}
-                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
-                    />
-                  </div>
-                  {/* Event Info */}
-                  <div className="space-y-4 px-2">
+    <div className="max-w-7xl mx-auto px-4 py-20 min-h-screen">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-16">
+        {/* Left: Stats & Profile */}
+        <div className="lg:col-span-1 space-y-12">
+          <div className="relative group">
+            <div className="arcade-panel-header bg-[#FF8C00]">PILOT.STATS</div>
+            <div className="arcade-card-3d p-10 bg-gradient-to-br from-[#111] to-black">
+              {user && userProfile ? (
+                <>
+                  <div className="flex items-center gap-8 mb-10">
+                    <div className="w-24 h-24 arcade-card-3d border-[#FF8C00] flex items-center justify-center overflow-hidden shadow-[6px_6px_0px_#FF8C00]">
+                      {userProfile.photoURL ? (
+                        <img src={userProfile.photoURL} alt="Profile" className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="font-arcade text-5xl text-white">{userProfile.name?.charAt(0) || 'P'}</span>
+                      )}
+                    </div>
                     <div>
-                      <div className="bg-[#6C5CE7] text-white px-2 py-1 rounded inline-block font-black text-[8px] tracking-[0.2em] mb-3 uppercase">
-                        {event.date} • {event.time}
-                      </div>
-                      <h3 className="font-header text-2xl md:text-3xl text-black group-hover:text-[#6C5CE7] transition-colors tracking-tight mb-2">
-                        {event.title}
-                      </h3>
-                      <p className="text-black/60 font-bold text-sm line-clamp-2">
-                        {event.description}
-                      </p>
-                    </div>
-                    <div className="flex items-center justify-between pt-4 border-t-2 border-black/10">
-                      <div className="text-black/50 text-xs font-black uppercase tracking-widest">{event.location}</div>
-                      <div>
-                        {event.price === 0 ? (
-                          <span className="text-[#00B894] font-black text-xs tracking-widest">FREE</span>
-                        ) : (
-                          <span className="text-black font-serif italic font-bold">₹{event.price}</span>
-                        )}
-                      </div>
+                      <h2 className="font-arcade text-3xl text-white truncate max-w-[150px]">{userProfile.name || 'PILOT'}</h2>
+                      <div className="text-[#FF8C00] font-arcade text-xs mt-1 animate-pulse">STATUS: {userProfile.role === 'admin' ? 'ADMIN_CMD' : 'ACTIVE_PILOT'}</div>
                     </div>
                   </div>
-                </div>
-              </Link>
-            ))}
-          </div>
 
-          {filteredEvents.length === 0 && (
-            <div className="text-center py-12">
-              <p className="text-black/40 font-black text-lg uppercase">NO EVENTS MATCHING FILTER</p>
-            </div>
-          )}
-        </section>
-
-        {/* --- DIGITAL COMMUNITY SECTION --- */}
-        <section className="mb-32">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Wallet & Points */}
-            <div className="border-2 border-black p-8 rounded-[30px] bg-white neo-shadow hover:translate-y-[-4px] transition-transform">
-              <h3 className="font-header text-sm tracking-[0.2em] text-[#6C5CE7] mb-6 uppercase border-b-2 border-black pb-2 font-black">Game Points & Wallet</h3>
-              <div className="space-y-6">
-                <div>
-                  <p className="text-black font-black text-lg mb-3">Earn points through:</p>
-                  <ul className="space-y-2 text-black/70 font-medium text-sm">
-                    <li>→ Purchasing games</li>
-                    <li>→ Attending events</li>
-                    <li>→ Playing online games</li>
-                    <li>→ Community engagement</li>
-                  </ul>
-                </div>
-                <div className="pt-4 border-t-2 border-black/10">
-                  <p className="text-black font-black text-lg mb-3">Redeem for:</p>
-                  <ul className="space-y-2 text-black/70 font-medium text-sm">
-                    <li>→ Store discounts</li>
-                    <li>→ Event tickets</li>
-                    <li>→ Exclusive merchandise</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-
-            {/* Blogs & Stories */}
-            <div className="border-2 border-black p-8 rounded-[30px] bg-white neo-shadow hover:translate-y-[-4px] transition-transform">
-              <h3 className="font-header text-sm tracking-[0.2em] text-[#FFD93D] mb-6 uppercase border-b-2 border-black pb-2 font-black drop-shadow-sm text-shadow-black">Community Stories</h3>
-              <div className="space-y-4">
-                <p className="text-black/70 font-medium text-sm leading-relaxed">
-                  Join the conversation. Share your game nights, read strategy guides, and get featured in our editorial blog.
-                </p>
-                <div className="pt-6">
-                  <Link href="/blog" className="text-black font-black text-xs tracking-[0.3em] hover:text-[#6C5CE7] hover:underline transition-all">VISIT THE BLOG →</Link>
-                </div>
-              </div>
-            </div>
-
-            {/* Puzzles & Challenges */}
-            <div className="border-2 border-black p-8 rounded-[30px] bg-white neo-shadow hover:translate-y-[-4px] transition-transform">
-              <h3 className="font-header text-sm tracking-[0.2em] text-[#00B894] mb-6 uppercase border-b-2 border-black pb-2 font-black">Daily Challenges</h3>
-              <div className="space-y-4">
-                <p className="text-black/70 font-medium text-sm leading-relaxed">
-                  Test your wit with our rotating selection of puzzles and brain teasers.
-                </p>
-                <div className="space-y-3 pt-4 border-t-2 border-black/10">
-                  {GAMES.slice(0, 2).map(game => (
-                    <div key={game.id} className="border-b border-black/10 pb-3 last:border-0 flex justify-between items-center">
-                      <p className="text-black font-bold text-xs">{game.title}</p>
-                      <p className="text-[#00B894] font-black text-xs">+{game.points} pts</p>
+                  <div className="space-y-6">
+                    <div className="flex justify-between font-arcade text-[10px] tracking-widest text-gray-500">
+                      <span>XP_BAR_PROGRESS</span>
+                      <span className="text-[#FFD400]">{(userProfile.xp || 0) % 1000} / 1000</span>
                     </div>
-                  ))}
+                    <div className="w-full bg-black h-6 border-2 border-[#1A1A1A] p-1">
+                      <div className="bg-[#FFD400] h-full shadow-[0_0_10px_#FFD400]" style={{ width: `${((userProfile.xp || 0) % 1000) / 10}%` }}></div>
+                    </div>
+                  </div>
+
+                  <div className="mt-12 grid grid-cols-2 gap-6">
+                    <div className="bg-black p-6 border-2 border-[#1A1A1A] text-center shadow-inner group-hover:border-[#FF8C00] transition-colors">
+                      <div className="font-arcade text-2xl text-[#FF8C00] truncate">{userProfile.balance || 0}</div>
+                      <div className="text-[10px] font-arcade text-gray-500 mt-2">TOKENS</div>
+                    </div>
+                    <div className="bg-black p-6 border-2 border-[#1A1A1A] text-center shadow-inner group-hover:border-[#FFD400] transition-colors">
+                      <div className="font-arcade text-2xl text-[#FFD400]">{Math.floor((userProfile.xp || 0) / 1000)}</div>
+                      <div className="text-[10px] font-arcade text-gray-500 mt-2">LEVEL</div>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div className="text-center py-10">
+                  <p className="text-gray-500 font-arcade mb-4">NO_PILOT_DETECTED</p>
+                  <a href="/auth/login" className="text-[#FF8C00] border-b border-[#FF8C00] pb-1 font-arcade text-xs hover:text-white hover:border-white uppercase">Initialize Login Sequence</a>
                 </div>
-              </div>
+              )}
             </div>
           </div>
-        </section>
 
-        {/* Testimonials Section */}
-        <div className="mb-24">
-          <h2 className="font-header text-4xl md:text-5xl mb-12 tracking-tight text-center text-black">Proof of Joy</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {TESTIMONIALS.map(testimonial => (
-              <div key={testimonial.id} className="border-2 border-black p-8 rounded-[20px] bg-white neo-shadow hover:scale-[1.02] transition-transform">
-                <p className="text-black/80 font-medium italic mb-6 leading-relaxed">"{testimonial.text}"</p>
-                <div className="flex items-center gap-4">
-                  <img
-                    src={testimonial.image}
-                    alt={testimonial.author}
-                    className="w-12 h-12 rounded-full border-2 border-black"
-                  />
-                  <div>
-                    <p className="font-black text-sm text-black">{testimonial.author}</p>
-                    <p className="text-black/50 text-xs font-bold uppercase tracking-wider">{testimonial.occasion}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
+          <div className="relative group">
+            <div className="arcade-panel-header bg-white text-black">MISSIONS.LOG</div>
+            <div className="arcade-card-3d p-10 bg-[#050505]">
+              <h3 className="font-arcade text-xl mb-8 text-[#FFD400] uppercase tracking-tighter">ACTIVE_DIRECTIVES</h3>
+              <ul className="space-y-6 text-sm">
+                <li className="flex items-center gap-4 text-gray-600">
+                  <div className="w-5 h-5 border-2 border-gray-800 flex items-center justify-center text-xs">✓</div>
+                  <span className="line-through font-bold">Join your first event</span>
+                </li>
+                <li className="flex items-center gap-4 text-white">
+                  <div className="w-5 h-5 border-2 border-[#FF8C00] animate-pulse"></div>
+                  <span className="font-bold">Solve the daily riddle</span>
+                </li>
+                <li className="flex items-center gap-4 text-white">
+                  <div className="w-5 h-5 border-2 border-[#FFD400]"></div>
+                  <span className="font-bold">Purchase a strategy game</span>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
 
-        {/* Final CTA */}
-        <div className="text-center py-16 border-t-2 border-black/10">
-          <h2 className="font-header text-4xl md:text-5xl mb-6 text-black">Ready to Join?</h2>
-          <p className="text-black/70 font-bold text-lg mb-8 max-w-2xl mx-auto">
-            Create your account and start earning points, engaging with the community, and discovering endless joy.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-6 justify-center">
-            <Link
-              href="/auth/signup"
-              className="px-8 py-4 bg-black text-white font-black text-xs tracking-[0.4em] hover:bg-[#6C5CE7] hover:scale-105 transition-all rounded-xl shadow-[4px_4px_0px_rgba(0,0,0,0.2)]"
-            >
-              CREATE ACCOUNT
-            </Link>
-            <Link
-              href="/play"
-              className="px-8 py-4 bg-[#FFD93D] text-black font-black text-xs tracking-[0.4em] border-2 border-black neo-shadow hover:scale-105 transition-all rounded-xl"
-            >
-              PLAY NOW
-            </Link>
+        {/* Center/Right: Feed & Daily Puzzle */}
+        <div className="lg:col-span-2 space-y-16">
+          {/* Daily Puzzle Section */}
+          <div className="relative group">
+            <div className="arcade-panel-header bg-[#FFD400] text-black">PUZZLE.SYSTEM</div>
+            <div className="arcade-card-3d p-12 bg-black relative overflow-hidden scanlines">
+              <div className="absolute top-0 left-0 w-full h-1 bg-[#FFD400] opacity-30 animate-pulse"></div>
+              <div className="relative z-10">
+                <div className="flex justify-between items-center mb-12">
+                  <h2 className="font-arcade text-5xl text-3d-yellow leading-none">DAILY ENIGMA</h2>
+                  <div className="bg-red-600 text-white font-arcade text-xs px-4 py-2 animate-pulse shadow-[4px_4px_0px_black]">LIVE_SIGNAL</div>
+                </div>
+
+                <>
+                  <div className="p-10 border-4 border-dashed border-[#1A1A1A] group-hover:border-[#FF8C00] transition-colors mb-12 bg-[#050505]">
+                    <p className="text-2xl italic text-gray-200 leading-relaxed font-medium">
+                      "{puzzle?.riddle}"
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col md:flex-row gap-6 mb-8">
+                    <input
+                      type="text"
+                      value={userAnswer}
+                      onChange={(e) => setUserAnswer(e.target.value)}
+                      placeholder="DECODE_HERE_"
+                      className="flex-grow bg-[#111] border-4 border-[#1A1A1A] p-6 font-arcade text-white focus:border-[#FFD400] outline-none transition-all placeholder:text-gray-800"
+                    />
+                    <button
+                      onClick={handleSubmit}
+                      className="bg-[#FFD400] text-black font-arcade text-xl px-12 py-6 border-b-8 border-[#B8860B] active:border-b-0 active:translate-y-2 transition-all hover:bg-white"
+                    >
+                      TRANSMIT
+                    </button>
+                  </div>
+
+                  {message && (
+                    <div className={`font-arcade text-lg p-6 border-4 shadow-[8px_8px_0px_black] ${message.startsWith('✅') ? 'text-green-400 border-green-400 bg-green-400/5' : 'text-red-500 border-red-500 bg-red-500/5'}`}>
+                      {message}
+                    </div>
+                  )}
+                </>
+
+                <div className="mt-12 pt-8 border-t border-[#1A1A1A] flex justify-between items-center text-[10px] font-arcade text-gray-600 tracking-[0.3em]">
+                  <span>NODE_ID: #042</span>
+                  <span className="text-[#FF8C00]">PRIZE: 250_TOKENS</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Leaderboard */}
+          <div className="relative group">
+            <div className="arcade-panel-header bg-[#FF8C00]">GLOBAL.RANKINGS</div>
+            <div className="arcade-card-3d p-12 bg-[#050505]">
+              <h3 className="font-arcade text-4xl mb-12 text-3d-orange">THE HALL OF FAME</h3>
+              <div className="space-y-4">
+                {leaderboard.map((user, i) => (
+                  <div key={user.id} className="flex items-center justify-between p-6 bg-black border-2 border-[#111] hover:border-[#FF8C00] transition-all transform hover:-translate-x-2 group">
+                    <div className="flex items-center gap-10">
+                      <span className="font-arcade text-4xl opacity-20 group-hover:opacity-100 transition-opacity" style={{ color: i === 0 ? '#FFD400' : i === 1 ? '#C0C0C0' : i === 2 ? '#CD7F32' : 'white' }}>0{i + 1}</span>
+                      <span className="font-arcade text-xl text-white tracking-widest uppercase">{user.name}</span>
+                    </div>
+                    <div className="flex items-center gap-12">
+                      <span className="font-arcade text-[#FF8C00] text-lg">{user.xp || 0} XP</span>
+                      <span className="text-2xl filter group-hover:drop-shadow-[0_0_8px_white] transition-all">
+                        {i < 2 ? '↗️' : '➖'}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
   );
-}
+};
+
+export default Community;

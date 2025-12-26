@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/app/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
+import { Save, RefreshCw, Settings as SettingsIcon, CreditCard, ShoppingBag, Globe } from 'lucide-react';
 
 interface Settings {
   // Gamification
@@ -112,13 +113,13 @@ export default function AdminSettingsPage() {
       if (!response.ok) throw new Error('Failed to save');
 
       addToast({
-        title: 'Success',
-        description: 'Settings updated successfully!',
+        title: 'CONFIGURATION_SAVED',
+        description: 'System parameters updated successfully.',
       });
     } catch (error) {
       addToast({
-        title: 'Error',
-        description: 'Failed to save settings',
+        title: 'SYSTEM_ERROR',
+        description: 'Failed to save configuration parameters.',
       });
     } finally {
       setIsSaving(false);
@@ -127,70 +128,83 @@ export default function AdminSettingsPage() {
 
   if (loading || isLoading) {
     return (
-      <div className="min-h-screen pt-24 pb-16 px-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center">
-            <p className="text-white/60">Loading settings...</p>
-          </div>
+      <div className="min-h-screen pt-24 pb-16 px-6 bg-[#050505] flex items-center justify-center">
+        <div className="text-[#FFD400] font-arcade tracking-[0.3em] animate-pulse text-xl">
+          LOADING_CONFIG...
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen pt-24 pb-16 px-6">
+    <div className="min-h-screen text-white bg-[#050505]">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="mb-12">
-          <h1 className="font-header text-5xl mb-2 tracking-wider">ADMIN SETTINGS</h1>
-          <p className="text-white/60 font-serif italic">Customize all platform configurations</p>
+        <div className="mb-12 border-b-2 border-[#333] pb-8 flex justify-between items-end">
+          <div>
+            <h1 className="font-arcade text-5xl text-white mb-2 text-3d-orange">SYSTEM_CONFIG</h1>
+            <p className="text-gray-500 font-sans text-lg tracking-wide uppercase">Global platform parameters</p>
+          </div>
+          <div className="bg-[#111] border border-[#333] px-4 py-2 rounded text-xs font-mono text-gray-400 flex items-center gap-2">
+            <SettingsIcon className="w-4 h-4 text-[#FFD400] animate-spin-slow" />
+            CONFIG_MODE_ACTIVE
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Gamification Settings */}
-          <div className="bg-white/5 border border-white/10 rounded-lg p-8">
-            <h2 className="font-header text-xl mb-6 text-amber-500 tracking-wider">GAMIFICATION</h2>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-white/70 font-serif text-sm mb-2">
+          <div className="bg-[#080808] border-2 border-[#333] rounded-[4px] p-8 shadow-lg hover:border-[#FFD400]/50 transition-colors group">
+            <div className="flex items-center gap-3 mb-8 border-b border-[#333] pb-4">
+              <div className="p-2 bg-[#111] border border-[#333] rounded">
+                <SettingsIcon className="w-5 h-5 text-[#FFD400]" />
+              </div>
+              <h2 className="font-arcade text-xl text-white tracking-widest text-shadow-glow">GAMIFICATION_ENGINE</h2>
+            </div>
+
+            <div className="space-y-6">
+              <div className="group/input">
+                <label className="block text-[#00B894] font-mono text-xs uppercase tracking-wider mb-2 group-hover/input:text-[#FFD400] transition-colors">
                   Points Per Rupee Spent
                 </label>
-                <input
-                  type="number"
-                  step="0.1"
-                  value={settings.pointsPerRupee}
-                  onChange={(e) => handleChange('pointsPerRupee', e.target.value)}
-                  className="w-full bg-black/50 border border-white/10 rounded px-4 py-2 text-white"
-                />
-                <p className="text-white/40 text-xs mt-1">User gets 1 point for every ₹{(1 / settings.pointsPerRupee).toFixed(2)} spent</p>
+                <div className="relative">
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={settings.pointsPerRupee}
+                    onChange={(e) => handleChange('pointsPerRupee', e.target.value)}
+                    className="w-full bg-[#111] border-2 border-[#333] rounded-sm px-4 py-3 text-white font-mono focus:outline-none focus:border-[#FFD400] transition-colors"
+                  />
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-xs font-mono">PTS/INR</div>
+                </div>
+                <p className="text-gray-600 text-[10px] font-mono mt-1 uppercase">Rate: 1 PT = ₹{(1 / settings.pointsPerRupee).toFixed(2)} SPENT</p>
               </div>
 
-              <div>
-                <label className="block text-white/70 font-serif text-sm mb-2">
+              <div className="group/input">
+                <label className="block text-[#00B894] font-mono text-xs uppercase tracking-wider mb-2 group-hover/input:text-[#FFD400] transition-colors">
                   First Time Bonus Points
                 </label>
                 <input
                   type="number"
                   value={settings.firstTimeBonusPoints}
                   onChange={(e) => handleChange('firstTimeBonusPoints', e.target.value)}
-                  className="w-full bg-black/50 border border-white/10 rounded px-4 py-2 text-white"
+                  className="w-full bg-[#111] border-2 border-[#333] rounded-sm px-4 py-3 text-white font-mono focus:outline-none focus:border-[#FFD400] transition-colors"
                 />
               </div>
 
-              <div>
-                <label className="block text-white/70 font-serif text-sm mb-2">
+              <div className="group/input">
+                <label className="block text-[#00B894] font-mono text-xs uppercase tracking-wider mb-2 group-hover/input:text-[#FFD400] transition-colors">
                   First Time Purchase Threshold (₹)
                 </label>
                 <input
                   type="number"
                   value={settings.firstTimeThreshold}
                   onChange={(e) => handleChange('firstTimeThreshold', e.target.value)}
-                  className="w-full bg-black/50 border border-white/10 rounded px-4 py-2 text-white"
+                  className="w-full bg-[#111] border-2 border-[#333] rounded-sm px-4 py-3 text-white font-mono focus:outline-none focus:border-[#FFD400] transition-colors"
                 />
               </div>
 
-              <div>
-                <label className="block text-white/70 font-serif text-sm mb-2">
+              <div className="group/input">
+                <label className="block text-[#00B894] font-mono text-xs uppercase tracking-wider mb-2 group-hover/input:text-[#FFD400] transition-colors">
                   Redeem Rate (₹ per point)
                 </label>
                 <input
@@ -198,56 +212,62 @@ export default function AdminSettingsPage() {
                   step="0.01"
                   value={settings.redeemRate}
                   onChange={(e) => handleChange('redeemRate', e.target.value)}
-                  className="w-full bg-black/50 border border-white/10 rounded px-4 py-2 text-white"
+                  className="w-full bg-[#111] border-2 border-[#333] rounded-sm px-4 py-3 text-white font-mono focus:outline-none focus:border-[#FFD400] transition-colors"
                 />
-                <p className="text-white/40 text-xs mt-1">1 point = ₹{settings.redeemRate}</p>
+                <p className="text-gray-600 text-[10px] font-mono mt-1 uppercase">CONVERSION: 1 PT = ₹{settings.redeemRate}</p>
               </div>
 
-              <div>
-                <label className="block text-white/70 font-serif text-sm mb-2">
+              <div className="group/input">
+                <label className="block text-[#00B894] font-mono text-xs uppercase tracking-wider mb-2 group-hover/input:text-[#FFD400] transition-colors">
                   Max Redeem Percentage (%)
                 </label>
                 <input
                   type="number"
                   value={settings.maxRedeemPercent}
                   onChange={(e) => handleChange('maxRedeemPercent', e.target.value)}
-                  className="w-full bg-black/50 border border-white/10 rounded px-4 py-2 text-white"
+                  className="w-full bg-[#111] border-2 border-[#333] rounded-sm px-4 py-3 text-white font-mono focus:outline-none focus:border-[#FFD400] transition-colors"
                 />
-                <p className="text-white/40 text-xs mt-1">Max {settings.maxRedeemPercent}% of order can be paid with points</p>
+                <p className="text-gray-600 text-[10px] font-mono mt-1 uppercase">CAP: {settings.maxRedeemPercent}% OF TOTAL ORDER</p>
               </div>
 
-              <div>
-                <label className="block text-white/70 font-serif text-sm mb-2">
+              <div className="group/input">
+                <label className="block text-[#00B894] font-mono text-xs uppercase tracking-wider mb-2 group-hover/input:text-[#FFD400] transition-colors">
                   Referral Bonus Points
                 </label>
                 <input
                   type="number"
                   value={settings.referralBonus}
                   onChange={(e) => handleChange('referralBonus', e.target.value)}
-                  className="w-full bg-black/50 border border-white/10 rounded px-4 py-2 text-white"
+                  className="w-full bg-[#111] border-2 border-[#333] rounded-sm px-4 py-3 text-white font-mono focus:outline-none focus:border-[#FFD400] transition-colors"
                 />
               </div>
 
-              <div>
-                <label className="block text-white/70 font-serif text-sm mb-2">
+              <div className="group/input">
+                <label className="block text-[#00B894] font-mono text-xs uppercase tracking-wider mb-2 group-hover/input:text-[#FFD400] transition-colors">
                   Birthday Bonus Points
                 </label>
                 <input
                   type="number"
                   value={settings.birthdayBonus}
                   onChange={(e) => handleChange('birthdayBonus', e.target.value)}
-                  className="w-full bg-black/50 border border-white/10 rounded px-4 py-2 text-white"
+                  className="w-full bg-[#111] border-2 border-[#333] rounded-sm px-4 py-3 text-white font-mono focus:outline-none focus:border-[#FFD400] transition-colors"
                 />
               </div>
             </div>
           </div>
 
           {/* Payment Settings */}
-          <div className="bg-white/5 border border-white/10 rounded-lg p-8">
-            <h2 className="font-header text-xl mb-6 text-amber-500 tracking-wider">PAYMENT & SHIPPING</h2>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-white/70 font-serif text-sm mb-2">
+          <div className="bg-[#080808] border-2 border-[#333] rounded-[4px] p-8 shadow-lg hover:border-[#FFD400]/50 transition-colors">
+            <div className="flex items-center gap-3 mb-8 border-b border-[#333] pb-4">
+              <div className="p-2 bg-[#111] border border-[#333] rounded">
+                <CreditCard className="w-5 h-5 text-[#FFD400]" />
+              </div>
+              <h2 className="font-arcade text-xl text-white tracking-widest text-shadow-glow">FINANCIAL_PROTOCOLS</h2>
+            </div>
+
+            <div className="space-y-6">
+              <div className="group/input">
+                <label className="block text-[#00B894] font-mono text-xs uppercase tracking-wider mb-2 group-hover/input:text-[#FFD400] transition-colors">
                   GST Rate (%)
                 </label>
                 <input
@@ -255,87 +275,93 @@ export default function AdminSettingsPage() {
                   step="0.1"
                   value={settings.gstRate}
                   onChange={(e) => handleChange('gstRate', e.target.value)}
-                  className="w-full bg-black/50 border border-white/10 rounded px-4 py-2 text-white"
+                  className="w-full bg-[#111] border-2 border-[#333] rounded-sm px-4 py-3 text-white font-mono focus:outline-none focus:border-[#FFD400] transition-colors"
                 />
-                <p className="text-white/40 text-xs mt-1">Current GST: {settings.gstRate}%</p>
+                <p className="text-gray-600 text-[10px] font-mono mt-1 uppercase">CURRENT TAX: {settings.gstRate}%</p>
               </div>
 
-              <div>
-                <label className="block text-white/70 font-serif text-sm mb-2">
+              <div className="group/input">
+                <label className="block text-[#00B894] font-mono text-xs uppercase tracking-wider mb-2 group-hover/input:text-[#FFD400] transition-colors">
                   Standard Shipping Cost (₹)
                 </label>
                 <input
                   type="number"
                   value={settings.shippingCost}
                   onChange={(e) => handleChange('shippingCost', e.target.value)}
-                  className="w-full bg-black/50 border border-white/10 rounded px-4 py-2 text-white"
+                  className="w-full bg-[#111] border-2 border-[#333] rounded-sm px-4 py-3 text-white font-mono focus:outline-none focus:border-[#FFD400] transition-colors"
                 />
               </div>
 
-              <div>
-                <label className="block text-white/70 font-serif text-sm mb-2">
+              <div className="group/input">
+                <label className="block text-[#00B894] font-mono text-xs uppercase tracking-wider mb-2 group-hover/input:text-[#FFD400] transition-colors">
                   Free Shipping Threshold (₹)
                 </label>
                 <input
                   type="number"
                   value={settings.freeShippingThreshold}
                   onChange={(e) => handleChange('freeShippingThreshold', e.target.value)}
-                  className="w-full bg-black/50 border border-white/10 rounded px-4 py-2 text-white"
+                  className="w-full bg-[#111] border-2 border-[#333] rounded-sm px-4 py-3 text-white font-mono focus:outline-none focus:border-[#FFD400] transition-colors"
                 />
-                <p className="text-white/40 text-xs mt-1">Orders above ₹{settings.freeShippingThreshold} get free shipping</p>
+                <p className="text-gray-600 text-[10px] font-mono mt-1 uppercase">IF ORDER &gt; ₹{settings.freeShippingThreshold} THEN SHIPPING = 0</p>
               </div>
             </div>
           </div>
 
           {/* General Settings */}
-          <div className="bg-white/5 border border-white/10 rounded-lg p-8 lg:col-span-2">
-            <h2 className="font-header text-xl mb-6 text-amber-500 tracking-wider">GENERAL SETTINGS</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-white/70 font-serif text-sm mb-2">
+          <div className="bg-[#080808] border-2 border-[#333] rounded-[4px] p-8 shadow-lg hover:border-[#FFD400]/50 transition-colors lg:col-span-2">
+            <div className="flex items-center gap-3 mb-8 border-b border-[#333] pb-4">
+              <div className="p-2 bg-[#111] border border-[#333] rounded">
+                <Globe className="w-5 h-5 text-[#FFD400]" />
+              </div>
+              <h2 className="font-arcade text-xl text-white tracking-widest text-shadow-glow">GENERAL_SETTINGS</h2>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="group/input">
+                <label className="block text-[#00B894] font-mono text-xs uppercase tracking-wider mb-2 group-hover/input:text-[#FFD400] transition-colors">
                   Store Name
                 </label>
                 <input
                   type="text"
                   value={settings.storeName}
                   onChange={(e) => handleChange('storeName', e.target.value)}
-                  className="w-full bg-black/50 border border-white/10 rounded px-4 py-2 text-white"
+                  className="w-full bg-[#111] border-2 border-[#333] rounded-sm px-4 py-3 text-white font-mono focus:outline-none focus:border-[#FFD400] transition-colors"
                 />
               </div>
 
-              <div>
-                <label className="block text-white/70 font-serif text-sm mb-2">
+              <div className="group/input">
+                <label className="block text-[#00B894] font-mono text-xs uppercase tracking-wider mb-2 group-hover/input:text-[#FFD400] transition-colors">
                   Store Email
                 </label>
                 <input
                   type="email"
                   value={settings.storeEmail}
                   onChange={(e) => handleChange('storeEmail', e.target.value)}
-                  className="w-full bg-black/50 border border-white/10 rounded px-4 py-2 text-white"
+                  className="w-full bg-[#111] border-2 border-[#333] rounded-sm px-4 py-3 text-white font-mono focus:outline-none focus:border-[#FFD400] transition-colors"
                 />
               </div>
 
-              <div>
-                <label className="block text-white/70 font-serif text-sm mb-2">
+              <div className="group/input">
+                <label className="block text-[#00B894] font-mono text-xs uppercase tracking-wider mb-2 group-hover/input:text-[#FFD400] transition-colors">
                   Store Phone
                 </label>
                 <input
                   type="tel"
                   value={settings.storePhone}
                   onChange={(e) => handleChange('storePhone', e.target.value)}
-                  className="w-full bg-black/50 border border-white/10 rounded px-4 py-2 text-white"
+                  className="w-full bg-[#111] border-2 border-[#333] rounded-sm px-4 py-3 text-white font-mono focus:outline-none focus:border-[#FFD400] transition-colors"
                 />
               </div>
 
-              <div>
-                <label className="block text-white/70 font-serif text-sm mb-2">
+              <div className="group/input">
+                <label className="block text-[#00B894] font-mono text-xs uppercase tracking-wider mb-2 group-hover/input:text-[#FFD400] transition-colors">
                   Currency
                 </label>
                 <input
                   type="text"
                   value={settings.currency}
                   onChange={(e) => handleChange('currency', e.target.value)}
-                  className="w-full bg-black/50 border border-white/10 rounded px-4 py-2 text-white"
+                  className="w-full bg-[#111] border-2 border-[#333] rounded-sm px-4 py-3 text-white font-mono focus:outline-none focus:border-[#FFD400] transition-colors"
                 />
               </div>
             </div>
@@ -343,19 +369,26 @@ export default function AdminSettingsPage() {
         </div>
 
         {/* Save Button */}
-        <div className="mt-12 flex gap-4">
+        <div className="mt-12 flex gap-4 border-t-2 border-[#333] pt-8">
           <button
             onClick={handleSave}
             disabled={isSaving}
-            className="px-8 py-3 bg-amber-500 text-black font-header text-sm tracking-widest hover:bg-amber-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all rounded"
+            className="px-8 py-3 bg-[#FFD400] text-black font-arcade text-sm uppercase tracking-widest hover:bg-[#FFE066] disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2 group border border-[#FFD400]"
           >
-            {isSaving ? 'SAVING...' : 'SAVE ALL SETTINGS'}
+            {isSaving ? (
+              <RefreshCw className="w-5 h-5 animate-spin" />
+            ) : (
+              <Save className="w-5 h-5 group-hover:scale-110 transition-transform" />
+            )}
+            {isSaving ? 'EXECUTING...' : 'SAVE_CONFIGURATION'}
           </button>
+
           <button
             onClick={() => setSettings(defaultSettings)}
-            className="px-8 py-3 border border-amber-500 text-amber-500 font-header text-sm tracking-widest hover:bg-amber-500/10 transition-all rounded"
+            className="px-8 py-3 bg-transparent border-2 border-[#333] text-gray-400 font-arcade text-sm uppercase tracking-widest hover:border-gray-500 hover:text-white transition-all flex items-center gap-2"
           >
-            RESET TO DEFAULT
+            <RefreshCw className="w-4 h-4" />
+            RESET_DEFAULTS
           </button>
         </div>
       </div>

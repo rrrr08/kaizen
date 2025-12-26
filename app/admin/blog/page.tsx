@@ -25,6 +25,8 @@ import {
   Eye,
   EyeOff,
   Image as ImageIcon,
+  FileText,
+  Tag
 } from "lucide-react";
 
 interface BlogPost {
@@ -202,59 +204,63 @@ export default function AdminBlogPage() {
 
   if (loading) {
     return (
-      <div className="p-8 flex items-center justify-center min-h-screen">
+      <div className="p-8 flex items-center justify-center min-h-screen bg-[#050505]">
         <div className="text-center">
-          <div className="w-12 h-12 border-4 border-amber-500/20 border-t-amber-500 rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-amber-500">Loading posts...</p>
+          <div className="text-[#FFD400] font-arcade tracking-[0.3em] animate-pulse text-xl">
+            LOADING_TRANSMISSIONS...
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="p-8 pb-16">
+    <div className="p-8 pb-16 text-white min-h-screen bg-[#050505]">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-12 border-b-2 border-[#333] pb-6">
         <div>
-          <h1 className="font-display text-5xl font-bold text-white mb-2">Blog Management</h1>
-          <p className="text-white/60">Create, edit, publish and manage blog posts</p>
+          <h1 className="font-arcade text-5xl text-white mb-2 text-3d-orange">COMMS_LOG</h1>
+          <p className="text-gray-500 font-sans text-lg tracking-wide uppercase">Manage system announcements and guides</p>
         </div>
         <button
           onClick={onAdd}
-          className="px-6 py-3 bg-amber-500 text-black font-header font-bold rounded hover:bg-amber-400 transition flex items-center gap-2"
+          className="px-6 py-3 bg-[#FFD400] text-black font-arcade text-sm font-bold rounded-sm hover:bg-[#FFE066] transition flex items-center gap-2 uppercase tracking-wider"
         >
           <Plus className="w-5 h-5" />
-          New Post
+          BROADCAST_NEW
         </button>
       </div>
 
       {/* Filters */}
-      <div className="bg-black/40 border border-white/10 rounded-lg p-6 mb-8">
+      <div className="bg-[#111] border border-[#333] rounded-sm p-6 mb-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-white/60 text-sm mb-2">
-              <Search className="w-4 h-4 inline mr-2" />
-              Search
+            <label className="block text-[#00B894] text-xs font-mono uppercase tracking-widest mb-2">
+              <Search className="w-3 h-3 inline mr-2" />
+              SEARCH_ARCHIVES
             </label>
             <input
               type="text"
-              placeholder="Title, excerpt, category..."
+              placeholder="ENTER KEYWORDS..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-white/5 border border-white/10 rounded px-4 py-2 text-white placeholder-white/40 focus:border-amber-500 outline-none transition"
+              className="w-full bg-black border border-[#333] rounded-sm px-4 py-2 text-white font-mono placeholder-gray-700 focus:border-[#FFD400] outline-none transition uppercase"
             />
           </div>
           <div>
-            <label className="block text-white/60 text-sm mb-2">Category</label>
+            <label className="block text-[#00B894] text-xs font-mono uppercase tracking-widest mb-2">
+              <Filter className="w-3 h-3 inline mr-2" />
+              CATEGORY_FILTER
+            </label>
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="w-full bg-white/5 border border-white/10 rounded px-4 py-2 text-white focus:border-amber-500 outline-none transition"
+              className="w-full bg-black border border-[#333] rounded-sm px-4 py-2 text-white font-mono focus:border-[#FFD400] outline-none transition uppercase appearance-none cursor-pointer"
             >
-              <option value="all">All</option>
+              <option value="all">ALL_CHANNELS</option>
               {CATEGORIES.map((c) => (
                 <option key={c} value={c}>
-                  {c}
+                  {c.toUpperCase()}
                 </option>
               ))}
             </select>
@@ -265,37 +271,44 @@ export default function AdminBlogPage() {
       {/* List */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {filtered.map((post) => (
-          <div key={post.id} className="bg-black/40 border border-white/10 rounded-lg overflow-hidden">
-            <div className="relative h-40 bg-white/5">
+          <div key={post.id} className="bg-[#080808] border-2 border-[#333] rounded-[4px] overflow-hidden hover:border-[#FFD400] transition-colors group">
+            <div className="relative h-40 bg-[#111] border-b-2 border-[#333]">
               {post.image ? (
-                <img src={post.image} alt={post.title} className="w-full h-full object-cover" />
+                <>
+                  <img src={post.image} alt={post.title} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                  <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.1)_1px,transparent_1px)] bg-[size:4px_4px] pointer-events-none"></div>
+                </>
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-white/30">
+                <div className="w-full h-full flex items-center justify-center text-[#333] border-b border-[#333]">
                   <ImageIcon className="w-10 h-10" />
                 </div>
               )}
+              <div className="absolute top-3 right-3 bg-black/80 backdrop-blur px-2 py-1 rounded-sm border border-[#333]">
+                <p className="text-[#FFD400] font-mono text-[10px] uppercase">{post.category}</p>
+              </div>
             </div>
             <div className="p-6">
-              <h3 className="font-display text-xl font-bold text-white mb-1">{post.title}</h3>
-              <p className="text-white/60 text-sm mb-3">{post.excerpt}</p>
-              <div className="flex items-center justify-between text-xs text-white/50 mb-4">
-                <span>{post.category}</span>
-                <span>{post.updatedAt ? `Updated ${new Date(post.updatedAt).toLocaleDateString()}` : ''}</span>
+              <h3 className="font-arcade text-lg text-white mb-2 tracking-wide truncate">{post.title}</h3>
+              <p className="text-gray-500 font-mono text-xs mb-6 line-clamp-2">{post.excerpt}</p>
+
+              <div className="flex items-center gap-2 mb-6 text-[10px] text-gray-600 font-mono uppercase">
+                <span>{post.updatedAt ? `LAST_UPDATE: ${new Date(post.updatedAt).toLocaleDateString()}` : 'UPDATE_PENDING'}</span>
               </div>
-              <div className="flex gap-2">
+
+              <div className="flex gap-3 border-t border-[#222] pt-4">
                 <button
                   onClick={() => onEdit(post)}
-                  className="flex-1 px-3 py-2 bg-blue-500/10 border border-blue-500/20 rounded text-blue-400 text-sm font-semibold hover:bg-blue-500/20 transition flex items-center justify-center gap-2"
+                  className="flex-1 px-3 py-2 bg-[#111] border border-[#333] rounded-sm text-gray-300 font-mono text-xs uppercase hover:border-[#FFD400] hover:text-[#FFD400] transition flex items-center justify-center gap-2 group/btn"
                 >
-                  <Edit2 className="w-4 h-4" />
-                  Edit
+                  <Edit2 className="w-3 h-3 group-hover/btn:text-[#FFD400]" />
+                  EDIT
                 </button>
                 <button
                   onClick={() => onDelete(post.id)}
-                  className="flex-1 px-3 py-2 bg-red-500/10 border border-red-500/20 rounded text-red-400 text-sm font-semibold hover:bg-red-500/20 transition flex items-center justify-center gap-2"
+                  className="flex-1 px-3 py-2 bg-[#111] border border-red-900/40 rounded-sm text-red-500 font-mono text-xs uppercase hover:bg-red-900/10 hover:border-red-500 transition flex items-center justify-center gap-2"
                 >
-                  <Trash2 className="w-4 h-4" />
-                  Delete
+                  <Trash2 className="w-3 h-3" />
+                  DELETE
                 </button>
               </div>
             </div>
@@ -304,94 +317,97 @@ export default function AdminBlogPage() {
       </div>
 
       {filtered.length === 0 && (
-        <div className="text-center py-12 text-white/60">No posts found</div>
+        <div className="text-center py-24 border-2 border-dashed border-[#333] rounded-[4px]">
+          <FileText className="w-16 h-16 text-[#333] mx-auto mb-6" />
+          <p className="text-gray-500 font-arcade tracking-widest">NO_RECORDS_FOUND</p>
+        </div>
       )}
 
       {/* Modal */}
       {showForm && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-          <div className="bg-black border border-white/10 rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between p-6 border-b border-white/10 sticky top-0 bg-black">
-              <h2 className="font-display text-2xl font-bold text-white">
-                {editingId ? "Edit Post" : "New Post"}
+        <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+          <div className="bg-[#050505] border-2 border-[#333] rounded-[4px] max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-[0_0_50px_rgba(0,0,0,0.8)]">
+            <div className="flex items-center justify-between p-6 border-b-2 border-[#333] sticky top-0 bg-[#050505] z-10">
+              <h2 className="font-arcade text-2xl text-[#FFD400] text-shadow-glow">
+                {editingId ? "EDIT_LOG" : "NEW_ENTRY"}
               </h2>
-              <button onClick={() => setShowForm(false)} className="text-white/60 hover:text-white transition">
+              <button onClick={() => setShowForm(false)} className="text-gray-500 hover:text-red-500 transition">
                 <X className="w-6 h-6" />
               </button>
             </div>
 
-            <form onSubmit={onSubmit} className="p-6 space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <form onSubmit={onSubmit} className="p-8 space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-white/60 text-sm mb-2">Title *</label>
+                  <label className="block text-[#00B894] font-mono text-[10px] uppercase tracking-widest mb-2">HEADER_TITLE *</label>
                   <input
                     value={form.title}
                     onChange={(e) => setForm({ ...form, title: e.target.value })}
-                    className="w-full bg-white/5 border border-white/10 rounded px-4 py-2 text-white placeholder-white/40 focus:border-amber-500 outline-none transition"
-                    placeholder="Enter title"
+                    className="w-full bg-[#111] border border-[#333] rounded-sm px-4 py-2 text-white font-mono placeholder-gray-700 focus:border-[#FFD400] outline-none transition uppercase"
+                    placeholder="ENTER TITLE"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-white/60 text-sm mb-2">Category *</label>
+                  <label className="block text-[#00B894] font-mono text-[10px] uppercase tracking-widest mb-2">CHANNEL_CATEGORY *</label>
                   <select
                     value={form.category}
                     onChange={(e) => setForm({ ...form, category: e.target.value })}
-                    className="w-full bg-white/5 border border-white/10 rounded px-4 py-2 text-white focus:border-amber-500 outline-none transition"
+                    className="w-full bg-[#111] border border-[#333] rounded-sm px-4 py-2 text-white font-mono focus:border-[#FFD400] outline-none transition uppercase"
                   >
                     {CATEGORIES.map((c) => (
                       <option key={c} value={c}>
-                        {c}
+                        {c.toUpperCase()}
                       </option>
                     ))}
                   </select>
                 </div>
                 <div className="md:col-span-2">
-                  <label className="block text-white/60 text-sm mb-2">Excerpt *</label>
+                  <label className="block text-[#00B894] font-mono text-[10px] uppercase tracking-widest mb-2">BRIEF_SYNOPSIS *</label>
                   <input
                     value={form.excerpt}
                     onChange={(e) => setForm({ ...form, excerpt: e.target.value })}
-                    className="w-full bg-white/5 border border-white/10 rounded px-4 py-2 text-white placeholder-white/40 focus:border-amber-500 outline-none transition"
-                    placeholder="Short summary"
+                    className="w-full bg-[#111] border border-[#333] rounded-sm px-4 py-2 text-white font-mono placeholder-gray-700 focus:border-[#FFD400] outline-none transition"
+                    placeholder="SHORT SUMMARY"
                     required
                   />
                 </div>
                 <div className="md:col-span-2">
-                  <label className="block text-white/60 text-sm mb-2">Content *</label>
+                  <label className="block text-[#00B894] font-mono text-[10px] uppercase tracking-widest mb-2">FULL_CONTENT_DATA *</label>
                   <textarea
                     value={form.content}
                     onChange={(e) => setForm({ ...form, content: e.target.value })}
-                    className="w-full min-h-48 bg-white/5 border border-white/10 rounded px-4 py-2 text-white placeholder-white/40 focus:border-amber-500 outline-none transition"
-                    placeholder="Write the full content here"
+                    className="w-full min-h-48 bg-[#111] border border-[#333] rounded-sm px-4 py-2 text-white font-mono placeholder-gray-700 focus:border-[#FFD400] outline-none transition text-sm"
+                    placeholder="ENTER CONTENT..."
                     required
                   />
                 </div>
                 <div className="md:col-span-2">
-                  <label className="block text-white/60 text-sm mb-2">Header Image URL</label>
+                  <label className="block text-[#00B894] font-mono text-[10px] uppercase tracking-widest mb-2">HEADER_MEDIA_URL</label>
                   <input
                     value={form.image}
                     onChange={(e) => setForm({ ...form, image: e.target.value })}
-                    className="w-full bg-white/5 border border-white/10 rounded px-4 py-2 text-white placeholder-white/40 focus:border-amber-500 outline-none transition"
-                    placeholder="https://..."
+                    className="w-full bg-[#111] border border-[#333] rounded-sm px-4 py-2 text-white font-mono placeholder-gray-700 focus:border-[#FFD400] outline-none transition"
+                    placeholder="HTTPS://..."
                   />
                 </div>
                 {/* Publish controls removed */}
               </div>
 
-              <div className="flex justify-end gap-3 pt-2">
+              <div className="flex justify-end gap-4 pt-6 border-t border-[#333]">
                 <button
                   type="button"
                   onClick={() => setShowForm(false)}
-                  className="px-4 py-2 bg-white/5 border border-white/10 rounded text-white/80 hover:bg-white/10 transition"
+                  className="px-6 py-3 bg-transparent border border-[#333] rounded-sm text-gray-400 font-arcade text-xs uppercase tracking-widest hover:text-white hover:border-gray-500 transition"
                 >
-                  Cancel
+                  ABORT
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-6 py-2 bg-amber-500 text-black font-header font-bold rounded hover:bg-amber-400 transition disabled:opacity-50"
+                  className="px-8 py-3 bg-[#FFD400] text-black font-arcade text-xs uppercase tracking-widest rounded-sm hover:bg-[#FFE066] transition disabled:opacity-50"
                 >
-                  {submitting ? "Saving..." : editingId ? "Save Changes" : "Create Post"}
+                  {submitting ? "PROCESSING..." : editingId ? "REROUTE_DATA" : "INITIATE_UPLOAD"}
                 </button>
               </div>
             </form>

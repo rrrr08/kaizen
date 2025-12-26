@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { GameEvent } from '@/lib/types';
 import { splitDateTime } from '@/lib/utils';
 import Link from 'next/link';
+import ArcadeNavbar from '@/components/ui/ArcadeNavbar';
+import Footer from '@/components/ui/Footer';
 
 export default function PastEvents() {
   const [events, setEvents] = useState<GameEvent[]>([]);
@@ -43,11 +45,15 @@ export default function PastEvents() {
   /* ---------------- LOADING ---------------- */
   if (loading) {
     return (
-      <div className="min-h-screen pt-28 pb-16 flex items-center justify-center">
-        <div className="text-amber-500 font-header tracking-[0.3em] animate-pulse">
-          LOADING PAST EVENTS...
+      <>
+        <ArcadeNavbar />
+        <div className="min-h-screen pt-28 pb-16 flex items-center justify-center bg-[#050505] bg-[linear-gradient(rgba(0,255,0,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(0,255,0,0.03)_1px,transparent_1px)] bg-[size:20px_20px]">
+          <div className="text-[#FF8C00] font-arcade tracking-[0.3em] animate-pulse text-2xl">
+            RETRIEVING_ARCHIVED_LOGS...
+          </div>
         </div>
-      </div>
+        <Footer />
+      </>
     );
   }
 
@@ -93,76 +99,76 @@ export default function PastEvents() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
           {events.map(event => (
             <Link key={event.id} href={`/events/past/${event.id}`}>
-            <div key={event.id} className="group">
+              <div key={event.id} className="group">
 
-              {/* Event Image */}
-              <div className="aspect-video overflow-hidden rounded-sm mb-6 border border-white/5 bg-white/5">
-                <img
-                  src={event.image}
-                  alt={event.title}
-                  className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500 group-hover:scale-105"
-                />
-              </div>
-
-              {/* Event Info */}
-              <div className="space-y-4">
-                <div>
-                  <div className="text-amber-500 font-header text-[9px] tracking-[0.4em] mb-2">
-                    {splitDateTime(event.datetime).date} •{' '}
-                    {splitDateTime(event.datetime).time}
-                  </div>
-
-                  <h3 className="font-header text-2xl md:text-3xl tracking-tight mb-3">
-                    {event.title}
-                  </h3>
-
-                  <p className="text-white/60 font-serif italic mb-4 line-clamp-2">
-                    {event.description}
-                  </p>
+                {/* Event Image */}
+                <div className="aspect-video overflow-hidden rounded-sm mb-6 border border-white/5 bg-white/5">
+                  <img
+                    src={event.image}
+                    alt={event.title}
+                    className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500 group-hover:scale-105"
+                  />
                 </div>
 
-                <div className="flex items-center justify-between pt-4 border-t border-white/10">
-                  <div className="flex items-center gap-6">
-                    <div>
-                      <p className="font-header text-[8px] tracking-widest text-white/40">
-                        LOCATION
-                      </p>
-                      <p className="font-serif text-sm text-white/80">
-                        {event.location}
-                      </p>
+                {/* Event Info */}
+                <div className="space-y-4">
+                  <div>
+                    <div className="text-amber-500 font-header text-[9px] tracking-[0.4em] mb-2">
+                      {splitDateTime(event.datetime).date} •{' '}
+                      {splitDateTime(event.datetime).time}
                     </div>
 
-                    <div>
-                      <p className="font-header text-[8px] tracking-widest text-white/40">
-                        ATTENDED
-                      </p>
-                      <p className="font-serif text-sm text-white/80">
-                        {event.registered}/{event.capacity}
-                      </p>
+                    <h3 className="font-header text-2xl md:text-3xl tracking-tight mb-3">
+                      {event.title}
+                    </h3>
+
+                    <p className="text-white/60 font-serif italic mb-4 line-clamp-2">
+                      {event.description}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-4 border-t border-white/10">
+                    <div className="flex items-center gap-6">
+                      <div>
+                        <p className="font-header text-[8px] tracking-widest text-white/40">
+                          LOCATION
+                        </p>
+                        <p className="font-serif text-sm text-white/80">
+                          {event.location}
+                        </p>
+                      </div>
+
+                      <div>
+                        <p className="font-header text-[8px] tracking-widest text-white/40">
+                          ATTENDED
+                        </p>
+                        <p className="font-serif text-sm text-white/80">
+                          {event.registered}/{event.capacity}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="text-right">
+                      {event.price === 0 ? (
+                        <p className="text-amber-500 font-header text-[10px] tracking-widest">
+                          FREE
+                        </p>
+                      ) : (
+                        <p className="text-amber-500 font-serif italic text-lg">
+                          ₹{event.price}
+                        </p>
+                      )}
                     </div>
                   </div>
 
-                  <div className="text-right">
-                    {event.price === 0 ? (
-                      <p className="text-amber-500 font-header text-[10px] tracking-widest">
-                        FREE
-                      </p>
-                    ) : (
-                      <p className="text-amber-500 font-serif italic text-lg">
-                        ₹{event.price}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                {/* Past Event Label */}
-                <div className="w-full text-center pt-4">
-                  <div className="px-6 py-3 border border-white/20 text-white/40 font-header text-[9px] tracking-[0.3em] rounded-sm">
-                    EVENT CONCLUDED
+                  {/* Past Event Label */}
+                  <div className="w-full text-center pt-4">
+                    <div className="px-6 py-3 border border-white/20 text-white/40 font-header text-[9px] tracking-[0.3em] rounded-sm">
+                      EVENT CONCLUDED
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
             </Link>
           ))}
         </div>

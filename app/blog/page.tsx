@@ -1,6 +1,8 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { LoadingScreen } from '@/components/ui/loading-screen';
+import { ErrorScreen } from '@/components/ui/error-screen';
 
 const categories = [
     'All',
@@ -52,84 +54,69 @@ export default function Blog() {
         : blogPosts.filter(post => post.category === activeCategory);
 
     if (loading) {
-        return (
-            <div className="min-h-screen pt-28 pb-16 flex items-center justify-center bg-[#FFFDF5]">
-                <div className="text-center">
-                    <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[#FFD93D] border-t-black mb-4"></div>
-                    <p className="text-black/60 font-black text-xs tracking-[0.4em]">LOADING BLOG POSTS...</p>
-                </div>
-            </div>
-        );
+        return <LoadingScreen message="LOADING_DATA_STREAM..." />;
     }
 
     if (error) {
-        return (
-            <div className="min-h-screen pt-28 pb-16 flex flex-col items-center justify-center gap-4 bg-[#FFFDF5]">
-                <div className="text-red-500 font-black tracking-widest text-center">
-                    {error}
-                </div>
-                <button
-                    onClick={fetchBlogPosts}
-                    className="px-6 py-2 border-2 border-black text-black hover:bg-black hover:text-white transition-all font-black text-xs tracking-widest rounded-lg"
-                >
-                    TRY AGAIN
-                </button>
-            </div>
-        );
+        return <ErrorScreen message={error} reset={fetchBlogPosts} title="TRANSMISSION_ERROR" />;
     }
 
     return (
-        <div className="min-h-screen pt-32 pb-16 bg-[#FFFDF5] text-[#2D3436] font-sans selection:bg-[#FFD93D]/50">
-            <div className="max-w-7xl mx-auto px-6 md:px-12">
+        <div className="min-h-screen pt-32 pb-16 bg-black text-white font-sans selection:bg-[#FF8C00]/50 relative overflow-hidden">
+            {/* Background Decor */}
+            <div className="absolute inset-0 pixel-grid opacity-20 pointer-events-none"></div>
+            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#6C5CE7]/10 rounded-full blur-[100px] pointer-events-none"></div>
+
+            <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
                 {/* SECTION 1 — HERO */}
                 <div className="text-center mb-24 max-w-4xl mx-auto">
-                    <p className="text-[#6C5CE7] font-black text-sm tracking-[0.4em] mb-6 uppercase font-header bg-white inline-block px-4 py-1 border-2 border-black rounded-full shadow-[4px_4px_0px_#000]">The Joy Juncture</p>
-                    <h1 className="font-header text-6xl md:text-8xl mb-8 text-black leading-none tracking-tight">
-                        Blog Journal
+                    <p className="text-[#FF8C00] font-arcade text-sm tracking-[0.4em] mb-6 uppercase inline-block px-4 py-1 border border-[#FF8C00] shadow-[0_0_10px_#FF8C00]">The Joy Juncture</p>
+                    <h1 className="font-arcade text-6xl md:text-8xl mb-8 text-white leading-none tracking-tight text-3d-orange">
+                        TRANSMISSIONS
                     </h1>
-                    <p className="font-bold italic text-2xl text-black/70">
-                        Stories from the table — games, people, strategies, and shared joy.
+                    <p className="font-arcade text-lg text-gray-400 max-w-2xl mx-auto">
+                        Stories from the neon grid — games, pilots, strategies, and shared joy.
                     </p>
                 </div>
 
                 {/* SECTION 2 — FEATURED STORY */}
                 <section className="mb-32">
-                    <div className="relative group cursor-pointer border-3 border-black rounded-[30px] overflow-hidden neo-shadow hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all">
-                        <div className="aspect-[21/9] w-full bg-white relative">
-                            <div className="absolute inset-0 bg-[#FFD93D] mix-blend-multiply opacity-20 z-10"></div>
+                    <div className="relative group cursor-pointer arcade-card-3d bg-[#111] overflow-hidden">
+                        <div className="aspect-[21/9] w-full bg-[#111] relative opacity-80 group-hover:opacity-100 transition-opacity">
+                            <div className="absolute inset-0 bg-[#FF8C00] mix-blend-overlay opacity-20 z-10"></div>
                             <img
                                 src="https://images.unsplash.com/photo-1543269865-cbf427effbad?q=80&w=2070&auto=format&fit=crop"
                                 alt="Featured Story"
                                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                             />
                         </div>
-                        <div className="absolute bottom-0 left-0 w-full p-8 md:p-12 bg-gradient-to-t from-white via-white/90 to-transparent text-black flex flex-col items-start justify-end h-full z-20">
-                            <span className="bg-[#00B894] text-black text-[10px] font-black tracking-[0.2em] px-3 py-1 rounded-lg border-2 border-black mb-4 uppercase shadow-[2px_2px_0px_#000]">
-                                Featured Story
+                        <div className="absolute bottom-0 left-0 w-full p-8 md:p-12 bg-gradient-to-t from-black via-black/90 to-transparent text-white flex flex-col items-start justify-end h-full z-20">
+                            <span className="bg-[#00B894] text-black text-[10px] font-arcade tracking-[0.2em] px-3 py-1 mb-4 uppercase shadow-[0_0_10px_#00B894]">
+                                Featured Protocol
                             </span>
-                            <h2 className="font-header text-4xl md:text-6xl mb-4 leading-tight group-hover:text-[#6C5CE7] transition-colors text-black drop-shadow-sm">
+                            <h2 className="font-arcade text-4xl md:text-6xl mb-4 leading-tight group-hover:text-[#FF8C00] transition-colors text-white text-3d-purple">
                                 The Art of the Game Night
                             </h2>
-                            <p className="font-medium text-lg md:text-xl text-black/80 max-w-2xl mb-6 leading-relaxed">
-                                How a simple gathering turned into a weekly tradition of rivalry, laughter, and unbreakable bonds.
+                            <p className="font-sans font-medium text-lg md:text-xl text-gray-300 max-w-2xl mb-6 leading-relaxed">
+                                How a simple gathering turned into a weekly tradition of rivalry, laughter, and unbreakable bonds in the neon city.
                             </p>
-                            <button className="flex items-center gap-2 text-xs font-black tracking-[0.3em] hover:gap-4 transition-all text-black uppercase bg-[#FFD93D] px-6 py-3 rounded-lg border-2 border-black shadow-[3px_3px_0px_#000]">
-                                READ STORY <span>→</span>
+                            <button className="flex items-center gap-2 text-xs font-arcade tracking-[0.3em] hover:gap-4 transition-all text-black uppercase bg-[#FF8C00] px-6 py-3 border-b-4 border-[#A0522D] active:border-b-0 active:translate-y-1">
+                                ACCESS_FILE <span>&gt;</span>
                             </button>
                         </div>
                     </div>
                 </section>
 
                 {/* SECTION 3 — FILTERS */}
-                <div className="mb-20 sticky top-24 z-40 bg-[#FFFDF5]/95 backdrop-blur py-4 border-b-2 border-black/10 overflow-x-auto">
+                <div className="mb-20 sticky top-24 z-40 bg-black/95 backdrop-blur py-4 border-b border-[#333] overflow-x-auto">
                     <div className="flex items-center gap-4 min-w-max pb-2">
                         {categories.map((cat) => (
                             <button
                                 key={cat}
                                 onClick={() => setActiveCategory(cat)}
-                                className={`px-4 py-2 rounded-xl text-[10px] font-black tracking-[0.2em] uppercase transition-all border-2 ${activeCategory === cat
-                                    ? 'bg-black text-white border-black shadow-[4px_4px_0px_rgba(0,0,0,0.2)]'
-                                    : 'bg-white text-black border-black hover:bg-[#FFD93D] shadow-[2px_2px_0px_rgba(0,0,0,0.1)]'
+                                className={`px-4 py-2 text-[10px] font-arcade tracking-[0.2em] uppercase transition-all border ${activeCategory === cat
+                                    ? 'bg-[#FF8C00] text-black border-[#FF8C00] shadow-[0_0_10px_#FF8C00]'
+                                    : 'bg-black text-[#FF8C00] border-[#FF8C00]/50 hover:border-[#FF8C00]'
                                     }`}
                             >
                                 {cat}
@@ -141,23 +128,23 @@ export default function Blog() {
                 {/* SECTION 4 — BLOG GRID */}
                 <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-16 mb-32">
                     {filteredPosts.map((post) => (
-                        <article key={post.id} className="group cursor-pointer flex flex-col h-full bg-white border-2 border-black p-4 rounded-[20px] neo-shadow hover:scale-[1.02] transition-transform">
-                            <div className="aspect-[4/3] overflow-hidden rounded-[15px] mb-6 border-2 border-black relative">
+                        <article key={post.id} className="group cursor-pointer flex flex-col h-full bg-[#111] border border-[#333] p-4 arcade-card-3d hover:scale-[1.02] transition-transform">
+                            <div className="aspect-[4/3] overflow-hidden mb-6 border border-[#333] relative">
                                 <img
                                     src={post.image}
                                     alt={post.title}
-                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-80 group-hover:opacity-100"
                                 />
                             </div>
                             <div className="flex items-center gap-4 mb-3">
-                                <span className="bg-[#FF7675] text-black border border-black px-2 py-0.5 rounded font-black text-[9px] tracking-[0.2em] uppercase">{post.category}</span>
-                                <span className="w-1.5 h-1.5 bg-black rounded-full"></span>
-                                <span className="text-black/60 font-bold text-xs uppercase tracking-wider">{post.readTime}</span>
+                                <span className="text-[#00B894] border border-[#00B894] px-2 py-0.5 font-arcade text-[9px] tracking-[0.2em] uppercase">{post.category}</span>
+                                <span className="w-1 h-1 bg-gray-500 rounded-full"></span>
+                                <span className="text-gray-500 font-arcade text-[10px] uppercase tracking-wider">{post.readTime}</span>
                             </div>
-                            <h3 className="font-header text-2xl md:text-3xl mb-3 leading-tight text-black group-hover:text-[#6C5CE7] transition-colors">
+                            <h3 className="font-arcade text-xl md:text-2xl mb-3 leading-tight text-white group-hover:text-[#FF8C00] transition-colors uppercase">
                                 {post.title}
                             </h3>
-                            <p className="text-black/70 font-medium leading-relaxed mb-4 flex-grow line-clamp-3">
+                            <p className="text-gray-400 font-sans text-sm leading-relaxed mb-4 flex-grow line-clamp-3">
                                 {post.excerpt}
                             </p>
                         </article>
@@ -165,27 +152,27 @@ export default function Blog() {
                 </section>
 
                 {/* SECTION 5 — LEARNING & GAMEPLAY HIGHLIGHT */}
-                <section className="mb-32 bg-black text-white border-3 border-black p-12 md:p-16 rounded-[30px] relative overflow-hidden shadow-[8px_8px_0px_#FFD93D]">
-                    <div className="absolute top-0 right-0 w-96 h-96 bg-[#FFD93D]/20 blur-[100px] rounded-full pointer-events-none"></div>
+                <section className="mb-32 bg-[#111] text-white border border-[#333] p-12 md:p-16 relative overflow-hidden shadow-[0_0_20px_rgba(255,140,0,0.1)]">
+                    <div className="absolute top-0 right-0 w-96 h-96 bg-[#FF8C00]/10 blur-[100px] rounded-full pointer-events-none"></div>
                     <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
                         <div className="lg:col-span-5">
-                            <h2 className="font-header text-4xl md:text-5xl mb-6 text-white">Learn the Game. <br /><span className="text-[#FFD93D] italic font-serif">Play Better.</span></h2>
-                            <p className="text-white/80 font-medium text-lg leading-relaxed mb-8">
-                                New to Joy Juncture? Or looking to master deep strategies?
-                                Explore our comprehensive guides designed to make every game night seamless.
+                            <h2 className="font-arcade text-4xl md:text-5xl mb-6 text-white text-3d-orange">MASTER THE GRID</h2>
+                            <p className="text-gray-400 font-medium text-lg leading-relaxed mb-8 font-sans">
+                                New to the Arcade? Or looking to master deep strategies?
+                                Explore our comprehensive guides designed to make every session seamless.
                             </p>
-                            <button className="px-8 py-4 bg-white text-black font-black text-xs tracking-[0.3em] hover:bg-[#FFD93D] hover:scale-105 transition-all rounded-xl border-2 border-transparent">
+                            <button className="px-8 py-4 bg-white text-black font-arcade text-xs tracking-[0.3em] hover:bg-[#FF8C00] transition-all border-b-4 border-gray-400 active:border-b-0 active:translate-y-1 uppercase">
                                 EXPLORE GUIDES
                             </button>
                         </div>
                         <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-6">
                             {['How-to-Play Videos', 'Rulebooks & FAQs', 'Strategy Breakdowns', 'House Rules'].map((item, idx) => (
-                                <div key={idx} className="p-6 bg-white/10 border border-white/20 hover:border-[#FFD93D] hover:bg-white/20 transition-all rounded-xl group cursor-pointer">
-                                    <div className="w-10 h-10 flex items-center justify-center bg-[#FFD93D] text-black border-2 border-black rounded-full mb-4 group-hover:scale-110 transition-transform shadow-[2px_2px_0px_#000]">
+                                <div key={idx} className="p-6 bg-black border border-[#333] hover:border-[#FF8C00] transition-all group cursor-pointer hover:shadow-[0_0_10px_rgba(255,140,0,0.3)]">
+                                    <div className="w-10 h-10 flex items-center justify-center bg-[#FF8C00] text-black mb-4 group-hover:scale-110 transition-transform">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
                                     </div>
-                                    <h3 className="font-header text-lg text-white mb-1">{item}</h3>
-                                    <p className="text-white/60 font-bold text-xs uppercase tracking-wider">Master the mechanics</p>
+                                    <h3 className="font-arcade text-sm text-white mb-1 uppercase">{item}</h3>
+                                    <p className="text-gray-500 text-[10px] uppercase tracking-wider font-arcade">Master the mechanics</p>
                                 </div>
                             ))}
                         </div>
@@ -196,11 +183,11 @@ export default function Blog() {
                 <section className="mb-32">
                     <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
                         <div>
-                            <h2 className="font-header text-4xl md:text-5xl text-black mb-4">Community Moments</h2>
-                            <p className="text-black/60 font-bold italic text-xl">Real people. Real joy. Real memories.</p>
+                            <h2 className="font-arcade text-4xl md:text-5xl text-white mb-4 text-3d-green">COMMUNITY LOGS</h2>
+                            <p className="text-gray-400 font-bold font-sans italic text-xl">Real pilots. Real joy. Real memories.</p>
                         </div>
-                        <Link href="/community" className="font-black text-xs tracking-[0.3em] text-[#6C5CE7] border-b-2 border-[#6C5CE7] pb-1 hover:text-black hover:border-black transition-all">
-                            VIEW FULL GALLERY
+                        <Link href="/community" className="font-arcade text-xs tracking-[0.3em] text-[#6C5CE7] border-b border-[#6C5CE7] pb-1 hover:text-white hover:border-white transition-all">
+                            VIEW FULL DATABASE
                         </Link>
                     </div>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -210,10 +197,10 @@ export default function Blog() {
                             'https://images.unsplash.com/photo-1523580494863-6f3031224c94?q=80&w=2070&auto=format&fit=crop',
                             'https://images.unsplash.com/photo-1558008258-3256797b43f3?q=80&w=2070&auto=format&fit=crop'
                         ].map((img, idx) => (
-                            <div key={idx} className={`rounded-[20px] overflow-hidden group relative border-2 border-black neo-shadow ${idx === 0 || idx === 3 ? 'md:col-span-2 aspect-[16/9]' : 'aspect-square'}`}>
-                                <img src={img} alt="Community" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 grayscale group-hover:grayscale-0" />
-                                <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                    <span className="text-white font-black text-xs tracking-[0.2em] bg-black px-3 py-1 rounded-full border border-white">@JOY_JUNCTURE</span>
+                            <div key={idx} className={`overflow-hidden group relative border border-[#333] ${idx === 0 || idx === 3 ? 'md:col-span-2 aspect-[16/9]' : 'aspect-square'}`}>
+                                <img src={img} alt="Community" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 grayscale group-hover:grayscale-0 opacity-70 group-hover:opacity-100" />
+                                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                    <span className="text-[#FF8C00] font-arcade text-xs tracking-[0.2em] border border-[#FF8C00] px-3 py-1 bg-black">@JOY_JUNCTURE</span>
                                 </div>
                             </div>
                         ))}
@@ -221,12 +208,12 @@ export default function Blog() {
                 </section>
 
                 {/* SECTION 7 — GAMIFICATION TEASER */}
-                <section className="mb-32 bg-white text-black rounded-[30px] p-12 text-center relative overflow-hidden border-2 border-black neo-shadow">
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#00B894]/10 blur-[150px] rounded-full pointer-events-none"></div>
+                <section className="mb-32 bg-[#111] text-white rounded-none p-12 text-center relative overflow-hidden border border-[#333] shadow-[0_0_30px_rgba(108,92,231,0.1)]">
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#6C5CE7]/10 blur-[150px] rounded-full pointer-events-none"></div>
                     <div className="relative z-10 max-w-3xl mx-auto">
-                        <span className="text-[#6C5CE7] font-black text-xs tracking-[0.4em] mb-4 block animate-pulse uppercase">Earn while you learn</span>
-                        <h2 className="font-header text-3xl md:text-5xl mb-8 leading-tight">
-                            "Reading, learning, and playing <br /> earns you points."
+                        <span className="text-[#6C5CE7] font-arcade text-xs tracking-[0.4em] mb-4 block animate-pulse uppercase">Earn while you learn</span>
+                        <h2 className="font-arcade text-3xl md:text-5xl mb-8 leading-tight uppercase text-3d-purple">
+                            "Reading, learning, and playing <br /> earns you credits."
                         </h2>
                         <div className="flex justify-center gap-8 mb-12 flex-wrap">
                             {[
@@ -234,47 +221,47 @@ export default function Blog() {
                                 { action: 'Play a Game', points: '+10 PTS' },
                                 { action: 'Attend Event', points: '+50 PTS' },
                             ].map((item, idx) => (
-                                <div key={idx} className="bg-white px-6 py-4 rounded-xl border-2 border-black shadow-[4px_4px_0px_rgba(0,0,0,0.1)] hover:-translate-y-1 transition-all">
-                                    <p className="font-bold text-black/60 text-xs uppercase tracking-wider mb-1">{item.action}</p>
-                                    <p className="font-header text-[#00B894] text-2xl">{item.points}</p>
+                                <div key={idx} className="bg-black px-6 py-4 border border-[#333] shadow-[0_4px_0px_#333] hover:-translate-y-1 transition-all">
+                                    <p className="font-arcade text-gray-500 text-xs uppercase tracking-wider mb-1">{item.action}</p>
+                                    <p className="font-arcade text-[#00B894] text-2xl">{item.points}</p>
                                 </div>
                             ))}
                         </div>
                         <div className="flex flex-col sm:flex-row gap-6 justify-center">
                             <Link
                                 href="/auth/signup"
-                                className="px-8 py-4 bg-black text-white font-black text-xs tracking-[0.4em] hover:bg-[#6C5CE7] hover:scale-105 transition-all rounded-xl shadow-[4px_4px_0px_rgba(0,0,0,0.2)]"
+                                className="px-8 py-4 bg-[#FF8C00] text-black font-arcade text-xs tracking-[0.4em] hover:bg-white transition-all border-b-4 border-[#A0522D] active:border-b-0 active:translate-y-1 uppercase"
                             >
-                                CREATE FREE ACCOUNT
+                                REGISTER_PILOT
                             </Link>
                             <Link
                                 href="/play"
-                                className="px-8 py-4 bg-[#FFD93D] text-black font-black text-xs tracking-[0.4em] border-2 border-black neo-shadow hover:scale-105 transition-all rounded-xl"
+                                className="px-8 py-4 bg-transparent text-[#FF8C00] font-arcade text-xs tracking-[0.4em] border border-[#FF8C00] hover:bg-[#FF8C00] hover:text-black transition-all uppercase"
                             >
-                                PLAY & EARN
+                                ENTER_ARCADE
                             </Link>
                         </div>
                     </div>
                 </section>
 
                 {/* SECTION 8 — FINAL CTA */}
-                <div className="text-center py-16 border-t-2 border-black/10">
-                    <h2 className="font-header text-4xl md:text-5xl mb-6 text-black">Still curious?</h2>
-                    <p className="text-black/60 font-bold italic text-xl mb-10 max-w-2xl mx-auto">
+                <div className="text-center py-16 border-t border-[#333]">
+                    <h2 className="font-arcade text-4xl md:text-5xl mb-6 text-white text-3d-orange">Still curious?</h2>
+                    <p className="text-gray-400 font-bold italic text-xl mb-10 max-w-2xl mx-auto font-sans">
                         "There's always another game, story, or moment waiting."
                     </p>
                     <div className="flex flex-col sm:flex-row gap-6 justify-center">
                         <Link
                             href="/shop"
-                            className="px-8 py-4 bg-black text-white font-black text-xs tracking-[0.4em] hover:bg-neutral-800 hover:scale-105 transition-all rounded-xl"
+                            className="px-8 py-4 bg-white text-black font-arcade text-xs tracking-[0.4em] hover:bg-gray-200 transition-all border-b-4 border-gray-400 active:border-b-0 active:translate-y-1 uppercase"
                         >
-                            EXPLORE GAMES
+                            EXPLORE_VAULT
                         </Link>
                         <Link
                             href="/community"
-                            className="px-8 py-4 border-2 border-black text-black font-black text-xs tracking-[0.4em] hover:bg-black/5 hover:scale-105 transition-all rounded-xl"
+                            className="px-8 py-4 border border-white text-white font-arcade text-xs tracking-[0.4em] hover:bg-white hover:text-black transition-all uppercase"
                         >
-                            JOIN AN EVENT
+                            JOIN_EVENT
                         </Link>
                     </div>
                 </div>

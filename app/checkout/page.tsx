@@ -4,6 +4,7 @@ import { useCart } from '@/app/context/CartContext';
 import { useAuth } from '@/app/context/AuthContext';
 import { useGamification } from '@/app/context/GamificationContext';
 import Link from 'next/link';
+import { Trash2, Plus, Minus, CreditCard, ShoppingBag, Coins } from "lucide-react";
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';

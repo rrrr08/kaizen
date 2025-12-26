@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Settings, Users, BarChart3, Zap, Bell, ShoppingBag, Home, Package, Calendar, LayoutGrid, FileText } from 'lucide-react';
+import { Settings, Users, BarChart3, Zap, Bell, ShoppingBag, Home, Package, Calendar, LayoutGrid, FileText, Smartphone } from 'lucide-react';
 import { useAuth } from '@/app/context/AuthContext';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -27,10 +27,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-[#FFFDF5]">
+      <div className="flex items-center justify-center min-h-screen bg-[#050505]">
         <div className="text-center">
-          <div className="w-12 h-12 border-4 border-black border-t-[#FFD93D] rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-black font-black uppercase tracking-widest">Loading...</p>
+          <div className="text-[#FFD400] font-arcade tracking-[0.3em] animate-pulse text-xl">
+            AUTHENTICATING_ADMIN_ACCESS...
+          </div>
         </div>
       </div>
     );
@@ -48,18 +49,20 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: '/admin/products', label: 'Products', icon: LayoutGrid },
     { href: '/admin/blog', label: 'Blog', icon: FileText },
     { href: '/admin/events', label: 'Events', icon: Calendar },
-    { href: '/admin/notifications', label: 'Notifications', icon: Bell },
+    { href: '/admin/gamification', label: 'Gamification', icon: Zap },
+    { href: '/admin/notifications', label: 'Alerts', icon: Bell },
+    { href: '/admin/push-notifications', label: 'Push Notifs', icon: Smartphone },
     { href: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
   ];
 
   return (
-    <div className="flex min-h-screen bg-[#FFFDF5] text-black font-sans">
+    <div className="flex min-h-screen bg-[#050505] text-white font-sans selection:bg-[#FFD400] selection:text-black">
       {/* Sidebar */}
-      <div className="w-64 bg-white border-r-2 border-black fixed h-screen pt-24 overflow-y-auto z-40">
+      <div className="w-64 bg-[#080808] border-r border-[#333] fixed h-screen pt-8 overflow-y-auto z-40 bg-[linear-gradient(rgba(0,255,0,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(0,255,0,0.02)_1px,transparent_1px)] bg-[size:16px_16px]">
         <div className="p-6 space-y-4">
-          <div className="mb-8">
-            <h2 className="font-header text-4xl font-black text-black mb-1">JOY</h2>
-            <p className="font-black text-xs text-black/40 tracking-[0.2em] uppercase">ADMIN PANEL</p>
+          <div className="mb-10 pl-2 border-l-4 border-[#FFD400]">
+            <h2 className="font-arcade text-3xl text-white text-3d-orange mb-1">KAIZEN</h2>
+            <p className="font-arcade text-xs text-gray-500 tracking-[0.2em] uppercase">SYSTEM_ADMIN</p>
           </div>
           <nav className="space-y-2">
             {adminMenuItems.map((item) => {
@@ -69,12 +72,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-[12px] transition-all duration-200 text-sm font-black uppercase tracking-wide border-2 ${isActive
-                      ? 'bg-[#FFD93D] text-black border-black neo-shadow-sm'
-                      : 'text-black/60 border-transparent hover:bg-black/5 hover:text-black'
+                  className={`flex items-center gap-3 px-4 py-3 border-l-2 transition-all duration-200 text-sm font-arcade tracking-wide group ${isActive
+                    ? 'bg-[#FFD93D]/10 border-[#FFD93D] text-[#FFD93D]'
+                    : 'border-transparent text-gray-500 hover:text-white hover:bg-white/5 hover:border-white/50'
                     }`}
                 >
-                  <Icon size={18} strokeWidth={2.5} />
+                  <Icon size={16} strokeWidth={2} className={`${isActive ? 'text-[#FFD93D]' : 'text-gray-600 group-hover:text-white'}`} />
                   <span>{item.label}</span>
                 </Link>
               );
@@ -84,11 +87,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 ml-64 pt-24">
-        <div className="min-h-screen bg-[#FFFDF5] p-6">
+      <div className="flex-1 ml-64">
+        <div className="min-h-screen bg-[#050505] p-8 bg-[linear-gradient(rgba(0,255,0,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(0,255,0,0.02)_1px,transparent_1px)] bg-[size:32px_32px]">
           {children}
         </div>
       </div>
     </div>
   );
 }
+

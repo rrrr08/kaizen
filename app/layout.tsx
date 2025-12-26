@@ -1,12 +1,15 @@
 import type { Metadata } from "next";
-import { Outfit, Fredoka } from "next/font/google"; // Import fonts
+import { Outfit, Fredoka, Bungee } from "next/font/google"; // Import fonts
 import "./globals.css";
-import Navbar from "@/components/ui/JoyNavbar";
+// import Navbar from "@/components/ui/JoyNavbar";
+import ArcadeNavbar from "@/components/ui/ArcadeNavbar";
 import Footer from "@/components/ui/Footer";
 import { CartProvider } from "@/app/context/CartContext";
 import { GamificationProvider } from "@/app/context/GamificationContext";
 import { AuthProvider } from "@/app/context/AuthContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import CustomCursor from "@/components/ui/CustomCursor";
+import SidebarMonitor from "@/components/ui/SidebarMonitor";
 
 // Configure fonts
 const outfit = Outfit({
@@ -18,6 +21,13 @@ const outfit = Outfit({
 const fredoka = Fredoka({
   subsets: ["latin"],
   variable: "--font-fredoka",
+  display: 'swap',
+});
+
+const bungee = Bungee({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-bungee",
   display: 'swap',
 });
 
@@ -40,13 +50,17 @@ export default function RootLayout({
           defer
         ></script>
       </head>
-      <body className={`${outfit.variable} ${fredoka.variable} antialiased bg-[#FFFDF5] text-[#2D3436] font-sans`}>
+      <body className={`${outfit.variable} ${fredoka.variable} ${bungee.variable} antialiased bg-[#000000] text-white font-sans`}>
         <ErrorBoundary>
           <AuthProvider>
             <GamificationProvider>
               <CartProvider>
-                <Navbar />
-                {children}
+                <ArcadeNavbar />
+                <CustomCursor />
+                <SidebarMonitor />
+                <div className="lg:pl-[60px]">
+                  {children}
+                </div>
                 <Footer />
 
                 {/* SVG Definition for Blob Mask */}

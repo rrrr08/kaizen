@@ -1,215 +1,203 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { getGames, db } from '@/lib/firebase';
+import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
+import { UserProfile } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
 
-export default function Play() {
+const Play: React.FC = () => {
   const [games, setGames] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [leaderboard, setLeaderboard] = useState<UserProfile[]>([]);
+
+  // Hardcoded Arcade Games (The actual functional games in the app)
+  const ARCADE_MODULES = [
+    {
+      id: 'sudoku',
+      title: 'NEON NUMBERS', // Sudoku
+      type: 'LOGIC_CORE',
+      description: 'The classic grid puzzle re-imagined for the digital age.',
+      link: '/play/sudoku',
+      color: '#FFD400',
+      icon: '🔢',
+      status: 'ONLINE',
+      players: 'SOLO'
+    },
+    {
+      id: 'riddles',
+      title: 'CRYPTIC CIPHER', // Riddles
+      type: 'BRAIN_DATA',
+      description: 'Crack the code. Solve the riddle. Unlock the truth.',
+      link: '/play/riddles',
+      color: '#FF8C00',
+      icon: '🧩',
+      status: 'ONLINE',
+      players: 'SOLO'
+    },
+    {
+      id: 'featured',
+      title: 'DAILY GLITCH', // Featured/Random
+      type: 'SYSTEM_EVENT',
+      description: 'A rotating challenge from the mainframe.',
+      link: '/play/sudoku', // Fallback for now
+      color: '#FFFFFF',
+      icon: '🎲',
+      status: 'LOCKED',
+      players: 'UNKNOWN'
+    }
+  ];
 
   useEffect(() => {
     const fetchGames = async () => {
       try {
         setLoading(true);
-        const { getGames } = await import('@/lib/firebase');
-        const data = await getGames();
-        setGames(data);
+        const [gamesData, leaderboardSnapshot] = await Promise.all([
+          getGames(),
+          getDocs(query(collection(db, 'users'), orderBy('xp', 'desc'), limit(5)))
+        ]);
+
+        setGames(gamesData);
+
+        const leaderboardData = leaderboardSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        })) as UserProfile[];
+        setLeaderboard(leaderboardData);
       } catch (err) {
-        console.error('Error fetching games:', err);
-        setError('Failed to load games');
+        console.error('Error fetching data:', err);
       } finally {
         setLoading(false);
       }
     };
-
     fetchGames();
   }, []);
 
   return (
-    <div className="min-h-screen pt-28 pb-16 bg-[#FFFDF5]">
-      <div className="max-w-7xl mx-auto px-6 md:px-12">
-        {/* Header */}
-        <div className="mb-20 border-b-2 border-black pb-12">
-          <div className="text-[#6C5CE7] font-black text-sm tracking-[0.2em] mb-4 uppercase font-display">Points-Based Games</div>
-          <h1 className="font-header text-6xl md:text-8xl tracking-tighter mb-8 text-[#2D3436]">
-            PLAY & <span className="text-[#FFD93D] drop-shadow-[2px_2px_0px_#000] italic font-serif">EARN</span>
-          </h1>
-          <p className="text-black/80 font-bold text-xl max-w-3xl leading-relaxed">
-            Challenge yourself with our collection of free online games and puzzles. Earn points for every win and climb the leaderboard.
-          </p>
-        </div>
+    <div className="max-w-7xl mx-auto px-4 py-20">
+      {/* Hero Header */}
+      <div className="text-center mb-24 relative">
+        <div className="arcade-panel-header bg-[#FF8C00] mx-auto mb-4 w-max px-4">SYSTEM.GAMES</div>
+        <h1 className="font-arcade text-7xl md:text-9xl text-white text-3d-orange leading-none tracking-tight mb-6">
+          ARCADE<br />ZONE
+        </h1>
+        <p className="text-gray-500 font-bold uppercase tracking-[0.4em] text-xs md:text-sm max-w-2xl mx-auto">
+          Initialize play sequence. Earn tokens. Dominate the grid.
+        </p>
+        {/* Decorative Grid Background (Local to header) */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-[linear-gradient(rgba(255,140,0,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(255,140,0,0.1)_1px,transparent_1px)] bg-[size:40px_40px] -z-10 opacity-30 pointer-events-none"></div>
+      </div>
 
-        {/* Game Categories */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-24">
-          {/* Sudoku */}
-          <div className="bg-white border-2 border-black p-8 rounded-[30px] neo-shadow hover:scale-[1.02] transition-transform group">
-            <h3 className="font-black text-sm tracking-[0.2em] text-[#6C5CE7] mb-4 uppercase">Sudoku</h3>
-            <p className="text-black font-black text-2xl mb-4">25+ Variations</p>
-            <p className="text-black/70 font-medium text-sm mb-6 leading-relaxed">
-              Challenge your logic and number-solving skills with multiple difficulty levels. Compete with others and earn points.
-            </p>
-            <div className="space-y-3 mb-8 pt-6 border-t-2 border-black/10">
-              <p className="text-black/40 font-black text-[10px] tracking-widest">FEATURES:</p>
-              <ul className="space-y-2 text-black/80 font-bold text-xs">
-                <li>→ Admin can add/edit puzzles</li>
-                <li>→ Answer key via backend</li>
-                <li>→ Correct answers = points</li>
-              </ul>
+      {/* Main Game Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-32">
+        {ARCADE_MODULES.map((game, idx) => (
+          <div key={game.id} className="relative group">
+            <div className="arcade-panel-header flex justify-between items-center" style={{ backgroundColor: game.color, color: 'black' }}>
+              <span>MODULE_0{idx + 1}</span>
+              <span className="text-[8px] animate-pulse">{game.status}</span>
             </div>
-            <Link href="/play/sudoku" className="block w-full text-center px-6 py-4 bg-[#FFD93D] text-black font-black text-xs tracking-[0.3em] border-2 border-black shadow-[4px_4px_0px_#000] hover:translate-y-1 hover:shadow-none transition-all rounded-xl">
-              PLAY NOW
-            </Link>
-          </div>
+            <Link href={game.link} className="block relative">
+              <div className="arcade-card-3d h-[500px] bg-black p-8 flex flex-col items-center text-center group-hover:bg-[#0A0A0A] transition-colors relative overflow-hidden pixel-grid">
 
-          {/* Riddles */}
-          <div className="bg-white border-2 border-black p-8 rounded-[30px] neo-shadow hover:scale-[1.02] transition-transform group relative">
-            <h3 className="font-black text-sm tracking-[0.2em] text-[#00B894] mb-4 uppercase">Riddles</h3>
-            <p className="text-black font-black text-2xl mb-4">Answer & Reveal</p>
-            <p className="text-black/70 font-medium text-sm mb-6 leading-relaxed">
-              Think outside the box and solve clever riddles. Get feedback on your answers and earn points for correct solutions.
-            </p>
-            <div className="space-y-3 mb-8 pt-6 border-t-2 border-black/10">
-              <p className="text-black/40 font-black text-[10px] tracking-widest">FEATURES:</p>
-              <ul className="space-y-2 text-black/80 font-bold text-xs">
-                <li>→ Curated riddle collection</li>
-                <li>→ Answer reveal mechanic</li>
-                <li>→ Points for correct guesses</li>
-              </ul>
-            </div>
-            <Link href="/play/riddles" className="block w-full text-center px-6 py-4 bg-[#00B894] text-black font-black text-xs tracking-[0.3em] border-2 border-black shadow-[4px_4px_0px_#000] hover:translate-y-1 hover:shadow-none transition-all rounded-xl">
-              PLAY NOW
-            </Link>
-          </div>
+                {/* Status Indicator */}
+                <div className="absolute top-4 right-4 flex flex-col gap-1 items-end">
+                  <span className="text-[8px] font-arcade text-gray-500">{game.type}</span>
+                  <div className={`w-2 h-2 rounded-full ${game.status === 'ONLINE' ? 'bg-green-500 shadow-[0_0_8px_green]' : 'bg-red-500'}`}></div>
+                </div>
 
-          {/* Puzzles */}
-          <div className="bg-white border-2 border-black p-8 rounded-[30px] neo-shadow hover:scale-[1.02] transition-transform group">
-            <h3 className="font-black text-sm tracking-[0.2em] text-[#FF7675] mb-4 uppercase">Puzzles</h3>
-            <p className="text-black font-black text-2xl mb-4">Brain Games</p>
-            <p className="text-black/70 font-medium text-sm mb-6 leading-relaxed">
-              Test your mental agility with our rotating collection of brain-teasing puzzles and challenges.
-            </p>
-            <div className="space-y-3 mb-8 pt-6 border-t-2 border-black/10">
-              <p className="text-black/40 font-black text-[10px] tracking-widest">FEATURES:</p>
-              <ul className="space-y-2 text-black/80 font-bold text-xs">
-                <li>→ Daily puzzle rotation</li>
-                <li>→ Increasing difficulty</li>
-                <li>→ Leaderboard rankings</li>
-              </ul>
-            </div>
-            <button className="w-full px-6 py-4 bg-[#FF7675] text-black font-black text-xs tracking-[0.3em] border-2 border-black shadow-[4px_4px_0px_#000] hover:translate-y-1 hover:shadow-none transition-all rounded-xl">
-              PLAY NOW
-            </button>
-          </div>
-        </div>
-
-        {/* Loading State */}
-        {loading && (
-          <div className="flex items-center justify-center py-24">
-            <div className="text-center">
-              <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[#FFD93D] border-t-black mb-4"></div>
-              <p className="text-black/60 font-black text-xs tracking-[0.4em]">LOADING GAMES...</p>
-            </div>
-          </div>
-        )}
-
-        {/* Error State */}
-        {error && !loading && (
-          <div className="text-center py-24">
-            <p className="text-red-500 font-black text-lg">{error}</p>
-          </div>
-        )}
-
-        {/* Game List */}
-        {!loading && !error && (
-          <div className="mb-24">
-            <h2 className="font-header text-4xl md:text-5xl mb-8 text-black">Available Games</h2>
-            <div className="space-y-4">
-              {games.map(game => (
-                <div key={game.id} className="bg-white border-2 border-black p-6 rounded-2xl shadow-[4px_4px_0px_#000] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all flex justify-between items-center cursor-pointer group">
-                  <div>
-                    <p className="font-black text-[10px] tracking-[0.3em] text-[#6C5CE7] mb-2 uppercase">{(game.category || 'GAME')}</p>
-                    <h3 className="font-header text-2xl text-black group-hover:text-[#6C5CE7] transition-colors">{game.title || game.name}</h3>
-                    <p className="text-black/60 font-bold text-sm mt-2">{game.description}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-[#00B894] font-black text-3xl">+{game.points || 10}</p>
-                    <p className="text-black/40 font-black text-[10px] tracking-widest mt-1">PTS</p>
+                {/* Icon/Visual */}
+                <div className="mt-12 mb-12 transform group-hover:scale-110 transition-transform duration-500">
+                  <div className="w-40 h-40 border-4 rounded-full flex items-center justify-center text-8xl relative" style={{ borderColor: game.color, color: game.color, textShadow: `0 0 20px ${game.color}` }}>
+                    {game.icon}
+                    <div className="absolute inset-0 border-2 border-white/20 rounded-full animate-ping opacity-20"></div>
                   </div>
                 </div>
-              ))}
-            </div>
-            {games.length === 0 && (
-              <div className="text-center py-12">
-                <p className="text-black/60 font-black text-lg uppercase">NO GAMES AVAILABLE</p>
-              </div>
-            )}
-          </div>
-        )}
 
-        {/* Leaderboard Section */}
-        <div className="mb-24">
-          <h2 className="font-header text-4xl md:text-5xl mb-8 text-black">Top Players</h2>
-          <div className="bg-white border-2 border-black rounded-[30px] overflow-hidden neo-shadow">
-            <table className="w-full">
-              <thead className="border-b-2 border-black bg-[#FFD93D]">
-                <tr>
-                  <th className="text-left p-6 font-black text-[10px] tracking-widest text-black">RANK</th>
-                  <th className="text-left p-6 font-black text-[10px] tracking-widest text-black">PLAYER</th>
-                  <th className="text-left p-6 font-black text-[10px] tracking-widest text-black">POINTS</th>
-                  <th className="text-left p-6 font-black text-[10px] tracking-widest text-black">GAMES PLAYED</th>
-                </tr>
-              </thead>
-              <tbody>
-                {[
-                  { rank: 1, name: 'ShadowGamer', points: 5420, games: 34 },
-                  { rank: 2, name: 'PuzzleMaster', points: 4980, games: 29 },
-                  { rank: 3, name: 'RiddleSolver', points: 4650, games: 27 },
-                  { rank: 4, name: 'BrainTease', points: 4120, games: 24 },
-                  { rank: 5, name: 'LogicLord', points: 3890, games: 22 },
-                ].map((player, i) => (
-                  <tr key={player.rank} className={`border-b border-black/10 hover:bg-[#FFFDF5] transition-colors ${i === 4 ? 'border-b-0' : ''}`}>
-                    <td className="p-6 font-black text-xl text-[#00B894]">#{player.rank}</td>
-                    <td className="p-6 font-bold text-sm tracking-wide text-black">{player.name}</td>
-                    <td className="p-6 font-black text-xl text-black">{player.points.toLocaleString()}</td>
-                    <td className="p-6 font-bold text-black/60">{player.games}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+                {/* Content */}
+                <h3 className="font-arcade text-3xl text-white mb-4 uppercase tracking-widest">{game.title}</h3>
+                <p className="text-gray-500 font-medium text-sm leading-relaxed max-w-xs mx-auto mb-8">
+                  {game.description}
+                </p>
 
-        {/* Info Section */}
-        <div className="text-center py-16 border-t-2 border-black/10">
-          <h2 className="font-header text-4xl md:text-5xl mb-6 text-black">Rules & Rewards</h2>
-          <div className="max-w-3xl mx-auto">
-            <p className="text-black/70 font-medium text-lg mb-12 leading-relaxed">
-              Play, earn points, and redeem them for exclusive rewards. The more you play, the more you earn. Climb the leaderboard and compete with players worldwide.
-            </p>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              <div className="bg-white border-2 border-black p-6 rounded-2xl neo-shadow">
-                <p className="font-black text-[10px] tracking-widest text-[#6C5CE7] mb-2 uppercase">DAILY BONUS</p>
-                <p className="font-black text-2xl text-black">+100 pts</p>
+                {/* Action Button */}
+                <div className="mt-auto w-full">
+                  <span className="inline-block bg-white text-black font-arcade text-lg px-8 py-3 border-b-4 border-gray-400 group-hover:bg-[#FF8C00] group-hover:border-[#A0522D] transition-all uppercase">
+                    START_GAME
+                  </span>
+                </div>
+
+                {/* Hover Effect: Scanline overlay */}
+                <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity scanlines"></div>
               </div>
-              <div className="bg-white border-2 border-black p-6 rounded-2xl neo-shadow">
-                <p className="font-black text-[10px] tracking-widest text-[#00B894] mb-2 uppercase">STREAK BONUS</p>
-                <p className="font-black text-2xl text-black">2x pts</p>
-              </div>
-              <div className="bg-white border-2 border-black p-6 rounded-2xl neo-shadow">
-                <p className="font-black text-[10px] tracking-widest text-[#FF7675] mb-2 uppercase">LEADERBOARD</p>
-                <p className="font-black text-2xl text-black">Monthly</p>
-              </div>
-              <div className="bg-white border-2 border-black p-6 rounded-2xl neo-shadow">
-                <p className="font-black text-[10px] tracking-widest text-[#FFD93D] mb-2 uppercase">REDEEM</p>
-                <p className="font-black text-2xl text-black">Rewards</p>
-              </div>
-            </div>
+            </Link>
           </div>
-        </div>
+        ))}
       </div>
+
+      {/* Dynamic/Firebase Games List (if any additional ones exist) */}
+      {!loading && games.length > 0 && (
+        <div className="mb-20">
+          <div className="arcade-panel-header bg-[#1A1A1A] text-gray-400 mb-8">ADDITIONAL_SESSIONS</div>
+          <div className="space-y-4">
+            {games.map((game, i) => (
+              <div key={i} className="bg-black border border-[#333] p-6 flex justify-between items-center hover:border-[#FFD400] transition-colors group">
+                <div>
+                  <h4 className="font-arcade text-xl text-white group-hover:text-[#FFD400]">{game.title}</h4>
+                  <p className="text-gray-600 text-xs mt-1 font-arcade uppercase">{game.description}</p>
+                </div>
+                <button className="text-[#FF8C00] font-arcade text-xs border border-[#FF8C00] px-4 py-2 hover:bg-[#FF8C00] hover:text-black transition-colors">
+                  LOAD
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Leaderboard Section */}
+      <section className="relative">
+        <div className="flex items-end justify-between mb-10 border-b border-[#333] pb-4">
+          <div>
+            <div className="text-[#FF8C00] font-arcade text-xs mb-2">NETWORK.TOP_PERFORMERS</div>
+            <h2 className="font-arcade text-5xl text-white">HIGH SCORES</h2>
+          </div>
+          <div className="font-arcade text-xs text-gray-500">RESET_IN: 14:02:55</div>
+        </div>
+
+        <div className="bg-[#050505] border-2 border-[#1A1A1A] p-2">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="border-b-2 border-[#1A1A1A] text-gray-500 font-arcade text-xs uppercase tracking-widest">
+                <th className="p-4">Rank</th>
+                <th className="p-4">Pilot_ID</th>
+                <th className="p-4 hidden md:table-cell">Module</th>
+                <th className="p-4 text-right">Score</th>
+              </tr>
+            </thead>
+            <tbody className="font-arcade text-sm">
+              {leaderboard.length > 0 ? (
+                leaderboard.map((row, i) => (
+                  <tr key={i} className="border-b border-[#111] hover:bg-[#111] transition-colors group">
+                    <td className="p-4" style={{ color: i === 0 ? '#FFD400' : i === 1 ? '#FF8C00' : 'white' }}>0{i + 1}</td>
+                    <td className="p-4 text-white group-hover:text-[#FFD400] transition-colors uppercase">{row.name}</td>
+                    <td className="p-4 text-gray-600 hidden md:table-cell">GLOBAL_XP</td>
+                    <td className="p-4 text-right text-[#FF8C00]">{row.xp ? row.xp.toLocaleString() : 0} XP</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={4} className="p-4 text-center text-gray-600 font-arcade">SCANNING_NETWORK...</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
     </div>
   );
-}
+};
+
+export default Play;

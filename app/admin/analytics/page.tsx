@@ -128,13 +128,13 @@ const AdminAnalyticsPage: React.FC = () => {
 
   const statsCards: StatsCard[] = [
     {
-      title: 'Total Users',
+      title: 'Active Entites',
       value: analytics.totalUsers,
-      change: `+${recentGrowth} this month`,
+      change: `+${recentGrowth} new seq.`,
       icon: Users,
-      color: 'from-blue-500 to-blue-600',
-      bgColor: 'bg-blue-50',
-      textColor: 'text-blue-600'
+      color: 'text-[#00B894]',
+      bgColor: 'bg-[#00B894]/10',
+      textColor: 'text-[#00B894]'
     }
   ];
 
@@ -147,11 +147,12 @@ const AdminAnalyticsPage: React.FC = () => {
   if (loading) {
     return (
       <RoleProtected allowedRoles={[USER_ROLES.ADMIN]}>
-        <div className="min-h-screen bg-gradient-to-br from-black to-slate-900 pt-24 pb-8 px-4 sm:px-6 lg:px-8">
+        <div className="min-h-screen text-white pt-24 pb-8 px-4 sm:px-6 lg:px-8 bg-[#050505] bg-[linear-gradient(rgba(0,255,0,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(0,255,0,0.02)_1px,transparent_1px)] bg-[size:32px_32px]">
           <div className="max-w-7xl mx-auto">
             <div className="flex items-center justify-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-500"></div>
-              <span className="ml-3 text-amber-500/60">Loading analytics...</span>
+              <div className="text-[#FFD400] font-arcade tracking-[0.3em] animate-pulse text-xl">
+                CALCULATING_METRICS...
+              </div>
             </div>
           </div>
         </div>
@@ -161,94 +162,75 @@ const AdminAnalyticsPage: React.FC = () => {
 
   return (
     <RoleProtected allowedRoles={[USER_ROLES.ADMIN]}>
-      <div className="min-h-screen bg-gradient-to-br from-black to-slate-900 pt-24 pb-8 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen text-white">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="text-center mb-8 border-b border-amber-500/10 pb-12"
-          >
-            <div className="flex items-center justify-center mb-4">
-              <div className="p-3 bg-gradient-to-r from-amber-500 to-amber-600 rounded-lg">
-                <BarChart3 className="w-8 h-8 text-black" />
-              </div>
+          <div className="mb-12 border-b-2 border-[#333] pb-8 flex justify-between items-end">
+            <div>
+              <h1 className="font-arcade text-5xl text-white mb-2 text-3d-orange">SYSTEM_ANALYTICS</h1>
+              <p className="text-gray-500 font-sans text-lg tracking-wide uppercase">Performance monitoring and logs</p>
             </div>
-            <h1 className="text-5xl font-header font-bold text-amber-500 mb-4 tracking-tight">
-              ANALYTICS & REPORTS
-            </h1>
-            <p className="text-lg text-white/60 max-w-2xl mx-auto font-header">
-              Monitor platform performance and user engagement metrics.
-            </p>
-          </motion.div>
+            <div className="bg-[#111] border border-[#333] px-4 py-2 rounded text-xs font-mono text-gray-400 flex items-center gap-2">
+              <Activity className="w-4 h-4 text-[#00B894] animate-pulse" />
+              LIVE_FEED
+            </div>
+          </div>
 
 
           {/* Stats Grid */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
-          >
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             {statsCards.map((stat, index) => {
               const IconComponent = stat.icon;
               return (
-                <motion.div
+                <div
                   key={stat.title}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                  whileHover={{ y: -5, transition: { duration: 0.2 } }}
-                  className="bg-slate-800/40 rounded-lg border border-amber-500/20 p-6 hover:border-amber-500/40 transition-all duration-300 backdrop-blur-sm"
+                  className="bg-[#080808] border border-[#333] p-6 hover:border-[#FFD400] transition-all duration-300 relative group overflow-hidden"
                 >
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="p-3 rounded-lg bg-amber-500/20">
-                      <IconComponent className="w-6 h-6 text-amber-500" />
+                  <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <IconComponent className="w-24 h-24 text-[#FFD400]" />
+                  </div>
+                  <div className="flex items-start justify-between mb-4 relative z-10">
+                    <div className="p-3 bg-[#111] border border-[#333] group-hover:border-[#FFD400] transition-colors">
+                      <IconComponent className="w-6 h-6 text-[#FFD400]" />
                     </div>
-                    <span className="text-sm font-medium text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded-full border border-emerald-500/20">
+                    <span className="text-[10px] font-mono text-[#00B894] border border-[#00B894]/30 bg-[#00B894]/10 px-2 py-1 uppercase tracking-wider">
                       {stat.change}
                     </span>
                   </div>
-                  <h3 className="text-2xl font-bold text-white mb-1">
+                  <h3 className="text-4xl font-arcade text-white mb-1 relative z-10 text-shadow-glow">
                     {typeof stat.value === 'number' ? stat.value.toLocaleString() : stat.value}
                   </h3>
-                  <p className="text-sm text-white/60">{stat.title}</p>
-                </motion.div>
+                  <p className="text-xs text-gray-500 font-mono uppercase tracking-widest relative z-10">{stat.title}</p>
+                </div>
               );
             })}
-          </motion.div>
+          </div>
 
           {/* User Roles Distribution */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            className="bg-slate-800/40 rounded-lg border border-amber-500/20 p-6 mb-8 backdrop-blur-sm"
-          >
-            <div className="flex items-center justify-center mb-8">
-              <div className="p-2 bg-amber-500/20 rounded-lg">
-                <Users className="w-5 h-5 text-amber-500" />
-              </div>
-              <h3 className="text-lg font-semibold text-white ml-3">User Distribution by Role</h3>
+          <div className="bg-[#080808] border border-[#333] p-8 mb-8 relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-1 h-full bg-[#FFD400]"></div>
+            <div className="flex items-center justify-center mb-12">
+              <h3 className="text-xl font-arcade text-white tracking-widest uppercase">Clearance_Level_Distribution</h3>
             </div>
             {roleCards.length > 0 ? (
-              <div className="flex flex-col items-center justify-center gap-8">
+              <div className="flex flex-col items-center justify-center gap-12">
                 {/* Main Circular Chart - Bigger */}
                 <div className="relative flex items-center justify-center">
-                  <svg width="300" height="300" className="transform -rotate-90">
+                  <div className="absolute inset-0 bg-[#FFD400]/5 blur-3xl rounded-full"></div>
+                  <svg width="300" height="300" className="transform -rotate-90 relative z-10 drop-shadow-[0_0_15px_rgba(255,212,0,0.3)]">
                     {/* Background circle */}
                     <circle
                       cx="150"
                       cy="150"
                       r="120"
                       fill="none"
-                      stroke="#3a3f47"
-                      strokeWidth="16"
+                      stroke="#111"
+                      strokeWidth="24"
                     />
                     {/* Role segments */}
                     {roleCards.map((roleData, index) => {
-                      const colors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#F97316'];
+                      // Neon colors palette
+                      const colors = ['#FFD400', '#00B894', '#6C5CE7', '#FF7675', '#0984E3', '#E17055'];
                       const percentage = parseFloat(roleData.percentage);
                       const circumference = 2 * Math.PI * 120;
                       const strokeDasharray = `${(percentage / 100) * circumference} ${circumference}`;
@@ -265,39 +247,47 @@ const AdminAnalyticsPage: React.FC = () => {
                           r="120"
                           fill="none"
                           stroke={colors[index % colors.length]}
-                          strokeWidth="16"
+                          strokeWidth="24"
                           strokeDasharray={strokeDasharray}
                           strokeDashoffset={strokeDashoffset}
-                          className="transition-all duration-500 ease-in-out"
+                          className="transition-all duration-500 ease-in-out hover:opacity-80 cursor-pointer"
                         />
                       );
                     })}
                   </svg>
                   {/* Center text */}
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <div className="text-4xl font-bold text-amber-500">{analytics.totalUsers}</div>
-                    <div className="text-lg text-white/60">Total Users</div>
+                    <div className="text-6xl font-arcade text-white text-shadow-glow">{analytics.totalUsers}</div>
+                    <div className="text-xs font-mono text-gray-500 uppercase tracking-widest mt-2">Total Entities</div>
                   </div>
                 </div>
 
                 {/* Linear User Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 w-full max-w-6xl">
                   {roleCards.map((roleData, index) => {
-                    const colors = ['#d4af37', '#0d7377', '#14919b', '#6366f1', '#ec4899', '#f59e0b'];
+                    const colors = ['#FFD400', '#00B894', '#6C5CE7', '#FF7675', '#0984E3', '#E17055'];
+                    const color = colors[index % colors.length];
                     return (
-                      <div key={roleData.role} className="bg-slate-800/50 border border-amber-500/20 rounded-lg p-4 hover:border-amber-500/40 transition-all duration-300 hover:scale-105 backdrop-blur-sm">
+                      <div key={roleData.role} className="bg-[#111] border border-[#333] hover:border-[#FFD400] p-4 transition-all duration-300 group">
                         <div className="flex items-center mb-3">
                           <div
-                            className="w-5 h-5 rounded-full mr-3"
-                            style={{ backgroundColor: colors[index % colors.length] }}
+                            className="w-3 h-3 mr-3 shadow-[0_0_8px]"
+                            style={{ backgroundColor: color, boxShadow: `0 0 8px ${color}` }}
                           ></div>
-                          <span className="font-semibold text-white text-sm">
+                          <span className="font-mono text-white text-xs uppercase tracking-wider group-hover:text-[#FFD400] transition-colors">
                             {ROLE_LABELS[roleData.role] || roleData.role}
                           </span>
                         </div>
-                        <div className="text-center">
-                          <div className="text-2xl font-bold text-amber-500 mb-1">{roleData.count}</div>
-                          <div className="text-sm text-white/60">{roleData.percentage}% of users</div>
+                        <div className="flex items-end justify-between">
+                          <div className="text-2xl font-arcade text-white">{roleData.count}</div>
+                          <div className="text-xs font-mono text-gray-500">{roleData.percentage}%</div>
+                        </div>
+                        {/* Progress bar */}
+                        <div className="w-full bg-[#222] h-1 mt-3">
+                          <div
+                            className="h-full transition-all duration-500"
+                            style={{ width: `${roleData.percentage}%`, backgroundColor: color }}
+                          ></div>
                         </div>
                       </div>
                     );
@@ -305,22 +295,17 @@ const AdminAnalyticsPage: React.FC = () => {
                 </div>
               </div>
             ) : (
-              <div className="text-center py-8 text-white/60">
-                <Users className="w-12 h-12 mx-auto mb-4 text-white/30" />
-                <p>No user data available yet.</p>
+              <div className="text-center py-8 text-gray-600 font-mono">
+                <Users className="w-12 h-12 mx-auto mb-4 opacity-30" />
+                <p>NO_DATA_AVAILABLE</p>
               </div>
             )}
-          </motion.div>
+          </div>
 
           {/* Footer */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.6 }}
-            className="mt-8 text-center text-white/40 text-sm"
-          >
-            <p>Analytics data is updated in real-time. Last updated: {new Date().toLocaleString()}</p>
-          </motion.div>
+          <div className="mt-8 text-center text-gray-600 text-[10px] font-mono uppercase tracking-widest">
+            <p>SYSTEM_LOGS_SYNCED: {new Date().toLocaleString()}</p>
+          </div>
         </div>
       </div>
     </RoleProtected>

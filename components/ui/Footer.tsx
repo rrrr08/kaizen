@@ -1,70 +1,46 @@
-'use client';
+"use client";
 
 import React from 'react';
 import Link from 'next/link';
-import { Github, Twitter, Instagram, Youtube } from 'lucide-react';
 
-const Footer = () => {
+const Footer: React.FC = () => {
   return (
-    <footer className="bg-[#FFFDF5] border-t-2 border-black py-20 px-6">
-      <div className="container mx-auto grid grid-cols-1 md:grid-cols-4 gap-12">
-        <div className="space-y-6">
-          <h2 className="text-3xl font-black font-display">Joy Juncture</h2>
-          <p className="font-medium text-[#2D3436]/60">
-            Making the world a more playful place, one game night at a time.
-          </p>
-          <div className="flex gap-4">
-            {[Twitter, Instagram, Youtube, Github].map((Icon, i) => (
-              <a key={i} href="#" className="p-3 bg-white neo-border neo-shadow hover:translate-y-[-2px] transition-transform text-black">
-                <Icon size={20} />
-              </a>
-            ))}
+    <footer className="bg-black border-t-4 border-[#1A1A1A] py-16">
+      <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-12">
+        <div>
+          <div className="font-arcade text-4xl mb-4 arcade-glow text-white">JOY JUNCTURE</div>
+          <p className="text-gray-500 max-w-sm">The digital playground for board game enthusiasts and event seekers. Play hard. Belong together.</p>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-12 text-sm">
+          <div className="space-y-4">
+            <h4 className="font-arcade text-[#FF8C00]">NAVIGATION</h4>
+            <ul className="space-y-2 text-gray-400 font-bold uppercase tracking-tighter">
+              <li><Link href="/shop" className="hover:text-white transition-colors">THE SHOP</Link></li>
+              <li><Link href="/events" className="hover:text-white transition-colors">LIVE EVENTS</Link></li>
+              <li><Link href="/community" className="hover:text-white transition-colors">COMMUNITY</Link></li>
+            </ul>
           </div>
-        </div>
-
-        <div className="space-y-4">
-          <h4 className="font-black text-xl font-display">Quick Links</h4>
-          <ul className="space-y-2 font-bold text-[#2D3436]/60">
-            <li><Link href="/shop" className="hover:text-black">Shop All</Link></li>
-            <li><Link href="/play" className="hover:text-black">Game Rentals</Link></li>
-            <li><Link href="/experiences" className="hover:text-black">How to Play</Link></li>
-            <li><Link href="/events" className="hover:text-black">Events</Link></li>
-          </ul>
-        </div>
-
-        <div className="space-y-4">
-          <h4 className="font-black text-xl font-display">Support</h4>
-          <ul className="space-y-2 font-bold text-[#2D3436]/60">
-            <li><Link href="#" className="hover:text-black">Shipping</Link></li>
-            <li><Link href="#" className="hover:text-black">Returns</Link></li>
-            <li><Link href="#" className="hover:text-black">FAQ</Link></li>
-            <li><Link href="/community" className="hover:text-black">Contact</Link></li>
-          </ul>
-        </div>
-
-        <div className="space-y-6">
-          <h4 className="font-black text-xl font-display">Newsletter</h4>
-          <p className="font-bold text-[#2D3436]/60">Get 10% off your first order!</p>
-          <div className="flex flex-col gap-3">
-            <input
-              type="email"
-              placeholder="Your email..."
-              className="px-4 py-3 rounded-xl neo-border font-bold bg-white text-black"
-            />
-            <button className="bg-[#FFD93D] py-3 rounded-xl font-black neo-border neo-shadow hover:translate-x-[2px] hover:translate-y-[2px] transition-all text-black">
-              Subscribe
-            </button>
+          <div className="space-y-4">
+            <h4 className="font-arcade text-[#FFD400]">SUPPORT</h4>
+            <ul className="space-y-2 text-gray-400 font-bold uppercase tracking-tighter">
+              <li><Link href="#" className="hover:text-white transition-colors">TICKET HELP</Link></li>
+              <li><Link href="#" className="hover:text-white transition-colors">GAME GUIDES</Link></li>
+              <li><Link href="#" className="hover:text-white transition-colors">CONTACT</Link></li>
+            </ul>
+          </div>
+          <div className="space-y-4 col-span-2 md:col-span-1">
+            <h4 className="font-arcade text-white">SOCIAL</h4>
+            <div className="flex space-x-4">
+              <div className="w-10 h-10 border border-gray-800 flex items-center justify-center hover:border-[#FF8C00] transition-colors cursor-pointer text-gray-500 hover:text-[#FF8C00]">IG</div>
+              <div className="w-10 h-10 border border-gray-800 flex items-center justify-center hover:border-[#FF8C00] transition-colors cursor-pointer text-gray-500 hover:text-[#FF8C00]">TW</div>
+              <div className="w-10 h-10 border border-gray-800 flex items-center justify-center hover:border-[#FF8C00] transition-colors cursor-pointer text-gray-500 hover:text-[#FF8C00]">DS</div>
+            </div>
           </div>
         </div>
       </div>
-
-      <div className="container mx-auto mt-20 pt-8 border-t border-black/10 flex flex-col md:flex-row justify-between items-center gap-6 font-bold text-[#2D3436]/40 text-sm">
-        <p>© 2024 Joy Juncture Inc. Play Responsibly.</p>
-        <div className="flex gap-8">
-          <a href="#" className="hover:text-black">Privacy Policy</a>
-          <a href="#" className="hover:text-black">Terms of Play</a>
-          <a href="#" className="hover:text-black">Accessibility</a>
-        </div>
+      <div className="text-center mt-16 text-[10px] font-arcade text-gray-800 tracking-widest">
+        © 2024 JOY JUNCTURE ARCADE — ALL NODES SECURED — SYSTEM STATUS: OPTIMAL
       </div>
     </footer>
   );
