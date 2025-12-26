@@ -19,7 +19,7 @@ export default function Community() {
       setLoading(true);
       setError(null);
 
-      const response = await fetch('/api/events/upcoming');
+      const response = await fetch('/api/events?status=upcoming');
 
       if (!response.ok) {
         throw new Error(`Failed to fetch events: ${response.status}`);
@@ -39,16 +39,17 @@ export default function Community() {
       setLoading(false);
     }
   };
-  
+
   const filteredEvents = eventFilter === 'All'
     ? events
     : events.filter(e => e.price === 0 ? eventFilter === 'Free' : eventFilter === 'Paid');
 
   if (loading) {
     return (
-      <div className="min-h-screen pt-28 pb-16 flex items-center justify-center">
-        <div className="text-amber-500 font-header tracking-[0.3em] animate-pulse">
-          LOADING COMMUNITY...
+      <div className="min-h-screen pt-28 pb-16 flex items-center justify-center bg-[#FFFDF5]">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[#FFD93D] border-t-black mb-4"></div>
+          <p className="text-black/60 font-black text-xs tracking-[0.4em]">LOADING COMMUNITY...</p>
         </div>
       </div>
     );
@@ -56,13 +57,13 @@ export default function Community() {
 
   if (error) {
     return (
-      <div className="min-h-screen pt-28 pb-16 flex flex-col items-center justify-center gap-4">
-        <div className="text-red-500 font-header tracking-widest text-center">
+      <div className="min-h-screen pt-28 pb-16 flex flex-col items-center justify-center gap-4 bg-[#FFFDF5]">
+        <div className="text-red-500 font-black tracking-widest text-center">
           {error}
         </div>
-        <button 
+        <button
           onClick={fetchEvents}
-          className="px-6 py-2 border border-amber-500 text-amber-500 hover:bg-amber-500/10 transition-all"
+          className="px-6 py-2 border-2 border-black text-black hover:bg-black hover:text-white transition-all font-black text-xs tracking-widest rounded-lg"
         >
           TRY AGAIN
         </button>
@@ -71,15 +72,15 @@ export default function Community() {
   }
 
   return (
-    <div className="min-h-screen pt-32 pb-16 bg-black text-white selection:bg-amber-500/30">
+    <div className="min-h-screen pt-32 pb-16 bg-[#FFFDF5] text-[#2D3436] selection:bg-[#FFD93D]/50">
       <div className="max-w-7xl mx-auto px-6 md:px-12">
         {/* Header */}
-        <div className="mb-20 border-b border-white/5 pb-12">
-          <div className="text-amber-500 font-header text-[10px] tracking-[0.6em] mb-4 uppercase">Events & Community Hub</div>
-          <h1 className="font-header text-5xl md:text-7xl lg:text-8xl tracking-tighter mb-8">
-            PLAY, GATHER & <br /><span className="text-amber-400">BELONG</span>
+        <div className="mb-20 border-b-2 border-black pb-12">
+          <div className="text-[#6C5CE7] font-black text-sm tracking-[0.2em] mb-4 uppercase font-display">Events & Community Hub</div>
+          <h1 className="font-header text-6xl md:text-8xl tracking-tighter mb-8 text-[#2D3436]">
+            PLAY, GATHER & <br /><span className="text-[#FFD93D] drop-shadow-[2px_2px_0px_#000] italic font-serif">BELONG</span>
           </h1>
-          <p className="text-white/60 font-serif italic text-lg max-w-3xl">
+          <p className="text-black/70 font-bold text-xl max-w-3xl leading-relaxed">
             The heart of Joy Juncture. Discover local meets, join our digital tribe, and earn rewards for simply having fun.
           </p>
         </div>
@@ -88,18 +89,20 @@ export default function Community() {
         <section className="mb-32">
           <div className="flex flex-col md:flex-row items-end justify-between gap-8 mb-12">
             <div>
-              <h2 className="font-header text-3xl md:text-5xl mb-2">Upcoming Events</h2>
-              <p className="text-white/50 font-serif italic">Soirees, workshops, and tournaments near you.</p>
+              <h2 className="font-header text-4xl md:text-5xl mb-2 text-black">Upcoming Events</h2>
+              <p className="text-black/60 font-bold text-lg">Soirees, workshops, and tournaments near you.</p>
             </div>
-            <div className="flex gap-4 md:gap-8">
+            <div className="flex gap-4 md:gap-4">
               {['All', 'Free', 'Paid'].map(cat => (
                 <button
                   key={cat}
                   onClick={() => setEventFilter(cat)}
-                  className={`font-header text-[9px] tracking-[0.4em] transition-all relative pb-2 ${eventFilter === cat ? 'text-amber-500 border-b border-amber-500' : 'text-white/40 hover:text-white'
+                  className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all neo-border neo-shadow ${eventFilter === cat
+                    ? 'bg-[#FFD93D] text-black scale-105'
+                    : 'bg-white text-black hover:bg-gray-50'
                     }`}
                 >
-                  {cat.toUpperCase()}
+                  {cat}
                 </button>
               ))}
             </div>
@@ -107,9 +110,9 @@ export default function Community() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
             {filteredEvents.map(event => (
               <Link key={event.id} href={`/events/${event.id}`}>
-                <div className="group cursor-pointer bg-neutral-900 border border-white/5 hover:border-amber-500/40 p-4 rounded-sm transition-all hover:-translate-y-1">
+                <div className="group cursor-pointer bg-white border-2 border-black p-4 rounded-[20px] neo-shadow hover:scale-[1.02] transition-transform">
                   {/* Event Image */}
-                  <div className="aspect-video overflow-hidden rounded-sm mb-6 bg-white/5">
+                  <div className="aspect-video overflow-hidden rounded-[15px] mb-6 border-2 border-black">
                     <img
                       src={event.image}
                       alt={event.title}
@@ -117,25 +120,25 @@ export default function Community() {
                     />
                   </div>
                   {/* Event Info */}
-                  <div className="space-y-4">
+                  <div className="space-y-4 px-2">
                     <div>
-                      <div className="text-amber-500 font-header text-[8px] tracking-[0.3em] mb-2 uppercase">
+                      <div className="bg-[#6C5CE7] text-white px-2 py-1 rounded inline-block font-black text-[8px] tracking-[0.2em] mb-3 uppercase">
                         {event.date} • {event.time}
                       </div>
-                      <h3 className="font-header text-xl md:text-2xl group-hover:text-amber-400 transition-colors tracking-tight mb-2">
+                      <h3 className="font-header text-2xl md:text-3xl text-black group-hover:text-[#6C5CE7] transition-colors tracking-tight mb-2">
                         {event.title}
                       </h3>
-                      <p className="text-white/50 font-serif text-sm italic line-clamp-2">
+                      <p className="text-black/60 font-bold text-sm line-clamp-2">
                         {event.description}
                       </p>
                     </div>
-                    <div className="flex items-center justify-between pt-4 border-t border-white/5">
-                      <div className="text-white/40 text-xs font-serif">{event.location}</div>
+                    <div className="flex items-center justify-between pt-4 border-t-2 border-black/10">
+                      <div className="text-black/50 text-xs font-black uppercase tracking-widest">{event.location}</div>
                       <div>
                         {event.price === 0 ? (
-                          <span className="text-amber-500 font-header text-[9px] tracking-widest">FREE</span>
+                          <span className="text-[#00B894] font-black text-xs tracking-widest">FREE</span>
                         ) : (
-                          <span className="text-amber-500 font-serif italic">₹{event.price}</span>
+                          <span className="text-black font-serif italic font-bold">₹{event.price}</span>
                         )}
                       </div>
                     </div>
@@ -146,8 +149,8 @@ export default function Community() {
           </div>
 
           {filteredEvents.length === 0 && (
-            <div className="text-center py-12 border border-white/10 rounded-sm">
-              <p className="text-white/40 font-header text-[10px] tracking-[0.3em]">NO EVENTS MATCHING FILTER</p>
+            <div className="text-center py-12">
+              <p className="text-black/40 font-black text-lg uppercase">NO EVENTS MATCHING FILTER</p>
             </div>
           )}
         </section>
@@ -156,21 +159,21 @@ export default function Community() {
         <section className="mb-32">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Wallet & Points */}
-            <div className="border border-white/10 p-8 rounded-sm bg-gradient-to-br from-white/5 to-transparent">
-              <h3 className="font-header text-[10px] tracking-[0.6em] text-amber-500 mb-6 uppercase">Game Points & Wallet</h3>
+            <div className="border-2 border-black p-8 rounded-[30px] bg-white neo-shadow hover:translate-y-[-4px] transition-transform">
+              <h3 className="font-header text-sm tracking-[0.2em] text-[#6C5CE7] mb-6 uppercase border-b-2 border-black pb-2 font-black">Game Points & Wallet</h3>
               <div className="space-y-6">
                 <div>
-                  <p className="text-white/60 font-serif italic mb-3">Earn points through:</p>
-                  <ul className="space-y-2 text-white/70 font-serif text-sm">
+                  <p className="text-black font-black text-lg mb-3">Earn points through:</p>
+                  <ul className="space-y-2 text-black/70 font-medium text-sm">
                     <li>→ Purchasing games</li>
                     <li>→ Attending events</li>
                     <li>→ Playing online games</li>
                     <li>→ Community engagement</li>
                   </ul>
                 </div>
-                <div className="pt-4 border-t border-white/10">
-                  <p className="text-white/60 font-serif italic mb-3">Redeem for:</p>
-                  <ul className="space-y-2 text-white/70 font-serif text-sm">
+                <div className="pt-4 border-t-2 border-black/10">
+                  <p className="text-black font-black text-lg mb-3">Redeem for:</p>
+                  <ul className="space-y-2 text-black/70 font-medium text-sm">
                     <li>→ Store discounts</li>
                     <li>→ Event tickets</li>
                     <li>→ Exclusive merchandise</li>
@@ -180,30 +183,30 @@ export default function Community() {
             </div>
 
             {/* Blogs & Stories */}
-            <div className="border border-white/10 p-8 rounded-sm bg-gradient-to-br from-white/5 to-transparent">
-              <h3 className="font-header text-[10px] tracking-[0.6em] text-amber-500 mb-6 uppercase">Community Stories</h3>
+            <div className="border-2 border-black p-8 rounded-[30px] bg-white neo-shadow hover:translate-y-[-4px] transition-transform">
+              <h3 className="font-header text-sm tracking-[0.2em] text-[#FFD93D] mb-6 uppercase border-b-2 border-black pb-2 font-black drop-shadow-sm text-shadow-black">Community Stories</h3>
               <div className="space-y-4">
-                <p className="text-white/70 font-serif text-sm leading-relaxed">
+                <p className="text-black/70 font-medium text-sm leading-relaxed">
                   Join the conversation. Share your game nights, read strategy guides, and get featured in our editorial blog.
                 </p>
                 <div className="pt-6">
-                  <Link href="/blog" className="text-amber-500 font-header text-[10px] tracking-[0.3em] border-b border-amber-500 pb-1 hover:text-amber-400 transition-all">VISIT THE BLOG →</Link>
+                  <Link href="/blog" className="text-black font-black text-xs tracking-[0.3em] hover:text-[#6C5CE7] hover:underline transition-all">VISIT THE BLOG →</Link>
                 </div>
               </div>
             </div>
 
             {/* Puzzles & Challenges */}
-            <div className="border border-white/10 p-8 rounded-sm bg-gradient-to-br from-white/5 to-transparent">
-              <h3 className="font-header text-[10px] tracking-[0.6em] text-amber-500 mb-6 uppercase">Daily Challenges</h3>
+            <div className="border-2 border-black p-8 rounded-[30px] bg-white neo-shadow hover:translate-y-[-4px] transition-transform">
+              <h3 className="font-header text-sm tracking-[0.2em] text-[#00B894] mb-6 uppercase border-b-2 border-black pb-2 font-black">Daily Challenges</h3>
               <div className="space-y-4">
-                <p className="text-white/70 font-serif text-sm leading-relaxed">
+                <p className="text-black/70 font-medium text-sm leading-relaxed">
                   Test your wit with our rotating selection of puzzles and brain teasers.
                 </p>
-                <div className="space-y-3 pt-4 border-t border-white/10">
+                <div className="space-y-3 pt-4 border-t-2 border-black/10">
                   {GAMES.slice(0, 2).map(game => (
-                    <div key={game.id} className="border-b border-white/5 pb-3 last:border-0">
-                      <p className="text-amber-400 font-header text-[9px] tracking-widest mb-1">{game.title}</p>
-                      <p className="text-white/50 font-serif text-xs">+{game.points} points</p>
+                    <div key={game.id} className="border-b border-black/10 pb-3 last:border-0 flex justify-between items-center">
+                      <p className="text-black font-bold text-xs">{game.title}</p>
+                      <p className="text-[#00B894] font-black text-xs">+{game.points} pts</p>
                     </div>
                   ))}
                 </div>
@@ -214,20 +217,20 @@ export default function Community() {
 
         {/* Testimonials Section */}
         <div className="mb-24">
-          <h2 className="font-header text-4xl md:text-5xl mb-12 tracking-tight text-center">Proof of Joy</h2>
+          <h2 className="font-header text-4xl md:text-5xl mb-12 tracking-tight text-center text-black">Proof of Joy</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {TESTIMONIALS.map(testimonial => (
-              <div key={testimonial.id} className="border border-white/10 p-8 rounded-sm hover:border-amber-500/40 transition-all">
-                <p className="text-white/70 font-serif italic mb-6 leading-relaxed">"{testimonial.text}"</p>
+              <div key={testimonial.id} className="border-2 border-black p-8 rounded-[20px] bg-white neo-shadow hover:scale-[1.02] transition-transform">
+                <p className="text-black/80 font-medium italic mb-6 leading-relaxed">"{testimonial.text}"</p>
                 <div className="flex items-center gap-4">
                   <img
                     src={testimonial.image}
                     alt={testimonial.author}
-                    className="w-12 h-12 rounded-full grayscale"
+                    className="w-12 h-12 rounded-full border-2 border-black"
                   />
                   <div>
-                    <p className="font-header text-sm">{testimonial.author}</p>
-                    <p className="text-white/50 text-xs font-serif italic">{testimonial.occasion}</p>
+                    <p className="font-black text-sm text-black">{testimonial.author}</p>
+                    <p className="text-black/50 text-xs font-bold uppercase tracking-wider">{testimonial.occasion}</p>
                   </div>
                 </div>
               </div>
@@ -236,21 +239,21 @@ export default function Community() {
         </div>
 
         {/* Final CTA */}
-        <div className="text-center py-16 border-t border-white/10">
-          <h2 className="font-header text-3xl md:text-4xl mb-6">Ready to Join?</h2>
-          <p className="text-white/60 font-serif italic text-lg mb-8 max-w-2xl mx-auto">
+        <div className="text-center py-16 border-t-2 border-black/10">
+          <h2 className="font-header text-4xl md:text-5xl mb-6 text-black">Ready to Join?</h2>
+          <p className="text-black/70 font-bold text-lg mb-8 max-w-2xl mx-auto">
             Create your account and start earning points, engaging with the community, and discovering endless joy.
           </p>
           <div className="flex flex-col sm:flex-row gap-6 justify-center">
             <Link
               href="/auth/signup"
-              className="px-8 py-4 bg-amber-500 text-black font-header text-[10px] tracking-[0.4em] hover:bg-amber-400 transition-all rounded-sm"
+              className="px-8 py-4 bg-black text-white font-black text-xs tracking-[0.4em] hover:bg-[#6C5CE7] hover:scale-105 transition-all rounded-xl shadow-[4px_4px_0px_rgba(0,0,0,0.2)]"
             >
               CREATE ACCOUNT
             </Link>
             <Link
               href="/play"
-              className="px-8 py-4 border border-amber-500 text-amber-500 font-header text-[10px] tracking-[0.4em] hover:bg-amber-500/10 transition-all rounded-sm"
+              className="px-8 py-4 bg-[#FFD93D] text-black font-black text-xs tracking-[0.4em] border-2 border-black neo-shadow hover:scale-105 transition-all rounded-xl"
             >
               PLAY NOW
             </Link>

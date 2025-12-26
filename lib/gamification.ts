@@ -102,3 +102,31 @@ export const STREAK_REWARDS = [
 ];
 
 export const STREAK_FREEZE_COST = 200; // JP
+
+// ------------------------------------------------------------------
+// 5. CHECKOUT & REDEMPTION HELPERS
+// ------------------------------------------------------------------
+export const CONFIG = {
+  redeemRate: 0.5, // 1 JP = ₹0.50
+  maxRedeemPercent: 50, // Can only pay 50% of total by points
+};
+
+export const calculatePoints = (price: number, isFirstTime: boolean = false) => {
+  let points = Math.floor(price * REWARDS.SHOP.POINTS_PER_RUPEE);
+  if (isFirstTime) {
+    points += 100; // Bonus
+  }
+  return points;
+};
+
+export const calculatePointWorth = (points: number) => {
+  return points * CONFIG.redeemRate;
+};
+
+export const getMaxRedeemableAmount = (totalPrice: number, userPoints: number) => {
+  const maxAllowedByPolicy = totalPrice * (CONFIG.maxRedeemPercent / 100);
+  const maxUserCanPay = userPoints * CONFIG.redeemRate;
+
+  // The value in RUPEES that can be redeemed
+  return Math.min(maxAllowedByPolicy, maxUserCanPay);
+};

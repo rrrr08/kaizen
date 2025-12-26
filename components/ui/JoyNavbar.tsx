@@ -1,419 +1,280 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import CartSidebar from './CartSidebar2';
-import { NotificationCenter } from '@/app/components/NotificationCenter';
-import { useAuth } from '@/app/context/AuthContext';
-import { ChevronDown, LogOut, Home, Settings } from 'lucide-react';
+import { usePathname } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Coins, ShoppingBag, Menu, X, User, LogOut, Settings, LayoutDashboard } from 'lucide-react';
+import { useCart } from '@/app/context/CartContext';
+import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
+import { doc, getDoc, getFirestore } from 'firebase/firestore';
+import { app } from '@/lib/firebase';
+import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 
-interface NavbarProps {
-  points?: number;
-  isObsidian?: boolean;
-}
+const navItems = [
+  { name: 'Shop', path: '/shop' },
+  { name: 'Experiences', path: '/experiences' },
+  { name: 'Play', path: '/play' },
+  { name: 'Events', path: '/events' },
+  { name: 'Community', path: '/community' },
+  { name: 'Blog', path: '/blog' },
+  { name: 'About', path: '/about' },
+];
 
-const Navbar: React.FC<NavbarProps> = ({ points = 0, isObsidian = false }) => {
-  const [mobileOpen, setMobileOpen] = useState<boolean>(false);
-  const [eventsDropdownOpen, setEventsDropdownOpen] = useState<boolean>(false);
-  const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>(null);
-  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
-  const [userProfile, setUserProfile] = useState<any>(null);
+const Navbar: React.FC = () => {
+  const pathname = usePathname();
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { items } = useCart();
+  const [user, setUser] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
-  const eventsDropdownRef = useRef<HTMLDivElement>(null);
-  const { user, loading } = useAuth();
+  const [points, setPoints] = useState(1250); // Dummy default, fetch real if needed
 
-  // Fetch user profile when user changes
   useEffect(() => {
-    console.log('[JoyNavbar] User changed:', {
-      user: user?.email || 'null',
-      uid: user?.uid || 'null',
-      loading,
-      timestamp: new Date().toLocaleTimeString()
-    });
-    
-    if (user) {
-      console.log('[JoyNavbar] Fetching user profile for:', user.uid);
-      // Lazy load Firebase functions
-      import('@/lib/firebase').then(({ getUserProfile, checkUserIsAdmin }) => {
-        getUserProfile(user.uid)
-          .then(profile => {
-            console.log('[JoyNavbar] User profile fetched:', {
-              name: profile?.first_name || profile?.name,
-              role: profile?.role,
-              email: profile?.email
-            });
-            setUserProfile(profile);
-          })
-          .catch(error => console.error('[JoyNavbar] Error fetching user profile:', error));
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-        // Check if user is admin
-        checkUserIsAdmin(user.uid)
-          .then(admin => {
-            console.log('[JoyNavbar] Admin check result for', user.uid, ':', admin);
-            setIsAdmin(admin);
-          })
-          .catch(error => console.error('[JoyNavbar] Error checking admin status:', error));
-      });
-    } else {
-      console.log('[JoyNavbar] Clearing user profile and admin status');
-      setUserProfile(null);
-      setIsAdmin(false);
-    }
-  }, [user]);
-
-  // Handle click outside to close dropdown
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (eventsDropdownRef.current && !eventsDropdownRef.current.contains(event.target as Node)) {
-        setEventsDropdownOpen(false);
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      setUser(currentUser);
+      if (currentUser) {
+        // Check admin status
+        const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+        if (userDoc.exists()) {
+          const data = userDoc.data();
+          setIsAdmin(data.role === 'admin' || data.isAdmin === true);
+          if (data.points) setPoints(data.points);
+        }
+      } else {
+        setIsAdmin(false);
       }
-    };
+    });
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      if (hoverTimeout) clearTimeout(hoverTimeout);
-    };
-  }, [hoverTimeout]);
+    return () => unsubscribe();
+  }, []);
 
-  const handleSignOut = async () => {
-    try {
-      console.log('[JoyNavbar] Signing out...');
-      // Lazy load Firebase function
-      const { logOut } = await import('@/lib/firebase');
-      await logOut();
-      setUserProfile(null);
-      setIsProfileMenuOpen(false);
-      console.log('[JoyNavbar] Signed out successfully');
-    } catch (error) {
-      console.error('[JoyNavbar] Error signing out:', error);
-    }
+  const handleLogout = async () => {
+    const auth = getAuth(app);
+    await signOut(auth);
+    window.location.href = '/';
   };
 
-  const getInitials = (name?: string) => {
-    if (!name) return 'JJ';
-    return name
-      .split(' ')
-      .map((n) => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
-  };
-
-  const navItems = [
-    { label: 'HOME', href: '/' },
-    { label: 'SHOP', href: '/shop' },
-    { label: 'EXPERIENCES', href: '/experiences' },
-    { label: 'PLAY', href: '/play' },
-    { label: 'COMMUNITY', href: '/community' },
-    { label: 'BLOG', href: '/blog' },
-    { label: 'ABOUT', href: '/about' },
-  ];
+  const totalItems = items.reduce((acc: number, item: any) => acc + item.quantity, 0);
 
   return (
     <>
-      <nav className={`fixed top-0 left-0 w-full z-[100] h-24 flex items-center px-8 md:px-12 transition-all duration-500 ${
-        isObsidian ? 'brightness-[0.85]' : ''
-      }`}>
-        <div className="absolute inset-0 bg-gradient-to-b from-black/80 to-transparent pointer-events-none"></div>
-        
-        <div className="relative w-full flex items-center justify-between">
-          {/* Logo - Premium Design */}
-          <Link 
-            href="/"
-            className="flex items-center gap-3 cursor-pointer group"
+      <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-4 flex items-center justify-between bg-[#FFFDF5] border-b-2 border-black transition-all">
+        {/* Logo */}
+        <Link href="/" className="flex items-center gap-3 group z-50">
+          <motion.div
+            whileHover={{ rotate: [0, -10, 10, -10, 10, 0] }}
+            transition={{ duration: 0.5 }}
+            className="bg-[#FFD93D] p-3 border-2 border-black rounded-[15px] neo-shadow"
           >
-            {/* Decorative Icon */}
-            <div className="relative w-10 h-10 flex items-center justify-center">
-              <div className="absolute inset-0 bg-gradient-to-br from-amber-400 to-amber-600 rounded-lg opacity-20 group-hover:opacity-30 transition-all duration-300 glow-gold-hover"></div>
-              <div className="text-2xl font-display font-bold text-amber-400 group-hover:text-amber-300 transition-all">✦</div>
-            </div>
-            
-            {/* Logo Text */}
-            <div className="flex flex-col">
-              <span className="font-display text-xl font-bold tracking-[0.15em] text-white group-hover:text-amber-300 transition-all duration-300">JOY</span>
-              <span className="font-header text-xs tracking-[0.12em] text-emerald-400 group-hover:text-emerald-300 transition-all duration-300">JUNCTURE</span>
-            </div>
-          </Link>
+            <span className="text-2xl font-black text-black">JJ</span>
+          </motion.div>
+          <span className="text-2xl font-black tracking-tighter hidden md:block text-black">Joy Juncture</span>
+        </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-8 lg:gap-12">
-            {navItems.map((item) => {
-              // Skip EVENTS from main nav - it has its own dropdown
-              if (item.label === 'EVENTS') return null;
-              
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="font-header text-xs font-medium tracking-[0.12em] transition-all duration-300 text-white/70 hover:text-amber-400 hover:drop-shadow-lg"
-                >
-                  {item.label}
-                </Link>
-              );
-            })}
-
-            {/* Events Dropdown */}
-            <div 
-              className="relative" 
-              ref={eventsDropdownRef}
-              onMouseEnter={() => {
-                if (hoverTimeout) clearTimeout(hoverTimeout);
-                setEventsDropdownOpen(true);
-              }}
-              onMouseLeave={() => {
-                const timeout = setTimeout(() => {
-                  setEventsDropdownOpen(false);
-                }, 200);
-                setHoverTimeout(timeout);
-              }}
-            >
-              <button
-                onClick={() => setEventsDropdownOpen(!eventsDropdownOpen)}
-                className="font-header text-xs font-medium tracking-[0.12em] transition-all duration-300 text-white/70 hover:text-amber-400 hover:drop-shadow-lg flex items-center gap-1"
-              >
-                EVENTS
-                <svg
-                  className={`w-3 h-3 transition-transform duration-200 ${eventsDropdownOpen ? 'rotate-180' : ''}`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-
-              {eventsDropdownOpen && (
-                <div 
-                  className="absolute left-1/2 transform -translate-x-1/2 mt-6 w-48 bg-black/95 backdrop-blur-lg border border-white/10 rounded-lg shadow-xl overflow-hidden z-50"
-                  onMouseEnter={() => {
-                    if (hoverTimeout) clearTimeout(hoverTimeout);
-                    setEventsDropdownOpen(true);
-                  }}
-                  onMouseLeave={() => {
-                    const timeout = setTimeout(() => {
-                      setEventsDropdownOpen(false);
-                    }, 100);
-                    setHoverTimeout(timeout);
-                  }}
-                >
-                  <div className="py-2">
-                    <Link
-                      href="/events/upcoming"
-                      className="block px-4 py-3 font-header text-[10px] tracking-[0.2em] text-white/70 hover:text-amber-500 hover:bg-white/5 transition-all border-b border-white/5"
-                      onClick={() => setEventsDropdownOpen(false)}
-                    >
-                      UPCOMING GAME NIGHTS
-                    </Link>
-                    <Link
-                      href="/events/past"
-                      className="block px-4 py-3 font-header text-[10px] tracking-[0.2em] text-white/70 hover:text-amber-500 hover:bg-white/5 transition-all border-b border-white/5"
-                      onClick={() => setEventsDropdownOpen(false)}
-                    >
-                      PAST EVENTS
-                    </Link>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Right Side - Notifications, Points & Toggle */}
-          <div className="flex items-center gap-4 md:gap-8">
-            {/* Notification Center */}
-            <div className="relative">
-              <NotificationCenter />
-            </div>
-
-            {loading ? (
-              // Loading state - show skeleton
-              <div className="hidden sm:flex items-center gap-3 px-4 py-2 rounded-full border border-amber-500/20 bg-amber-500/5 animate-pulse">
-                <div className="w-8 h-8 bg-amber-500/20 rounded-full"></div>
-                <div className="h-4 w-20 bg-amber-500/20 rounded"></div>
-              </div>
-            ) : user ? (
-              // User logged in - show profile button
-              <div className="relative">
-                <button
-                  onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-                  className="hidden sm:flex items-center gap-3 px-4 py-2 rounded-full border border-amber-500/40 bg-amber-500/5 hover:bg-amber-500/10 transition-all"
-                >
-                  <div className="w-8 h-8 bg-gradient-to-r from-amber-500 to-amber-600 rounded-full flex items-center justify-center text-white text-[10px] font-bold">
-                    {getInitials(userProfile?.first_name || userProfile?.name || user.email)}
-                  </div>
-                  <div className="flex flex-col items-start">
-                    <span className="font-header text-[9px] tracking-[0.2em] text-amber-500">
-                      {userProfile?.first_name || userProfile?.name || 'USER'}
-                    </span>
-                    <span className="font-header text-[7px] tracking-[0.1em] text-white/40">
-                      {userProfile?.points || 0} PTS
-                    </span>
-                  </div>
-                  <ChevronDown
-                    size={16}
-                    className={`text-amber-500 transition-transform ${
-                      isProfileMenuOpen ? 'rotate-180' : ''
-                    }`}
-                  />
-                </button>
-
-                {/* Profile Dropdown */}
-                {isProfileMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-slate-950 border border-amber-500/30 rounded-sm shadow-lg overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300 z-50">
-                    <Link
-                      href="/wallet"
-                      className="flex items-center gap-3 px-4 py-3 text-white/70 hover:bg-amber-500/10 hover:text-amber-500 transition-colors border-b border-white/5 font-serif text-sm"
-                      onClick={() => setIsProfileMenuOpen(false)}
-                    >
-                      💰 My Wallet
-                    </Link>
-                    <Link
-                      href="/orders"
-                      className="flex items-center gap-3 px-4 py-3 text-white/70 hover:bg-amber-500/10 hover:text-amber-500 transition-colors border-b border-white/5 font-serif text-sm"
-                      onClick={() => setIsProfileMenuOpen(false)}
-                    >
-                      <Home size={16} />
-                      My Orders
-                    </Link>
-                    {isAdmin && (
-                      <Link
-                        href="/admin"
-                        className="flex items-center gap-3 px-4 py-3 text-white/70 hover:bg-amber-500/10 hover:text-amber-500 transition-colors border-b border-white/5 font-serif text-sm"
-                        onClick={() => setIsProfileMenuOpen(false)}
-                      >
-                        <Settings size={16} />
-                        Admin Panel
-                      </Link>
-                    )}
-                    <button
-                      onClick={handleSignOut}
-                      className="w-full flex items-center gap-3 px-4 py-3 text-white/70 hover:bg-red-500/10 hover:text-red-400 transition-colors font-serif text-sm"
-                    >
-                      <LogOut size={16} />
-                      Sign Out
-                    </button>
-                  </div>
-                )}
-              </div>
-            ) : (
-              // User not logged in - show auth buttons
+        {/* Desktop Menu */}
+        <div className="relative hidden lg:flex bg-white/50 p-1.5 rounded-full border-2 border-black items-center shadow-[4px_4px_0px_rgba(0,0,0,0.1)]">
+          {navItems.map((item, idx) => {
+            const isActive = pathname.startsWith(item.path);
+            return (
               <Link
-                href="/auth/login"
-                className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-lg border border-amber-400/40 hover:border-amber-400/80 hover:bg-amber-400/5 transition-all duration-300"
+                key={item.path}
+                href={item.path}
+                className={`relative px-5 py-2 rounded-full text-sm font-black uppercase tracking-wider transition-colors duration-300 z-10 ${isActive ? 'text-white' : 'text-black hover:bg-black/5'
+                  }`}
+                onMouseEnter={() => setHoveredIndex(idx)}
+                onMouseLeave={() => setHoveredIndex(null)}
               >
-                <span className="font-header text-xs font-medium tracking-[0.1em] text-amber-400 hover:text-amber-300">SIGN IN</span>
+                {isActive && (
+                  <motion.div
+                    layoutId="activeNav"
+                    className="absolute inset-0 bg-black rounded-full -z-10"
+                    transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+                  />
+                )}
+                {item.name}
               </Link>
-            )}
-            
-            {!user && points > 0 && (
-              <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-500/10 border border-emerald-400/30 glow-emerald">
-                <div className="font-header text-lg font-bold text-emerald-400">{points}</div>
-                <div className="font-header text-xs font-medium tracking-[0.1em] text-emerald-400">PTS</div>
-              </div>
-            )}
-          </div>
-
-          {/* Mobile Menu Button */}
-          <button 
-            className="md:hidden ml-4"
-            onClick={() => setMobileOpen(!mobileOpen)}
-            aria-label="Toggle mobile menu"
-          >
-            <div className="space-y-1">
-              <div className="w-6 h-0.5 bg-amber-500"></div>
-              <div className="w-6 h-0.5 bg-amber-500"></div>
-              <div className="w-6 h-0.5 bg-amber-500"></div>
-            </div>
-          </button>
+            );
+          })}
         </div>
 
-        {/* Mobile Menu */}
-        {mobileOpen && (
-          <div className="absolute top-24 left-0 right-0 bg-black/95 backdrop-blur border-b border-white/10 md:hidden">
-            <div className="flex flex-col p-8 gap-6">
+        {/* User Actions */}
+        <div className="flex items-center gap-4 z-50">
+          {/* Wallet Capsule (Hidden on small mobile) */}
+          <div className="hidden sm:flex items-center gap-4">
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              className="flex items-center gap-3 bg-[#00B894] px-4 py-2 rounded-full border-2 border-black neo-shadow mr-2"
+            >
+              <motion.div
+                animate={{ rotateY: [0, 360] }}
+                transition={{ duration: 2, repeat: Infinity, repeatDelay: 3, ease: "easeInOut" }}
+                className="flex items-center justify-center"
+              >
+                <Coins className="text-black w-5 h-5" />
+              </motion.div>
+              <div className="flex flex-col -space-y-1">
+                <span className="text-[8px] text-black font-black uppercase leading-none tracking-widest">Balance</span>
+                <span className="text-black font-black whitespace-nowrap text-sm leading-none">{points.toLocaleString()}</span>
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Cart Button */}
+          <Link href="/cart">
+            <motion.button
+              whileHover={{ scale: 1.1, rotate: -5 }}
+              whileTap={{ scale: 0.9 }}
+              className="w-12 h-12 bg-white flex items-center justify-center rounded-full border-2 border-black neo-shadow relative"
+            >
+              <ShoppingBag className="w-5 h-5 text-black" />
+              {totalItems > 0 && (
+                <span className="absolute -top-1 -right-1 bg-[#FF7675] text-black text-[10px] font-black w-5 h-5 flex items-center justify-center rounded-full border-2 border-black">
+                  {totalItems}
+                </span>
+              )}
+            </motion.button>
+          </Link>
+
+          {/* Profile / Auth Button (Dropdown) */}
+          {user ? (
+            <DropdownMenu.Root>
+              <DropdownMenu.Trigger asChild>
+                <motion.button
+                  whileHover={{ scale: 1.1, rotate: 5 }}
+                  whileTap={{ scale: 0.9 }}
+                  className="w-12 h-12 bg-[#6C5CE7] flex items-center justify-center rounded-full border-2 border-black neo-shadow cursor-pointer outline-none"
+                >
+                  <div className="w-full h-full flex items-center justify-center text-white font-black text-sm">
+                    {user.email?.[0].toUpperCase()}
+                  </div>
+                </motion.button>
+              </DropdownMenu.Trigger>
+
+              <DropdownMenu.Portal>
+                <DropdownMenu.Content
+                  className="w-56 bg-white border-2 border-black rounded-xl p-2 neo-shadow z-[60] data-[side=bottom]:animate-slideUpAndFade data-[side=right]:animate-slideLeftAndFade data-[side=left]:animate-slideRightAndFade data-[side=top]:animate-slideDownAndFade"
+                  sideOffset={5}
+                >
+                  <div className="px-2 py-2 mb-2 bg-gray-100 rounded-lg border border-black/10">
+                    <p className="text-xs font-bold text-black/50 uppercase tracking-wider mb-1">Signed in as</p>
+                    <p className="text-sm font-black text-black truncate">{user.email}</p>
+                  </div>
+
+                  {isAdmin && (
+                    <DropdownMenu.Item className="group flex items-center gap-3 px-3 py-2 text-sm font-bold text-black rounded-lg outline-none cursor-pointer hover:bg-[#FF7675] hover:text-white hover:border-black transition-colors border border-transparent">
+                      <Link href="/admin" className="flex items-center gap-3 w-full">
+                        <LayoutDashboard size={16} strokeWidth={2.5} />
+                        Admin Dashboard
+                      </Link>
+                    </DropdownMenu.Item>
+                  )}
+
+                  <DropdownMenu.Item className="group flex items-center gap-3 px-3 py-2 text-sm font-bold text-black rounded-lg outline-none cursor-pointer hover:bg-[#FFD93D] hover:text-black hover:border-black transition-colors border border-transparent">
+                    <Link href="/profile" className="flex items-center gap-3 w-full">
+                      <User size={16} strokeWidth={2.5} />
+                      My Profile
+                    </Link>
+                  </DropdownMenu.Item>
+
+                  <DropdownMenu.Item className="group flex items-center gap-3 px-3 py-2 text-sm font-bold text-black rounded-lg outline-none cursor-pointer hover:bg-[#FFD93D] hover:text-black hover:border-black transition-colors border border-transparent">
+                    <Link href="/profile/settings" className="flex items-center gap-3 w-full">
+                      <Settings size={16} strokeWidth={2.5} />
+                      Settings
+                    </Link>
+                  </DropdownMenu.Item>
+
+                  <DropdownMenu.Separator className="h-[2px] bg-black my-2" />
+
+                  <DropdownMenu.Item
+                    className="group flex items-center gap-3 px-3 py-2 text-sm font-bold text-red-500 rounded-lg outline-none cursor-pointer hover:bg-black hover:text-white hover:border-transparent transition-colors border border-transparent"
+                    onSelect={handleLogout}
+                  >
+                    <LogOut size={16} strokeWidth={2.5} />
+                    Log Out
+                  </DropdownMenu.Item>
+
+                  <DropdownMenu.Arrow className="fill-black" />
+                </DropdownMenu.Content>
+              </DropdownMenu.Portal>
+            </DropdownMenu.Root>
+          ) : (
+            <Link href="/auth/login">
+              <motion.button
+                whileHover={{ scale: 1.1, rotate: 5 }}
+                whileTap={{ scale: 0.9 }}
+                className="w-12 h-12 bg-[#6C5CE7] flex items-center justify-center rounded-full border-2 border-black neo-shadow"
+              >
+                <User className="w-5 h-5 text-white" />
+              </motion.button>
+            </Link>
+          )}
+
+          {/* Mobile Menu Toggle */}
+          <button
+            className="lg:hidden w-12 h-12 bg-black flex items-center justify-center rounded-full text-white"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          >
+            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
+      </nav>
+
+      {/* Mobile Menu Overlay */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="fixed inset-0 top-[80px] z-40 bg-[#FFFDF5] p-6 lg:hidden overflow-y-auto"
+          >
+            <div className="flex flex-col gap-4">
               {navItems.map((item) => (
                 <Link
-                  key={item.href}
-                  href={item.href}
-                  className="font-header text-[10px] tracking-[0.3em] text-white/60 hover:text-amber-500"
-                  onClick={() => setMobileOpen(false)}
+                  key={item.path}
+                  href={item.path}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="text-4xl font-black text-black hover:text-[#6C5CE7] uppercase tracking-tighter"
                 >
-                  {item.label}
+                  {item.name}
                 </Link>
               ))}
-
-              {/* Events Section in Mobile Menu */}
-              <div className="pt-4 border-t border-white/10">
-                <div className="font-header text-[10px] tracking-[0.3em] text-amber-500 mb-4">EVENTS</div>
-                <div className="flex flex-col gap-4 ml-4">
-                  <Link
-                    href="/events/upcoming"
-                    className="font-header text-[9px] tracking-[0.2em] text-white/60 hover:text-amber-500"
-                    onClick={() => setMobileOpen(false)}
-                  >
-                    UPCOMING GAME NIGHTS
-                  </Link>
-                  <Link
-                    href="/events/past"
-                    className="font-header text-[9px] tracking-[0.2em] text-white/60 hover:text-amber-500"
-                    onClick={() => setMobileOpen(false)}
-                  >
-                    PAST EVENTS
-                  </Link>
-                </div>
+              {isAdmin && (
+                <Link
+                  href="/admin"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="text-4xl font-black text-red-500 hover:text-red-600 uppercase tracking-tighter"
+                >
+                  Admin Dashboard
+                </Link>
+              )}
+              <div className="h-px bg-black/10 my-4" />
+              <Link href={user ? "/profile" : "/auth/login"} className="text-xl font-bold text-black/60 uppercase tracking-widest">
+                {user ? "My Profile" : "Login / Sign Up"}
+              </Link>
+              <div className="mt-8 p-6 bg-[#00B894] rounded-2xl border-2 border-black neo-shadow">
+                <p className="font-black text-black uppercase tracking-widest mb-2">My Balance</p>
+                <p className="text-4xl font-black text-black">{points.toLocaleString()} PTS</p>
               </div>
-
-              {/* Auth Section in Mobile Menu */}
-              <div className="pt-4 border-t border-white/10">
-                {user ? (
-                  <>
-                    <div className="font-header text-[10px] tracking-[0.3em] text-amber-500 mb-4">ACCOUNT</div>
-                    <div className="flex flex-col gap-3 ml-4">
-                      <Link
-                        href="/wallet"
-                        className="font-header text-[9px] tracking-[0.2em] text-white/60 hover:text-amber-500"
-                        onClick={() => setMobileOpen(false)}
-                      >
-                        MY WALLET
-                      </Link>
-                      {isAdmin && (
-                        <Link
-                          href="/admin/dashboard"
-                          className="font-header text-[9px] tracking-[0.2em] text-amber-500"
-                          onClick={() => setMobileOpen(false)}
-                        >
-                          ADMIN PANEL
-                        </Link>
-                      )}
-                      <button
-                        onClick={() => {
-                          handleSignOut();
-                          setMobileOpen(false);
-                        }}
-                        className="text-left font-header text-[9px] tracking-[0.2em] text-red-400 hover:text-red-300"
-                      >
-                        SIGN OUT
-                      </button>
-                    </div>
-                  </>
-                ) : (
-                  <Link
-                    href="/auth/login"
-                    className="font-header text-[10px] tracking-[0.3em] text-amber-500 hover:text-amber-400"
-                    onClick={() => setMobileOpen(false)}
-                  >
-                    SIGN IN
-                  </Link>
-                )}
-              </div>
+              {user && (
+                <button
+                  onClick={() => {
+                    handleLogout();
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="mt-4 w-full py-4 bg-black text-white font-black uppercase tracking-widest rounded-xl"
+                >
+                  Log Out
+                </button>
+              )}
             </div>
-          </div>
+          </motion.div>
         )}
-      </nav>
-      
-      {/* Cart Sidebar */}
-      <CartSidebar />
+      </AnimatePresence>
     </>
   );
 };

@@ -6,6 +6,7 @@ import { useAuth } from '@/app/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { getDocs, collection, query, orderBy, limit } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import Link from 'next/link';
 
 interface DashboardStats {
   totalUsers: number;
@@ -46,14 +47,14 @@ export default function AdminDashboard() {
   const loadDashboardData = async () => {
     try {
       setLoading(true);
-      
+
       // Fetch real data from Firebase
       const usersSnapshot = await getDocs(collection(db, 'users'));
       const totalUsers = usersSnapshot.size;
 
       const ordersSnapshot = await getDocs(collection(db, 'orders'));
       const totalOrders = ordersSnapshot.size;
-      
+
       let totalRevenue = 0;
       let totalPointsIssued = 0;
       let totalPointsRedeemed = 0;
@@ -64,7 +65,7 @@ export default function AdminDashboard() {
         totalRevenue += data.totalPrice || 0;
         totalPointsIssued += data.totalPoints || 0;
         totalPointsRedeemed += data.pointsRedeemed || 0;
-        
+
         recentOrdersList.push({
           id: doc.id,
           userId: data.userId || 'unknown',
@@ -112,132 +113,149 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <div className="p-8 flex items-center justify-center min-h-screen">
+      <div className="p-8 flex items-center justify-center min-h-[calc(100vh-80px)] bg-[#FFFDF5]">
         <div className="text-center">
-          <div className="w-12 h-12 border-4 border-amber-500/20 border-t-amber-500 rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-amber-500">Loading dashboard...</p>
+          <div className="w-12 h-12 border-4 border-black border-t-[#FFD93D] rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-black font-black uppercase tracking-widest">Loading dashboard...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="p-8 pb-16">
+    <div className="p-8 pb-16 min-h-screen bg-[#FFFDF5]">
       {/* Header */}
-      <div className="mb-12">
-        <h1 className="font-display text-5xl font-bold text-white mb-2">Dashboard</h1>
-        <p className="text-white/60">Platform overview and analytics</p>
+      <div className="mb-12 border-b-2 border-black pb-8">
+        <h1 className="font-header text-6xl font-black text-black mb-2">DASHBOARD</h1>
+        <p className="text-black/60 font-bold text-xl">Platform overview and analytics</p>
       </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
         {/* Total Users */}
-        <div className="bg-gradient-to-br from-blue-500/10 to-transparent border border-blue-500/20 rounded-lg p-6">
+        <div className="bg-[#6C5CE7] border-2 border-black rounded-[20px] p-6 neo-shadow hover:-translate-y-1 transition-transform">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-header text-white/70 text-sm">Total Users</h3>
-            <Users className="w-5 h-5 text-blue-500" />
+            <h3 className="font-black text-white text-sm uppercase tracking-wider">Total Users</h3>
+            <div className="bg-white p-2 rounded-lg border-2 border-black">
+              <Users className="w-5 h-5 text-black" />
+            </div>
           </div>
-          <p className="font-display text-4xl font-bold text-white mb-2">{stats?.totalUsers.toLocaleString()}</p>
-          <p className="text-blue-400 text-sm">+{stats?.monthlyGrowth}% this month</p>
+          <p className="font-header text-5xl font-black text-white mb-2">{stats?.totalUsers.toLocaleString()}</p>
+          <p className="text-white font-bold text-sm bg-black/20 inline-block px-2 py-1 rounded">+{stats?.monthlyGrowth}% this month</p>
         </div>
 
         {/* Total Orders */}
-        <div className="bg-gradient-to-br from-green-500/10 to-transparent border border-green-500/20 rounded-lg p-6">
+        <div className="bg-[#00B894] border-2 border-black rounded-[20px] p-6 neo-shadow hover:-translate-y-1 transition-transform">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-header text-white/70 text-sm">Total Orders</h3>
-            <ShoppingBag className="w-5 h-5 text-green-500" />
+            <h3 className="font-black text-black text-sm uppercase tracking-wider">Total Orders</h3>
+            <div className="bg-white p-2 rounded-lg border-2 border-black">
+              <ShoppingBag className="w-5 h-5 text-black" />
+            </div>
           </div>
-          <p className="font-display text-4xl font-bold text-white mb-2">{stats?.totalOrders.toLocaleString()}</p>
-          <p className="text-green-400 text-sm">₹{(stats?.totalRevenue || 0).toLocaleString()}</p>
+          <p className="font-header text-5xl font-black text-black mb-2">{stats?.totalOrders.toLocaleString()}</p>
+          <p className="text-black font-bold text-sm bg-white/30 inline-block px-2 py-1 rounded">₹{(stats?.totalRevenue || 0).toLocaleString()} Revenue</p>
         </div>
 
         {/* Average Order Value */}
-        <div className="bg-gradient-to-br from-purple-500/10 to-transparent border border-purple-500/20 rounded-lg p-6">
+        <div className="bg-[#FF7675] border-2 border-black rounded-[20px] p-6 neo-shadow hover:-translate-y-1 transition-transform">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-header text-white/70 text-sm">Avg Order Value</h3>
-            <TrendingUp className="w-5 h-5 text-purple-500" />
+            <h3 className="font-black text-black text-sm uppercase tracking-wider">Avg Order Value</h3>
+            <div className="bg-white p-2 rounded-lg border-2 border-black">
+              <TrendingUp className="w-5 h-5 text-black" />
+            </div>
           </div>
-          <p className="font-display text-4xl font-bold text-white mb-2">₹{stats?.averageOrderValue.toLocaleString()}</p>
-          <p className="text-purple-400 text-sm">Per transaction</p>
+          <p className="font-header text-5xl font-black text-black mb-2">₹{stats?.averageOrderValue.toLocaleString()}</p>
+          <p className="text-black font-bold text-sm bg-white/30 inline-block px-2 py-1 rounded">Per transaction</p>
         </div>
 
         {/* Active Users */}
-        <div className="bg-gradient-to-br from-amber-500/10 to-transparent border border-amber-500/20 rounded-lg p-6">
+        <div className="bg-[#FFD93D] border-2 border-black rounded-[20px] p-6 neo-shadow hover:-translate-y-1 transition-transform">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-header text-white/70 text-sm">Active Users</h3>
-            <Clock className="w-5 h-5 text-amber-500" />
+            <h3 className="font-black text-black text-sm uppercase tracking-wider">Active Users</h3>
+            <div className="bg-white p-2 rounded-lg border-2 border-black">
+              <Clock className="w-5 h-5 text-black" />
+            </div>
           </div>
-          <p className="font-display text-4xl font-bold text-white mb-2">{stats?.activeUsers.toLocaleString()}</p>
-          <p className="text-amber-400 text-sm">Last 24 hours</p>
+          <p className="font-header text-5xl font-black text-black mb-2">{stats?.activeUsers.toLocaleString()}</p>
+          <p className="text-black font-bold text-sm bg-white/30 inline-block px-2 py-1 rounded">Last 24 hours</p>
         </div>
       </div>
 
       {/* Points Statistics */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12">
-        <div className="bg-gradient-to-br from-amber-500/10 to-transparent border border-amber-500/20 rounded-lg p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <Zap className="w-5 h-5 text-amber-500" />
-            <h3 className="font-header text-white text-lg">Points Issued</h3>
+        <div className="bg-white border-2 border-black rounded-[20px] p-8 neo-shadow">
+          <div className="flex items-center gap-4 mb-6">
+            <div className="bg-[#FFD93D] p-3 rounded-xl border-2 border-black">
+              <Zap className="w-6 h-6 text-black" fill="black" />
+            </div>
+            <h3 className="font-header text-black text-3xl font-black">Points Issued</h3>
           </div>
-          <p className="font-display text-4xl font-bold text-amber-400 mb-2">
+          <p className="font-header text-6xl font-black text-black mb-4">
             {(stats?.totalPointsIssued || 0).toLocaleString()}
           </p>
-          <div className="space-y-2 text-sm text-white/60">
-            <p>Total points given to users</p>
-            <div className="w-full bg-white/10 rounded-full h-2">
-              <div className="bg-amber-500 h-2 rounded-full" style={{ width: '75%' }}></div>
+          <div className="space-y-3">
+            <p className="text-black/60 font-bold uppercase tracking-wide text-xs">Total points given to users</p>
+            <div className="w-full bg-gray-100 rounded-full h-4 border-2 border-black">
+              <div className="bg-[#FFD93D] h-full rounded-l-full border-r-2 border-black" style={{ width: '75%' }}></div>
             </div>
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-green-500/10 to-transparent border border-green-500/20 rounded-lg p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <Zap className="w-5 h-5 text-green-500" />
-            <h3 className="font-header text-white text-lg">Points Redeemed</h3>
+        <div className="bg-white border-2 border-black rounded-[20px] p-8 neo-shadow">
+          <div className="flex items-center gap-4 mb-6">
+            <div className="bg-[#00B894] p-3 rounded-xl border-2 border-black">
+              <Zap className="w-6 h-6 text-black" fill="black" />
+            </div>
+            <h3 className="font-header text-black text-3xl font-black">Points Redeemed</h3>
           </div>
-          <p className="font-display text-4xl font-bold text-green-400 mb-2">
+          <p className="font-header text-6xl font-black text-black mb-4">
             {(stats?.totalPointsRedeemed || 0).toLocaleString()}
           </p>
-          <div className="space-y-2 text-sm text-white/60">
-            <p>Points used for discounts</p>
-            <div className="w-full bg-white/10 rounded-full h-2">
-              <div className="bg-green-500 h-2 rounded-full" style={{ width: '18%' }}></div>
+          <div className="space-y-3">
+            <p className="text-black/60 font-bold uppercase tracking-wide text-xs">Points used for discounts</p>
+            <div className="w-full bg-gray-100 rounded-full h-4 border-2 border-black">
+              <div className="bg-[#00B894] h-full rounded-l-full border-r-2 border-black" style={{ width: '18%' }}></div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Recent Orders */}
-      <div className="bg-black/40 border border-white/10 rounded-lg p-6">
-        <h2 className="font-display text-2xl font-bold text-white mb-6 flex items-center gap-2">
-          <ShoppingBag className="w-6 h-6 text-amber-500" />
-          Recent Orders
+      <div className="bg-white border-2 border-black rounded-[25px] p-8 neo-shadow">
+        <h2 className="font-header text-3xl font-black text-black mb-8 flex items-center gap-3">
+          <ShoppingBag className="w-8 h-8 text-black" />
+          RECENT ORDERS
         </h2>
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-white/10">
-                <th className="text-left py-3 px-4 text-white/60 font-header">Order ID</th>
-                <th className="text-left py-3 px-4 text-white/60 font-header">Amount</th>
-                <th className="text-left py-3 px-4 text-white/60 font-header">Status</th>
-                <th className="text-left py-3 px-4 text-white/60 font-header">Date</th>
+              <tr className="border-b-2 border-black">
+                <th className="py-4 px-4 text-black/50 font-black uppercase tracking-wider text-xs">Order ID</th>
+                <th className="py-4 px-4 text-black/50 font-black uppercase tracking-wider text-xs">Amount</th>
+                <th className="py-4 px-4 text-black/50 font-black uppercase tracking-wider text-xs">Status</th>
+                <th className="py-4 px-4 text-black/50 font-black uppercase tracking-wider text-xs">Date</th>
               </tr>
             </thead>
             <tbody>
               {recentOrders.map((order) => (
-                <tr key={order.id} className="border-b border-white/5 hover:bg-white/5 transition">
-                  <td className="py-3 px-4 text-white font-semibold">{order.id}</td>
-                  <td className="py-3 px-4 text-amber-400">₹{order.totalPrice.toLocaleString()}</td>
-                  <td className="py-3 px-4">
-                    <span className="inline-flex px-3 py-1 bg-green-500/10 border border-green-500/20 rounded-full text-green-400 text-xs font-semibold">
+                <tr key={order.id} className="border-b-2 border-black/10 hover:bg-[#FFFDF5] transition">
+                  <td className="py-4 px-4 text-black font-bold font-mono text-sm">{order.id}</td>
+                  <td className="py-4 px-4 text-black font-black text-lg">₹{order.totalPrice.toLocaleString()}</td>
+                  <td className="py-4 px-4">
+                    <span className="inline-flex px-3 py-1 bg-[#00B894] border-2 border-black rounded-lg text-black text-xs font-black uppercase shadow-[2px_2px_0px_rgba(0,0,0,0.1)]">
                       ✓ Completed
                     </span>
                   </td>
-                  <td className="py-3 px-4 text-white/60">
+                  <td className="py-4 px-4 text-black/60 font-bold text-sm">
                     {new Date(order.createdAt).toLocaleDateString()}
                   </td>
                 </tr>
               ))}
+              {recentOrders.length === 0 && (
+                <tr>
+                  <td colSpan={4} className="py-8 text-center text-black/40 font-bold">No orders found.</td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

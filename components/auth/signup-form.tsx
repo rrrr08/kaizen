@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Eye, EyeOff, Mail, Lock, User, Loader2 } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User, Loader2, ArrowRight } from 'lucide-react';
 import { USER_ROLES } from '@/lib/roles';
 import { useCart } from '@/app/context/CartContext';
 
@@ -70,15 +70,14 @@ export function SignupForm() {
           handleCodeInApp: true,
         };
 
-        console.log('Sending verification email with action URL:', actionUrl);
         await sendEmailVerification(auth.currentUser, actionCodeSettings);
-        
+
         // Determine redirect after email verification
         let finalRedirect = redirectUrl;
         if (hasCheckoutIntent) {
           finalRedirect = '/checkout';
         }
-        
+
         // Clear checkout intent
         if (hasCheckoutIntent) {
           if (typeof window !== 'undefined') {
@@ -88,25 +87,17 @@ export function SignupForm() {
 
         router.push(`/auth/verify?email=${email}&redirect=${encodeURIComponent(finalRedirect)}`);
       } else {
-        console.error("Signup successful, but auth.currentUser is null before sending verification email.");
         setError("Signup was successful, but couldn't send verification email. Please try logging in.");
       }
-    } catch (error) {
-      console.error("Signup error:", error);
-      const authError = error as { code?: string; message: string };
-
-      if (authError.code === 'auth/email-already-in-use') {
+    } catch (error: any) {
+      if (error.code === 'auth/email-already-in-use') {
         setError("This email is already registered. Please try logging in instead.");
-      } else if (authError.code === 'auth/invalid-email') {
-        setError("Invalid email format. Please check your email and try again.");
-      } else if (authError.code === 'auth/weak-password') {
-        setError("Password is too weak. Please choose a stronger password.");
-      } else if (authError.code === 'auth/network-request-failed') {
-        setError("Network error. Please check your internet connection and try again.");
-      } else if (authError.code === 'unavailable' || authError.message?.toLowerCase().includes('offline')) {
-        setError("Unable to connect to the database. Please check your internet connection, firewall, or ensure the Firestore database exists in the Firebase Console.");
+      } else if (error.code === 'auth/invalid-email') {
+        setError("Invalid email format.");
+      } else if (error.code === 'auth/weak-password') {
+        setError("Password is too weak.");
       } else {
-        setError(authError.message || "An error occurred during signup");
+        setError(error.message || "An error occurred during signup");
       }
     } finally {
       setLoading(false);
@@ -118,188 +109,160 @@ export function SignupForm() {
     setError(null);
 
     try {
-      // Lazy load Firebase
       const { signInWithGoogle } = await import('@/lib/firebase');
-
       const userCredential = await signInWithGoogle();
 
-      // If redirect is used instead of popup, the function returns null
-      // The redirect will handle the auth automatically
-      if (!userCredential) {
-        // Redirect-based auth was initiated, page will redirect soon
-        return;
-      }
-
       if (userCredential) {
-        // Merge local cart with Firebase after Google signup
         await mergeLocalCartWithFirebase();
 
-        // Determine redirect destination
         let finalRedirect = redirectUrl;
         if (hasCheckoutIntent) {
           finalRedirect = '/checkout';
         }
-        
-        // Clear checkout intent
+
         if (hasCheckoutIntent) {
           if (typeof window !== 'undefined') {
             sessionStorage.removeItem('checkoutIntent');
           }
         }
 
-        // Redirect to determined URL
         router.push(finalRedirect);
       }
-    } catch (error) {
-      console.error("Google sign in error:", error);
-      const authError = error as { code?: string; message: string };
-      
-      // Handle specific error codes
-      if (authError.code === 'auth/popup-blocked') {
-        setError('Opening Google Sign-In... Please complete the login in the new window/tab.');
-      } else if (authError.code === 'auth/cancelled-popup-request') {
-        setError('Google Sign-In was cancelled. Please try again.');
-      } else if (authError.code === 'auth/popup-closed-by-user') {
-        setError('You closed the sign-in popup. Please try again.');
-      } else {
-        setError(authError.message || "An error occurred with Google sign in");
-      }
+    } catch (error: any) {
+      setError(error.message || "Google sign in failed");
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-black text-white flex items-center justify-center px-4 py-12">
-      {/* Background Gradient */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-[120px]"></div>
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-amber-500/5 rounded-full blur-[120px]"></div>
-      </div>
-
+    <div className="min-h-screen bg-[#FFFDF5] text-[#2D3436] flex items-center justify-center px-4 py-12">
       <div className="relative z-10 w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-12">
-          <Link href="/" className="inline-block font-header text-3xl tracking-[0.2em] hover:opacity-80 transition-opacity group mb-8">
-            <span className="text-amber-500">JOY</span>
-            <span className="text-white/40 ml-2">JUNCTURE</span>
+          <Link href="/" className="inline-block flex justify-center mb-6 hover:scale-105 transition-transform">
+            <div className="bg-[#FFD93D] p-3 border-2 border-black rounded-[15px] neo-shadow">
+              <span className="text-2xl font-black text-black">JJ</span>
+            </div>
           </Link>
-          <h1 className="font-header text-[10px] tracking-[0.3em] text-amber-500 uppercase mb-2">JOIN THE GUILD</h1>
-          <p className="font-serif italic text-white/40 text-sm">Create your membership</p>
+          <h1 className="font-header text-4xl font-black text-black mb-2 uppercase tracking-tight">Join The Guild</h1>
+          <p className="font-sans font-bold text-black/60 text-sm">Start your adventure</p>
         </div>
 
         {/* Error Alert */}
         {error && (
-          <div className="mb-6 p-4 border border-red-500/40 bg-red-500/10 rounded-sm animate-in fade-in slide-in-from-top-4">
-            <p className="font-serif text-sm text-red-400">{error}</p>
+          <div className="mb-6 p-4 border-2 border-black bg-[#FF7675] rounded-[15px] neo-shadow animate-in fade-in slide-in-from-top-4">
+            <p className="font-black text-sm text-black uppercase tracking-wide flex items-center gap-2">
+              <span>⚠️</span> {error}
+            </p>
           </div>
         )}
 
         {/* Signup Form Card */}
-        <div className="border border-amber-500/20 bg-black/40 backdrop-blur-sm p-8 rounded-sm">
+        <div className="border-2 border-black bg-white p-6 md:p-8 rounded-[25px] neo-shadow">
           <form onSubmit={handleSignup} className="space-y-4">
             {/* Name Fields */}
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-3">
-                <label className="font-header text-[8px] tracking-[0.2em] text-amber-500/70 uppercase">
-                  Forename
+              <div className="space-y-2">
+                <label className="font-black text-xs tracking-widest text-black uppercase ml-1">
+                  First Name
                 </label>
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-500/40" />
+                  <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-black" />
                   <input
                     type="text"
-                    placeholder="Your first name"
+                    placeholder="First"
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
                     required
-                    className="w-full bg-white/5 border border-amber-500/20 text-white placeholder:text-white/20 pl-10 pr-4 py-3 text-sm font-serif focus:border-amber-500/40 focus:bg-white/10 outline-none transition-all"
+                    className="w-full bg-[#FFFDF5] border-2 border-black rounded-[12px] text-black placeholder:text-black/30 pl-10 pr-2 py-3 text-sm font-bold focus:bg-[#FFD93D]/20 focus:outline-none transition-all shadow-[2px_2px_0px_#000]"
                   />
                 </div>
               </div>
 
-              <div className="space-y-3">
-                <label className="font-header text-[8px] tracking-[0.2em] text-amber-500/70 uppercase">
-                  Surname
+              <div className="space-y-2">
+                <label className="font-black text-xs tracking-widest text-black uppercase ml-1">
+                  Last Name
                 </label>
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-500/40" />
+                  <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-black" />
                   <input
                     type="text"
-                    placeholder="Your last name"
+                    placeholder="Last"
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
                     required
-                    className="w-full bg-white/5 border border-amber-500/20 text-white placeholder:text-white/20 pl-10 pr-4 py-3 text-sm font-serif focus:border-amber-500/40 focus:bg-white/10 outline-none transition-all"
+                    className="w-full bg-[#FFFDF5] border-2 border-black rounded-[12px] text-black placeholder:text-black/30 pl-10 pr-2 py-3 text-sm font-bold focus:bg-[#FFD93D]/20 focus:outline-none transition-all shadow-[2px_2px_0px_#000]"
                   />
                 </div>
               </div>
             </div>
 
             {/* Email Field */}
-            <div className="space-y-3">
-              <label className="font-header text-[8px] tracking-[0.2em] text-amber-500/70 uppercase">
-                Electronic Mail
+            <div className="space-y-2">
+              <label className="font-black text-xs tracking-widest text-black uppercase ml-1">
+                Email Address
               </label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-500/40" />
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-black" />
                 <input
                   type="email"
-                  placeholder="your.email@example.com"
+                  placeholder="name@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="w-full bg-white/5 border border-amber-500/20 text-white placeholder:text-white/20 pl-10 pr-4 py-3 text-sm font-serif focus:border-amber-500/40 focus:bg-white/10 outline-none transition-all"
+                  className="w-full bg-[#FFFDF5] border-2 border-black rounded-[12px] text-black placeholder:text-black/30 pl-12 pr-4 py-4 text-sm font-bold focus:bg-[#FFD93D]/20 focus:outline-none transition-all shadow-[2px_2px_0px_#000]"
                 />
               </div>
             </div>
 
             {/* Password Field */}
-            <div className="space-y-3">
-              <label className="font-header text-[8px] tracking-[0.2em] text-amber-500/70 uppercase">
-                Passphrase
+            <div className="space-y-2">
+              <label className="font-black text-xs tracking-widest text-black uppercase ml-1">
+                Create Password
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-500/40" />
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-black" />
                 <input
                   type={showPassword ? 'text' : 'password'}
-                  placeholder="••••••••"
+                  placeholder="At least 6 chars"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   minLength={6}
-                  className="w-full bg-white/5 border border-amber-500/20 text-white placeholder:text-white/20 pl-10 pr-10 py-3 text-sm font-serif focus:border-amber-500/40 focus:bg-white/10 outline-none transition-all"
+                  className="w-full bg-[#FFFDF5] border-2 border-black rounded-[12px] text-black placeholder:text-black/30 pl-12 pr-12 py-4 text-sm font-bold focus:bg-[#FFD93D]/20 focus:outline-none transition-all shadow-[2px_2px_0px_#000]"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-amber-500/40 hover:text-amber-500 transition-colors"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-black/50 hover:text-black transition-colors"
                 >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
             </div>
 
             {/* Confirm Password Field */}
-            <div className="space-y-3">
-              <label className="font-header text-[8px] tracking-[0.2em] text-amber-500/70 uppercase">
-                Confirm Passphrase
+            <div className="space-y-2">
+              <label className="font-black text-xs tracking-widest text-black uppercase ml-1">
+                Confirm Password
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-500/40" />
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-black" />
                 <input
                   type={showConfirmPassword ? 'text' : 'password'}
-                  placeholder="••••••••"
+                  placeholder="Repeat password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
                   minLength={6}
-                  className="w-full bg-white/5 border border-amber-500/20 text-white placeholder:text-white/20 pl-10 pr-10 py-3 text-sm font-serif focus:border-amber-500/40 focus:bg-white/10 outline-none transition-all"
+                  className="w-full bg-[#FFFDF5] border-2 border-black rounded-[12px] text-black placeholder:text-black/30 pl-12 pr-12 py-4 text-sm font-bold focus:bg-[#FFD93D]/20 focus:outline-none transition-all shadow-[2px_2px_0px_#000]"
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-amber-500/40 hover:text-amber-500 transition-colors"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-black/50 hover:text-black transition-colors"
                 >
-                  {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
             </div>
@@ -308,24 +271,27 @@ export function SignupForm() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full border border-amber-500 bg-amber-500 text-black hover:bg-amber-400 disabled:opacity-50 disabled:cursor-wait py-3 font-header text-[8px] tracking-[0.4em] uppercase transition-all mt-8 flex items-center justify-center gap-2"
+              className="w-full border-2 border-black bg-[#00B894] text-white hover:bg-[#00a383] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_#000] active:translate-y-[2px] active:shadow-[2px_2px_0px_#000] py-4 rounded-[15px] font-black text-sm tracking-[0.2em] uppercase transition-all mt-6 flex items-center justify-center gap-3 neo-shadow"
             >
               {loading ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>PROCESSING...</span>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span>CREATING...</span>
                 </>
               ) : (
-                'CREATE MEMBERSHIP'
+                <>
+                  <span>CREATE ACCOUNT</span>
+                  <ArrowRight size={18} strokeWidth={3} />
+                </>
               )}
             </button>
           </form>
 
           {/* Divider */}
-          <div className="my-8 flex items-center gap-4">
-            <div className="flex-1 h-px bg-gradient-to-r from-amber-500/0 to-amber-500/20"></div>
-            <span className="font-header text-[7px] tracking-[0.2em] text-white/30 uppercase">OR</span>
-            <div className="flex-1 h-px bg-gradient-to-l from-amber-500/0 to-amber-500/20"></div>
+          <div className="my-6 flex items-center gap-4">
+            <div className="flex-1 h-[2px] bg-black/10"></div>
+            <span className="font-black text-xs tracking-widest text-black/40 uppercase">OR</span>
+            <div className="flex-1 h-[2px] bg-black/10"></div>
           </div>
 
           {/* Google Sign Up */}
@@ -333,42 +299,36 @@ export function SignupForm() {
             type="button"
             onClick={handleGoogleSignup}
             disabled={loading}
-            className="w-full border border-amber-500/30 bg-white/5 hover:bg-white/10 disabled:opacity-50 disabled:cursor-wait py-3 font-header text-[8px] tracking-[0.3em] uppercase transition-all flex items-center justify-center gap-3"
+            className="w-full border-2 border-black bg-white text-black hover:bg-gray-50 py-4 rounded-[15px] font-black text-xs tracking-[0.2em] uppercase transition-all flex items-center justify-center gap-3 neo-shadow hover:translate-y-[-2px]"
           >
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-              <path fill='#4285F4' d='M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z'/>
-              <path fill='#34A853' d='M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z'/>
-              <path fill='#FBBC05' d='M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z'/>
-              <path fill='#EA4335' d='M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z'/>
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+              <path fill='#4285F4' d='M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z' />
+              <path fill='#34A853' d='M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z' />
+              <path fill='#FBBC05' d='M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z' />
+              <path fill='#EA4335' d='M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z' />
             </svg>
-            <span className="text-white/70">GOOGLE</span>
+            <span>SIGN UP WITH GOOGLE</span>
           </button>
 
           {/* Sign In Link */}
-          <div className="mt-8 text-center border-t border-amber-500/10 pt-8">
-            <p className="font-serif italic text-white/40 text-sm mb-4">
-              Already a member?
+          <div className="mt-8 text-center bg-[#FFD93D]/10 rounded-xl p-4 border-2 border-black/5">
+            <p className="font-bold text-black/60 text-xs mb-2">
+              Already have an account?
             </p>
             <Link
               href="/auth/login"
-              className="inline-block font-header text-[8px] tracking-[0.2em] text-amber-500/70 hover:text-amber-500 uppercase border-b border-amber-500/0 hover:border-amber-500/40 transition-all pb-1"
+              className="inline-block font-black text-xs tracking-[0.2em] text-[#6C5CE7] hover:text-black uppercase border-b-2 border-[#6C5CE7] hover:border-black transition-all pb-1"
             >
-              ENTER THY CREDENTIALS
+              LOG IN HERE
             </Link>
           </div>
 
           {/* Terms */}
-          <div className="mt-6 pt-6 border-t border-amber-500/10 text-center">
-            <p className="font-serif italic text-white/30 text-xs leading-relaxed">
-              By joining, thou agreest to our{" "}
-              <Link href="/terms" className="text-amber-500/70 hover:text-amber-500 transition-colors">
-                Terms
-              </Link>
-              {" "}and{" "}
-              <Link href="/privacy" className="text-amber-500/70 hover:text-amber-500 transition-colors">
-                Privacy
-              </Link>
-              .
+          <div className="mt-6 text-center">
+            <p className="text-[10px] text-black/40 font-bold uppercase tracking-wide">
+              By joining, you agree to our{" "}
+              <Link href="/terms" className="text-black underline">Terms</Link> &{" "}
+              <Link href="/privacy" className="text-black underline">Privacy</Link>
             </p>
           </div>
         </div>

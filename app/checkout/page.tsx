@@ -66,7 +66,7 @@ export default function CheckoutPage() {
       try {
         // Lazy load Firebase
         const { auth } = await import('@/lib/firebase');
-        
+
         if (!auth || !auth.currentUser) {
           console.error('User not authenticated');
           setWalletPoints(0);
@@ -121,14 +121,14 @@ export default function CheckoutPage() {
   const handleRedeemPointsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let points = parseInt(e.target.value) || 0;
     const maxRedeemPoints = Math.floor(maxRedeemable / config.redeemRate);
-    
+
     if (points > walletPoints) {
       points = walletPoints;
     }
     if (points > maxRedeemPoints) {
       points = maxRedeemPoints;
     }
-    
+
     setRedeemPoints(points);
     setAppliedPointsDiscount(calculatePointWorth(points));
   };
@@ -166,7 +166,7 @@ export default function CheckoutPage() {
     try {
       // Validate amount is reasonable (max 1 crore rupees = 10,000,000)
       const MAX_RAZORPAY_AMOUNT = 10000000;
-      
+
       if (finalPrice > MAX_RAZORPAY_AMOUNT) {
         addToast({
           title: 'Order Amount Too Large',
@@ -176,7 +176,7 @@ export default function CheckoutPage() {
         setIsProcessing(false);
         return;
       }
-      
+
       if (finalPrice <= 0) {
         addToast({
           title: 'Invalid Order Amount',
@@ -301,7 +301,7 @@ export default function CheckoutPage() {
           });
 
           clearCart();
-          
+
           // Use window.location.href for a complete page navigation
           setTimeout(() => {
             window.location.href = `/order-confirmation/${orderId_New}`;
@@ -313,10 +313,10 @@ export default function CheckoutPage() {
           contact: formData.phone,
         },
         theme: {
-          color: '#3399cc',
+          color: '#000000',
         },
         modal: {
-          ondismiss: function() {
+          ondismiss: function () {
             // User closed the payment modal without completing payment
             console.log('Payment modal dismissed');
             addToast({
@@ -346,13 +346,13 @@ export default function CheckoutPage() {
       console.error('Payment error:', error);
       let errorMessage = 'Something went wrong. Please try again.';
       let errorDetails = '';
-      
+
       if (error instanceof Error) {
         errorMessage = error.message;
-        
+
         // Handle specific Razorpay errors
-        if (error.message.includes('international_transaction_not_allowed') || 
-            error.message.includes('BAD_REQUEST_ERROR')) {
+        if (error.message.includes('international_transaction_not_allowed') ||
+          error.message.includes('BAD_REQUEST_ERROR')) {
           errorMessage = 'International card not supported';
           errorDetails = 'Please use a domestic Indian card, UPI, or other Indian payment methods.';
         } else if (error.message.includes('invalid_card') || error.message.includes('card')) {
@@ -363,7 +363,7 @@ export default function CheckoutPage() {
           errorDetails = 'Please check your internet connection and try again.';
         }
       }
-      
+
       addToast({
         title: 'Payment Failed',
         description: errorDetails || errorMessage,
@@ -381,11 +381,11 @@ export default function CheckoutPage() {
 
   if (items.length === 0 && !authLoading) {
     return (
-      <div className="min-h-screen pt-28 pb-16 flex items-center justify-center">
+      <div className="min-h-screen pt-28 pb-16 flex items-center justify-center bg-[#FFFDF5]">
         <div className="text-center">
-          <h1 className="font-display text-6xl font-bold mb-6">YOUR CART IS EMPTY</h1>
-          <p className="text-lg text-muted-foreground font-body mb-10">Discover amazing games in our repository</p>
-          <Link href="/shop" className="inline-block px-8 py-3 bg-primary text-primary-foreground font-header font-bold text-sm rounded hover:opacity-90 transition-all">
+          <h1 className="font-header text-6xl font-black mb-6 text-black">YOUR CART IS EMPTY</h1>
+          <p className="text-lg text-black/60 font-bold mb-10">Discover amazing games in our repository</p>
+          <Link href="/shop" className="inline-block px-8 py-4 bg-[#FFD93D] text-black font-black text-sm rounded-[15px] border-2 border-black neo-shadow hover:scale-105 transition-all">
             BROWSE GAMES
           </Link>
         </div>
@@ -396,10 +396,10 @@ export default function CheckoutPage() {
   // Show loading while checking authentication
   if (authLoading || (user === null && authLoading === false && items.length > 0)) {
     return (
-      <div className="min-h-screen pt-28 pb-16 flex items-center justify-center">
+      <div className="min-h-screen pt-28 pb-16 flex items-center justify-center bg-[#FFFDF5]">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
-          <p className="text-white/60 font-header text-[10px] tracking-[0.4em]">REDIRECTING TO LOGIN...</p>
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-black border-t-[#FFD93D] mb-4"></div>
+          <p className="text-black font-black text-xs tracking-[0.4em]">REDIRECTING TO LOGIN...</p>
         </div>
       </div>
     );
@@ -411,15 +411,15 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="min-h-screen pt-28 pb-16 bg-background">
+    <div className="min-h-screen pt-28 pb-16 bg-[#FFFDF5] text-[#2D3436]">
       <div className="max-w-7xl mx-auto px-6 md:px-12">
         {/* Header */}
         <div className="mb-16">
-          <Link href="/shop" className="font-header text-sm text-muted-foreground hover:text-primary mb-8 inline-block transition-colors">
+          <Link href="/shop" className="font-black text-xs uppercase tracking-[0.3em] text-[#6C5CE7] hover:text-black mb-8 inline-block transition-colors">
             ← BACK TO SHOP
           </Link>
-          <h1 className="font-display text-5xl font-bold tracking-tight mb-6">CHECKOUT</h1>
-          <p className="text-lg text-muted-foreground font-body">Complete your order and earn amazing rewards points</p>
+          <h1 className="font-header text-6xl md:text-7xl font-black tracking-tighter mb-6 text-black">CHECKOUT</h1>
+          <p className="text-xl text-black/60 font-medium">Complete your order and earn amazing rewards points</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
@@ -427,8 +427,8 @@ export default function CheckoutPage() {
           <div className="lg:col-span-2">
             <form onSubmit={handlePlaceOrder} className="space-y-8">
               {/* Shipping Information */}
-              <div className="glass-card p-8 rounded-lg">
-                <h2 className="font-display text-3xl font-bold mb-8">SHIPPING INFORMATION</h2>
+              <div className="bg-white border-2 border-black rounded-[20px] p-8 neo-shadow">
+                <h2 className="font-header text-3xl font-black mb-8 text-black">SHIPPING INFORMATION</h2>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <input
@@ -437,7 +437,7 @@ export default function CheckoutPage() {
                     placeholder="Full Name"
                     value={formData.name}
                     onChange={handleInputChange}
-                    className="col-span-2 md:col-span-1 bg-input-background border border-border rounded px-4 py-3 text-foreground placeholder-muted-foreground focus:border-primary focus:outline-none transition"
+                    className="col-span-2 md:col-span-1 bg-white border-2 border-black rounded-lg px-4 py-3 text-black placeholder-black/40 focus:bg-[#FFD93D]/20 focus:outline-none transition font-bold"
                     required
                   />
                   <input
@@ -446,7 +446,7 @@ export default function CheckoutPage() {
                     placeholder="Email Address"
                     value={formData.email}
                     onChange={handleInputChange}
-                    className="col-span-2 md:col-span-1 bg-input-background border border-border rounded px-4 py-3 text-foreground placeholder-muted-foreground focus:border-primary focus:outline-none transition"
+                    className="col-span-2 md:col-span-1 bg-white border-2 border-black rounded-lg px-4 py-3 text-black placeholder-black/40 focus:bg-[#FFD93D]/20 focus:outline-none transition font-bold"
                     required
                   />
                   <input
@@ -455,7 +455,7 @@ export default function CheckoutPage() {
                     placeholder="Phone Number"
                     value={formData.phone}
                     onChange={handleInputChange}
-                    className="col-span-2 md:col-span-1 bg-input-background border border-border rounded px-4 py-3 text-foreground placeholder-muted-foreground focus:border-primary focus:outline-none transition"
+                    className="col-span-2 md:col-span-1 bg-white border-2 border-black rounded-lg px-4 py-3 text-black placeholder-black/40 focus:bg-[#FFD93D]/20 focus:outline-none transition font-bold"
                     required
                   />
                   <input
@@ -464,7 +464,7 @@ export default function CheckoutPage() {
                     placeholder="Address"
                     value={formData.address}
                     onChange={handleInputChange}
-                    className="col-span-2 bg-input-background border border-border rounded px-4 py-3 text-foreground placeholder-muted-foreground focus:border-primary focus:outline-none transition"
+                    className="col-span-2 bg-white border-2 border-black rounded-lg px-4 py-3 text-black placeholder-black/40 focus:bg-[#FFD93D]/20 focus:outline-none transition font-bold"
                     required
                   />
                   <input
@@ -473,7 +473,7 @@ export default function CheckoutPage() {
                     placeholder="City"
                     value={formData.city}
                     onChange={handleInputChange}
-                    className="bg-input-background border border-border rounded px-4 py-3 text-foreground placeholder-muted-foreground focus:border-primary focus:outline-none transition"
+                    className="bg-white border-2 border-black rounded-lg px-4 py-3 text-black placeholder-black/40 focus:bg-[#FFD93D]/20 focus:outline-none transition font-bold"
                   />
                   <input
                     type="text"
@@ -481,7 +481,7 @@ export default function CheckoutPage() {
                     placeholder="State"
                     value={formData.state}
                     onChange={handleInputChange}
-                    className="bg-input-background border border-border rounded px-4 py-3 text-foreground placeholder-muted-foreground focus:border-primary focus:outline-none transition"
+                    className="bg-white border-2 border-black rounded-lg px-4 py-3 text-black placeholder-black/40 focus:bg-[#FFD93D]/20 focus:outline-none transition font-bold"
                   />
                   <input
                     type="text"
@@ -489,63 +489,67 @@ export default function CheckoutPage() {
                     placeholder="ZIP Code"
                     value={formData.zipCode}
                     onChange={handleInputChange}
-                    className="bg-input-background border border-border rounded px-4 py-3 text-foreground placeholder-muted-foreground focus:border-primary focus:outline-none transition"
+                    className="bg-white border-2 border-black rounded-lg px-4 py-3 text-black placeholder-black/40 focus:bg-[#FFD93D]/20 focus:outline-none transition font-bold"
                   />
                 </div>
               </div>
 
               {/* Wallet Points Redemption */}
-              <div className="glass-card p-8 rounded-lg border-amber-500/30 border-2 bg-gradient-to-r from-amber-500/10 to-transparent">
-                <h2 className="font-display text-3xl font-bold mb-6 text-amber-500">💰 USE WALLET POINTS</h2>
-                
-                <div className="bg-amber-500/20 border-2 border-amber-500/40 rounded-lg p-4 mb-6">
-                  <p className="text-sm text-amber-500/70 mb-2 font-header tracking-wider">YOUR AVAILABLE POINTS</p>
-                  <p className="font-display text-4xl font-bold text-amber-400">{walletPoints.toLocaleString()} PTS</p>
-                  <p className="text-sm text-amber-500/80 mt-2">Worth up to ₹{calculatePointWorth(walletPoints).toFixed(2)} in discounts</p>
+              <div className="bg-[#FFFDF5] p-8 rounded-[20px] border-2 border-black neo-shadow relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-[#FFD93D]/20 rounded-full blur-[40px] pointer-events-none"></div>
+                <h2 className="font-header text-3xl font-black mb-6 text-black flex items-center gap-2">
+                  <Coins className="text-[#FFD93D] fill-black" strokeWidth={2.5} />
+                  USE WALLET POINTS
+                </h2>
+
+                <div className="bg-[#FFD93D] border-2 border-black rounded-xl p-4 mb-6 neo-shadow-sm">
+                  <p className="text-xs text-black font-black uppercase tracking-widest mb-1">YOUR AVAILABLE POINTS</p>
+                  <p className="font-header text-4xl font-black text-black">{walletPoints.toLocaleString()} PTS</p>
+                  <p className="text-sm text-black font-bold mt-1">Worth up to ₹{calculatePointWorth(walletPoints).toFixed(2)} in discounts</p>
                 </div>
 
                 {walletPoints > 0 ? (
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm font-header font-semibold mb-3 text-amber-500">How Many Points to Use?</label>
+                      <label className="block text-sm font-black uppercase tracking-wider mb-3 text-black">How Many Points to Use?</label>
                       <div className="flex gap-2">
                         <input
                           type="number"
                           value={redeemPoints}
                           onChange={handleRedeemPointsChange}
                           max={Math.floor(maxRedeemable / config.redeemRate)}
-                          placeholder="Enter points to redeem"
-                          className="flex-1 bg-black/50 border-2 border-amber-500/30 rounded px-4 py-3 text-amber-400 placeholder-amber-500/40 focus:border-amber-500 focus:outline-none transition"
+                          placeholder="Points"
+                          className="flex-1 bg-white border-2 border-black rounded-lg px-4 py-3 text-black font-bold placeholder-black/30 focus:border-[#6C5CE7] focus:outline-none transition shadow-[2px_2px_0px_rgba(0,0,0,0.1)]"
                         />
                         <button
                           type="button"
                           onClick={handleUseMaxPoints}
-                          className="px-6 py-3 bg-amber-500 text-black font-header font-bold text-sm tracking-wider hover:bg-amber-400 transition-all rounded"
+                          className="px-6 py-3 bg-black text-white font-black text-sm tracking-wider hover:bg-[#6C5CE7] transition-all rounded-lg border-2 border-black shadow-[2px_2px_0px_#888]"
                         >
                           USE ALL
                         </button>
                       </div>
-                      <p className="text-xs text-amber-500/70 mt-2">
-                        Max you can use: {Math.floor(maxRedeemable / config.redeemRate).toLocaleString()} points (₹{maxRedeemable.toFixed(2)})
+                      <p className="text-xs text-black/60 font-bold mt-2">
+                        Max: {Math.floor(maxRedeemable / config.redeemRate).toLocaleString()} points (₹{maxRedeemable.toFixed(2)})
                       </p>
                     </div>
 
                     {redeemPoints > 0 && (
-                      <div className="bg-black/50 border border-amber-500/20 rounded-lg p-4">
-                        <div className="flex justify-between items-center">
-                          <span className="text-amber-500/80">Points Discount:</span>
-                          <span className="font-display text-xl font-bold text-amber-400">-₹{pointsWorthRupees.toFixed(2)}</span>
+                      <div className="bg-white border-2 border-black rounded-xl p-4 flex justify-between items-center shadow-[2px_2px_0px_rgba(0,0,0,0.1)]">
+                        <div>
+                          <span className="text-black/80 font-bold block">Points Discount applied:</span>
+                          <span className="text-xs text-black/50 font-bold">
+                            {redeemPoints} points × ₹{config.redeemRate}
+                          </span>
                         </div>
-                        <div className="text-xs text-amber-500/60 mt-2">
-                          {redeemPoints} points × ₹{config.redeemRate} = ₹{pointsWorthRupees.toFixed(2)} off
-                        </div>
+                        <span className="font-header text-2xl font-black text-[#00B894]">-₹{pointsWorthRupees.toFixed(2)}</span>
                       </div>
                     )}
                   </div>
                 ) : (
-                  <div className="bg-amber-500/20 border border-amber-500/30 rounded-lg p-4 text-center">
-                    <p className="text-amber-500/80 font-header">No points available yet</p>
-                    <p className="text-sm text-amber-500/60 mt-2">Complete your first purchase to earn points and use them on future orders!</p>
+                  <div className="bg-black/5 border-2 border-black/10 rounded-xl p-6 text-center">
+                    <p className="text-black/60 font-black">No points available yet</p>
+                    <p className="text-sm text-black/50 font-bold mt-2">Complete your first purchase to earn points!</p>
                   </div>
                 )}
               </div>
@@ -554,7 +558,7 @@ export default function CheckoutPage() {
               <button
                 type="submit"
                 disabled={isProcessing}
-                className="w-full py-4 bg-primary text-primary-foreground font-header font-bold hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all rounded-lg"
+                className="w-full py-5 bg-[#00B894] text-black font-header text-xl font-black hover:bg-[#00a884] hover:scale-[1.01] disabled:opacity-50 disabled:cursor-not-allowed transition-all rounded-[15px] border-2 border-black neo-shadow uppercase tracking-wide"
               >
                 {isProcessing ? 'PROCESSING...' : `PLACE ORDER & EARN ${earnedPoints} POINTS`}
               </button>
@@ -563,20 +567,20 @@ export default function CheckoutPage() {
 
           {/* Order Summary */}
           <div className="lg:col-span-1">
-            <div className="sticky top-32 glass-card p-8 rounded-lg">
-              <h2 className="font-header text-2xl mb-8">ORDER SUMMARY</h2>
+            <div className="sticky top-32 bg-[#FFD93D] border-2 border-black p-8 rounded-[25px] neo-shadow">
+              <h2 className="font-header text-2xl font-black mb-6 text-black">ORDER SUMMARY</h2>
 
               {/* Items */}
-              <div className="space-y-4 mb-8 pb-8 border-b border-border">
+              <div className="space-y-4 mb-6 pb-6 border-b-2 border-black/10">
                 {items.map((item) => (
-                  <div key={item.productId} className="flex justify-between">
+                  <div key={item.productId} className="flex justify-between items-start">
                     <div>
-                      <p className="font-header text-sm line-clamp-2">
+                      <p className="font-header text-sm font-bold text-black line-clamp-2">
                         {item.product.name}
                       </p>
-                      <p className="text-xs text-muted-foreground">x{item.quantity}</p>
+                      <p className="text-xs text-black/60 font-bold">x{item.quantity}</p>
                     </div>
-                    <p className="text-right font-body">
+                    <p className="text-right font-black text-black">
                       ₹{item.product.price * item.quantity}
                     </p>
                   </div>
@@ -584,44 +588,47 @@ export default function CheckoutPage() {
               </div>
 
               {/* Pricing */}
-              <div className="space-y-3 mb-8 pb-8 border-b border-border">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Subtotal</span>
-                  <span>₹{totalPrice.toFixed(2)}</span>
+              <div className="space-y-3 mb-6 pb-6 border-b-2 border-black/10">
+                <div className="flex justify-between text-sm font-bold">
+                  <span className="text-black/70">Subtotal</span>
+                  <span className="text-black">₹{totalPrice.toFixed(2)}</span>
                 </div>
                 {redeemPoints > 0 && (
-                  <div className="flex justify-between text-sm text-secondary">
+                  <div className="flex justify-between text-sm font-bold text-[#00B894]">
                     <span>Points Discount</span>
                     <span>-₹{pointsWorthRupees.toFixed(2)}</span>
                   </div>
                 )}
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Shipping</span>
-                  <span className="text-secondary">FREE</span>
+                <div className="flex justify-between text-sm font-bold">
+                  <span className="text-black/70">Shipping</span>
+                  <span className="text-black bg-white border border-black px-1 rounded text-[10px] uppercase">FREE</span>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">GST ({gstRate}%)</span>
-                  <span>₹{gstAmount.toFixed(2)}</span>
+                <div className="flex justify-between text-sm font-bold">
+                  <span className="text-black/70">GST ({gstRate}%)</span>
+                  <span className="text-black">₹{gstAmount.toFixed(2)}</span>
                 </div>
               </div>
 
               {/* Points to Earn */}
-              <div className="bg-primary/10 border border-primary/20 rounded-lg p-4 mb-8">
-                <p className="text-xs text-muted-foreground mb-2">YOU WILL EARN</p>
-                <p className="font-display text-2xl font-bold text-primary">
-                  +{earnedPoints.toLocaleString()} <span className="text-sm text-muted-foreground">PTS</span>
-                </p>
+              <div className="bg-white border-2 border-black rounded-xl p-4 mb-8 flex items-center gap-3 shadow-[2px_2px_0px_rgba(0,0,0,0.1)]">
+                <div className="w-8 h-8 rounded-full bg-[#6C5CE7] text-white flex items-center justify-center font-black border border-black">P</div>
+                <div>
+                  <p className="text-[10px] text-black/50 font-black uppercase">YOU WILL EARN</p>
+                  <p className="font-header text-xl font-black text-black leading-none">
+                    +{earnedPoints.toLocaleString()} <span className="text-xs text-black/60">PTS</span>
+                  </p>
+                </div>
               </div>
 
               {/* Total */}
               <div className="space-y-4">
-                <div className="flex justify-between font-header text-lg">
-                  <span>TOTAL</span>
-                  <span className="text-primary font-bold text-2xl">₹{finalPrice.toFixed(2)}</span>
+                <div className="flex justify-between items-end font-header">
+                  <span className="text-xl font-black text-black">TOTAL</span>
+                  <span className="text-black font-black text-3xl">₹{finalPrice.toFixed(2)}</span>
                 </div>
 
                 {/* Terms */}
-                <p className="text-xs text-muted-foreground font-body">
+                <p className="text-[10px] text-black/50 font-bold text-center leading-tight">
                   By placing this order, you agree to our terms and conditions. Points will be credited upon order confirmation.
                 </p>
               </div>

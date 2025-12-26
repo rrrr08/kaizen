@@ -53,9 +53,10 @@ export default function Blog() {
 
     if (loading) {
         return (
-            <div className="min-h-screen pt-28 pb-16 flex items-center justify-center">
-                <div className="text-amber-500 font-header tracking-[0.3em] animate-pulse">
-                    LOADING BLOG POSTS...
+            <div className="min-h-screen pt-28 pb-16 flex items-center justify-center bg-[#FFFDF5]">
+                <div className="text-center">
+                    <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[#FFD93D] border-t-black mb-4"></div>
+                    <p className="text-black/60 font-black text-xs tracking-[0.4em]">LOADING BLOG POSTS...</p>
                 </div>
             </div>
         );
@@ -63,13 +64,13 @@ export default function Blog() {
 
     if (error) {
         return (
-            <div className="min-h-screen pt-28 pb-16 flex flex-col items-center justify-center gap-4">
-                <div className="text-red-500 font-header tracking-widest text-center">
+            <div className="min-h-screen pt-28 pb-16 flex flex-col items-center justify-center gap-4 bg-[#FFFDF5]">
+                <div className="text-red-500 font-black tracking-widest text-center">
                     {error}
                 </div>
-                <button 
+                <button
                     onClick={fetchBlogPosts}
-                    className="px-6 py-2 border border-amber-500 text-amber-500 hover:bg-amber-500/10 transition-all"
+                    className="px-6 py-2 border-2 border-black text-black hover:bg-black hover:text-white transition-all font-black text-xs tracking-widest rounded-lg"
                 >
                     TRY AGAIN
                 </button>
@@ -78,40 +79,41 @@ export default function Blog() {
     }
 
     return (
-        <div className="min-h-screen pt-32 pb-16 bg-black text-white font-sans selection:bg-amber-500/30">
+        <div className="min-h-screen pt-32 pb-16 bg-[#FFFDF5] text-[#2D3436] font-sans selection:bg-[#FFD93D]/50">
             <div className="max-w-7xl mx-auto px-6 md:px-12">
                 {/* SECTION 1 — HERO */}
                 <div className="text-center mb-24 max-w-4xl mx-auto">
-                    <p className="text-amber-500 font-header text-xs tracking-[0.4em] mb-6 uppercase">The Joy Juncture</p>
-                    <h1 className="font-header text-6xl md:text-8xl mb-8 text-white leading-none">
+                    <p className="text-[#6C5CE7] font-black text-sm tracking-[0.4em] mb-6 uppercase font-header bg-white inline-block px-4 py-1 border-2 border-black rounded-full shadow-[4px_4px_0px_#000]">The Joy Juncture</p>
+                    <h1 className="font-header text-6xl md:text-8xl mb-8 text-black leading-none tracking-tight">
                         Blog Journal
                     </h1>
-                    <p className="font-serif italic text-2xl text-white/60">
+                    <p className="font-bold italic text-2xl text-black/70">
                         Stories from the table — games, people, strategies, and shared joy.
                     </p>
                 </div>
 
                 {/* SECTION 2 — FEATURED STORY */}
                 <section className="mb-32">
-                    <div className="relative group cursor-pointer border border-white/10 rounded-sm overflow-hidden">
-                        <div className="aspect-[21/9] w-full bg-neutral-900">
+                    <div className="relative group cursor-pointer border-3 border-black rounded-[30px] overflow-hidden neo-shadow hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all">
+                        <div className="aspect-[21/9] w-full bg-white relative">
+                            <div className="absolute inset-0 bg-[#FFD93D] mix-blend-multiply opacity-20 z-10"></div>
                             <img
                                 src="https://images.unsplash.com/photo-1543269865-cbf427effbad?q=80&w=2070&auto=format&fit=crop"
                                 alt="Featured Story"
-                                className="w-full h-full object-cover opacity-80 transition-transform duration-700 group-hover:scale-105 group-hover:opacity-100"
+                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                             />
                         </div>
-                        <div className="absolute bottom-0 left-0 w-full p-8 md:p-12 bg-gradient-to-t from-black via-black/60 to-transparent text-white flex flex-col items-start justify-end h-full">
-                            <span className="bg-amber-500 text-black text-[10px] font-header tracking-[0.2em] px-3 py-1 rounded-full mb-4 uppercase">
+                        <div className="absolute bottom-0 left-0 w-full p-8 md:p-12 bg-gradient-to-t from-white via-white/90 to-transparent text-black flex flex-col items-start justify-end h-full z-20">
+                            <span className="bg-[#00B894] text-black text-[10px] font-black tracking-[0.2em] px-3 py-1 rounded-lg border-2 border-black mb-4 uppercase shadow-[2px_2px_0px_#000]">
                                 Featured Story
                             </span>
-                            <h2 className="font-header text-4xl md:text-6xl mb-4 leading-tight group-hover:text-amber-400 transition-colors">
+                            <h2 className="font-header text-4xl md:text-6xl mb-4 leading-tight group-hover:text-[#6C5CE7] transition-colors text-black drop-shadow-sm">
                                 The Art of the Game Night
                             </h2>
-                            <p className="font-serif italic text-lg md:text-xl text-white/80 max-w-2xl mb-6">
+                            <p className="font-medium text-lg md:text-xl text-black/80 max-w-2xl mb-6 leading-relaxed">
                                 How a simple gathering turned into a weekly tradition of rivalry, laughter, and unbreakable bonds.
                             </p>
-                            <button className="flex items-center gap-2 text-[10px] font-header tracking-[0.3em] hover:gap-4 transition-all text-amber-500">
+                            <button className="flex items-center gap-2 text-xs font-black tracking-[0.3em] hover:gap-4 transition-all text-black uppercase bg-[#FFD93D] px-6 py-3 rounded-lg border-2 border-black shadow-[3px_3px_0px_#000]">
                                 READ STORY <span>→</span>
                             </button>
                         </div>
@@ -119,16 +121,16 @@ export default function Blog() {
                 </section>
 
                 {/* SECTION 3 — FILTERS */}
-                <div className="mb-20 sticky top-24 z-40 bg-black/95 backdrop-blur py-4 border-b border-white/10 overflow-x-auto">
-                    <div className="flex items-center gap-8 min-w-max">
+                <div className="mb-20 sticky top-24 z-40 bg-[#FFFDF5]/95 backdrop-blur py-4 border-b-2 border-black/10 overflow-x-auto">
+                    <div className="flex items-center gap-4 min-w-max pb-2">
                         {categories.map((cat) => (
                             <button
                                 key={cat}
                                 onClick={() => setActiveCategory(cat)}
-                                className={`font-header text-[10px] tracking-[0.2em] uppercase transition-all pb-1 ${activeCategory === cat
-                                    ? 'text-amber-500 border-b-2 border-amber-500'
-                                    : 'text-white/40 hover:text-white'
-                                }`}
+                                className={`px-4 py-2 rounded-xl text-[10px] font-black tracking-[0.2em] uppercase transition-all border-2 ${activeCategory === cat
+                                    ? 'bg-black text-white border-black shadow-[4px_4px_0px_rgba(0,0,0,0.2)]'
+                                    : 'bg-white text-black border-black hover:bg-[#FFD93D] shadow-[2px_2px_0px_rgba(0,0,0,0.1)]'
+                                    }`}
                             >
                                 {cat}
                             </button>
@@ -139,23 +141,23 @@ export default function Blog() {
                 {/* SECTION 4 — BLOG GRID */}
                 <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-16 mb-32">
                     {filteredPosts.map((post) => (
-                        <article key={post.id} className="group cursor-pointer flex flex-col h-full">
-                            <div className="aspect-[4/3] overflow-hidden rounded-sm bg-neutral-900 mb-6 border border-white/5">
+                        <article key={post.id} className="group cursor-pointer flex flex-col h-full bg-white border-2 border-black p-4 rounded-[20px] neo-shadow hover:scale-[1.02] transition-transform">
+                            <div className="aspect-[4/3] overflow-hidden rounded-[15px] mb-6 border-2 border-black relative">
                                 <img
                                     src={post.image}
                                     alt={post.title}
-                                    className="w-full h-full object-cover opacity-80 transition-transform duration-700 group-hover:scale-110 group-hover:opacity-100"
+                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                                 />
                             </div>
                             <div className="flex items-center gap-4 mb-3">
-                                <span className="text-amber-500 font-header text-[9px] tracking-[0.2em] uppercase">{post.category}</span>
-                                <span className="w-1 h-1 bg-white/20 rounded-full"></span>
-                                <span className="text-white/40 font-serif italic text-xs">{post.readTime}</span>
+                                <span className="bg-[#FF7675] text-black border border-black px-2 py-0.5 rounded font-black text-[9px] tracking-[0.2em] uppercase">{post.category}</span>
+                                <span className="w-1.5 h-1.5 bg-black rounded-full"></span>
+                                <span className="text-black/60 font-bold text-xs uppercase tracking-wider">{post.readTime}</span>
                             </div>
-                            <h3 className="font-header text-2xl md:text-3xl mb-3 leading-tight text-white group-hover:text-amber-500 transition-colors">
+                            <h3 className="font-header text-2xl md:text-3xl mb-3 leading-tight text-black group-hover:text-[#6C5CE7] transition-colors">
                                 {post.title}
                             </h3>
-                            <p className="text-white/60 font-serif leading-relaxed mb-4 flex-grow">
+                            <p className="text-black/70 font-medium leading-relaxed mb-4 flex-grow line-clamp-3">
                                 {post.excerpt}
                             </p>
                         </article>
@@ -163,27 +165,27 @@ export default function Blog() {
                 </section>
 
                 {/* SECTION 5 — LEARNING & GAMEPLAY HIGHLIGHT */}
-                <section className="mb-32 bg-white/5 border border-white/10 p-12 md:p-16 rounded-sm relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/10 blur-[100px] rounded-full pointer-events-none"></div>
+                <section className="mb-32 bg-black text-white border-3 border-black p-12 md:p-16 rounded-[30px] relative overflow-hidden shadow-[8px_8px_0px_#FFD93D]">
+                    <div className="absolute top-0 right-0 w-96 h-96 bg-[#FFD93D]/20 blur-[100px] rounded-full pointer-events-none"></div>
                     <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
                         <div className="lg:col-span-5">
-                            <h2 className="font-header text-4xl md:text-5xl mb-6 text-white">Learn the Game. <br /><span className="text-amber-500 italic font-serif">Play Better.</span></h2>
-                            <p className="text-white/70 font-serif text-lg leading-relaxed mb-8">
+                            <h2 className="font-header text-4xl md:text-5xl mb-6 text-white">Learn the Game. <br /><span className="text-[#FFD93D] italic font-serif">Play Better.</span></h2>
+                            <p className="text-white/80 font-medium text-lg leading-relaxed mb-8">
                                 New to Joy Juncture? Or looking to master deep strategies?
                                 Explore our comprehensive guides designed to make every game night seamless.
                             </p>
-                            <button className="px-8 py-4 bg-white text-black font-header text-[10px] tracking-[0.3em] hover:bg-neutral-200 transition-all rounded-sm">
+                            <button className="px-8 py-4 bg-white text-black font-black text-xs tracking-[0.3em] hover:bg-[#FFD93D] hover:scale-105 transition-all rounded-xl border-2 border-transparent">
                                 EXPLORE GUIDES
                             </button>
                         </div>
                         <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-6">
                             {['How-to-Play Videos', 'Rulebooks & FAQs', 'Strategy Breakdowns', 'House Rules'].map((item, idx) => (
-                                <div key={idx} className="p-6 bg-black/40 border border-white/10 hover:border-amber-500/40 transition-all rounded-sm group">
-                                    <div className="w-8 h-8 flex items-center justify-center bg-amber-500/20 text-amber-500 rounded-full mb-4 group-hover:scale-110 transition-transform">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                                <div key={idx} className="p-6 bg-white/10 border border-white/20 hover:border-[#FFD93D] hover:bg-white/20 transition-all rounded-xl group cursor-pointer">
+                                    <div className="w-10 h-10 flex items-center justify-center bg-[#FFD93D] text-black border-2 border-black rounded-full mb-4 group-hover:scale-110 transition-transform shadow-[2px_2px_0px_#000]">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
                                     </div>
                                     <h3 className="font-header text-lg text-white mb-1">{item}</h3>
-                                    <p className="text-white/40 font-serif italic text-xs">Master the mechanics</p>
+                                    <p className="text-white/60 font-bold text-xs uppercase tracking-wider">Master the mechanics</p>
                                 </div>
                             ))}
                         </div>
@@ -194,10 +196,10 @@ export default function Blog() {
                 <section className="mb-32">
                     <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
                         <div>
-                            <h2 className="font-header text-4xl md:text-5xl text-white mb-4">Community Moments</h2>
-                            <p className="text-white/60 font-serif italic text-xl">Real people. Real joy. Real memories.</p>
+                            <h2 className="font-header text-4xl md:text-5xl text-black mb-4">Community Moments</h2>
+                            <p className="text-black/60 font-bold italic text-xl">Real people. Real joy. Real memories.</p>
                         </div>
-                        <Link href="/community" className="font-header text-[10px] tracking-[0.3em] text-amber-500 border-b border-amber-500 pb-1 hover:text-amber-400 hover:border-amber-400 transition-all">
+                        <Link href="/community" className="font-black text-xs tracking-[0.3em] text-[#6C5CE7] border-b-2 border-[#6C5CE7] pb-1 hover:text-black hover:border-black transition-all">
                             VIEW FULL GALLERY
                         </Link>
                     </div>
@@ -208,10 +210,10 @@ export default function Blog() {
                             'https://images.unsplash.com/photo-1523580494863-6f3031224c94?q=80&w=2070&auto=format&fit=crop',
                             'https://images.unsplash.com/photo-1558008258-3256797b43f3?q=80&w=2070&auto=format&fit=crop'
                         ].map((img, idx) => (
-                            <div key={idx} className={`rounded-sm overflow-hidden group relative border border-white/5 ${idx === 0 || idx === 3 ? 'md:col-span-2 aspect-[16/9]' : 'aspect-square'}`}>
-                                <img src={img} alt="Community" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 grayscale group-hover:grayscale-0 opacity-80 group-hover:opacity-100" />
+                            <div key={idx} className={`rounded-[20px] overflow-hidden group relative border-2 border-black neo-shadow ${idx === 0 || idx === 3 ? 'md:col-span-2 aspect-[16/9]' : 'aspect-square'}`}>
+                                <img src={img} alt="Community" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 grayscale group-hover:grayscale-0" />
                                 <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                    <span className="text-white font-header text-xs tracking-[0.2em]">@JOY_JUNCTURE</span>
+                                    <span className="text-white font-black text-xs tracking-[0.2em] bg-black px-3 py-1 rounded-full border border-white">@JOY_JUNCTURE</span>
                                 </div>
                             </div>
                         ))}
@@ -219,10 +221,10 @@ export default function Blog() {
                 </section>
 
                 {/* SECTION 7 — GAMIFICATION TEASER */}
-                <section className="mb-32 bg-neutral-900 text-white rounded-sm p-12 text-center relative overflow-hidden border border-white/5">
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-amber-500/10 blur-[150px] rounded-full pointer-events-none"></div>
+                <section className="mb-32 bg-white text-black rounded-[30px] p-12 text-center relative overflow-hidden border-2 border-black neo-shadow">
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#00B894]/10 blur-[150px] rounded-full pointer-events-none"></div>
                     <div className="relative z-10 max-w-3xl mx-auto">
-                        <span className="text-amber-500 font-header text-[10px] tracking-[0.4em] mb-4 block animate-pulse">Earn while you learn</span>
+                        <span className="text-[#6C5CE7] font-black text-xs tracking-[0.4em] mb-4 block animate-pulse uppercase">Earn while you learn</span>
                         <h2 className="font-header text-3xl md:text-5xl mb-8 leading-tight">
                             "Reading, learning, and playing <br /> earns you points."
                         </h2>
@@ -232,22 +234,22 @@ export default function Blog() {
                                 { action: 'Play a Game', points: '+10 PTS' },
                                 { action: 'Attend Event', points: '+50 PTS' },
                             ].map((item, idx) => (
-                                <div key={idx} className="bg-white/5 backdrop-blur px-6 py-4 rounded-sm border border-white/10 hover:border-amber-500/30 transition-all">
-                                    <p className="font-serif italic text-white/60 text-sm mb-1">{item.action}</p>
-                                    <p className="font-header text-amber-500 text-xl">{item.points}</p>
+                                <div key={idx} className="bg-white px-6 py-4 rounded-xl border-2 border-black shadow-[4px_4px_0px_rgba(0,0,0,0.1)] hover:-translate-y-1 transition-all">
+                                    <p className="font-bold text-black/60 text-xs uppercase tracking-wider mb-1">{item.action}</p>
+                                    <p className="font-header text-[#00B894] text-2xl">{item.points}</p>
                                 </div>
                             ))}
                         </div>
                         <div className="flex flex-col sm:flex-row gap-6 justify-center">
                             <Link
                                 href="/auth/signup"
-                                className="px-8 py-4 bg-amber-500 text-black font-header text-[10px] tracking-[0.4em] hover:bg-amber-400 transition-all rounded-sm"
+                                className="px-8 py-4 bg-black text-white font-black text-xs tracking-[0.4em] hover:bg-[#6C5CE7] hover:scale-105 transition-all rounded-xl shadow-[4px_4px_0px_rgba(0,0,0,0.2)]"
                             >
                                 CREATE FREE ACCOUNT
                             </Link>
                             <Link
                                 href="/play"
-                                className="px-8 py-4 border border-amber-500 text-amber-500 font-header text-[10px] tracking-[0.4em] hover:bg-amber-500/10 transition-all rounded-sm"
+                                className="px-8 py-4 bg-[#FFD93D] text-black font-black text-xs tracking-[0.4em] border-2 border-black neo-shadow hover:scale-105 transition-all rounded-xl"
                             >
                                 PLAY & EARN
                             </Link>
@@ -256,21 +258,21 @@ export default function Blog() {
                 </section>
 
                 {/* SECTION 8 — FINAL CTA */}
-                <div className="text-center py-16 border-t border-white/10">
-                    <h2 className="font-header text-4xl md:text-5xl mb-6 text-white">Still curious?</h2>
-                    <p className="text-white/60 font-serif italic text-xl mb-10 max-w-2xl mx-auto">
+                <div className="text-center py-16 border-t-2 border-black/10">
+                    <h2 className="font-header text-4xl md:text-5xl mb-6 text-black">Still curious?</h2>
+                    <p className="text-black/60 font-bold italic text-xl mb-10 max-w-2xl mx-auto">
                         "There's always another game, story, or moment waiting."
                     </p>
                     <div className="flex flex-col sm:flex-row gap-6 justify-center">
                         <Link
                             href="/shop"
-                            className="px-8 py-4 bg-white text-black font-header text-[10px] tracking-[0.4em] hover:bg-neutral-200 transition-all rounded-sm"
+                            className="px-8 py-4 bg-black text-white font-black text-xs tracking-[0.4em] hover:bg-neutral-800 hover:scale-105 transition-all rounded-xl"
                         >
                             EXPLORE GAMES
                         </Link>
                         <Link
                             href="/community"
-                            className="px-8 py-4 border border-white text-white font-header text-[10px] tracking-[0.4em] hover:bg-white/10 transition-all rounded-sm"
+                            className="px-8 py-4 border-2 border-black text-black font-black text-xs tracking-[0.4em] hover:bg-black/5 hover:scale-105 transition-all rounded-xl"
                         >
                             JOIN AN EVENT
                         </Link>

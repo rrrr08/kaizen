@@ -27,10 +27,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-black">
+      <div className="flex items-center justify-center min-h-screen bg-[#FFFDF5]">
         <div className="text-center">
-          <div className="w-12 h-12 border-4 border-amber-500/20 border-t-amber-500 rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-amber-500">Loading...</p>
+          <div className="w-12 h-12 border-4 border-black border-t-[#FFD93D] rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-black font-black uppercase tracking-widest">Loading...</p>
         </div>
       </div>
     );
@@ -53,15 +53,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   ];
 
   return (
-    <div className="flex min-h-screen bg-black text-white">
+    <div className="flex min-h-screen bg-[#FFFDF5] text-black font-sans">
       {/* Sidebar */}
-      <div className="w-64 bg-gradient-to-b from-black to-black/80 border-r border-amber-500/10 fixed h-screen pt-24 overflow-y-auto scrollbar-hide z-40">
-        <div className="p-6 space-y-2">
+      <div className="w-64 bg-white border-r-2 border-black fixed h-screen pt-24 overflow-y-auto z-40">
+        <div className="p-6 space-y-4">
           <div className="mb-8">
-            <h2 className="font-display text-2xl font-bold text-amber-500 mb-1">JOY</h2>
-            <p className="font-header text-xs text-amber-500/60 tracking-widest">ADMIN PANEL</p>
+            <h2 className="font-header text-4xl font-black text-black mb-1">JOY</h2>
+            <p className="font-black text-xs text-black/40 tracking-[0.2em] uppercase">ADMIN PANEL</p>
           </div>
-          <nav className="space-y-0.5">
+          <nav className="space-y-2">
             {adminMenuItems.map((item) => {
               const Icon = item.icon;
               const isActive = pathname === item.href;
@@ -69,14 +69,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 text-sm ${
-                    isActive
-                      ? 'bg-amber-500/20 text-amber-500 border border-amber-500/30 shadow-lg shadow-amber-500/10'
-                      : 'text-white/60 hover:text-white hover:bg-white/5'
-                  }`}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-[12px] transition-all duration-200 text-sm font-black uppercase tracking-wide border-2 ${isActive
+                      ? 'bg-[#FFD93D] text-black border-black neo-shadow-sm'
+                      : 'text-black/60 border-transparent hover:bg-black/5 hover:text-black'
+                    }`}
                 >
-                  <Icon size={16} />
-                  <span className="font-header">{item.label}</span>
+                  <Icon size={18} strokeWidth={2.5} />
+                  <span>{item.label}</span>
                 </Link>
               );
             })}
@@ -86,7 +85,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       {/* Main Content */}
       <div className="flex-1 ml-64 pt-24">
-        <div className="min-h-screen bg-gradient-to-b from-black to-black/80">
+        <div className="min-h-screen bg-[#FFFDF5] p-6">
           {children}
         </div>
       </div>

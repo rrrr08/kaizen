@@ -19,7 +19,7 @@ export default function UpcomingEvents() {
     (async () => {
       const { auth } = await import('@/lib/firebase');
       const { onAuthStateChanged } = await import('firebase/auth');
-      
+
       const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
         setUser(currentUser);
       });
@@ -65,16 +65,17 @@ export default function UpcomingEvents() {
   const handleRegistrationSuccess = () => {
     setSelectedEventForRegistration(null);
     // Update events list to reflect registration
-    setEvents(prev => prev.map(e => 
+    setEvents(prev => prev.map(e =>
       e.id === selectedEventForRegistration?.id ? { ...e, registered: e.registered + 1 } : e
     ));
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen pt-28 pb-16 flex items-center justify-center">
-        <div className="text-amber-500 font-header tracking-[0.3em] animate-pulse">
-          LOADING UPCOMING EVENTS...
+      <div className="min-h-screen pt-28 pb-16 flex items-center justify-center bg-[#FFFDF5]">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[#FFD93D] border-t-black mb-4"></div>
+          <p className="text-black/60 font-black text-xs tracking-[0.4em]">LOADING UPCOMING EVENTS...</p>
         </div>
       </div>
     );
@@ -82,13 +83,13 @@ export default function UpcomingEvents() {
 
   if (error) {
     return (
-      <div className="min-h-screen pt-28 pb-16 flex flex-col items-center justify-center gap-4">
-        <div className="text-red-500 font-header tracking-widest text-center">
+      <div className="min-h-screen pt-28 pb-16 flex flex-col items-center justify-center gap-4 bg-[#FFFDF5]">
+        <div className="text-red-500 font-black tracking-widest text-center">
           {error}
         </div>
-        <button 
+        <button
           onClick={fetchEvents}
-          className="px-6 py-2 border border-amber-500 text-amber-500 hover:bg-amber-500/10 transition-all"
+          className="px-6 py-2 border-2 border-black text-black hover:bg-black hover:text-white transition-all font-black text-xs tracking-widest rounded-lg"
         >
           TRY AGAIN
         </button>
@@ -97,17 +98,17 @@ export default function UpcomingEvents() {
   }
 
   return (
-    <div className="min-h-screen pt-28 pb-16">
+    <div className="min-h-screen pt-28 pb-16 bg-[#FFFDF5]">
       <div className="max-w-7xl mx-auto px-6 md:px-12">
         {/* Header */}
-        <div className="mb-20 border-b border-white/5 pb-12">
-          <div className="text-amber-500 font-header text-[10px] tracking-[0.6em] mb-4 uppercase">
+        <div className="mb-20 border-b-2 border-black pb-12">
+          <div className="text-[#6C5CE7] font-black text-sm tracking-[0.2em] mb-4 uppercase font-display">
             Upcoming Game Nights
           </div>
-          <h1 className="font-header text-5xl md:text-7xl lg:text-8xl tracking-tighter">
-            UPCOMING <br/><span className="text-amber-400">EVENTS</span>
+          <h1 className="font-header text-6xl md:text-8xl tracking-tighter text-[#2D3436]">
+            UPCOMING <br /><span className="text-[#FFD93D] drop-shadow-[2px_2px_0px_#000] italic font-serif">EVENTS</span>
           </h1>
-          <div className="mt-6 text-white/60 font-serif italic">
+          <div className="mt-6 text-black/60 font-medium font-serif italic text-xl">
             {events.length} events scheduled
           </div>
         </div>
@@ -115,76 +116,76 @@ export default function UpcomingEvents() {
         {/* Events Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
           {events.map(event => (
-          <Link key={event.id} href={`/events/upcoming/${event.id}`}>
-            <div key={event.id} className="group">
-              {/* Event Image */}
-              <div className="aspect-video overflow-hidden rounded-sm mb-6 border border-white/5 group-hover:border-amber-500/40 transition-all bg-white/5">
-              {event.image !== "" && <img 
-                  src={event.image}
-                  alt={event.title}
-                  className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500 group-hover:scale-105"
-                />}
-              </div>
-
-              {/* Event Info */}
-              <div className="space-y-4">
-                <div>
-                  <div className="text-amber-500 font-header text-[9px] tracking-[0.4em] mb-2">
-                    {splitDateTime(event.datetime).date} • {splitDateTime(event.datetime).time}
-                  </div>
-                  <h3 className="font-header text-2xl md:text-3xl group-hover:text-amber-400 transition-colors tracking-tight mb-3">
-                    {event.title}
-                  </h3>
-                  <p className="text-white/60 font-serif italic mb-4 line-clamp-2">
-                    {event.description}
-                  </p>
+            <Link key={event.id} href={`/events/upcoming/${event.id}`}>
+              <div key={event.id} className="group cursor-pointer">
+                {/* Event Image */}
+                <div className="aspect-video overflow-hidden rounded-[30px] mb-6 border-3 border-black neo-shadow bg-white group-hover:scale-[1.02] transition-transform">
+                  {event.image !== "" && <img
+                    src={event.image}
+                    alt={event.title}
+                    className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
+                  />}
                 </div>
 
-                <div className="flex items-center justify-between pt-4 border-t border-white/10">
-                  <div className="flex items-center gap-6">
-                    <div>
-                      <p className="font-header text-[8px] tracking-widest text-white/40">LOCATION</p>
-                      <p className="font-serif text-sm text-white/80">{event.location}</p>
+                {/* Event Info */}
+                <div className="space-y-4 px-2">
+                  <div>
+                    <div className="bg-[#FFD93D] text-black px-3 py-1 rounded-lg neo-border shadow-[2px_2px_0px_#000] inline-block font-black text-[10px] tracking-[0.2em] mb-4 uppercase">
+                      {splitDateTime(event.datetime).date} • {splitDateTime(event.datetime).time}
                     </div>
-                    <div>
-                      <p className="font-header text-[8px] tracking-widest text-white/40">REGISTERED</p>
-                      <p className="font-serif text-sm text-white/80">
-                        {event.registered}/{event.capacity}
-                      </p>
+                    <h3 className="font-header text-4xl md:text-5xl text-black group-hover:text-[#6C5CE7] transition-colors tracking-tight mb-3">
+                      {event.title}
+                    </h3>
+                    <p className="text-black/70 font-medium text-lg mb-4 line-clamp-2 leading-relaxed">
+                      {event.description}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-6 border-t-2 border-black/10">
+                    <div className="flex items-center gap-8">
+                      <div>
+                        <p className="font-black text-[9px] tracking-widest text-black/40 uppercase mb-1">LOCATION</p>
+                        <p className="font-bold text-sm text-black">{event.location}</p>
+                      </div>
+                      <div>
+                        <p className="font-black text-[9px] tracking-widest text-black/40 uppercase mb-1">REGISTERED</p>
+                        <p className="font-bold text-sm text-black">
+                          {event.registered}/{event.capacity}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      {event.price === 0 ? (
+                        <p className="text-[#00B894] font-black text-xl tracking-widest">FREE</p>
+                      ) : (
+                        <p className="text-black font-serif italic text-2xl font-bold">₹{event.price}</p>
+                      )}
                     </div>
                   </div>
-                  <div className="text-right">
-                    {event.price === 0 ? (
-                      <p className="text-amber-500 font-header text-[10px] tracking-widest">FREE</p>
-                    ) : (
-                      <p className="text-amber-500 font-serif italic text-lg">₹{event.price}</p>
-                    )}
+
+                  <div className="w-full text-center pt-4">
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleRegister(event);
+                      }}
+                      className="w-full px-6 py-4 bg-black text-white font-black text-xs tracking-[0.2em] hover:bg-[#6C5CE7] hover:scale-105 transition-all rounded-xl border-2 border-transparent shadow-[4px_4px_0px_rgba(0,0,0,0.2)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-black disabled:hover:scale-100"
+                      disabled={event.registered >= event.capacity}
+                    >
+                      {event.registered >= event.capacity ? 'WAITLIST JOIN' : 'REGISTER NOW'}
+                    </button>
                   </div>
                 </div>
-
-                <div className="w-full text-center pt-4">
-                  <button 
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      handleRegister(event);
-                    }}
-                    className="w-full px-6 py-3 border border-amber-500 text-amber-500 font-header text-[9px] tracking-[0.3em] hover:bg-amber-500/10 transition-all rounded-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                    disabled={event.registered >= event.capacity}
-                  >
-                    {event.registered >= event.capacity ? 'WAITLIST' : 'REGISTER'}
-                  </button>
-                </div>
               </div>
-            </div>
-          </Link>
+            </Link>
           ))}
         </div>
 
         {events.length === 0 && (
           <div className="text-center py-24">
-            <p className="text-white/60 font-header text-[10px] tracking-[0.4em]">NO UPCOMING EVENTS</p>
-            <p className="text-white/40 font-serif italic mt-4">Check back soon for new events!</p>
+            <p className="text-black/60 font-black text-lg uppercase">NO UPCOMING EVENTS</p>
+            <p className="text-black/40 font-serif italic mt-4">Check back soon for new events!</p>
           </div>
         )}
       </div>

@@ -11,6 +11,7 @@ export interface Product {
   mood: string;
   image: string;
   badges: string[];
+  time?: string;
 }
 
 export interface GameEvent {
@@ -70,20 +71,20 @@ export interface UserProfile {
   created_at?: any;
   updated_at?: any;
   last_sign_in_at?: any;
-  
+
   // Gamification & Economy
   points?: number; // @deprecated use balance (JP)
   wallet?: number; // @deprecated use balance (JP)
-  
+
   balance: number; // Joy Points (JP) - Spendable
   xp: number;      // Experience Points (XP) - Status/Tier
-  
+
   streak?: {
     count: number;
     last_active_date: string; // ISO Date string
     freeze_count: number;
   };
-  
+
   daily_stats?: {
     last_spin_date?: string; // ISO Date string
     eggs_found: number;
@@ -175,22 +176,22 @@ export interface BonusRule {
   type: 'percentage' | 'fixed' | 'milestone' | 'seasonal' | 'tier';
   active: boolean;
   description: string;
-  
+
   // For percentage & fixed
   bonusPoints?: number;
   minPurchaseAmount?: number;
-  
+
   // For milestone
   purchaseCount?: number;
-  
+
   // For seasonal
   startDate?: string;
   endDate?: string;
-  
+
   // For tier
   minAmount?: number;
   maxAmount?: number;
-  
+
   applicableCategories?: string[];
   createdAt: Date;
   updatedAt: Date;

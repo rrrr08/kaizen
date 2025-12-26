@@ -2,49 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import ProductCard from '@/components/ui/ProductCard';
+import { Product } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
 
-const TarotCard = ({ product, onClick }: any) => {
-  return (
-    <div 
-      onClick={onClick}
-      className="group relative cursor-pointer"
-    >
-      <div className="aspect-[9/16] rounded-sm overflow-hidden border border-white/5 hover:border-amber-500/40 bg-white/5 transition-all duration-700">
-        <img 
-          src={product.image} 
-          className="w-full h-full object-cover transition-all duration-1000 grayscale group-hover:grayscale-0 opacity-40 group-hover:opacity-100 scale-110 group-hover:scale-100"
-          alt={product.name}
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80"></div>
-
-        <div className="absolute bottom-12 left-6 md:left-8 right-6 md:right-8 text-center">
-          {product.mood && (
-            <div className="text-amber-500 font-header text-[9px] tracking-[0.5em] mb-4 opacity-0 group-hover:opacity-100 transition-all">
-              {product.mood.toUpperCase()}
-            </div>
-          )}
-          <h3 className="font-header text-2xl mb-1 tracking-wider uppercase text-white group-hover:text-amber-400 transition-colors">
-            {product.name}
-          </h3>
-          {product.players && (
-            <div className="font-serif italic text-white/40 text-sm">
-              {product.players}
-            </div>
-          )}
-        </div>
-      </div>
-      
-      {/* Decorative Corners */}
-      <div className="absolute -top-1 -left-1 w-4 h-4 border-t border-l border-amber-500/0 group-hover:border-amber-500/60 transition-all"></div>
-      <div className="absolute -bottom-1 -right-1 w-4 h-4 border-b border-r border-amber-500/0 group-hover:border-amber-500/60 transition-all"></div>
-    </div>
-  );
-};
-
 export default function Shop() {
-  const [products, setProducts] = useState<any[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState('All');
@@ -56,7 +20,26 @@ export default function Shop() {
         setLoading(true);
         const { getProducts } = await import('@/lib/firebase');
         const data = await getProducts();
-        setProducts(data);
+
+        // Transform firebase data to match Product interface if needed
+        // Assuming data structure matches roughly, but ensuring core fields
+        const formattedData: Product[] = data.map((item: any) => ({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          image: item.image,
+          description: item.description,
+          players: item.players,
+          time: item.time || '30-45m',
+          mood: item.mood || 'Fun',
+          badges: item.badges || [],
+          // Extra fields for details page
+          story: item.story,
+          howToPlay: item.howToPlay,
+          occasion: item.occasion
+        }));
+
+        setProducts(formattedData);
       } catch (err) {
         console.error('Error fetching products:', err);
         setError('Failed to load products');
@@ -64,37 +47,38 @@ export default function Shop() {
         setLoading(false);
       }
     };
-    
+
     fetchProducts();
   }, []);
 
-  const filteredProducts = filter === 'All' 
-    ? products 
+  const filteredProducts = filter === 'All'
+    ? products
     : products.filter(p => p.occasion?.includes(filter) || p.badges?.some((b: string) => b.toLowerCase().includes(filter.toLowerCase())));
 
   return (
-    <div className="min-h-screen pt-28 pb-16">
+    <div className="min-h-screen pt-28 pb-16 bg-[#FFFDF5]">
       <div className="max-w-7xl mx-auto px-6 md:px-12">
         {/* Header */}
-        <div className="mb-20 flex flex-col md:flex-row items-end justify-between gap-8 border-b border-white/5 pb-12">
+        <div className="mb-20 flex flex-col md:flex-row items-end justify-between gap-8 border-b-2 border-black pb-12">
           <div>
-            <div className="text-amber-500 font-header text-[10px] tracking-[0.6em] mb-4 uppercase">Archive of Curiosities</div>
-            <h1 className="font-header text-5xl md:text-7xl lg:text-8xl tracking-tighter">
-              THE <br/><span className="italic font-serif text-amber-500">REPOSITORY</span>
+            <div className="text-[#6C5CE7] font-black text-sm tracking-[0.2em] mb-4 uppercase font-display">Archive of Curiosities</div>
+            <h1 className="font-header text-6xl md:text-8xl tracking-tighter text-[#2D3436]">
+              THE <br /><span className="italic font-serif text-[#FFD93D] drop-shadow-[2px_2px_0px_#000]">REPOSITORY</span>
             </h1>
           </div>
-          
+
           {/* Filters */}
-          <div className="flex flex-wrap gap-4 md:gap-8">
+          <div className="flex flex-wrap gap-4 md:gap-4">
             {categories.map(cat => (
               <button
                 key={cat}
                 onClick={() => setFilter(cat)}
-                className={`font-header text-[9px] tracking-[0.4em] transition-all relative pb-2 ${
-                  filter === cat ? 'text-amber-500 border-b border-amber-500' : 'text-white/40 hover:text-white'
-                }`}
+                className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all neo-border neo-shadow ${filter === cat
+                  ? 'bg-[#FFD93D] text-black scale-105'
+                  : 'bg-white text-black hover:bg-gray-50'
+                  }`}
               >
-                {cat.toUpperCase()}
+                {cat}
               </button>
             ))}
           </div>
@@ -104,8 +88,8 @@ export default function Shop() {
         {loading && (
           <div className="flex items-center justify-center py-24">
             <div className="text-center">
-              <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-amber-500 mb-4"></div>
-              <p className="text-white/60 font-header text-[10px] tracking-[0.4em]">LOADING REPOSITORY...</p>
+              <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[#FFD93D] border-t-black mb-4"></div>
+              <p className="text-black/60 font-black text-xs tracking-[0.4em]">LOADING REPOSITORY...</p>
             </div>
           </div>
         )}
@@ -113,16 +97,21 @@ export default function Shop() {
         {/* Error State */}
         {error && !loading && (
           <div className="text-center py-24">
-            <p className="text-red-500 font-header text-[10px] tracking-[0.4em]">{error}</p>
+            <p className="text-red-500 font-black text-lg">{error}</p>
           </div>
         )}
 
         {/* Products Grid */}
         {!loading && !error && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12">
             {filteredProducts.map(product => (
-              <Link key={product.id} href={`/shop/${product.id}`}>
-                <TarotCard product={product} />
+              <Link key={product.id} href={`/shop/${product.id}`} className="block">
+                <div className="transform transition-transform hover:scale-[1.02]">
+                  <ProductCard product={product} />
+                  {/* Note: ProductCard has its own "Add to Cart" button which currently doesn't work, 
+                        but wrapping in Link makes the whole card clickable to go to details page.
+                        We might need to adjust this interaction. */}
+                </div>
               </Link>
             ))}
           </div>
@@ -130,7 +119,7 @@ export default function Shop() {
 
         {!loading && !error && filteredProducts.length === 0 && (
           <div className="text-center py-24">
-            <p className="text-white/60 font-header text-[10px] tracking-[0.4em]">NO ITEMS FOUND</p>
+            <p className="text-black/60 font-black text-lg uppercase">NO ITEMS FOUND</p>
           </div>
         )}
       </div>

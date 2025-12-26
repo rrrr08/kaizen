@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { useAuth } from './AuthContext';
 import { UserProfile } from '@/lib/types';
-import { TIERS, getTier, STREAK_REWARDS, STREAK_FREEZE_COST } from '@/lib/gamification';
+import { TIERS, getTier, STREAK_REWARDS, STREAK_FREEZE_COST, CONFIG, calculatePoints, calculatePointWorth, getMaxRedeemableAmount } from '@/lib/gamification';
 import { doc, onSnapshot, updateDoc, increment, setDoc, getFirestore } from 'firebase/firestore';
 import { app } from '@/lib/firebase'; // Ensure using the same firebase app instance
 
@@ -28,6 +28,10 @@ interface GamificationContextType {
   updateStreak: () => Promise<void>;
   buyStreakFreeze: () => Promise<boolean>;
   foundEasterEgg: () => Promise<boolean>;
+  config: typeof CONFIG;
+  calculatePoints: (price: number, isFirstTime?: boolean) => number;
+  calculatePointWorth: (points: number) => number;
+  getMaxRedeemableAmount: (totalPrice: number, userPoints: number) => number;
 }
 
 const GamificationContext = createContext<GamificationContextType | undefined>(undefined);
@@ -222,7 +226,8 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
   return (
     <GamificationContext.Provider value={{
       xp, balance, tier, nextTier, streak, dailyStats, loading,
-      awardPoints, spendPoints, spinWheel, updateStreak, buyStreakFreeze, foundEasterEgg
+      awardPoints, spendPoints, spinWheel, updateStreak, buyStreakFreeze, foundEasterEgg,
+      config: CONFIG, calculatePoints, calculatePointWorth, getMaxRedeemableAmount
     }}>
       {children}
     </GamificationContext.Provider>

@@ -29,15 +29,15 @@ export default function Experiences() {
   }, []);
 
   return (
-    <div className="min-h-screen pt-28 pb-16">
+    <div className="min-h-screen pt-28 pb-16 bg-[#FFFDF5]">
       <div className="max-w-7xl mx-auto px-6 md:px-12">
         {/* Header */}
-        <div className="mb-20 border-b border-white/5 pb-12">
-          <div className="text-amber-500 font-header text-[10px] tracking-[0.6em] mb-4 uppercase">Custom & Hosted Experiences</div>
-          <h1 className="font-header text-5xl md:text-7xl lg:text-8xl tracking-tighter mb-8">
-            PLAY FOR <br/><span className="text-amber-400">OCCASIONS</span>
+        <div className="mb-20 border-b-2 border-black pb-12">
+          <div className="text-[#6C5CE7] font-black text-sm tracking-[0.2em] mb-4 uppercase font-display">Custom & Hosted Experiences</div>
+          <h1 className="font-header text-6xl md:text-8xl tracking-tighter mb-8 text-[#2D3436]">
+            PLAY FOR <br /><span className="text-[#FFD93D] drop-shadow-[2px_2px_0px_#000] italic font-serif">OCCASIONS</span>
           </h1>
-          <p className="text-white/60 font-serif italic text-lg max-w-3xl">
+          <p className="text-black/80 font-bold text-xl max-w-3xl leading-relaxed">
             From corporate team-building to intimate celebrations, we design unforgettable experiences around game-based engagement.
           </p>
         </div>
@@ -46,8 +46,8 @@ export default function Experiences() {
         {loading && (
           <div className="flex items-center justify-center py-24">
             <div className="text-center">
-              <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-amber-500 mb-4"></div>
-              <p className="text-white/60 font-header text-[10px] tracking-[0.4em]">LOADING EXPERIENCES...</p>
+              <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[#FFD93D] border-t-black mb-4"></div>
+              <p className="text-black/60 font-black text-xs tracking-[0.4em]">LOADING EXPERIENCES...</p>
             </div>
           </div>
         )}
@@ -55,7 +55,7 @@ export default function Experiences() {
         {/* Error State */}
         {error && !loading && (
           <div className="text-center py-24">
-            <p className="text-red-500 font-header text-[10px] tracking-[0.4em]">{error}</p>
+            <p className="text-red-500 font-black text-lg">{error}</p>
           </div>
         )}
 
@@ -66,39 +66,39 @@ export default function Experiences() {
               <div key={exp.id} className={`grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16 items-center ${idx % 2 === 1 ? 'md:grid-flow-dense' : ''}`}>
                 {/* Image */}
                 <div className={`${idx % 2 === 1 ? 'md:col-start-2' : ''}`}>
-                  <div className="aspect-square overflow-hidden rounded-sm border border-white/10 group hover:border-amber-500/40 transition-all bg-white/5">
-                    <img 
+                  <div className="aspect-square overflow-hidden rounded-[30px] border-3 border-black neo-shadow bg-white group transition-transform hover:scale-[1.02]">
+                    <img
                       src={exp.image}
                       alt={exp.title}
-                      className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500 hover:scale-105"
+                      className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110"
                     />
                   </div>
                 </div>
 
                 {/* Content */}
                 <div className={`${idx % 2 === 1 ? 'md:col-start-1' : ''}`}>
-                  <div className="text-amber-500 font-header text-[10px] tracking-[0.6em] mb-6 uppercase">
+                  <div className="bg-[#FFD93D] text-black px-4 py-2 rounded-lg neo-border shadow-[2px_2px_0px_#000] inline-block font-black text-xs tracking-[0.2em] mb-6 uppercase">
                     {exp.category}
                   </div>
-                  <h2 className="font-header text-4xl md:text-5xl mb-6 tracking-tight">
+                  <h2 className="font-header text-5xl md:text-6xl mb-6 tracking-tight text-black">
                     {exp.title}
                   </h2>
-                  <p className="text-white/60 font-serif italic text-lg mb-8">
+                  <p className="text-black/80 font-medium text-lg mb-8 leading-relaxed">
                     {exp.description}
                   </p>
 
                   {/* Features */}
                   <ul className="space-y-4 mb-8">
                     {exp.details?.map((detail: string, i: number) => (
-                      <li key={i} className="flex gap-4">
-                        <span className="text-amber-500 mt-1">→</span>
-                        <span className="text-white/70 font-serif">{detail}</span>
+                      <li key={i} className="flex gap-4 items-start">
+                        <span className="text-[#6C5CE7] mt-1 font-black">→</span>
+                        <span className="text-black/90 font-bold">{detail}</span>
                       </li>
                     ))}
                   </ul>
 
                   {/* CTA */}
-                  <button className="px-8 py-4 bg-amber-500 text-black font-header text-[10px] tracking-[0.4em] hover:bg-amber-400 transition-all rounded-sm">
+                  <button className="px-8 py-4 bg-black text-white font-black text-xs tracking-[0.2em] hover:bg-[#6C5CE7] hover:scale-105 transition-all rounded-xl border-2 border-transparent shadow-[4px_4px_0px_rgba(0,0,0,0.2)]">
                     INQUIRE NOW
                   </button>
                 </div>
@@ -109,17 +109,17 @@ export default function Experiences() {
 
         {!loading && !error && experiences.length === 0 && (
           <div className="text-center py-24">
-            <p className="text-white/60 font-header text-[10px] tracking-[0.4em]">NO EXPERIENCES FOUND</p>
+            <p className="text-black/60 font-black text-lg uppercase">NO EXPERIENCES FOUND</p>
           </div>
         )}
 
         {/* CTA Section */}
-        <div className="mt-24 pt-24 border-t border-white/10 text-center">
-          <h2 className="font-header text-4xl md:text-5xl mb-6">Have a Unique Vision?</h2>
-          <p className="text-white/60 font-serif italic text-lg mb-8 max-w-2xl mx-auto">
+        <div className="mt-24 pt-24 border-t-2 border-black/10 text-center">
+          <h2 className="font-header text-4xl md:text-6xl mb-6 text-black">Have a Unique Vision?</h2>
+          <p className="text-black/70 font-bold text-lg mb-8 max-w-2xl mx-auto">
             We create bespoke experiences tailored to your specific needs and budget.
           </p>
-          <button className="px-8 py-4 border border-amber-500 text-amber-500 font-header text-[10px] tracking-[0.4em] hover:bg-amber-500/10 transition-all rounded-sm">
+          <button className="px-10 py-5 bg-[#00B894] text-black font-black text-xs tracking-[0.2em] neo-border neo-shadow hover:scale-105 transition-all rounded-xl">
             CONTACT OUR TEAM
           </button>
         </div>

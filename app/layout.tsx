@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Outfit, Fredoka } from "next/font/google"; // Import fonts
 import "./globals.css";
 import Navbar from "@/components/ui/JoyNavbar";
 import Footer from "@/components/ui/Footer";
@@ -8,18 +8,21 @@ import { GamificationProvider } from "@/app/context/GamificationContext";
 import { AuthProvider } from "@/app/context/AuthContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+// Configure fonts
+const outfit = Outfit({
   subsets: ["latin"],
+  variable: "--font-outfit",
+  display: 'swap',
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const fredoka = Fredoka({
   subsets: ["latin"],
+  variable: "--font-fredoka",
+  display: 'swap',
 });
 
 export const metadata: Metadata = {
-  title: "Joy Juncture - The Digital Playground",
+  title: "Joy Juncture | Playful E-commerce",
   description: "Experience board games, events, and community engagement like never before",
 };
 
@@ -37,9 +40,7 @@ export default function RootLayout({
           defer
         ></script>
       </head>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black text-white`}
-      >
+      <body className={`${outfit.variable} ${fredoka.variable} antialiased bg-[#FFFDF5] text-[#2D3436] font-sans`}>
         <ErrorBoundary>
           <AuthProvider>
             <GamificationProvider>
@@ -47,6 +48,15 @@ export default function RootLayout({
                 <Navbar />
                 {children}
                 <Footer />
+
+                {/* SVG Definition for Blob Mask */}
+                <svg width="0" height="0" className="absolute">
+                  <defs>
+                    <clipPath id="blob" clipPathUnits="objectBoundingBox">
+                      <path d="M0.85,0.25 C0.95,0.45 0.9,0.7 0.7,0.85 C0.5,1 0.25,0.95 0.1,0.75 C-0.05,0.55 0,0.3 0.2,0.1 C0.4,-0.1 0.7,0.05 0.85,0.25"></path>
+                    </clipPath>
+                  </defs>
+                </svg>
               </CartProvider>
             </GamificationProvider>
           </AuthProvider>

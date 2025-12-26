@@ -7,10 +7,10 @@
 export async function initializeFirebaseData() {
   try {
     console.log('🚀 Starting Firebase initialization...');
-    
+
     // Lazy load Firebase
-    const { 
-      setDoc, doc, getDocs, addDoc, serverTimestamp, query, limit, db: firebaseDb 
+    const {
+      setDoc, doc, getDocs, addDoc, serverTimestamp, query, limit, db: firebaseDb
     } = await import('@/lib/firebase');
 
     if (!firebaseDb) {
@@ -136,7 +136,7 @@ async function initializeProducts(db: any, setDoc: any, doc: any, serverTimestam
     console.log('📦 Starting product initialization...');
     const { collection, getDocs, addDoc } = await import('@/lib/firebase');
     const productsRef = collection(db, 'products');
-    
+
     // Check if products already exist
     const existingProducts = await getDocs(productsRef);
     if (existingProducts.size > 0) {
@@ -290,7 +290,7 @@ async function initializeEvents(db: any, setDoc: any, doc: any, serverTimestamp:
     console.log('📅 Starting events initialization...');
     const { collection, getDocs, addDoc } = await import('@/lib/firebase');
     const eventsRef = collection(db, 'events');
-    
+
     const existingEvents = await getDocs(eventsRef);
     if (existingEvents.size > 0) {
       console.log(`✅ Events already exist (${existingEvents.size} found), skipping initialization`);
@@ -301,7 +301,7 @@ async function initializeEvents(db: any, setDoc: any, doc: any, serverTimestamp:
       {
         title: 'Tech Talk: Web Performance',
         description: 'Join us for an insightful discussion on optimizing web performance and best practices.',
-        date: '2024-01-15',
+        date: '2026-01-15',
         time: '18:00',
         location: 'Joy Juncture Main Hall',
         capacity: 200,
@@ -311,9 +311,9 @@ async function initializeEvents(db: any, setDoc: any, doc: any, serverTimestamp:
         createdAt: new Date().toISOString(),
       },
       {
-        title: 'Fashion Show 2025',
+        title: 'Fashion Show 2026',
         description: 'Exclusive fashion showcase featuring latest collections from renowned designers.',
-        date: '2024-01-20',
+        date: '2026-01-20',
         time: '19:00',
         location: 'Downtown Exhibition Center',
         capacity: 500,
@@ -325,7 +325,7 @@ async function initializeEvents(db: any, setDoc: any, doc: any, serverTimestamp:
       {
         title: 'Gaming Tournament',
         description: '24-hour gaming marathon to raise funds for childrens education.',
-        date: '2024-01-12',
+        date: '2026-01-12',
         time: '10:00',
         location: 'Gaming Arena Downtown',
         capacity: 150,
@@ -337,7 +337,7 @@ async function initializeEvents(db: any, setDoc: any, doc: any, serverTimestamp:
       {
         title: 'Community Cleanup Drive',
         description: 'Help us clean up local parks and streets. All supplies provided.',
-        date: '2024-01-05',
+        date: '2025-12-05',
         time: '08:00',
         location: 'Central Park',
         capacity: 100,
@@ -365,7 +365,7 @@ async function initializeOrders(db: any, addDoc: any, serverTimestamp: any) {
     console.log('📦 Starting orders initialization...');
     const { collection, getDocs } = await import('@/lib/firebase');
     const ordersRef = collection(db, 'orders');
-    
+
     const existingOrders = await getDocs(ordersRef);
     if (existingOrders.size > 0) {
       console.log(`✅ Orders already exist (${existingOrders.size} found), skipping initialization`);
@@ -459,7 +459,7 @@ async function initializeUsers(db: any, setDoc: any, doc: any, addDoc: any) {
     console.log('👥 Starting users initialization...');
     const { collection, getDocs } = await import('@/lib/firebase');
     const usersRef = collection(db, 'users');
-    
+
     const existingUsers = await getDocs(usersRef);
     if (existingUsers.size > 0) {
       console.log(`✅ Users already exist (${existingUsers.size} found), skipping initialization`);

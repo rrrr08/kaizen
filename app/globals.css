@@ -1,480 +1,109 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Raleway:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Quicksand:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Fredoka:wght@400;600;700&display=swap');
 @import "tailwindcss";
 
 @layer theme {
   :root {
-    /* Obsidian Manor - Refined Luxury Colors */
-    --obsidian-black: #0f1419;
-    --manor-emerald: #0d7377;
-    --manor-emerald-light: #14919b;
-    --manor-gold: #d4af37;
-    --manor-gold-secondary: #c99b3b;
-    
-    --background: #0f1419;
-    --foreground: #f5f1e8;
-    --card: #151b22;
-    --card-foreground: #f5f1e8;
-    --primary: #d4af37;
-    --primary-foreground: #0f1419;
-    --secondary: #0d7377;
-    --secondary-foreground: #f5f1e8;
-    --muted: #2d3139;
-    --muted-foreground: #a0a0a0;
-    --accent: #d4af37;
-    --accent-foreground: #0f1419;
-    --border: rgba(212, 175, 55, 0.1);
-    --input-background: rgba(255, 255, 255, 0.03);
-    
-    --font-display: 'Raleway', sans-serif;
-    --font-header: 'Poppins', sans-serif;
-    --font-accent: 'Playfair Display', serif;
-    --font-body: 'Quicksand', sans-serif;
+    --cream: #FFFDF5;
+    --yellow: #FFD93D;
+    --purple: #6C5CE7;
+    --mint: #00B894;
+    --charcoal: #2D3436;
+
+    --background: var(--cream);
+    --foreground: var(--charcoal);
   }
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-body);
+  font-family: var(--font-outfit), sans-serif;
+  background-color: var(--cream);
+  color: var(--charcoal);
   overflow-x: hidden;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  font-weight: 400;
-  line-height: 1.6;
 }
 
-/* Refined Luxury Typography */
-h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-display);
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  line-height: 1.3;
-  color: #f5f1e8;
-}
-
-h1 {
-  font-size: 3.5rem;
-  font-weight: 700;
-  line-height: 1.1;
-  letter-spacing: 0.02em;
-}
-
-h2 {
-  font-size: 2.5rem;
-  font-weight: 700;
-  line-height: 1.2;
-  letter-spacing: 0.02em;
-}
-
-h3 {
-  font-size: 1.875rem;
-  font-weight: 600;
-  line-height: 1.3;
-  letter-spacing: 0.02em;
-}
-
-h4 {
-  font-size: 1.375rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  line-height: 1.4;
-}
-
-h5 {
-  font-size: 1.125rem;
-  font-weight: 500;
-  letter-spacing: 0.02em;
-}
-
-h6 {
-  font-size: 0.875rem;
-  font-weight: 500;
-  letter-spacing: 0.02em;
-}
-
-p {
-  font-size: 1rem;
-  font-weight: 400;
-  line-height: 1.7;
-  letter-spacing: 0.2px;
-}
-
-/* Font header utility class */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
 .font-header {
-  font-family: 'Poppins', sans-serif;
-  font-weight: 600;
-  letter-spacing: 0.02em;
+  font-family: var(--font-fredoka), sans-serif;
+  letter-spacing: -0.02em;
 }
 
-/* Font serif utility class */
-.font-serif {
-  font-family: 'Playfair Display', serif;
+.font-sans {
+  font-family: var(--font-outfit), sans-serif;
 }
 
-/* Refined Font Classes */
 .font-display {
-  font-family: var(--font-display);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  font-family: var(--font-fredoka), sans-serif;
 }
 
-.font-display-bold {
-  font-family: var(--font-display);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
+.neo-shadow {
+  box-shadow: 4px 4px 0px #000000;
 }
 
-.font-header {
-  font-family: var(--font-header);
-  font-weight: 500;
-  letter-spacing: 0.04em;
+.neo-shadow-lg {
+  box-shadow: 8px 8px 0px #000000;
 }
 
-.font-header-bold {
-  font-family: var(--font-header);
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+.neo-shadow-hover:hover {
+  box-shadow: 6px 6px 0px #000000;
+  transform: translate(-2px, -2px);
 }
 
-.font-accent {
-  font-family: var(--font-accent);
-  font-weight: 500;
-  font-style: italic;
-  letter-spacing: 0.02em;
+.neo-border {
+  border: 2px solid #000000;
 }
 
-.font-accent-bold {
-  font-family: var(--font-accent);
-  font-weight: 600;
-  font-style: italic;
-  letter-spacing: 0.02em;
+.neo-border-thick {
+  border: 3px solid #000000;
 }
 
-.font-body {
-  font-family: var(--font-body);
-  font-weight: 400;
-  line-height: 1.7;
+.blob-mask {
+  clip-path: url(#blob);
 }
 
-.font-body-bold {
-  font-family: var(--font-body);
-  font-weight: 600;
-  line-height: 1.6;
-}
-
-/* Text Utilities - Balanced */
-.text-xs {
-  font-size: 0.75rem;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.text-sm {
-  font-size: 0.875rem;
-  font-weight: 400;
-  letter-spacing: 0.3px;
-}
-
-.text-base {
-  font-size: 1rem;
-  font-weight: 400;
-  letter-spacing: 0.3px;
-}
-
-.text-lg {
-  font-size: 1.25rem;
-  font-weight: 500;
-  letter-spacing: 0.2px;
-}
-
-.text-xl {
-  font-size: 1.5rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.text-2xl {
-  font-size: 1.875rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.text-3xl {
-  font-size: 2.25rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.text-4xl {
-  font-size: 2.75rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.text-5xl {
-  font-size: 3.25rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-.text-6xl {
-  font-size: 3.75rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-/* Luxury Design Utilities */
-.glass-card {
-  background: rgba(212, 175, 55, 0.02);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(212, 175, 55, 0.1);
-  transition: all 0.3s ease;
-}
-
-.glass-card:hover {
-  background: rgba(212, 175, 55, 0.04);
-  border-color: rgba(212, 175, 55, 0.2);
-}
-
-.marble-texture {
-  background-image: 
-    radial-gradient(circle at 20% 50%, rgba(13, 115, 119, 0.04) 0%, transparent 50%),
-    radial-gradient(circle at 80% 80%, rgba(212, 175, 55, 0.03) 0%, transparent 50%);
-}
-
-.glow-gold {
-  box-shadow: 0 0 25px rgba(212, 175, 55, 0.25);
-  transition: box-shadow 0.3s ease;
-}
-
-.glow-gold:hover {
-  box-shadow: 0 0 40px rgba(212, 175, 55, 0.4);
-}
-
-.glow-emerald {
-  box-shadow: 0 0 25px rgba(13, 115, 119, 0.25);
-  transition: box-shadow 0.3s ease;
-}
-
-.glow-emerald:hover {
-  box-shadow: 0 0 40px rgba(13, 115, 119, 0.4);
-}
-
-/* Smooth Scrolling & Scrollbar */
-html {
-  scroll-behavior: smooth;
-}
-
-
-/* ===============================
-   Luxury Form Inputs (Dark Mode)
-   =============================== */
-
-.lux-input {
-  position: relative;
-  width: 100%;
-}
-
-.lux-input input,
-.lux-input textarea {
-  width: 100%;
-  background: linear-gradient(
-    180deg,
-    rgba(255,255,255,0.04),
-    rgba(255,255,255,0.015)
-  );
-  border: 1px solid rgba(255,255,255,0.14);
-  border-radius: 14px;
-  padding: 16px 18px;
-  color: #f5f1e8;
-  font-size: 0.95rem;
-  outline: none;
-  box-shadow:
-    inset 0 1px 1px rgba(255,255,255,0.06),
-    0 8px 20px rgba(0,0,0,0.35);
-  transition: all 0.3s ease;
-}
-
-/* Hover: soft light response */
-.lux-input input:hover,
-.lux-input textarea:hover {
-  border-color: rgba(254,154,0,0.4);
-  box-shadow:
-    inset 0 1px 1px rgba(255,255,255,0.08),
-    0 10px 28px rgba(0,0,0,0.45);
-}
-
-/* Focus: premium accent glow */
-.lux-input input:focus,
-.lux-input textarea:focus {
-  border-color: #fe9a00;
-  box-shadow:
-    inset 0 1px 1px rgba(255,255,255,0.1),
-    0 0 0 1px rgba(254,154,0,0.3),
-    0 0 24px rgba(254,154,0,0.25),
-    0 16px 40px rgba(0,0,0,0.6);
-}
-
-/* Floating label */
-.lux-input label {
-  position: absolute;
-  left: 18px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 0.75rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: rgba(245,241,232,0.5);
-  pointer-events: none;
-  transition: all 0.25s ease;
-  background: linear-gradient(
-    to bottom,
-    rgba(15,20,25,0.9),
-    rgba(15,20,25,0.7)
-  );
-  padding: 0 6px;
-}
-
-/* Label floats when active */
-.lux-input input:focus + label,
-.lux-input textarea:focus + label,
-.lux-input input:not(:placeholder-shown) + label,
-.lux-input textarea:not(:placeholder-shown) + label {
-  top: -8px;
-  font-size: 0.65rem;
-  color: #fe9a00;
-}
-
-/* Textarea height polish */
-.lux-input textarea {
-  min-height: 120px;
-  resize: vertical;
-}
-
-/* Disabled state */
-.lux-input input:disabled,
-.lux-input textarea:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-
+/* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 12px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #020617;
+  background: var(--cream);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #333;
-  border-radius: 3px;
+  background: var(--yellow);
+  border: 3px solid #000000;
+  border-radius: 10px;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: var(--accent-gold);
+/* Perspective for 3D card flips */
+.perspective-1000 {
+  perspective: 1000px;
 }
 
-/* Animated Gold Gradient Effect */
-@keyframes goldGradientShift {
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+}
+
+/* Marquee Animation */
+@keyframes marquee {
   0% {
-    background-position: 0% 50%;
+    transform: translateX(0);
   }
-  50% {
-    background-position: 100% 50%;
-  }
+
   100% {
-    background-position: 0% 50%;
+    transform: translateX(-50%);
   }
 }
 
-.gradient-gold {
-  background: linear-gradient(
-    90deg,
-    #f5f1e8,
-    #d4af37,
-    #ffd700,
-    #d4af37,
-    #f5f1e8
-  );
-  background-size: 200% 100%;
-  animation: goldGradientShift 4s ease-in-out infinite;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  font-weight: 700;
-}
-
-.gradient-gold-slow {
-  background: linear-gradient(
-    90deg,
-    #f5f1e8,
-    #d4af37,
-    #ffd700,
-    #d4af37,
-    #f5f1e8
-  );
-  background-size: 200% 100%;
-  animation: goldGradientShift 6s ease-in-out infinite;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  font-weight: 700;
-}
-
-.gradient-gold-fast {
-  background: linear-gradient(
-    90deg,
-    #f5f1e8,
-    #d4af37,
-    #ffd700,
-    #d4af37,
-    #f5f1e8
-  );
-  background-size: 200% 100%;
-  animation: goldGradientShift 2.5s ease-in-out infinite;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  font-weight: 700;
-}
-
-/* Animated Gradient Background Effect (for spans/words) */
-.gradient-bg-gold {
-  position: relative;
-  display: inline-block;
-  background: linear-gradient(
-    90deg,
-    rgba(212, 175, 55, 0.2),
-    rgba(255, 215, 0, 0.4),
-    rgba(212, 175, 55, 0.2)
-  );
-  background-size: 200% 100%;
-  animation: goldGradientShift 4s ease-in-out infinite;
-  padding: 0.2em 0.4em;
-  border-radius: 0.3em;
-}
-
-/* Subtle Grain Texture Overlay */
-.grain-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 50;
-  opacity: 0.03;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+.animate-marquee {
+  animation: marquee 30s linear infinite;
 }

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function About() {
   const [aboutData, setAboutData] = useState<any>(null);
@@ -40,9 +41,10 @@ export default function About() {
 
   if (loading) {
     return (
-      <div className="min-h-screen pt-28 pb-16 flex items-center justify-center">
-        <div className="text-amber-500 font-header tracking-[0.3em] animate-pulse">
-          LOADING ABOUT...
+      <div className="min-h-screen pt-28 pb-16 flex items-center justify-center bg-[#FFFDF5]">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[#FFD93D] border-t-black mb-4"></div>
+          <p className="text-black/60 font-black text-xs tracking-[0.4em]">LOADING ABOUT...</p>
         </div>
       </div>
     );
@@ -50,13 +52,13 @@ export default function About() {
 
   if (error) {
     return (
-      <div className="min-h-screen pt-28 pb-16 flex flex-col items-center justify-center gap-4">
-        <div className="text-red-500 font-header tracking-widest text-center">
+      <div className="min-h-screen pt-28 pb-16 flex flex-col items-center justify-center gap-4 bg-[#FFFDF5]">
+        <div className="text-red-500 font-black tracking-widest text-center">
           {error}
         </div>
-        <button 
+        <button
           onClick={fetchAboutData}
-          className="px-6 py-2 border border-amber-500 text-amber-500 hover:bg-amber-500/10 transition-all"
+          className="px-6 py-2 border-2 border-black text-black hover:bg-black hover:text-white transition-all font-black text-xs tracking-widest rounded-lg"
         >
           TRY AGAIN
         </button>
@@ -65,19 +67,19 @@ export default function About() {
   }
 
   return (
-    <div className="min-h-screen pt-32 pb-16 bg-black text-white selection:bg-amber-500/30">
+    <div className="min-h-screen pt-32 pb-16 bg-[#FFFDF5] text-[#2D3436] selection:bg-[#FFD93D]/50 font-sans">
       <div className="max-w-7xl mx-auto px-6 md:px-12">
         {/* SECTION 1 — PAGE HERO */}
         <section className="mb-32">
-          <div className="text-amber-500 font-header text-[20px] tracking-[0.6em] mb-4 uppercase">Our Story</div>
-          <h1 className="font-header text-5xl md:text-7xl lg:text-8xl tracking-tighter mb-8 leading-none">
-            OUR <br /><span className="text-amber-400 ">(accidentally awesome)</span> STORY
+          <div className="text-[#6C5CE7] font-black text-sm tracking-[0.2em] mb-4 uppercase font-header">Our Story</div>
+          <h1 className="font-header text-6xl md:text-8xl tracking-tighter mb-8 leading-none text-black">
+            OUR <br /><span className="text-[#FFD93D] drop-shadow-[2px_2px_0px_#000] italic font-serif">(accidentally awesome)</span> STORY
           </h1>
-          <p className="text-white/60 font-serif italic text-lg max-w-3xl">
+          <p className="text-black/80 font-bold text-xl max-w-3xl leading-relaxed">
             A digital playground built on the belief that games are more than products—they're moments, memories, and shared joy.
           </p>
-          <div className="max-w-2xl border-l-2 border-amber-500 pl-8 py-2 mt-8">
-            <p className="text-white/80 font-serif italic text-xl md:text-2xl leading-relaxed">
+          <div className="max-w-2xl border-l-4 border-black pl-8 py-2 mt-8">
+            <p className="text-black/70 font-medium italic text-xl md:text-2xl leading-relaxed">
               Honestly? There's no dramatic lifelong passion story here.
               Just two people who realized they're pretty good at creating chaos, laughter, and the kind of competitive tension that turns friends into frenemies.
             </p>
@@ -87,15 +89,15 @@ export default function About() {
         {/* SECTION 2 — HOW IT ALL STARTED (FOUNDERS' JOURNEY) */}
         <section className="grid grid-cols-1 lg:grid-cols-12 gap-12 mb-32 items-center">
           <div className="lg:col-span-12">
-            <h2 className="font-header text-[10px] tracking-[0.6em] text-amber-500 mb-8 uppercase">How It All Started</h2>
+            <h2 className="font-black text-sm tracking-[0.2em] text-[#00B894] mb-8 uppercase font-header">How It All Started</h2>
             <div className="space-y-8 max-w-4xl">
-              <p className="text-white/70 font-serif text-lg leading-relaxed">
+              <p className="text-black/80 font-medium text-lg leading-relaxed">
                 Instead of sticking to the 'safe' family businesses (textiles and electricals — thrilling, right?), we decided to channel our inner entrepreneurs.
               </p>
-              <p className="text-white/90 font-serif text-lg italic border-l border-white/20 pl-6">
+              <p className="text-black font-black text-xl italic border-l-4 border-[#FFD93D] pl-6 py-2 bg-yellow-50/50 rounded-r-lg">
                 Spoiler: we didn't know what we were doing.
               </p>
-              <p className="text-white/70 font-serif text-lg leading-relaxed">
+              <p className="text-black/80 font-medium text-lg leading-relaxed">
                 But we did know how to make people laugh. And argue. And then laugh again.
                 <br />
                 Now here we are — turning random ideas into something real, fun, and (fingers crossed) successful.
@@ -105,17 +107,17 @@ export default function About() {
         </section>
 
         {/* SECTION 3 — WHY GAMES? (THE WHY) */}
-        <section className="mb-32 py-24 border-y border-white/5 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/5 blur-[100px] rounded-full pointer-events-none"></div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+        <section className="mb-32 py-24 border-y-2 border-black relative overflow-hidden bg-white neo-pattern">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-[#FFD93D]/20 blur-[100px] rounded-full pointer-events-none"></div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center relative z-10">
             <div>
-              <h2 className="font-header text-5xl md:text-6xl mb-6">Why Games?</h2>
+              <h2 className="font-header text-5xl md:text-6xl mb-6 text-black">Why Games?</h2>
             </div>
             <div>
-              <p className="text-white/80 font-serif italic text-xl leading-loose">
+              <p className="text-black/90 font-bold italic text-2xl leading-loose">
                 Our goal? To make games that bring people together.
                 <br />
-                Because let's be honest — nothing bonds people like arguing over rules or laughing at someone's questionable strategy.
+                <span className="text-[#6C5CE7]">Because let's be honest — nothing bonds people like arguing over rules or laughing at someone's questionable strategy.</span>
               </p>
             </div>
           </div>
@@ -123,16 +125,16 @@ export default function About() {
 
         {/* SECTION 4 — OUR MISSION & BELIEF */}
         <section className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-32">
-          <div className="bg-white/5 p-12 rounded-sm border border-white/5 hover:border-amber-500/20 transition-all group">
-            <h3 className="font-header text-[10px] tracking-[0.6em] text-amber-500 mb-6 uppercase">Our Mission</h3>
-            <p className="text-2xl md:text-3xl font-header leading-tight text-white/90 group-hover:text-amber-50 transition-colors">
+          <div className="bg-white p-12 rounded-[20px] border-2 border-black neo-shadow hover:scale-[1.02] transition-transform group">
+            <h3 className="font-black text-sm tracking-[0.2em] text-[#FF7675] mb-6 uppercase font-header">Our Mission</h3>
+            <p className="text-2xl md:text-3xl font-header leading-tight text-black group-hover:text-[#FF7675] transition-colors">
               Spread the magic of tabletop games wherever we go and build a culture that's all about fun.
             </p>
           </div>
 
-          <div className="bg-gradient-to-br from-amber-600/20 to-transparent p-12 rounded-sm border border-amber-500/10 flex flex-col justify-center">
-            <h3 className="font-header text-[10px] tracking-[0.6em] text-amber-500 mb-6 uppercase">We Believe</h3>
-            <p className="text-white/80 font-serif italic text-xl space-y-2 leading-relaxed">
+          <div className="bg-[#FFD93D] p-12 rounded-[20px] border-2 border-black neo-shadow flex flex-col justify-center shadow-[4px_4px_0px_#000]">
+            <h3 className="font-black text-sm tracking-[0.2em] text-black mb-6 uppercase font-header">We Believe</h3>
+            <p className="text-black font-black italic text-2xl space-y-2 leading-relaxed">
               "Games aren't just products.<br />
               They're moments.<br />
               They're memories.<br />
@@ -143,7 +145,7 @@ export default function About() {
 
         {/* SECTION 5 — OUR PHILOSOPHY */}
         <section className="mb-32">
-          <h2 className="font-header text-4xl mb-16 text-center">Our Philosophy</h2>
+          <h2 className="font-header text-4xl mb-16 text-center text-black">Our Philosophy</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               {
@@ -159,10 +161,10 @@ export default function About() {
                 text: "Whether you're 10 or 100, there's a Joy Juncture game for you."
               }
             ].map((item, idx) => (
-              <div key={idx} className="text-center p-8">
-                <div className="w-2 h-2 bg-amber-500 mx-auto mb-6 rounded-full"></div>
-                <h3 className="font-header text-[12px] tracking-[0.3em] uppercase mb-4 text-amber-100">{item.title}</h3>
-                <p className="text-white/60 font-serif italic">{item.text}</p>
+              <div key={idx} className="text-center p-8 border-2 border-transparent hover:border-black hover:bg-white hover:neo-shadow hover:rounded-[20px] transition-all duration-300">
+                <div className="w-4 h-4 bg-[#00B894] mx-auto mb-6 rounded-none rotate-45 border border-black"></div>
+                <h3 className="font-black text-sm tracking-[0.2em] uppercase mb-4 text-black font-header">{item.title}</h3>
+                <p className="text-black/70 font-medium italic">{item.text}</p>
               </div>
             ))}
           </div>
@@ -170,13 +172,13 @@ export default function About() {
 
         {/* SECTION 6 — MEET THE MINDS BEHIND THE MADNESS */}
         <section className="mb-32">
-          <h2 className="font-header text-4xl md:text-5xl mb-16 text-center">Meet the Minds <br /> Behind the Madness</h2>
+          <h2 className="font-header text-4xl md:text-5xl mb-16 text-center text-black">Meet the Minds <br /> Behind the Madness</h2>
 
           <div className="space-y-12 mb-12">
             <div>
-              <h2 className="font-header text-[10px] tracking-[0.6em] text-amber-500 mb-6 uppercase">Founder's Journey</h2>
-              <h3 className="font-header text-3xl md:text-4xl mb-6">Why Joy Juncture Started</h3>
-              <div className="space-y-6 text-white/70 font-serif italic">
+              <h2 className="font-black text-sm tracking-[0.2em] text-[#6C5CE7] mb-6 uppercase font-header">Founder's Journey</h2>
+              <h3 className="font-header text-3xl md:text-4xl mb-6 text-black">Why Joy Juncture Started</h3>
+              <div className="space-y-6 text-black/80 font-medium leading-relaxed max-w-4xl">
                 <p>
                   Joy Juncture was born from a simple observation: in a world obsessed with digital isolation, people crave real connections and shared moments of joy. Games, in their purest form, are vehicles for these moments.
                 </p>
@@ -193,47 +195,49 @@ export default function About() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-4xl mx-auto">
             {/* Founder 1 */}
             <div className="group relative">
-              <div className="aspect-[4/5] bg-neutral-900 border border-white/10 rounded-sm overflow-hidden mb-6 filter grayscale group-hover:grayscale-0 transition-all duration-700">
+              <div className="aspect-[4/5] bg-white border-2 border-black rounded-[20px] overflow-hidden mb-6 neo-shadow group-hover:scale-[1.02] transition-transform duration-300">
                 {/* Placeholder for Founder Image - You can replace src with real images later */}
-                <div className="w-full h-full bg-gradient-to-b from-neutral-800 to-black flex items-center justify-center">
-                  <span className="text-white/20 font-header text-6xl">KP</span>
+                <div className="w-full h-full bg-[#FFD93D] flex items-center justify-center relative overflow-hidden">
+                  <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#000000_1px,transparent_1px)] [background-size:16px_16px]"></div>
+                  <span className="text-black font-header text-8xl opacity-20">KP</span>
                 </div>
               </div>
-              <h3 className="font-header text-2xl mb-1">Khushi Poddar</h3>
-              <p className="text-amber-500 text-[10px] tracking-[0.3em] uppercase mb-4">Dreamer-in-Chief</p>
-              <p className="text-white/60 font-serif italic text-sm">Brings ideas to life, chaos included.</p>
+              <h3 className="font-header text-3xl mb-1 text-black">Khushi Poddar</h3>
+              <p className="text-[#FF7675] font-black text-xs tracking-[0.3em] uppercase mb-4 bg-black/5 inline-block px-2 py-1 rounded">Dreamer-in-Chief</p>
+              <p className="text-black/70 font-bold text-sm">Brings ideas to life, chaos included.</p>
             </div>
 
             {/* Founder 2 */}
             <div className="group relative">
-              <div className="aspect-[4/5] bg-neutral-900 border border-white/10 rounded-sm overflow-hidden mb-6 filter grayscale group-hover:grayscale-0 transition-all duration-700">
+              <div className="aspect-[4/5] bg-white border-2 border-black rounded-[20px] overflow-hidden mb-6 neo-shadow group-hover:scale-[1.02] transition-transform duration-300">
                 {/* Placeholder for Founder Image */}
-                <div className="w-full h-full bg-gradient-to-b from-neutral-800 to-black flex items-center justify-center">
-                  <span className="text-white/20 font-header text-6xl">MP</span>
+                <div className="w-full h-full bg-[#00B894] flex items-center justify-center relative overflow-hidden">
+                  <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#000000_1px,transparent_1px)] [background-size:16px_16px]"></div>
+                  <span className="text-black font-header text-8xl opacity-20">MP</span>
                 </div>
               </div>
-              <h3 className="font-header text-2xl mb-1">Muskan Poddar</h3>
-              <p className="text-amber-500 text-[10px] tracking-[0.3em] uppercase mb-4">Design Whiz</p>
-              <p className="text-white/60 font-serif italic text-sm">Makes sure every card, board, and token looks as good as it feels.</p>
+              <h3 className="font-header text-3xl mb-1 text-black">Muskan Poddar</h3>
+              <p className="text-[#6C5CE7] font-black text-xs tracking-[0.3em] uppercase mb-4 bg-black/5 inline-block px-2 py-1 rounded">Design Whiz</p>
+              <p className="text-black/70 font-bold text-sm">Makes sure every card, board, and token looks as good as it feels.</p>
             </div>
           </div>
         </section>
 
         {/* SECTION 7 — WHY CHOOSE JOY JUNCTURE? */}
-        <section className="text-center py-20 border-t border-white/10">
-          <p className="font-header text-2xl md:text-4xl mb-12 text-white/90">
+        <section className="text-center py-20 border-t-2 border-black/10">
+          <p className="font-header text-3xl md:text-5xl mb-12 text-black leading-tight">
             "Because life is too short for boring evenings."
           </p>
           <div className="flex flex-col sm:flex-row gap-6 justify-center">
             <Link
               href="/shop"
-              className="px-8 py-4 bg-amber-500 text-black font-header text-[10px] tracking-[0.4em] hover:bg-amber-400 transition-all rounded-sm"
+              className="px-8 py-4 bg-black text-white font-black text-xs tracking-[0.4em] hover:bg-[#6C5CE7] hover:scale-110 transition-all rounded-xl shadow-[4px_4px_0px_rgba(0,0,0,0.2)]"
             >
               EXPLORE GAMES
             </Link>
             <Link
               href="/community"
-              className="px-8 py-4 border border-amber-500 text-amber-500 font-header text-[10px] tracking-[0.4em] hover:bg-amber-500/10 transition-all rounded-sm"
+              className="px-8 py-4 bg-[#FFD93D] text-black border-2 border-black font-black text-xs tracking-[0.4em] neo-shadow hover:scale-110 transition-all rounded-xl"
             >
               JOIN THE FUN
             </Link>
