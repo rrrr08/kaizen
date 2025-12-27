@@ -1,5 +1,3 @@
-import React from 'react';
-
 export const COLORS = {
     cream: '#FFFDF5',
     yellow: '#FFD93D',

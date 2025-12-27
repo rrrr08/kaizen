@@ -3,15 +3,27 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { useAuth } from './AuthContext';
 import { UserProfile } from '@/lib/types';
-import { TIERS, getTier, STREAK_REWARDS, STREAK_FREEZE_COST, CONFIG, calculatePoints, calculatePointWorth, getMaxRedeemableAmount } from '@/lib/gamification';
-import { doc, onSnapshot, updateDoc, increment, setDoc, getFirestore } from 'firebase/firestore';
-import { app } from '@/lib/firebase'; // Ensure using the same firebase app instance
+import { getTier, fetchTiersFromFirebase, STREAK_REWARDS, STREAK_FREEZE_COST, CONFIG, calculatePoints, calculatePointWorth, getMaxRedeemableAmount } from '@/lib/gamification';
+import { doc, onSnapshot, updateDoc, increment, setDoc, getFirestore, getDoc } from 'firebase/firestore';
+import { app } from '@/lib/firebase';
+
+interface Tier {
+  name: string;
+  minXP: number;
+  multiplier: number;
+  badge: string;
+  perk: string;
+  color: string;
+  icon: string;
+  unlockPrice?: number;
+}
 
 interface GamificationContextType {
   xp: number;
-  balance: number; // Joy Points (JP)
-  tier: typeof TIERS[0];
-  nextTier: typeof TIERS[0] | null;
+  balance: number;
+  tier: Tier;
+  nextTier: Tier | null;
+  allTiers: Tier[];
   streak: {
     count: number;
     lastActiveDate: string | null;
@@ -32,6 +44,9 @@ interface GamificationContextType {
   calculatePoints: (price: number, isFirstTime?: boolean) => number;
   calculatePointWorth: (points: number) => number;
   getMaxRedeemableAmount: (totalPrice: number, userPoints: number) => number;
+  hasEarlyEventAccess: boolean;
+  workshopDiscountPercent: number;
+  hasVIPSeating: boolean;
 }
 
 const GamificationContext = createContext<GamificationContextType | undefined>(undefined);
@@ -43,10 +58,20 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
   // State
   const [xp, setXp] = useState(0);
   const [balance, setBalance] = useState(0);
+  const [allTiers, setAllTiers] = useState<Tier[]>([]);
   const [streak, setStreak] = useState({ count: 0, lastActiveDate: null as string | null, freezeCount: 0 });
   const [dailyStats, setDailyStats] = useState({ lastSpinDate: null as string | null, eggsFound: 0 });
 
   const db = getFirestore(app);
+
+  // Load tiers from Firebase on mount
+  useEffect(() => {
+    const loadTiers = async () => {
+      const tiers = await fetchTiersFromFirebase();
+      setAllTiers(tiers);
+    };
+    loadTiers();
+  }, []);
 
   useEffect(() => {
     if (!user) {
@@ -65,7 +90,8 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
 
         // Sync State from DB
         setXp(data.xp || 0);
-        setBalance(data.balance || data.wallet || data.points || 0); // Fallback for migration
+        // Prioritize 'points' field as primary balance source
+        setBalance(data.points || data.balance || data.wallet || 0);
 
         setStreak({
           count: data.streak?.count || 0,
@@ -86,24 +112,55 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
         // Init profile if missing
         setDoc(userRef, {
           xp: 0,
-          balance: 0,
+          points: 0,
           streak: { count: 0, last_active_date: null, freeze_count: 0 },
           daily_stats: { eggs_found: 0 }
-        }, { merge: true });
+        }, { merge: true }).catch(err => {
+          console.error("Error initializing user profile:", err);
+        });
       }
       setLoading(false);
     }, (error) => {
-      console.error("Error listening to gamification data:", error);
-      setLoading(false);
+      console.error("Firestore listener error:", error);
+      // Fallback: Try one-time fetch instead of real-time listener
+      import('firebase/firestore').then(({ getDoc }) => {
+        getDoc(userRef).then(docSnap => {
+          if (docSnap.exists()) {
+            const data = docSnap.data() as UserProfile;
+            setXp(data.xp || 0);
+            setBalance(data.points || data.balance || data.wallet || 0);
+            setStreak({
+              count: data.streak?.count || 0,
+              lastActiveDate: data.streak?.last_active_date || null,
+              freezeCount: data.streak?.freeze_count || 0
+            });
+            const today = new Date().toISOString().split('T')[0];
+            const lastEggDate = data.daily_stats?.last_egg_date;
+            setDailyStats({
+              lastSpinDate: data.daily_stats?.last_spin_date || null,
+              eggsFound: lastEggDate === today ? (data.daily_stats?.eggs_found || 0) : 0
+            });
+          }
+          setLoading(false);
+        }).catch(err => {
+          console.error("Fallback fetch failed:", err);
+          setLoading(false);
+        });
+      });
     });
 
     return () => unsubscribe();
   }, [user]);
 
-  // Derived State
-  const tier = getTier(xp);
-  const nextTierIndex = TIERS.findIndex(t => t.name === tier.name) + 1;
-  const nextTier = nextTierIndex < TIERS.length ? TIERS[nextTierIndex] : null;
+  // Derived State - Use Firebase tiers
+  const tier = allTiers.length > 0 ? getTier(xp, allTiers) : { name: 'Newbie', minXP: 0, multiplier: 1.0, badge: 'Grey Meeple', perk: 'None', color: 'text-slate-400', icon: '♟️' };
+  const nextTierIndex = allTiers.findIndex(t => t.name === tier.name) + 1;
+  const nextTier = nextTierIndex < allTiers.length ? allTiers[nextTierIndex] : null;
+  
+  // Tier Perks - Dynamic based on loaded tiers
+  const hasEarlyEventAccess = allTiers.length > 1 ? xp >= allTiers[1].minXP : xp >= 500;
+  const workshopDiscountPercent = allTiers.length > 2 && xp >= allTiers[2].minXP ? 5 : 0;
+  const hasVIPSeating = allTiers.length > 3 && xp >= allTiers[3].minXP;
 
   // Actions
   const awardPoints = async (amount: number, reason: string) => {
@@ -116,7 +173,7 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
 
     await updateDoc(userRef, {
       xp: increment(amount),
-      balance: increment(jpEarned),
+      points: increment(jpEarned),
       history: increment(1) // Just a placeholder, ideally push to array
     });
 
@@ -127,7 +184,7 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
     if (!user || balance < amount) return false;
     const userRef = doc(db, 'users', user.uid);
     await updateDoc(userRef, {
-      balance: increment(-amount)
+      points: increment(-amount)
     });
     return true;
   };
@@ -197,7 +254,7 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
     };
 
     if (prize.type === 'JP' || prize.type === 'JACKPOT') {
-      updates.balance = increment(Number(prize.value));
+      updates.points = increment(Number(prize.value));
     } else if (prize.type === 'XP') {
       updates.xp = increment(Number(prize.value));
     }
@@ -217,7 +274,7 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
     await updateDoc(userRef, {
       'daily_stats.eggs_found': increment(1),
       'daily_stats.last_egg_date': today,
-      balance: increment(reward)
+      points: increment(reward)
     });
 
     return true;
@@ -225,9 +282,10 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
 
   return (
     <GamificationContext.Provider value={{
-      xp, balance, tier, nextTier, streak, dailyStats, loading,
+      xp, balance, tier, nextTier, allTiers, streak, dailyStats, loading,
       awardPoints, spendPoints, spinWheel, updateStreak, buyStreakFreeze, foundEasterEgg,
-      config: CONFIG, calculatePoints, calculatePointWorth, getMaxRedeemableAmount
+      config: CONFIG, calculatePoints, calculatePointWorth, getMaxRedeemableAmount,
+      hasEarlyEventAccess, workshopDiscountPercent, hasVIPSeating
     }}>
       {children}
     </GamificationContext.Provider>

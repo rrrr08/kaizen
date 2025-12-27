@@ -1,0 +1,86 @@
+[
+  {
+    "id": "trivia_1",
+    "question": "What is the capital of France?",
+    "options": ["London", "Berlin", "Paris", "Madrid"],
+    "correct": 2,
+    "category": "Geography"
+  },
+  {
+    "id": "trivia_2",
+    "question": "Who painted the Mona Lisa?",
+    "options": ["Van Gogh", "Da Vinci", "Picasso", "Monet"],
+    "correct": 1,
+    "category": "Art"
+  },
+  {
+    "id": "trivia_3",
+    "question": "What is 15 × 8?",
+    "options": ["120", "125", "115", "130"],
+    "correct": 0,
+    "category": "Math"
+  },
+  {
+    "id": "trivia_4",
+    "question": "Which planet is known as the Red Planet?",
+    "options": ["Venus", "Jupiter", "Mars", "Saturn"],
+    "correct": 2,
+    "category": "Science"
+  },
+  {
+    "id": "trivia_5",
+    "question": "In which year did World War II end?",
+    "options": ["1943", "1944", "1945", "1946"],
+    "correct": 2,
+    "category": "History"
+  },
+  {
+    "id": "trivia_6",
+    "question": "What is the largest ocean on Earth?",
+    "options": ["Atlantic", "Indian", "Arctic", "Pacific"],
+    "correct": 3,
+    "category": "Geography"
+  },
+  {
+    "id": "trivia_7",
+    "question": "Who wrote 'Romeo and Juliet'?",
+    "options": ["Dickens", "Shakespeare", "Austen", "Hemingway"],
+    "correct": 1,
+    "category": "Literature"
+  },
+  {
+    "id": "trivia_8",
+    "question": "What is the chemical symbol for gold?",
+    "options": ["Go", "Gd", "Au", "Ag"],
+    "correct": 2,
+    "category": "Science"
+  },
+  {
+    "id": "trivia_9",
+    "question": "How many continents are there?",
+    "options": ["5", "6", "7", "8"],
+    "correct": 2,
+    "category": "Geography"
+  },
+  {
+    "id": "trivia_10",
+    "question": "What is the square root of 144?",
+    "options": ["10", "11", "12", "13"],
+    "correct": 2,
+    "category": "Math"
+  },
+  {
+    "id": "trivia_11",
+    "question": "What is the smallest prime number?",
+    "options": ["0", "1", "2", "3"],
+    "correct": 2,
+    "category": "Math"
+  },
+  {
+    "id": "trivia_12",
+    "question": "Which gas do plants absorb from the atmosphere?",
+    "options": ["Oxygen", "Nitrogen", "Carbon Dioxide", "Hydrogen"],
+    "correct": 2,
+    "category": "Science"
+  }
+]

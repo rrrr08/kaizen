@@ -1,0 +1,9 @@
+[
+  { "id": "ws_1", "words": ["REACT", "NEXT", "CODE", "DEBUG", "ARRAY"], "theme": "Programming" },
+  { "id": "ws_2", "words": ["PYTHON", "JAVA", "RUBY", "SWIFT", "RUST"], "theme": "Languages" },
+  { "id": "ws_3", "words": ["CLOUD", "SERVER", "API", "DATA", "CACHE"], "theme": "Tech Terms" },
+  { "id": "ws_4", "words": ["LOGIC", "BRAIN", "THINK", "SOLVE", "SMART"], "theme": "Thinking" },
+  { "id": "ws_5", "words": ["GAME", "PLAY", "WIN", "SCORE", "LEVEL"], "theme": "Gaming" },
+  { "id": "ws_6", "words": ["HTML", "CSS", "JSON", "XML", "SQL"], "theme": "Web Tech" },
+  { "id": "ws_7", "words": ["MOUSE", "SCREEN", "PHONE", "TABLET", "LAPTOP"], "theme": "Devices" }
+]

@@ -1,0 +1,22 @@
+[
+  { "id": "wordle_1", "word": "REACT" },
+  { "id": "wordle_2", "word": "CHESS" },
+  { "id": "wordle_3", "word": "BRAIN" },
+  { "id": "wordle_4", "word": "LOGIC" },
+  { "id": "wordle_5", "word": "SMART" },
+  { "id": "wordle_6", "word": "QUICK" },
+  { "id": "wordle_7", "word": "FLASH" },
+  { "id": "wordle_8", "word": "POWER" },
+  { "id": "wordle_9", "word": "MAGIC" },
+  { "id": "wordle_10", "word": "DREAM" },
+  { "id": "wordle_11", "word": "HAPPY" },
+  { "id": "wordle_12", "word": "LUCKY" },
+  { "id": "wordle_13", "word": "BRAVE" },
+  { "id": "wordle_14", "word": "SHINE" },
+  { "id": "wordle_15", "word": "PEACE" },
+  { "id": "wordle_16", "word": "TRUST" },
+  { "id": "wordle_17", "word": "LIGHT" },
+  { "id": "wordle_18", "word": "SMILE" },
+  { "id": "wordle_19", "word": "DANCE" },
+  { "id": "wordle_20", "word": "MUSIC" }
+]

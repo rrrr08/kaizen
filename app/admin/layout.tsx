@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Settings, Users, BarChart3, Zap, Bell, ShoppingBag, Home, Package, Calendar, LayoutGrid, FileText } from 'lucide-react';
+import { Settings, Users, BarChart3, Zap, Bell, ShoppingBag, Home, Calendar, LayoutGrid, FileText, Gamepad2, Trophy, Database, Ticket, TrendingUp } from 'lucide-react';
 import { useAuth } from '@/app/context/AuthContext';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -44,6 +44,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: '/admin/dashboard', label: 'Dashboard', icon: Home },
     { href: '/admin/settings', label: 'Settings', icon: Settings },
     { href: '/admin/users', label: 'Users', icon: Users },
+    { href: '/admin/games', label: 'Games', icon: Gamepad2 },
+    { href: '/admin/gamification', label: 'Gamification', icon: Trophy },
+    { href: '/admin/xp-tiers', label: 'XP & Tiers', icon: TrendingUp },
+    { href: '/admin/game-content', label: 'Game Content', icon: Database },
+    { href: '/admin/vouchers', label: 'Vouchers', icon: Ticket },
+    { href: '/admin/api-test', label: 'API Test', icon: Zap },
     { href: '/admin/orders', label: 'Orders', icon: ShoppingBag },
     { href: '/admin/products', label: 'Products', icon: LayoutGrid },
     { href: '/admin/blog', label: 'Blog', icon: FileText },

@@ -44,24 +44,25 @@ const TreasureHunt: React.FC = () => {
         return () => clearTimeout(timer);
     }, [dailyStats.eggsFound]);
 
+
     const handleCatch = async () => {
         if (collected) return;
         setCollected(true);
-
-        const success = await foundEasterEgg();
-        if (success) {
-            // Show +JP animation (simplified here, in reality we'd get the actual amount from a return or calc)
-            // For UI feedback we assume slightly generic or pre-calc. 
-            // Ideally `foundEasterEgg` returns the amount. 
-            // I'll assume 10 for visual feedback or just "+JP"
-            setRewardAmount(10);
-
-            // Hide after celebration
-            setTimeout(() => setIsVisible(false), 2000);
-        } else {
-            // Maybe capped in race condition
-            setIsVisible(false);
-        }
+        // Call award API for treasure hunt
+        let awardedPoints = 0;
+        try {
+            const res = await fetch('/api/games/award', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ gameId: 'treasure_hunt', retry: 0 }),
+            });
+            const data = await res.json();
+            if (data.success) {
+                awardedPoints = data.awardedPoints;
+            }
+        } catch {}
+        setRewardAmount(awardedPoints || 10);
+        setTimeout(() => setIsVisible(false), 2000);
     };
 
     if (!isVisible || !IconComponent) return null;

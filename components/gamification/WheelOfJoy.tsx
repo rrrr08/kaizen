@@ -10,6 +10,7 @@ const WheelOfJoy: React.FC = () => {
     const { spinWheel, spendPoints, dailyStats, balance, loading } = useGamification();
     const [isSpinning, setIsSpinning] = useState(false);
     const [result, setResult] = useState<WheelPrize | null>(null);
+    const [currentRotation, setCurrentRotation] = useState(0);
     const controls = useAnimation();
 
     const canFreeSpin = (() => {
@@ -20,9 +21,9 @@ const WheelOfJoy: React.FC = () => {
 
     const canPaidSpin = balance >= SPIN_COST;
 
+
     const handleSpin = async () => {
         if (isSpinning) return;
-
         let isFree = false;
         if (canFreeSpin) {
             isFree = true;
@@ -35,15 +36,12 @@ const WheelOfJoy: React.FC = () => {
         } else {
             return;
         }
-
         setIsSpinning(true);
         setResult(null);
-
         // 1. Determine Result (Weighted Random)
         const rand = Math.random();
         let cumulative = 0;
         let selectedPrize = WHEEL_PRIZES[0];
-
         for (const prize of WHEEL_PRIZES) {
             cumulative += prize.probability;
             if (rand <= cumulative) {
@@ -51,29 +49,91 @@ const WheelOfJoy: React.FC = () => {
                 break;
             }
         }
-
-        // 2. Calculate Rotation
+        
+        console.log('🎯 Selected Prize:', selectedPrize.label, 'at index:', WHEEL_PRIZES.findIndex(p => p.id === selectedPrize.id));
+        
+        // 2. Calculate Rotation (accounting for current rotation)
         const prizeIndex = WHEEL_PRIZES.findIndex(p => p.id === selectedPrize.id);
         const segmentAngle = 360 / WHEEL_PRIZES.length;
-        // Add minimal extra rotation (e.g., 5 full spins) + random jitter within segment - target segment offset
-        const fullSpins = 5 * 360;
-        const targetRotation = fullSpins + (360 - (prizeIndex * segmentAngle)) - (segmentAngle / 2); // Center of segment
-
+        const fullSpins = 5 * 360; // 5 full rotations
+        
+        // IMPORTANT: conic-gradient starts at 0° (3 o'clock / right side) and goes clockwise
+        // Our pointer is at 12 o'clock (top), which is 270° in standard coords (or -90°)
+        // 
+        // Prize at index 0 occupies: 0° to 72° (starting from 3 o'clock)
+        // Prize at index 1 occupies: 72° to 144°, etc.
+        //
+        // To get prize index 0 to point at top (270°), we need to rotate wheel by:
+        // 270° - 36° (center of segment 0) = 234°
+        
+        // Calculate the center angle of the selected prize segment (from 3 o'clock, going clockwise)
+        const segmentStartAngle = prizeIndex * segmentAngle;
+        const segmentCenterAngle = segmentStartAngle + (segmentAngle / 2);
+        
+        // Pointer is at 270° (top), we want segment center to align there
+        // But we rotate the wheel, not move the pointer
+        // So we need: (270° - segmentCenterAngle)
+        const pointerAngle = 270; // Top position in standard coordinates
+        const targetAngle = pointerAngle - segmentCenterAngle;
+        
+        console.log('� Segrment angle:', segmentAngle, '| Center:', segmentCenterAngle, '| Target rotation:', targetAngle);
+        
+        // Add to current rotation to continue from where we are
+        const newRotation = currentRotation + fullSpins + targetAngle;
+        
+        console.log('🔄 Current rotation:', currentRotation, '| New rotation:', newRotation);
+        
         // 3. Animate
         await controls.start({
-            rotate: targetRotation,
+            rotate: newRotation,
             transition: { duration: 4, ease: "circOut" }
         });
-
-        // 4. Commit Result
+        
+        // Update current rotation for next spin (keep the full value, don't use modulo)
+        setCurrentRotation(newRotation);
+        
+        // 4. Commit Result via award API
+        // Use different game IDs for free vs paid spins
+        // Free spin: 'wheel-free' (once per day)
+        // Paid spin: 'wheel-paid-{timestamp}' (unlimited)
+        let awardedPoints = 0;
+        if (selectedPrize.type === 'JP' || selectedPrize.type === 'JACKPOT') {
+            try {
+                // Get Firebase Auth token
+                const { getAuth } = await import('firebase/auth');
+                const { app } = await import('@/lib/firebase');
+                const auth = getAuth(app);
+                const user = auth.currentUser;
+                
+                if (user) {
+                    const token = await user.getIdToken();
+                    
+                    // For paid spins, use unique game ID to bypass daily restriction
+                    const gameId = isFree ? 'wheel-free' : `wheel-paid-${Date.now()}`;
+                    
+                    const res = await fetch('/api/games/award', {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ gameId, retry: 0, points: selectedPrize.value }),
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        awardedPoints = data.awardedPoints;
+                    } else if (data.error === 'Already played today' && isFree) {
+                        // Free spin already used today, just show the prize without awarding
+                        console.log('Free spin already used today');
+                    }
+                }
+            } catch (error) {
+                console.error('Error awarding points:', error);
+            }
+        }
         await spinWheel(selectedPrize);
-        setResult(selectedPrize);
+        setResult({ ...selectedPrize, value: awardedPoints || selectedPrize.value });
         setIsSpinning(false);
-
-        // Reset rotation visually (instant) for next spin logic if needed, 
-        // but typically better to just keep adding rotation or reset 
-        // Modulo logic would be needed for continuous spinning without visual glitches
-        // For simple MVP: leave it rotated.
     };
 
     if (loading) return <div className="p-8 flex justify-center"><Loader2 className="animate-spin text-gold" /></div>;

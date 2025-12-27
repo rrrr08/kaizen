@@ -1,0 +1,20 @@
+[
+  {
+    "id": "chess_1",
+    "fen": "r1bqkb1r/pppp1ppp/2n2n2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 4 4",
+    "solution": "Qxf7#",
+    "difficulty": "Easy"
+  },
+  {
+    "id": "chess_2",
+    "fen": "r1bqkbnr/pppp1ppp/2n5/4p3/2B1P3/5Q2/PPPP1PPP/RNB1K1NR w KQkq - 4 4",
+    "solution": "Qxf7#",
+    "difficulty": "Easy"
+  },
+  {
+    "id": "chess_3",
+    "fen": "r1bqk2r/pppp1ppp/2n2n2/2b1p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 6 5",
+    "solution": "Qxf7#",
+    "difficulty": "Medium"
+  }
+]

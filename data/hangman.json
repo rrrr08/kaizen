@@ -1,0 +1,16 @@
+[
+  { "id": "hangman_1", "word": "JAVASCRIPT", "category": "Programming" },
+  { "id": "hangman_2", "word": "PYTHON", "category": "Programming" },
+  { "id": "hangman_3", "word": "REACT", "category": "Programming" },
+  { "id": "hangman_4", "word": "TYPESCRIPT", "category": "Programming" },
+  { "id": "hangman_5", "word": "DATABASE", "category": "Technology" },
+  { "id": "hangman_6", "word": "ALGORITHM", "category": "Computer Science" },
+  { "id": "hangman_7", "word": "FUNCTION", "category": "Programming" },
+  { "id": "hangman_8", "word": "VARIABLE", "category": "Programming" },
+  { "id": "hangman_9", "word": "COMPUTER", "category": "Technology" },
+  { "id": "hangman_10", "word": "KEYBOARD", "category": "Hardware" },
+  { "id": "hangman_11", "word": "INTERNET", "category": "Technology" },
+  { "id": "hangman_12", "word": "SOFTWARE", "category": "Technology" },
+  { "id": "hangman_13", "word": "NETWORK", "category": "Technology" },
+  { "id": "hangman_14", "word": "SECURITY", "category": "Technology" }
+]

@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Coins, ShoppingBag, Menu, X, User, LogOut, Settings, LayoutDashboard, ChevronDown } from 'lucide-react';
 import { useCart } from '@/app/context/CartContext';
+import { useGamification } from '@/app/context/GamificationContext';
 import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
 import { doc, getDoc, getFirestore } from 'firebase/firestore';
 import { app } from '@/lib/firebase';
@@ -17,6 +18,8 @@ const navItems = [
   { name: 'Play', path: '/play' },
   { name: 'Events', path: '/events' },
   { name: 'Community', path: '/community' },
+  { name: 'Rewards', path: '/rewards' },
+  { name: 'Progress', path: '/progress' },
   { name: 'Blog', path: '/blog' },
   { name: 'About', path: '/about' },
 ];
@@ -26,9 +29,9 @@ const Navbar: React.FC = () => {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { items } = useCart();
+  const { balance } = useGamification(); // Use centralized balance from GamificationContext
   const [user, setUser] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [points, setPoints] = useState(1250); // Dummy default, fetch real if needed
 
   useEffect(() => {
     const auth = getAuth(app);
@@ -42,7 +45,6 @@ const Navbar: React.FC = () => {
         if (userDoc.exists()) {
           const data = userDoc.data();
           setIsAdmin(data.role === 'admin' || data.isAdmin === true);
-          if (data.points) setPoints(data.points);
         }
       } else {
         setIsAdmin(false);
@@ -166,7 +168,7 @@ const Navbar: React.FC = () => {
               </motion.div>
               <div className="flex flex-col -space-y-1">
                 <span className="text-[8px] text-black font-black uppercase leading-none tracking-widest">Balance</span>
-                <span className="text-black font-black whitespace-nowrap text-sm leading-none">{points.toLocaleString()}</span>
+                <span className="text-black font-black whitespace-nowrap text-sm leading-none">{balance.toLocaleString()}</span>
               </div>
             </motion.div>
           </div>
@@ -329,7 +331,7 @@ const Navbar: React.FC = () => {
               </Link>
               <div className="mt-8 p-6 bg-[#00B894] rounded-2xl border-2 border-black neo-shadow">
                 <p className="font-black text-black uppercase tracking-widest mb-2">My Balance</p>
-                <p className="text-4xl font-black text-black">{points.toLocaleString()} PTS</p>
+                <p className="text-4xl font-black text-black">{balance.toLocaleString()} PTS</p>
               </div>
               {user && (
                 <button

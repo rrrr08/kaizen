@@ -1,9 +1,12 @@
 import { BonusRule, LevelThreshold } from './types';
+import { doc, getDoc, getFirestore } from 'firebase/firestore';
+import { app } from './firebase';
 
 // ------------------------------------------------------------------
-// 1. THE JOY LADDER (TIER SYSTEM)
+// 1. THE JOY LADDER (TIER SYSTEM) - Now loaded from Firebase
 // ------------------------------------------------------------------
-export const TIERS = [
+// Default fallback tiers (only used if Firebase fetch fails)
+const DEFAULT_TIERS = [
   {
     name: 'Newbie',
     minXP: 0,
@@ -11,7 +14,8 @@ export const TIERS = [
     badge: 'Grey Meeple',
     perk: 'None',
     color: 'text-slate-400',
-    icon: '♟️'
+    icon: '♟️',
+    unlockPrice: 0
   },
   {
     name: 'Player',
@@ -20,7 +24,8 @@ export const TIERS = [
     badge: 'Green Pawn',
     perk: 'Early access to Event Tickets',
     color: 'text-emerald-400',
-    icon: '♟️'
+    icon: '♟️',
+    unlockPrice: 2000
   },
   {
     name: 'Strategist',
@@ -29,7 +34,8 @@ export const TIERS = [
     badge: 'Blue Rook',
     perk: '5% off all Workshops',
     color: 'text-blue-400',
-    icon: '♜'
+    icon: '♜',
+    unlockPrice: 5000
   },
   {
     name: 'Grandmaster',
@@ -38,12 +44,56 @@ export const TIERS = [
     badge: 'Gold Crown',
     perk: 'VIP Seating at Game Nights',
     color: 'text-amber-400',
-    icon: '👑'
+    icon: '👑',
+    unlockPrice: 10000
   }
 ];
 
-export const getTier = (xp: number) => {
-  return [...TIERS].reverse().find(tier => xp >= tier.minXP) || TIERS[0];
+// Fetch tiers from Firebase
+export const fetchTiersFromFirebase = async () => {
+  try {
+    const db = getFirestore(app);
+    const settingsRef = doc(db, 'settings', 'xpSystem');
+    const snap = await getDoc(settingsRef);
+    
+    if (snap.exists() && snap.data()?.tiers) {
+      return snap.data()!.tiers;
+    }
+    return DEFAULT_TIERS;
+  } catch (error) {
+    console.error('Error fetching tiers from Firebase:', error);
+    return DEFAULT_TIERS;
+  }
+};
+
+// Get tier based on XP (requires tiers array)
+export const getTier = (xp: number, tiers: any[]) => {
+  return [...tiers].reverse().find(tier => xp >= tier.minXP) || tiers[0];
+};
+
+// Check if user has specific tier perk
+export const hasTierPerk = (xp: number, perkType: 'earlyAccess' | 'workshopDiscount' | 'vipSeating', tiers: any[]): boolean => {
+  const tier = getTier(xp, tiers);
+  
+  switch (perkType) {
+    case 'earlyAccess':
+      return tier.minXP >= 500; // Player tier and above
+    case 'workshopDiscount':
+      return tier.minXP >= 2000; // Strategist tier and above
+    case 'vipSeating':
+      return tier.minXP >= 5000; // Grandmaster tier only
+    default:
+      return false;
+  }
+};
+
+// Get discount percentage based on tier
+export const getTierDiscount = (xp: number, tiers: any[]): number => {
+  const tier = getTier(xp, tiers);
+  
+  if (tier.minXP >= 5000) return 10; // Grandmaster: 10% off
+  if (tier.minXP >= 2000) return 5;  // Strategist: 5% off
+  return 0; // No discount for lower tiers
 };
 
 // ------------------------------------------------------------------

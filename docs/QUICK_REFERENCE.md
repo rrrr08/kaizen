@@ -1,307 +1,209 @@
-# 📚 Quick Reference - Data Tables Implementation
+# Games System - Quick Reference
 
-## What Was Done
+## 🎮 All Games (10 Total)
 
-All admin data is now stored in **Firestore collections** with **mock data** included, making it easy to replace with real data later.
-
----
-
-## Collections Created
-
-| Collection | Documents | Status | Ready for Real Data |
-|-----------|-----------|--------|-------------------|
-| `notifications` | 3 | ✅ Active | Yes |
-| `campaigns` | 3 | ✅ Active | Yes |
-| `orders` | Auto | ✅ Real | Already using |
-| `products` | Auto | ✅ Real | Already using |
-| `events` | Auto | ✅ Real | Already using |
-| `users` | Auto | ✅ Real | Already using |
+| Game | ID | Route | Points | Retry Penalty |
+|------|----|----|--------|---------------|
+| Sudoku | `sudoku` | `/play/sudoku` | 20 | -3 |
+| Riddles | `riddle` | `/play/riddles` | 15 | -2 |
+| Wordle | `wordle` | `/play/wordle` | 25 | -4 |
+| Chess | `chess` | `/play/chess` | 30 | -5 |
+| Trivia | `trivia` | `/play/trivia` | 10 | -1 |
+| Brain Games | `puzzles` | `/play/puzzles` | 35 | -3 |
+| 2048 | `2048` | `/play/2048` | 30 | -2 |
+| Hangman | `hangman` | `/play/hangman` | 20 | -3 |
+| Word Search | `wordsearch` | `/play/wordsearch` | 25 | -2 |
+| Math Quiz | `mathquiz` | `/play/mathquiz` | 20 | -1 |
 
 ---
 
-## Quick Start (3 Steps)
+## 🔧 Admin URLs
 
-### 1. Initialize Mock Data
+- **Game Settings**: `/admin/games`
+- **Initialize System**: `POST /api/games/initialize`
+
+---
+
+## 📡 API Endpoints
+
+### Award Points
 ```bash
-# Visit this URL in browser (one-time setup):
-http://localhost:3000/api/admin/init-mock-data
-
-# Response:
-# { "success": true, "message": "Mock data initialized successfully" }
+POST /api/games/award
+Body: { gameId, retry, level? }
 ```
 
-### 2. Visit Admin Pages
-```
-/admin/notifications → See 3 notifications
-/admin/push-notifications → See 3 campaigns
-```
-
-### 3. Test Adding Data
-- Fill form on either page
-- Click send/submit
-- New data appears in list
-- Refresh page → Data persists (it's in Firestore!)
-
----
-
-## Firebase Functions (Ready to Use)
-
-```typescript
-import { 
-  getNotificationHistory, 
-  addNotification,
-  getCampaigns,
-  addCampaign,
-  NotificationHistory,
-  Campaign
-} from '@/lib/firebase';
-
-// Fetch
-const notifications = await getNotificationHistory();
-const campaigns = await getCampaigns();
-
-// Add
-const id1 = await addNotification({ /* data */ });
-const id2 = await addCampaign({ /* data */ });
-```
-
----
-
-## Data Structures
-
-### NotificationHistory
-```typescript
-{
-  id: string;              // Auto-generated
-  title: string;
-  message: string;
-  type: 'info' | 'success' | 'offer' | 'warning';
-  recipientType: 'all' | 'specific';
-  recipientCount: number;
-  sentAt: string;          // ISO format
-  actionUrl?: string;
-  createdAt: Timestamp;    // Auto-generated
-}
-```
-
-### Campaign
-```typescript
-{
-  id: string;              // Auto-generated
-  title: string;
-  message: string;
-  status: string;
-  recipientCount: number;
-  deliveredCount: number;
-  interactionCount: number;
-  createdAt: string;       // ISO format
-  image?: string;
-  actionUrl?: string;
-  priority?: string;
-}
-```
-
----
-
-## File Changes Summary
-
-### Modified
-- `lib/firebase.ts` → Added 4 functions
-- `app/admin/notifications/page.tsx` → Uses Firestore
-- `app/admin/push-notifications/page.tsx` → Uses Firestore
-
-### Created
-- `lib/initMockData.ts` → Mock data initialization
-- `app/api/admin/init-mock-data/route.ts` → API endpoint
-
-### Documentation
-- `MOCK_DATA_IMPLEMENTATION.md` → Full details
-- `DATA_TABLES_SETUP.md` → Setup guide
-- `DATA_TABLES_COMPLETE.md` → Data overview
-- `TESTING_MOCK_DATA.md` → Testing guide
-
----
-
-## How to Replace with Real Data
-
-### Simple Case
-```typescript
-// Before (mock data):
-const notifications = await getNotificationHistory();
-
-// After (real data):
-// 1. Fetch from your API
-const real = await fetch('your-api.com/notifications');
-
-// 2. Store in Firestore (one-time or daily sync)
-for (const item of real) {
-  await addNotification(item);
-}
-
-// 3. Display (code unchanged!)
-const notifications = await getNotificationHistory();
-```
-
-### Advanced Case
-```typescript
-// Update the fetch function once:
-export async function getNotificationHistory() {
-  // Fetch real data from your API
-  const realData = await fetch('your-api.com/notifications');
-  
-  // Optionally store in Firestore for caching
-  for (const item of realData) {
-    await addNotification(item);
-  }
-  
-  // Return all notifications (real + cached)
-  const allData = await getDocs(collection(db, 'notifications'));
-  return allData.docs.map(doc => doc.data());
-}
-```
-
----
-
-## Mock Data Included
-
-### notifications (3 items)
-1. **"50% Off Sale"** - offer type, 1 day ago
-2. **"New Event Added"** - info type, 2 days ago
-3. **"Welcome to Joy Juncture!"** - success type, 3 days ago
-
-### campaigns (3 items)
-1. **"Flash Sale Alert"** - sent, 1150/1250 delivered, 340 interactions
-2. **"New Collection Launch"** - sent, 1200/1250 delivered, 280 interactions
-3. **"Weekend Special"** - scheduled, 0 delivered
-
----
-
-## Testing Commands
-
+### Game Settings
 ```bash
-# Initialize (one-time)
-curl http://localhost:3000/api/admin/init-mock-data
-
-# Verify in Firestore Console
-# Firebase Console → Your Project → Firestore Database
-# Look for: notifications and campaigns collections
-
-# Test pages
-http://localhost:3000/admin/notifications
-http://localhost:3000/admin/push-notifications
+GET /api/games/settings
+POST /api/games/settings (admin)
+Body: { gameId, name, basePoints, retryPenalty, maxRetries, scratcher }
 ```
 
----
-
-## Key Benefits
-
-✅ Data is persistent (survives page refresh)
-✅ Organized in Firestore collections
-✅ Easy to replace mock with real data
-✅ Admin UI code never changes
-✅ Works with any real data source
-✅ Ready for scaling
-
----
-
-## Admin Pages Status
-
-| Page | Data Source | Status | Testing |
-|------|-----------|--------|---------|
-| `/admin/notifications` | Firestore | ✅ Live | See TESTING_MOCK_DATA.md |
-| `/admin/push-notifications` | Firestore | ✅ Live | See TESTING_MOCK_DATA.md |
-| `/admin/dashboard` | Firestore | ✅ Real | Real data from orders |
-| `/admin/orders` | Firestore | ✅ Real | Real data from payments |
-| `/admin/products` | Firestore | ✅ Real | Real data, empty if none |
-| `/admin/events` | Firestore | ✅ Real | Real data, empty if none |
-| `/admin/users` | Firestore | ✅ Real | Real user accounts |
-| `/admin/analytics` | Firestore | ✅ Real | Real user metrics |
-
----
-
-## Common Commands
-
-### Initialize Mock Data
+### Game of the Day
 ```bash
-# Browser
-http://localhost:3000/api/admin/init-mock-data
-
-# Curl
-curl http://localhost:3000/api/admin/init-mock-data
-
-# PowerShell
-Invoke-WebRequest http://localhost:3000/api/admin/init-mock-data
+GET /api/games/game-of-the-day
+POST /api/games/game-of-the-day (admin)
+Body: { gameId, gameName }
 ```
 
-### Check Data in Firebase Console
-```
-1. Go to firebase.google.com
-2. Select your project
-3. Click "Firestore Database"
-4. Look for "notifications" and "campaigns" collections
-5. Click to see documents
+### Rotation Policy
+```bash
+GET /api/games/rotation-policy
+POST /api/games/rotation-policy (admin)
+Body: { enabled, gamesPerDay, selectedGames }
+PUT /api/games/rotation-policy (admin) - Manual rotation
 ```
 
-### Verify Functions
+### Leaderboard & History
+```bash
+GET /api/games/leaderboard?gameId={id}
+GET /api/games/history
+```
+
+---
+
+## 💡 Points Formula
+
 ```javascript
-// In browser console (F12)
-import { getNotificationHistory } from '@/lib/firebase';
-const data = await getNotificationHistory();
-console.log(data);
+finalPoints = max(basePoints - (retries × retryPenalty), 1)
+
+// If Game of the Day
+finalPoints = finalPoints × 2
 ```
 
 ---
 
-## Troubleshooting
+## 🔄 Rotation Policy
 
-| Problem | Solution |
-|---------|----------|
-| No data showing | Run init: `http://localhost:3000/api/admin/init-mock-data` |
-| Collections don't exist | Check Firestore Console → Collections |
-| Can't add notifications | Check browser console for Firebase errors |
-| Data doesn't persist | Make sure you're using Firestore functions |
+### Enable Rotation
+1. Go to `/admin/games`
+2. Check "Enable Daily Rotation"
+3. Set "Games Per Day" (1-20)
+4. Click "Save Rotation Policy"
 
----
+### Manual Rotation
+Click "Rotate Now" button in admin panel
 
-## For Production
-
-When ready with real data:
-
-1. **Update Data Source**
-   - Change where `getNotificationHistory()` fetches from
-   - Change where `getCampaigns()` fetches from
-
-2. **Keep Firestore Structure**
-   - Same collections
-   - Same field names
-   - Same function signatures
-
-3. **Deploy**
-   - No admin UI changes needed
-   - Just new data source
-   - Everything works!
+### Disable Rotation
+Uncheck "Enable Daily Rotation" and save
 
 ---
 
-## Files to Review
+## 🎯 Daily Restriction
 
-| File | Purpose |
-|------|---------|
-| `MOCK_DATA_IMPLEMENTATION.md` | Full implementation details |
-| `DATA_TABLES_SETUP.md` | How to set up and initialize |
-| `DATA_TABLES_COMPLETE.md` | Complete data schema overview |
-| `TESTING_MOCK_DATA.md` | Step-by-step testing guide |
-| `lib/firebase.ts` | All Firebase functions |
-| `lib/initMockData.ts` | Mock data initialization |
+- Each game can only be played once per day
+- Tracked by: `{gameId}_{YYYY-MM-DD}`
+- Example: `sudoku_2025-12-27`
 
 ---
 
-## Status: ✅ COMPLETE & TESTED
+## 🎁 Scratcher System
 
-- ✅ All data in Firestore collections
-- ✅ Mock data ready to use
-- ✅ Admin pages updated
-- ✅ Easy to replace with real data
-- ✅ Ready for testing
+Enable in admin for each game:
+```javascript
+scratcher: {
+  enabled: true,
+  drops: [
+    { prob: 0.5, points: 10, label: 'Bronze' },
+    { prob: 0.3, points: 25, label: 'Silver' },
+    { prob: 0.15, points: 50, label: 'Gold' },
+    { prob: 0.05, points: 100, label: 'Diamond' }
+  ]
+}
+```
 
-**Next: Run initialization and test the pages!**
+---
+
+## 📁 File Locations
+
+### Components
+```
+kaizen/components/games/
+├── SudokuGame.tsx
+├── RiddleGame.tsx
+├── WordleGame.tsx
+├── ChessGame.tsx
+├── TriviaGame.tsx
+├── BrainGamesSet.tsx
+├── Game2048.tsx
+├── HangmanGame.tsx
+├── WordSearchGame.tsx
+└── MathQuizGame.tsx
+```
+
+### Routes
+```
+kaizen/app/play/
+├── page.tsx (main)
+├── sudoku/page.tsx
+├── riddles/page.tsx
+├── wordle/page.tsx
+├── chess/page.tsx
+├── trivia/page.tsx
+├── puzzles/page.tsx
+├── 2048/page.tsx
+├── hangman/page.tsx
+├── wordsearch/page.tsx
+└── mathquiz/page.tsx
+```
+
+### APIs
+```
+kaizen/app/api/games/
+├── award/route.ts
+├── settings/route.ts
+├── game-of-the-day/route.ts
+├── rotation-policy/route.ts
+├── leaderboard/route.ts
+├── history/route.ts
+└── initialize/route.ts
+```
+
+---
+
+## 🚀 Quick Start
+
+### 1. Initialize (First Time)
+```bash
+curl -X POST http://localhost:3000/api/games/initialize
+```
+
+### 2. Play a Game
+Navigate to `/play` and click any game
+
+### 3. Configure Admin
+Go to `/admin/games` to customize settings
+
+### 4. Enable Rotation
+In admin panel, enable rotation and set games per day
+
+---
+
+## 🐛 Troubleshooting
+
+### Games not awarding points?
+- Check if user already played today
+- Verify game settings exist in Firestore
+- Check browser console for errors
+
+### Rotation not working?
+- Ensure rotation is enabled in admin
+- Check today's date exists in rotation schedule
+- Try manual rotation
+
+### Scratcher not appearing?
+- Enable scratcher in game settings
+- Verify drops array is configured
+- Check if user already played today
+
+---
+
+## 📚 Full Documentation
+
+- **Complete List**: `kaizen/docs/GAMES_COMPLETE_LIST.md`
+- **Rotation Guide**: `kaizen/docs/ROTATION_POLICY_GUIDE.md`
+- **Task Summary**: `kaizen/docs/TASK_4_COMPLETION_SUMMARY.md`
+
+---
+
+**Last Updated**: December 27, 2025

@@ -231,7 +231,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Recent Orders */}
-      <div className="bg-white border-2 border-black rounded-[25px] p-8 neo-shadow">
+      <div className="bg-white border-2 border-black rounded-[25px] p-8 neo-shadow mb-8">
         <h2 className="font-header text-3xl font-black text-black mb-8 flex items-center gap-3 uppercase tracking-tighter">
           <div className="bg-black p-2 rounded-lg">
             <ShoppingBag className="w-5 h-5 text-white" />
@@ -270,6 +270,44 @@ export default function AdminDashboard() {
               )}
             </tbody>
           </table>
+        </div>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="bg-white border-2 border-black rounded-[25px] p-8 neo-shadow">
+        <h2 className="font-header text-3xl font-black text-black mb-8 uppercase tracking-tighter">
+          ⚡ QUICK ACTIONS
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <Link href="/admin/games" className="p-6 bg-[#6C5CE7] border-2 border-black rounded-xl neo-shadow hover:translate-x-[4px] hover:translate-y-[4px] hover:shadow-none transition-all">
+            <h3 className="font-black text-white text-lg mb-2">🎮 GAME SETTINGS</h3>
+            <p className="text-white/80 text-sm font-bold">Configure points, retries, Game of the Day</p>
+          </Link>
+          
+          <Link href="/admin/gamification" className="p-6 bg-[#FFD93D] border-2 border-black rounded-xl neo-shadow hover:translate-x-[4px] hover:translate-y-[4px] hover:shadow-none transition-all">
+            <h3 className="font-black text-black text-lg mb-2">🏆 GAMIFICATION</h3>
+            <p className="text-black/80 text-sm font-bold">Wheel odds, economy rules</p>
+          </Link>
+          
+          <Link href="/admin/game-content" className="p-6 bg-[#00B894] border-2 border-black rounded-xl neo-shadow hover:translate-x-[4px] hover:translate-y-[4px] hover:shadow-none transition-all">
+            <h3 className="font-black text-white text-lg mb-2">💾 GAME CONTENT</h3>
+            <p className="text-white/80 text-sm font-bold">Manage riddles, trivia, puzzles</p>
+          </Link>
+          
+          <Link href="/admin/users" className="p-6 bg-[#FF7675] border-2 border-black rounded-xl neo-shadow hover:translate-x-[4px] hover:translate-y-[4px] hover:shadow-none transition-all">
+            <h3 className="font-black text-white text-lg mb-2">👥 USERS</h3>
+            <p className="text-white/80 text-sm font-bold">Manage user accounts & roles</p>
+          </Link>
+          
+          <Link href="/admin/events" className="p-6 bg-[#A29BFE] border-2 border-black rounded-xl neo-shadow hover:translate-x-[4px] hover:translate-y-[4px] hover:shadow-none transition-all">
+            <h3 className="font-black text-white text-lg mb-2">📅 EVENTS</h3>
+            <p className="text-white/80 text-sm font-bold">Create & manage events</p>
+          </Link>
+          
+          <Link href="/admin/products" className="p-6 bg-[#FDCB6E] border-2 border-black rounded-xl neo-shadow hover:translate-x-[4px] hover:translate-y-[4px] hover:shadow-none transition-all">
+            <h3 className="font-black text-black text-lg mb-2">🛍️ PRODUCTS</h3>
+            <p className="text-black/80 text-sm font-bold">Manage shop inventory</p>
+          </Link>
         </div>
       </div>
     </div>

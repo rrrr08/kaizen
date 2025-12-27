@@ -1,13 +1,37 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getEvents, createEvent } from '@/lib/db/events';
+import { adminDb } from '@/lib/firebaseAdmin';
 
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const status = searchParams.get('status') as 'past' | 'upcoming' | null;
 
-    const events = await getEvents({
-      status: status ?? 'upcoming', // default
+    const eventsCollection = adminDb.collection('events');
+    const now = new Date();
+
+    let query;
+
+    if (status === 'upcoming' || !status) {
+      query = eventsCollection
+        .where('datetime', '>', now)
+        .orderBy('datetime', 'asc');
+    } else {
+      query = eventsCollection
+        .where('datetime', '<=', now)
+        .orderBy('datetime', 'desc');
+    }
+
+    const snapshot = await query.get();
+
+    const events = snapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        ...data,
+        datetime: data.datetime?.toDate?.() || data.datetime,
+        createdAt: data.createdAt?.toDate?.() || data.createdAt,
+        updatedAt: data.updatedAt?.toDate?.() || data.updatedAt,
+      };
     });
 
     return NextResponse.json({
@@ -59,11 +83,13 @@ export async function POST(req: NextRequest) {
     const payload: any = {
       title,
       description,
-      datetime: new Date(datetime),
+      datetime: adminDb.Timestamp.fromDate(new Date(datetime)),
       location,
       status: status ?? 'upcoming',
-      registered,
+      registered: registered || 0,
       capacity: Number(capacity),
+      createdAt: adminDb.FieldValue.serverTimestamp(),
+      updatedAt: adminDb.FieldValue.serverTimestamp(),
     };
 
     if (price !== undefined) payload.price = Number(price);
@@ -76,10 +102,10 @@ export async function POST(req: NextRequest) {
       if (gallery !== undefined) payload.gallery = gallery;
     }
 
-    const id = await createEvent(payload);
+    const docRef = await adminDb.collection('events').add(payload);
 
     return NextResponse.json(
-      { success: true, id },
+      { success: true, id: docRef.id },
       { status: 201 }
     );
   } catch (error: any) {

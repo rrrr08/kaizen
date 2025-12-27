@@ -143,11 +143,17 @@ export default function Blog() {
                     {filteredPosts.map((post) => (
                         <article key={post.id} className="group cursor-pointer flex flex-col h-full bg-white border-2 border-black p-4 rounded-[20px] neo-shadow hover:scale-[1.02] transition-transform">
                             <div className="aspect-[4/3] overflow-hidden rounded-[15px] mb-6 border-2 border-black relative">
-                                <img
-                                    src={post.image}
-                                    alt={post.title}
-                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                                />
+                                {post.image ? (
+                                    <img
+                                        src={post.image}
+                                        alt={post.title}
+                                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                    />
+                                ) : (
+                                    <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                                        <span className="text-black/20 font-black text-4xl">📝</span>
+                                    </div>
+                                )}
                             </div>
                             <div className="flex items-center gap-4 mb-3">
                                 <span className="bg-[#FF7675] text-black border border-black px-2 py-0.5 rounded font-black text-[9px] tracking-[0.2em] uppercase">{post.category}</span>
