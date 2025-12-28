@@ -46,6 +46,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: '/admin/users', label: 'Users', icon: Users },
     { href: '/admin/orders', label: 'Orders', icon: ShoppingBag },
     { href: '/admin/products', label: 'Products', icon: LayoutGrid },
+    { href: '/admin/media', label: 'Media', icon: FileText },
     { href: '/admin/blog', label: 'Blog', icon: FileText },
     { href: '/admin/events', label: 'Events', icon: Calendar },
     { href: '/admin/notifications', label: 'Notifications', icon: Bell },
@@ -70,8 +71,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   key={item.href}
                   href={item.href}
                   className={`flex items-center gap-3 px-4 py-3 rounded-[12px] transition-all duration-200 text-sm font-black uppercase tracking-wide border-2 ${isActive
-                      ? 'bg-[#FFD93D] text-black border-black neo-shadow-sm'
-                      : 'text-black/60 border-transparent hover:bg-black/5 hover:text-black'
+                    ? 'bg-[#FFD93D] text-black border-black neo-shadow-sm'
+                    : 'text-black/60 border-transparent hover:bg-black/5 hover:text-black'
                     }`}
                 >
                   <Icon size={18} strokeWidth={2.5} />

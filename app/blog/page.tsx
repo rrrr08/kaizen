@@ -2,6 +2,9 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+
 const categories = [
     'All',
     'Gameplay Guides',
@@ -17,9 +20,39 @@ export default function Blog() {
     const [error, setError] = useState<string | null>(null);
     const [activeCategory, setActiveCategory] = useState('All');
 
+    // Dynamic Content State
+    const [featuredStory, setFeaturedStory] = useState({
+        title: 'The Art of the Game Night',
+        excerpt: 'How a simple gathering turned into a weekly tradition of rivalry, laughter, and unbreakable bonds.',
+        image: 'https://images.unsplash.com/photo-1543269865-cbf427effbad?q=80&w=2070&auto=format&fit=crop'
+    });
+    const [communityGallery, setCommunityGallery] = useState([
+        'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?q=80&w=2032&auto=format&fit=crop',
+        'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?q=80&w=2069&auto=format&fit=crop',
+        'https://images.unsplash.com/photo-1523580494863-6f3031224c94?q=80&w=2070&auto=format&fit=crop',
+        'https://images.unsplash.com/photo-1558008258-3256797b43f3?q=80&w=2070&auto=format&fit=crop'
+    ]);
+
     useEffect(() => {
         fetchBlogPosts();
+        fetchPageContent();
     }, []);
+
+    const fetchPageContent = async () => {
+        try {
+            const docRef = doc(db, 'content', 'blog');
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                if (data.featuredStory?.image) {
+                    setFeaturedStory(prev => ({ ...prev, image: data.featuredStory.image }));
+                }
+                if (data.communityGallery && Array.isArray(data.communityGallery)) setCommunityGallery(data.communityGallery);
+            }
+        } catch (err) {
+            console.error("Error fetching blog content:", err);
+        }
+    };
 
     const fetchBlogPosts = async () => {
         try {
@@ -98,7 +131,7 @@ export default function Blog() {
                         <div className="aspect-[21/9] w-full bg-white relative">
                             <div className="absolute inset-0 bg-[#FFD93D] mix-blend-multiply opacity-20 z-10"></div>
                             <img
-                                src="https://images.unsplash.com/photo-1543269865-cbf427effbad?q=80&w=2070&auto=format&fit=crop"
+                                src={featuredStory.image}
                                 alt="Featured Story"
                                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                             />
@@ -108,10 +141,10 @@ export default function Blog() {
                                 Featured Story
                             </span>
                             <h2 className="font-header text-4xl md:text-6xl mb-4 leading-tight group-hover:text-[#6C5CE7] transition-colors text-black drop-shadow-sm">
-                                The Art of the Game Night
+                                {featuredStory.title}
                             </h2>
                             <p className="font-medium text-lg md:text-xl text-black/80 max-w-2xl mb-6 leading-relaxed">
-                                How a simple gathering turned into a weekly tradition of rivalry, laughter, and unbreakable bonds.
+                                {featuredStory.excerpt}
                             </p>
                             <button className="flex items-center gap-2 text-xs font-black tracking-[0.3em] hover:gap-4 transition-all text-black uppercase bg-[#FFD93D] px-6 py-3 rounded-lg border-2 border-black shadow-[3px_3px_0px_#000]">
                                 READ STORY <span>→</span>
@@ -204,12 +237,7 @@ export default function Blog() {
                         </Link>
                     </div>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        {[
-                            'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?q=80&w=2032&auto=format&fit=crop',
-                            'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?q=80&w=2069&auto=format&fit=crop',
-                            'https://images.unsplash.com/photo-1523580494863-6f3031224c94?q=80&w=2070&auto=format&fit=crop',
-                            'https://images.unsplash.com/photo-1558008258-3256797b43f3?q=80&w=2070&auto=format&fit=crop'
-                        ].map((img, idx) => (
+                        {communityGallery.map((img, idx) => (
                             <div key={idx} className={`rounded-[20px] overflow-hidden group relative border-2 border-black neo-shadow ${idx === 0 || idx === 3 ? 'md:col-span-2 aspect-[16/9]' : 'aspect-square'}`}>
                                 <img src={img} alt="Community" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 grayscale group-hover:grayscale-0" />
                                 <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">

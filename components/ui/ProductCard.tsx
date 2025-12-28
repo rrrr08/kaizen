@@ -50,12 +50,18 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                             animate={{ scale: isFlipped ? 1.1 : 1 }}
                             className="w-full h-full relative"
                         >
-                            <Image
-                                src={product.image}
-                                alt={product.name}
-                                fill
-                                className="object-cover transition-transform duration-700"
-                            />
+                            {product.image ? (
+                                <Image
+                                    src={product.image}
+                                    alt={product.name}
+                                    fill
+                                    className="object-cover transition-transform duration-700"
+                                />
+                            ) : (
+                                <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                                    <span className="text-black/40 font-black uppercase text-sm">No Image</span>
+                                </div>
+                            )}
                         </motion.div>
 
                         {/* Badges */}
@@ -148,8 +154,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                         Add to Bag — ${product.price}
                     </motion.button>
                 </div>
-            </motion.div>
-        </div>
+            </motion.div >
+        </div >
     );
 };
 

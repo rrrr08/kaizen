@@ -26,6 +26,7 @@ import {
   EyeOff,
   Image as ImageIcon,
 } from "lucide-react";
+import ImageUpload from "@/components/ui/ImageUpload";
 
 interface BlogPost {
   id: string;
@@ -374,12 +375,11 @@ export default function AdminBlogPage() {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-black font-black text-xs uppercase tracking-widest mb-2">Header Image URL</label>
-                  <input
-                    value={form.image}
-                    onChange={(e) => setForm({ ...form, image: e.target.value })}
-                    className="w-full bg-white border-2 border-black rounded-xl px-4 py-3 text-black placeholder-black/30 focus:outline-none focus:shadow-[4px_4px_0px_#000] transition-shadow font-bold"
-                    placeholder="https://..."
+                  <label className="block text-black font-black text-xs uppercase tracking-widest mb-2">Header Image</label>
+                  <ImageUpload
+                    value={form.image ? [form.image] : []}
+                    onChange={(url) => setForm({ ...form, image: url })}
+                    onRemove={() => setForm({ ...form, image: '' })}
                   />
                 </div>
                 <div className="md:col-span-2">

@@ -110,14 +110,14 @@ export default function Community() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
             {filteredEvents.map(event => (
               <Link key={event.id} href={`/events/${event.id}`}>
-                <div className="group cursor-pointer bg-white border-2 border-black p-4 rounded-[20px] neo-shadow hover:scale-[1.02] transition-transform">
+                <div className="group cursor-pointer bg-white border-2 border-black p-4 rounded-[20px] neo-shadow hover:scale-[1.02] transition-transform transform-gpu isolation-isolate">
                   {/* Event Image */}
                   <div className="aspect-video overflow-hidden rounded-[15px] mb-6 border-2 border-black bg-gray-100 relative">
                     {event.image ? (
                       <img
                         src={event.image}
                         alt={event.title}
-                        className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
+                        className="w-full h-full object-cover object-top grayscale group-hover:grayscale-0 transition-all duration-500"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-black/20 font-black text-sm uppercase tracking-widest">

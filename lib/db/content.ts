@@ -13,6 +13,7 @@ export async function getAboutData() {
     const snapshot = await getDocs(aboutCollection);
 
     if (snapshot.empty) {
+      console.warn('No about data found in Firestore');
       return null;
     }
 
@@ -26,7 +27,7 @@ export async function getAboutData() {
       updatedAt: data.updatedAt?.toDate(),
     };
   } catch (error) {
-    console.error('Error getting about data', error);
+    console.error('Error getting about data:', error);
     throw error;
   }
 }

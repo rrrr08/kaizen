@@ -119,11 +119,11 @@ export default function UpcomingEvents() {
             <Link key={event.id} href={`/events/upcoming/${event.id}`}>
               <div key={event.id} className="group cursor-pointer">
                 {/* Event Image */}
-                <div className="aspect-video overflow-hidden rounded-[30px] mb-6 border-3 border-black neo-shadow bg-white group-hover:scale-[1.02] transition-transform">
+                <div className="aspect-video overflow-hidden rounded-[30px] mb-6 border-3 border-black neo-shadow bg-white group-hover:scale-[1.02] transition-transform transform-gpu isolation-isolate">
                   {event.image !== "" && <img
                     src={event.image}
                     alt={event.title}
-                    className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
+                    className="w-full h-full object-cover object-top grayscale group-hover:grayscale-0 transition-all duration-500"
                   />}
                 </div>
 

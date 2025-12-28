@@ -1,0 +1,441 @@
+[
+    {
+        "name": "Buzzed – The Drinking Card Game",
+        "subtitle": "Party & Drinking Games",
+        "price": 299.00,
+        "description": "Keep the party buzzing with Buzzed, the ultimate drinking card game by Joy Juncture! Whether it's a house party, a pre-game warmup, a post-game chill session, or a full-blown club night, Buzzed brings people together with effortless fun. Designed for adults, by adults, this card game works for every kind of party person... early birds, night owls, social butterflies, silent observers, front-benchers, and full-time back-bench comedians. With quirky, chaotic, senseless, and wildly funny prompts, Buzzed guarantees non-stop laughter, unforgettable memories, and stories you'll discuss the next morning (if you remember them 👀). Just shuffle → sip → survive!!",
+        "images": [
+            "https://joyjuncture.vercel.app/_next/image?url=%2Fgallery%2Fmarketplace%2FBuzzed%20%E2%80%93%20The%20Drinking%20Card%20Game.webp&w=3840&q=75"
+        ],
+        "players": "3-20",
+        "age": "21+",
+        "features": [
+            {
+                "title": "Super Easy to Play",
+                "description": "No setup, no rules to memorise. Just open, shuffle, and sip"
+            },
+            {
+                "title": "Perfect for All Social Settings",
+                "description": "House parties, picnics, weekend getaways, birthdays, club nights, or awkward reunion dinners"
+            },
+            {
+                "title": "Inclusive & Multiplayer",
+                "description": "Works for all adults, any group size, and every vibe"
+            },
+            {
+                "title": "Made in India",
+                "description": "Thoughtfully designed and produced by Joy Juncture"
+            },
+            {
+                "title": "Pocket-Friendly Size",
+                "description": "Toss it in your bag and take the party anywhere"
+            }
+        ],
+        "howToPlay": [
+            {
+                "title": "Gather Your Crew & Grab Drinks",
+                "description": "Get 3-20 friends together and make sure everyone has their favorite drink ready."
+            },
+            {
+                "title": "Shuffle & Draw Cards",
+                "description": "Shuffle the deck and take turns drawing cards. Each card has a wild prompt or challenge."
+            },
+            {
+                "title": "Follow the Prompt",
+                "description": "Read the card aloud and follow the instructions. Some cards make you drink, some make others drink!"
+            },
+            {
+                "title": "Repeat & Have Fun",
+                "description": "Keep playing until the laughs run out (or the drinks do). There's no winner—just great memories!"
+            }
+        ]
+    },
+    {
+        "name": "Court 52 Pickleball Card Game",
+        "subtitle": "Pickleball Card Game",
+        "price": 459.00,
+        "description": "Strategic rally-based pickleball card game with evolving 2v2 team play. Court 52 brings the thrill of pickleball to your table with a tactical 2v2 card game where momentum matters. Every three rally points trigger fresh effects, forcing teams to rethink their strategy, time their plays, and adapt on the fly. With a full 52-card deck of Challenge, Trap, and Wild cards, every match feels fast, competitive, and replayable.",
+        "images": [
+            "https://joyjuncture.vercel.app/_next/image?url=%2Fgallery%2Fmarketplace%2FCourt%2052%20Pickleball.WEBP&w=3840&q=75"
+        ],
+        "players": "2-4 (2v2 teams)",
+        "age": "Adult",
+        "features": [
+            {
+                "title": "Strategic 2v2 Rally Play",
+                "description": "Innovative card-based pickleball experience where team tactics shine and effects refresh every three rally points."
+            },
+            {
+                "title": "52-Card Arsenal",
+                "description": "Complete deck with Challenge, Trap, and Wild cards featuring unique spiral powers to shake up each point."
+            },
+            {
+                "title": "Momentum Management",
+                "description": "Plan ahead to control the next three rounds—timing your moves decides whether you seize or lose momentum."
+            },
+            {
+                "title": "Quick, Dynamic Matches",
+                "description": "Designed for fast-paced play so every rally counts and no two games feel the same."
+            },
+            {
+                "title": "Ready-to-Play Kit",
+                "description": "Includes all 52 custom gameplay cards plus a comprehensive rule guide for casual or competitive sessions."
+            },
+            {
+                "title": "Active Court Strategy",
+                "description": "Predict opponents, adjust your cards, and make smart choices to win every tactical exchange."
+            }
+        ],
+        "howToPlay": [
+            {
+                "title": "FORM TEAMS & DEAL CARDS",
+                "description": "Split into 2v2 teams and deal cards from the 52-card deck with Challenge, Trap, and Wild cards."
+            },
+            {
+                "title": "PLAY CARDS DURING RALLIES",
+                "description": "Each rally lasts 3 points. Play cards strategically to activate special effects and gain advantage."
+            },
+            {
+                "title": "ADAPT & CAPTURE MOMENTUM",
+                "description": "Every 3 points, new card effects trigger! Adjust your strategy and time your best plays."
+            },
+            {
+                "title": "WIN WITH TEAM TACTICS",
+                "description": "Work with your partner to predict opponents' moves and dominate the court. First team to target score wins!"
+            }
+        ]
+    },
+    {
+        "name": "Dead Man's Deck",
+        "subtitle": "Strategy Card Game",
+        "price": 399.00,
+        "description": "Strategy meets memory — zombie-themed thrills. Meet Dead Man’s Deck, the card game that combines strategy, memory, and a chilling zombie theme to keep you on your toes! With every flip of the card, you’re one step closer to survival… or succumbing to the undead. Want to turn up the party? Dead Man’s Deck easily transforms into a zombie-themed drinking game.",
+        "images": [
+            "https://joyjuncture.vercel.app/_next/image?url=%2Fgallery%2Fmarketplace%2FDead%20Man%E2%80%99s%20Deck.webp&w=3840&q=75"
+        ],
+        "players": "2-8",
+        "age": "14+",
+        "features": [
+            {
+                "title": "Dual Gameplay",
+                "description": "A thrilling strategy game that doubles as a party drinking game with optional Challenge Cards. Perfect for both intense game nights and lighthearted gatherings."
+            },
+            {
+                "title": "Fast-Paced Speed",
+                "description": "Timing is key—beat your opponents to discard Phase and Power Cards or risk being stuck with them!"
+            },
+            {
+                "title": "Epic Showdown Ending",
+                "description": "Either discard all your cards first or declare \"NO MORE A ZOMBIE!\" and reveal your hand to claim the win. But watch out—if you’re wrong, double penalties await."
+            },
+            {
+                "title": "Zombie Memory Showdown",
+                "description": "Challenge your memory as you keep track of Phase and Power Cards, adding a level of skill that's unique among party games."
+            }
+        ],
+        "howToPlay": [
+            {
+                "title": "Deal Cards & Set the Stage",
+                "description": "Each player gets dealt cards. Phase cards and Power cards create the zombie apocalypse vibe."
+            },
+            {
+                "title": "Discard Phase & Power Cards Fast",
+                "description": "Timing is everything! Beat your opponents to discard matching Phase and Power cards before they do."
+            },
+            {
+                "title": "Track Cards with Your Memory",
+                "description": "Remember what's been played. Your memory is your weapon in this zombie showdown."
+            },
+            {
+                "title": "Win by Declaring Freedom",
+                "description": "Discard all cards OR shout 'NO MORE A ZOMBIE!' and reveal your hand. Wrong call? Double penalty!"
+            }
+        ]
+    },
+    {
+        "name": "Dreamer's Fair | 36 PCS Silhouette Puzzle",
+        "subtitle": "Jigsaw Puzzle",
+        "price": 699.00,
+        "description": "A magical 36-piece silhouette puzzle featuring a fairy, unicorn, and enchanted forest. Step into a world of wonder with Dreamer's Fair, a beautifully illustrated 36-piece silhouette puzzle by Djeco. This enchanting puzzle features a magical fairy with iridescent wings, a mystical unicorn, and a whimsical forest fair illuminated by fireflies and fairy lights. Perfect for young dreamers and puzzle enthusiasts, this silhouette puzzle comes in a stunning keepsake box that doubles as artwork. Each piece is crafted with precision, revealing a captivating scene that sparks imagination and creativity. Ideal for quiet afternoons, family bonding, or as a thoughtful gift for anyone who loves fantasy and art.",
+        "images": [
+            "https://joyjuncture.vercel.app/_next/image?url=%2Fgallery%2Fmarketplace%2FDreamer%27s%20Fair.webp&w=3840&q=75"
+        ],
+        "players": "1-2",
+        "age": "4+",
+        "features": [
+            {
+                "title": "Magical Silhouette Design",
+                "description": "Features a stunning fairy and unicorn scene with an enchanted forest fair, perfect for sparking imagination."
+            },
+            {
+                "title": "36 Premium Pieces",
+                "description": "Just the right size for young puzzlers—challenging enough to engage, easy enough to complete and feel proud."
+            },
+            {
+                "title": "Beautiful Keepsake Box",
+                "description": "Comes in an artistic box that can be displayed as decor. Perfect for gifting or keeping as a collectible."
+            },
+            {
+                "title": "High-Quality Djeco Craftsmanship",
+                "description": "Made by renowned brand Djeco with precision-cut pieces, vibrant colors, and durable materials."
+            }
+        ],
+        "howToPlay": [
+            {
+                "title": "Open & Admire the Art",
+                "description": "Unbox the puzzle and take a moment to appreciate the magical illustration on the box cover."
+            },
+            {
+                "title": "Sort Edge Pieces First",
+                "description": "Separate the border pieces to build the frame. This helps define the puzzle shape early on."
+            },
+            {
+                "title": "Assemble the Fairy & Unicorn",
+                "description": "Focus on the colorful fairy wings and unicorn details. These vibrant areas make great starting points!"
+            },
+            {
+                "title": "Complete & Display",
+                "description": "Place the final piece and enjoy your finished masterpiece! Frame it or keep it in the beautiful box."
+            }
+        ]
+    },
+    {
+        "name": "Judge Me & Guess",
+        "subtitle": "Community Card Game",
+        "price": 999.00,
+        "description": "A social experience that turns strangers into friends. Judge Me & Guess isn't just a card game... it's a social experience made for every community, every group, and every table. From cafés and clubs to office teams, friend circles, student groups, and Sunday brunch communities… this game adapts to your vibe and your rules. Whether you're meeting a stranger, sitting with your date, or catching up with friends, this game replaces awkward silence with curious guesses, bold judgments, and surprisingly accurate truths!!",
+        "images": [
+            "https://joyjuncture.vercel.app/_next/image?url=%2Fgallery%2Fmarketplace%2FJudge%20Me%20%26%20Guess.webp&w=3840&q=75"
+        ],
+        "players": "2-10+",
+        "age": "16+",
+        "features": [
+            {
+                "title": "Creates Real Connection",
+                "description": "Encourages genuine conversations & laughter. Turns strangers into friends within minutes. Works for shy players, loud players, new groups, and mixed groups."
+            },
+            {
+                "title": "3 Judgment Levels",
+                "description": "Every card comes with a signature eye illustration and is divided into 3 levels... from light warm-up to bold & deeper questions as the game progresses."
+            },
+            {
+                "title": "Play Your Way",
+                "description": "No complicated rules, easy for anyone to join mid-game. Customise how you play... points, punishments, storytelling, anything. Perfect for café tables, offices, hostels, team off-sites, brunch clubs."
+            },
+            {
+                "title": "Perfect For Every Community",
+                "description": "Friends & siblings, first dates, café customers, college students, office teams, family gatherings, social communities & clubs. Bulk customisations available (MOQ 25)."
+            }
+        ],
+        "howToPlay": [
+            {
+                "title": "Pick a Card & Read Aloud",
+                "description": "Draw a card and read the judgment or question. Each card has 3 levels—start light or go bold!"
+            },
+            {
+                "title": "Make Your Guess",
+                "description": "Other players guess how you'd answer or what you'd choose. The game creates curiosity and laughter."
+            },
+            {
+                "title": "Reveal & Score",
+                "description": "Share your real answer! Score points for correct guesses or customize your own rules (punishments, storytelling, etc)."
+            },
+            {
+                "title": "Keep Going & Connect",
+                "description": "Play until everyone's had their turn. Perfect for breaking the ice or deepening friendships!"
+            }
+        ]
+    },
+    {
+        "name": "Mehfil – The Ultimate Musical Card Game",
+        "subtitle": "Musical Card Game",
+        "price": 399.00,
+        "description": "A singing challenge card game for every gathering. Turn any gathering into a full-blown musical night! Mehfil by Joy Juncture is a super fun, super simple singing challenge card game where your voice (good or bad!) becomes the star of the evening. 1 player or 99+ players. Mehfil never stops. Perfect for family nights, house parties, weddings, picnics, long drives, office breaks, hostel hangouts, or that one cousin who refuses to stop singing.",
+        "images": [
+            "https://joyjuncture.vercel.app/_next/image?url=%2Fgallery%2Fmarketplace%2FMehfil.webp&w=3840&q=75"
+        ],
+        "players": "1-99+",
+        "age": "12+",
+        "features": [
+            {
+                "title": "Musical Categories",
+                "description": "Includes four exciting categories - Word Play, Situationship, Jodi Jukebox, and Mic Drop - each offering unique Bollywood music challenges."
+            },
+            {
+                "title": "Play With Anyone, Anywhere",
+                "description": "1 player or 99+ players; Mehfil never stops. Perfect for family nights, house parties, weddings, picnics, long drives, office breaks, hostel hangouts."
+            },
+            {
+                "title": "Portable Design",
+                "description": "Comes in a compact, fabric pouch for easy storage and transport, allowing you to carry the fun wherever you go."
+            },
+            {
+                "title": "Party Essential",
+                "description": "Ideal for house parties, game nights, travel, and family gatherings, bringing musical entertainment to any social occasion."
+            }
+        ],
+        "howToPlay": [
+            {
+                "title": "Shuffle & Pick a Category",
+                "description": "Choose from Word Play, Situationship, Jodi Jukebox, or Mic Drop categories. Each has unique Bollywood challenges!"
+            },
+            {
+                "title": "Draw a Card & Sing",
+                "description": "Read the prompt and sing! It could be matching lyrics, humming tunes, or performing iconic Bollywood songs."
+            },
+            {
+                "title": "Score Points or Just Have Fun",
+                "description": "Award points for correct songs, or skip scoring and just enjoy the musical chaos. Your rules, your mehfil!"
+            },
+            {
+                "title": "Keep the Music Going",
+                "description": "Play until someone wins, or keep going forever! Works with 1 or 99+ players—the party never stops."
+            }
+        ]
+    },
+    {
+        "name": "One More Round | Jigsaw Puzzle",
+        "subtitle": "Jigsaw Puzzle",
+        "price": 499.00,
+        "description": "A 150-piece adult puzzle that feels like game night in a box. One More Round – A 150-Piece Jigsaw Puzzle for Adults That Feels Like Game Night in a Box. Looking for a jigsaw puzzle that's more than just a pretty picture? One More Round is your official invite to game night with friends, beers, and a bit of playful chaos. This 150-piece puzzle drops you right into a buzzing table full of laughter, clinking glasses, and half-played card games. It's the kind of scene you wish you were part of... now you can piece it together, one moment at a time. Designed for puzzle lovers who appreciate fun, storytelling, and strong visual detail, this hand-illustrated adult puzzle celebrates the art of chilling out. From spilled drinks to cheeky expressions, every detail adds to the story and the challenge.",
+        "images": [
+            "https://joyjuncture.vercel.app/_next/image?url=%2Fgallery%2Fmarketplace%2FOne%20More%20Round.webp&w=3840&q=75"
+        ],
+        "players": "1-4+",
+        "age": "18+",
+        "features": [
+            {
+                "title": "Hand-Illustrated Design",
+                "description": "A beautifully hand-illustrated adult puzzle that celebrates the art of chilling out and storytelling."
+            },
+            {
+                "title": "Game Night in a Box",
+                "description": "Drops you right into a buzzing table full of laughter, clinking glasses, and half-played card games with intricate visual details."
+            },
+            {
+                "title": "150 Pieces of Fun",
+                "description": "Perfect for puzzle lovers who appreciate challenges, from spilled drinks to cheeky expressions, every detail adds to the story."
+            },
+            {
+                "title": "Ideal for Adults",
+                "description": "A relaxing and engaging activity for game night enthusiasts, perfect for solo sessions or group puzzle nights."
+            }
+        ],
+        "howToPlay": [
+            {
+                "title": "Open the Box & Sort Pieces",
+                "description": "Unbox the puzzle and take a moment to appreciate the magical illustration on the box cover."
+            },
+            {
+                "title": "Start with the Borders",
+                "description": "Build the frame first! Connect edge pieces to form the puzzle boundary and get a sense of the scene."
+            },
+            {
+                "title": "Fill in the Game Night Scene",
+                "description": "Work on different sections—drinks, cards, expressions. Every piece reveals more of the party story!"
+            },
+            {
+                "title": "Complete & Display",
+                "description": "Place the final piece and admire your work! Frame it or take a photo to celebrate your puzzle night win."
+            }
+        ]
+    },
+    {
+        "name": "Tamasha – The Bollywood Bid Card Game",
+        "subtitle": "Bollywood Card Game",
+        "price": 399.00,
+        "description": "Filmy drama meets competitive bidding. Tamasha blends filmy drama, acting talent, iconic dance steps and competitive bidding into one laugh-out-loud party game. Perfect for families, friends, and anyone who loves Bollywood. PLAY WITH ANYONE, ANYWHERE – LITERALLY! 1 player or 99+ players; Tamasha never stops. Perfect for family nights, house parties, weddings, picnics, long drives, office breaks, hostel hangouts, or that one cousin who refuses to stop being bollywood.",
+        "images": [
+            "https://joyjuncture.vercel.app/_next/image?url=%2Fgallery%2Fmarketplace%2FTamasha.webp&w=3840&q=75"
+        ],
+        "players": "1-99+",
+        "age": "12+",
+        "features": [
+            {
+                "title": "Play With Anyone, Anywhere",
+                "description": "1 player or 99+ players; Tamasha never stops. Perfect for family nights, house parties, weddings, picnics, long drives, office breaks, hostel hangouts."
+            },
+            {
+                "title": "Portable Design",
+                "description": "Comes in a compact, fabric pouch for easy storage and transport, allowing you to carry the fun wherever you go."
+            },
+            {
+                "title": "Perfect Gift for Every Occasion",
+                "description": "A guaranteed hit for birthdays, Diwali gifting, family game night hampers, sangeet nights, bachelorettes, and every bollywood lover in your life."
+            },
+            {
+                "title": "Filmy Drama & Bidding",
+                "description": "Blends acting talent, iconic dance steps, and competitive bidding into one laugh-out-loud party game."
+            }
+        ],
+        "howToPlay": [
+            {
+                "title": "Draw a Bollywood Challenge",
+                "description": "Pick a card with a Bollywood acting, dancing, or singing challenge. Get ready to unleash your filmy side!"
+            },
+            {
+                "title": "Bid on Your Confidence",
+                "description": "How well can you perform? Bid based on your confidence! Higher bids mean bigger rewards (and risks!)."
+            },
+            {
+                "title": "Perform & Entertain",
+                "description": "Act out iconic scenes, perform dance steps, or sing Bollywood hits. Make it dramatic—this is Tamasha!"
+            },
+            {
+                "title": "Score & Repeat",
+                "description": "Earn points for successful performances. Keep playing until someone becomes the ultimate Bollywood champion!"
+            }
+        ]
+    },
+    {
+        "name": "The Bloody Inheritance | Murder Mystery Case File",
+        "subtitle": "Murder Mystery Game",
+        "price": 999.00,
+        "description": "A hands-on detective mystery with realistic evidence. Step inside a story that feels straight out of a crime thriller!! The Bloody Inheritance is a hands-on murder mystery case file where you become the detective. Created by JJ's game designers, this experience is packed with realistic evidence, gripping storytelling, and the kind of twists that keep you thinking long after the game ends!! This isn't your usual \"solve-the-puzzle\" game. It feels like opening a real cold case... armed with files, photos, reports, letters, clues, and odd fragments of someone's life. Every piece leads you closer to the truth… if you read between the lines!",
+        "images": [
+            "https://joyjuncture.vercel.app/_next/image?url=%2Fgallery%2Fmarketplace%2FThe%20Bloody%20Inheritance.webp&w=3840&q=75"
+        ],
+        "players": "1-5",
+        "age": "16+",
+        "features": [
+            {
+                "title": "Immersive Detective Experience",
+                "description": "Feels like you're inside a movie. Work through realistic evidence, handwritten notes, photographs, reports, puzzles, and objects to crack the case."
+            },
+            {
+                "title": "Perfect for Any Occasion",
+                "description": "House parties, game nights with friends, corporate team-building, couples looking for something different, or hosting a detective-themed party."
+            },
+            {
+                "title": "Sharpens Critical Skills",
+                "description": "Enhances deduction, teamwork, and smart decision-making. Every clue matters—nothing is random."
+            },
+            {
+                "title": "Low Prep, High Engagement",
+                "description": "A totally fresh kind of game night experience. Best played in teams of 3, playable by 1–5 players. The fastest team to solve it wins bragging rights and eternal detective glory."
+            },
+            {
+                "title": "1-5 Players",
+                "description": "Best played in small teams. Compete against friends or solve it together!"
+            }
+        ],
+        "howToPlay": [
+            {
+                "title": "Open the Case File",
+                "description": "Unbox the murder mystery and spread out evidence—photos, letters, reports, notes, and mysterious objects."
+            },
+            {
+                "title": "Examine Every Clue",
+                "description": "Study each piece of evidence carefully. Look for connections, inconsistencies, and hidden details. Nothing is random!"
+            },
+            {
+                "title": "Discuss & Deduce as a Team",
+                "description": "Work together to piece the story together. Share theories, challenge assumptions, and narrow down suspects."
+            },
+            {
+                "title": "Solve the Mystery",
+                "description": "Identify the murderer, motive, and method! The fastest team to crack the case wins eternal detective glory."
+            }
+        ]
+    }
+]

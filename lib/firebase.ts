@@ -102,12 +102,10 @@ function ensureFirebaseInit() {
 
 // Helper to get initialized Firestore instance
 export async function getFirebaseDb() {
-  if (db) return db;
-
-  const firebase = await import('@/lib/firebase');
-  if (firebase.db) return firebase.db;
-
-  throw new Error('Firebase Firestore not initialized');
+  if (!db) {
+    throw new Error('Firebase Firestore not initialized. Please ensure all NEXT_PUBLIC_FIREBASE_* environment variables are set correctly.');
+  }
+  return db;
 }
 
 // ProfileUpdateData interface removed for JavaScript conversion
