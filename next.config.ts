@@ -25,11 +25,6 @@ const nextConfig: NextConfig = {
         destination: '/auth/signup',
         permanent: true,
       },
-      {
-        source: '/rewards',
-        destination: '/wallet',
-        permanent: true,
-      },
     ];
   },
 };

@@ -84,8 +84,9 @@ export async function POST(request: NextRequest) {
         ];
         const currentTier = [...TIERS].reverse().find((tier: any) => currentXP >= tier.minXP) || TIERS[0];
         
-        // Award JP based on purchase (0.1 JP per rupee)
-        const purchaseJP = Math.floor(amount * 0.1 * currentTier.multiplier);
+        // Award JP based on purchase (customizable via Firebase, default: 10 JP per ₹100)
+        const jpPer100 = shopXPSource?.baseJP || 10;
+        const purchaseJP = Math.floor((amount / 100) * jpPer100 * currentTier.multiplier);
         
         await userRef.set({
           xp: currentXP + purchaseXP,
@@ -125,6 +126,7 @@ export async function POST(request: NextRequest) {
           
           const eventXPSource = xpSettings?.xpSources?.find((s: any) => s.name.includes('Event Registration'));
           const eventXP = eventXPSource?.baseXP || 50;
+          const eventJPBase = eventXPSource?.baseJP || 50;
           
           // Get tier multiplier
           const TIERS = xpSettings?.tiers || [
@@ -135,7 +137,7 @@ export async function POST(request: NextRequest) {
           ];
           const currentTier = [...TIERS].reverse().find((tier: any) => currentXP >= tier.minXP) || TIERS[0];
           
-          const eventJP = Math.floor(eventXP * currentTier.multiplier);
+          const eventJP = Math.floor(eventJPBase * currentTier.multiplier);
           
           await userRef.set({
             xp: currentXP + eventXP,

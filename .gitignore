@@ -45,4 +45,5 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-seeder
+# seeder scripts (if any)
+seeder/

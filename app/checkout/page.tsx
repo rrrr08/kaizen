@@ -41,6 +41,14 @@ export default function CheckoutPage() {
     zipCode: '',
   });
 
+  // Voucher state
+  const [voucherCode, setVoucherCode] = useState('');
+  const [appliedVoucher, setAppliedVoucher] = useState<any>(null);
+  const [appliedVoucherId, setAppliedVoucherId] = useState<string | null>(null);
+  const [voucherDiscount, setVoucherDiscount] = useState(0);
+  const [voucherError, setVoucherError] = useState('');
+  const [checkingVoucher, setCheckingVoucher] = useState(false);
+
   // Redirect to login if not authenticated
   useEffect(() => {
     if (!authLoading && !user) {
@@ -107,7 +115,23 @@ export default function CheckoutPage() {
   const totalPrice = getTotalPrice();
   const maxRedeemable = getMaxRedeemableAmount(totalPrice, walletPoints);
   const pointsWorthRupees = calculatePointWorth(redeemPoints);
-  const subtotal = totalPrice - pointsWorthRupees;
+  
+  // Calculate with voucher
+  let subtotalAfterPoints = totalPrice - pointsWorthRupees;
+  let voucherDiscountAmount = 0;
+  
+  if (appliedVoucher) {
+    if (appliedVoucher.discountType === 'percentage') {
+      voucherDiscountAmount = (subtotalAfterPoints * appliedVoucher.discountValue) / 100;
+      if (appliedVoucher.maxDiscount) {
+        voucherDiscountAmount = Math.min(voucherDiscountAmount, appliedVoucher.maxDiscount);
+      }
+    } else {
+      voucherDiscountAmount = appliedVoucher.discountValue;
+    }
+  }
+  
+  const subtotal = subtotalAfterPoints - voucherDiscountAmount;
   const gstAmount = Math.round(subtotal * (gstRate / 100));
   const finalPrice = subtotal + gstAmount;
 
@@ -139,6 +163,70 @@ export default function CheckoutPage() {
     const pointsToUse = Math.min(walletPoints, maxRedeemPoints);
     setRedeemPoints(pointsToUse);
     setAppliedPointsDiscount(calculatePointWorth(pointsToUse));
+  };
+
+  const handleApplyVoucher = async () => {
+    if (!voucherCode.trim()) {
+      setVoucherError('Please enter a voucher code');
+      return;
+    }
+
+    if (!user) {
+      setVoucherError('Please log in to apply vouchers');
+      return;
+    }
+
+    setCheckingVoucher(true);
+    setVoucherError('');
+
+    try {
+      const token = await user.getIdToken();
+      const response = await fetch('/api/rewards/validate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          code: voucherCode,
+          orderTotal: totalPrice - pointsWorthRupees,
+          category: 'shop' // Checkout page is for shop purchases
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.valid) {
+        setAppliedVoucher(data.voucher);
+        setAppliedVoucherId(data.voucherId);
+        setVoucherDiscount(data.discount.amount); // Use discount.amount from API
+        setVoucherError('');
+        addToast({
+          title: 'Voucher Applied!',
+          description: `You saved ₹${data.discount.amount.toFixed(2)}`,
+        });
+      } else {
+        setVoucherError(data.error || 'Invalid voucher code');
+        setAppliedVoucher(null);
+        setAppliedVoucherId(null);
+        setVoucherDiscount(0);
+      }
+    } catch (error) {
+      setVoucherError('Failed to validate voucher');
+      setAppliedVoucher(null);
+      setAppliedVoucherId(null);
+      setVoucherDiscount(0);
+    } finally {
+      setCheckingVoucher(false);
+    }
+  };
+
+  const handleRemoveVoucher = () => {
+    setAppliedVoucher(null);
+    setAppliedVoucherId(null);
+    setVoucherDiscount(0);
+    setVoucherCode('');
+    setVoucherError('');
   };
 
   const handlePlaceOrder = async (e: React.FormEvent) => {
@@ -295,6 +383,27 @@ export default function CheckoutPage() {
 
           // Clear cart from Firebase
           await clearUserCart(currentUser.uid);
+
+          // Mark voucher as used if one was applied
+          if (appliedVoucherId) {
+            try {
+              const token = await currentUser.getIdToken();
+              await fetch('/api/rewards/use', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                  voucherId: appliedVoucherId,
+                  orderId: orderId_New
+                })
+              });
+            } catch (voucherError) {
+              console.error('Error marking voucher as used:', voucherError);
+              // Don't fail the order if voucher marking fails
+            }
+          }
 
           addToast({
             title: 'Payment Successful!',
@@ -495,62 +604,49 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
-              {/* Wallet Points Redemption */}
-              <div className="bg-[#FFFDF5] p-8 rounded-[20px] border-2 border-black neo-shadow relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-[#FFD93D]/20 rounded-full blur-[40px] pointer-events-none"></div>
-                <h2 className="font-header text-3xl font-black mb-6 text-black flex items-center gap-2">
-                  <Coins className="text-[#FFD93D] fill-black" strokeWidth={2.5} />
-                  USE WALLET POINTS
-                </h2>
-
-                <div className="bg-[#FFD93D] border-2 border-black rounded-xl p-4 mb-6 neo-shadow-sm">
-                  <p className="text-xs text-black font-black uppercase tracking-widest mb-1">YOUR AVAILABLE POINTS</p>
-                  <p className="font-header text-4xl font-black text-black">{walletPoints.toLocaleString()} PTS</p>
-                  <p className="text-sm text-black font-bold mt-1">Worth up to ₹{calculatePointWorth(walletPoints).toFixed(2)} in discounts</p>
-                </div>
-
-                {walletPoints > 0 ? (
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-black uppercase tracking-wider mb-3 text-black">How Many Points to Use?</label>
-                      <div className="flex gap-2">
-                        <input
-                          type="number"
-                          value={redeemPoints}
-                          onChange={handleRedeemPointsChange}
-                          max={Math.floor(maxRedeemable / config.redeemRate)}
-                          placeholder="Points"
-                          className="flex-1 bg-white border-2 border-black rounded-lg px-4 py-3 text-black font-bold placeholder-black/30 focus:border-[#6C5CE7] focus:outline-none transition shadow-[2px_2px_0px_rgba(0,0,0,0.1)]"
-                        />
-                        <button
-                          type="button"
-                          onClick={handleUseMaxPoints}
-                          className="px-6 py-3 bg-black text-white font-black text-sm tracking-wider hover:bg-[#6C5CE7] transition-all rounded-lg border-2 border-black shadow-[2px_2px_0px_#888]"
-                        >
-                          USE ALL
-                        </button>
-                      </div>
-                      <p className="text-xs text-black/60 font-bold mt-2">
-                        Max: {Math.floor(maxRedeemable / config.redeemRate).toLocaleString()} points (₹{maxRedeemable.toFixed(2)})
-                      </p>
+              {/* Voucher Code Section */}
+              <div className="bg-white border-2 border-black p-6 rounded-[20px] neo-shadow">
+                <h3 className="font-header text-lg font-black mb-4 text-black">HAVE A VOUCHER?</h3>
+                
+                {!appliedVoucher ? (
+                  <div className="space-y-3">
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={voucherCode}
+                        onChange={(e) => setVoucherCode(e.target.value.toUpperCase())}
+                        placeholder="Enter voucher code"
+                        className="flex-1 bg-white border-2 border-black rounded-lg px-4 py-3 text-black placeholder-black/40 focus:bg-[#FFD93D]/20 focus:outline-none transition font-bold uppercase"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleApplyVoucher}
+                        disabled={checkingVoucher || !voucherCode.trim()}
+                        className="px-6 py-3 bg-[#6C5CE7] text-white font-black text-sm rounded-lg border-2 border-black neo-shadow hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed transition-all uppercase"
+                      >
+                        {checkingVoucher ? 'CHECKING...' : 'APPLY'}
+                      </button>
                     </div>
-
-                    {redeemPoints > 0 && (
-                      <div className="bg-white border-2 border-black rounded-xl p-4 flex justify-between items-center shadow-[2px_2px_0px_rgba(0,0,0,0.1)]">
-                        <div>
-                          <span className="text-black/80 font-bold block">Points Discount applied:</span>
-                          <span className="text-xs text-black/50 font-bold">
-                            {redeemPoints} points × ₹{config.redeemRate}
-                          </span>
-                        </div>
-                        <span className="font-header text-2xl font-black text-[#00B894]">-₹{pointsWorthRupees.toFixed(2)}</span>
-                      </div>
+                    {voucherError && (
+                      <p className="text-red-600 text-sm font-bold">❌ {voucherError}</p>
                     )}
                   </div>
                 ) : (
-                  <div className="bg-black/5 border-2 border-black/10 rounded-xl p-6 text-center">
-                    <p className="text-black/60 font-black">No points available yet</p>
-                    <p className="text-sm text-black/50 font-bold mt-2">Complete your first purchase to earn points!</p>
+                  <div className="bg-[#00B894]/10 border-2 border-[#00B894] rounded-lg p-4 flex items-center justify-between">
+                    <div>
+                      <p className="font-black text-black text-sm">✅ {appliedVoucher.name}</p>
+                      <p className="text-xs text-black/60 font-bold">Code: {voucherCode}</p>
+                      <p className="text-xs text-[#00B894] font-bold mt-1">
+                        Saved ₹{voucherDiscountAmount.toFixed(2)}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleRemoveVoucher}
+                      className="px-3 py-1 bg-red-500 text-white text-xs font-black rounded border-2 border-black hover:bg-red-600 transition-all"
+                    >
+                      REMOVE
+                    </button>
                   </div>
                 )}
               </div>
@@ -598,6 +694,12 @@ export default function CheckoutPage() {
                   <div className="flex justify-between text-sm font-bold text-[#00B894]">
                     <span>Points Discount</span>
                     <span>-₹{pointsWorthRupees.toFixed(2)}</span>
+                  </div>
+                )}
+                {appliedVoucher && voucherDiscountAmount > 0 && (
+                  <div className="flex justify-between text-sm font-bold text-[#6C5CE7]">
+                    <span>Voucher Discount</span>
+                    <span>-₹{voucherDiscountAmount.toFixed(2)}</span>
                   </div>
                 )}
                 <div className="flex justify-between text-sm font-bold">

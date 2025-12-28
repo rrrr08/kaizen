@@ -26,14 +26,20 @@ export default function EventRegistrationForm({
   onClose,
 }: EventRegistrationFormProps) {
   const router = useRouter();
-  const { config } = useGamification();
-  const [wallet, setWallet] = useState<any>(null);
+  const { hasEarlyEventAccess, workshopDiscountPercent, hasVIPSeating } = useGamification();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [useWalletPoints, setUseWalletPoints] = useState(false);
-  const [pointsToUse, setPointsToUse] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
+  const [wantsVIPSeating, setWantsVIPSeating] = useState(false);
+
+  // Voucher state
+  const [voucherCode, setVoucherCode] = useState('');
+  const [appliedVoucher, setAppliedVoucher] = useState<any>(null);
+  const [appliedVoucherId, setAppliedVoucherId] = useState<string | null>(null);
+  const [voucherDiscount, setVoucherDiscount] = useState(0);
+  const [voucherError, setVoucherError] = useState('');
+  const [checkingVoucher, setCheckingVoucher] = useState(false);
 
   const [formData, setFormData] = useState({
     name: user?.displayName || '',
@@ -41,32 +47,11 @@ export default function EventRegistrationForm({
     phone: '',
   });
 
-  useEffect(() => {
-    if (user) {
-      loadWallet();
-    }
-  }, [user]);
-
-  const loadWallet = async () => {
-    try {
-      if (!user?.uid) return;
-      // Lazy load Firebase function
-      const { getUserWallet } = await import('@/lib/firebase');
-      const walletData = await getUserWallet(user.uid);
-      // If wallet doesn't exist, create a default one with 0 points
-      setWallet(walletData || { points: 0, userId: user.uid });
-    } catch (err) {
-      console.error('Error loading wallet:', err);
-      // Set default wallet on error
-      if (user?.uid) {
-        setWallet({ points: 0, userId: user.uid });
-      }
-    }
-  };
-
-  // Convert points to rupees using standard conversion rate (1 point = redeemRate rupees)
-  const pointsValue = pointsToUse * config.redeemRate;
-  const finalAmount = Math.max(0, (event.price || 0) - pointsValue);
+  // Calculate price with tier discount
+  const basePrice = event.price || 0;
+  const tierDiscount = workshopDiscountPercent > 0 ? (basePrice * workshopDiscountPercent / 100) : 0;
+  const priceAfterTierDiscount = basePrice - tierDiscount;
+  const finalAmount = Math.max(0, priceAfterTierDiscount - voucherDiscount);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -100,6 +85,66 @@ export default function EventRegistrationForm({
     return true;
   };
 
+  const handleApplyVoucher = async () => {
+    if (!voucherCode.trim()) {
+      setVoucherError('Please enter a voucher code');
+      return;
+    }
+
+    if (!user) {
+      setVoucherError('Please log in to apply vouchers');
+      return;
+    }
+
+    setCheckingVoucher(true);
+    setVoucherError('');
+
+    try {
+      const token = await user.getIdToken();
+      const response = await fetch('/api/rewards/validate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          code: voucherCode,
+          orderTotal: priceAfterTierDiscount,
+          category: 'events' // Event registration category
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.valid) {
+        setAppliedVoucher(data.voucher);
+        setAppliedVoucherId(data.voucherId);
+        setVoucherDiscount(data.discount.amount);
+        setVoucherError('');
+      } else {
+        setVoucherError(data.error || 'Invalid voucher code');
+        setAppliedVoucher(null);
+        setAppliedVoucherId(null);
+        setVoucherDiscount(0);
+      }
+    } catch (error) {
+      setVoucherError('Failed to validate voucher');
+      setAppliedVoucher(null);
+      setAppliedVoucherId(null);
+      setVoucherDiscount(0);
+    } finally {
+      setCheckingVoucher(false);
+    }
+  };
+
+  const handleRemoveVoucher = () => {
+    setAppliedVoucher(null);
+    setAppliedVoucherId(null);
+    setVoucherDiscount(0);
+    setVoucherCode('');
+    setVoucherError('');
+  };
+
   const handlePayment = async () => {
     if (!user) {
       alert('Please sign in to register');
@@ -127,7 +172,6 @@ export default function EventRegistrationForm({
             eventName: event.title,
             userName: formData.name,
             userEmail: formData.email,
-            walletPointsUsed: pointsToUse,
           },
         }),
       });
@@ -144,7 +188,7 @@ export default function EventRegistrationForm({
         event.id,
         user.uid,
         finalAmount * 100, // Convert to paise
-        pointsToUse
+        0 // No wallet points used
       );
 
       // Load Razorpay script
@@ -179,13 +223,33 @@ export default function EventRegistrationForm({
                   eventId: event.id,
                   userId: user.uid,
                   amount: finalAmount,
-                  walletPointsUsed: pointsToUse,
+                  walletPointsUsed: 0,
                 }),
               });
 
               const paymentData = await paymentResponse.json();
 
               if (paymentData.success) {
+                // Mark voucher as used if one was applied
+                if (appliedVoucherId) {
+                  try {
+                    const token = await user.getIdToken();
+                    await fetch('/api/rewards/use', {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                      },
+                      body: JSON.stringify({
+                        voucherId: appliedVoucherId,
+                        orderId: dbOrderResult.orderId
+                      })
+                    });
+                  } catch (voucherError) {
+                    console.error('Error marking voucher as used:', voucherError);
+                  }
+                }
+
                 const registrationId = paymentData.registrationId || dbOrderResult.orderId;
                 
                 // Store registration details in localStorage for the success page
@@ -195,9 +259,12 @@ export default function EventRegistrationForm({
                   eventDate: event.date,
                   eventLocation: event.location,
                   amount: finalAmount.toFixed(2),
-                  pointsUsed: pointsToUse,
+                  pointsUsed: 0,
                   userName: formData.name,
                   userEmail: formData.email,
+                  vipSeating: hasVIPSeating && wantsVIPSeating,
+                  tierDiscount: tierDiscount > 0 ? tierDiscount.toFixed(2) : null,
+                  voucherDiscount: voucherDiscount > 0 ? voucherDiscount.toFixed(2) : null,
                 };
                 
                 if (typeof window !== 'undefined') {
@@ -369,58 +436,89 @@ export default function EventRegistrationForm({
           </div>
         </div>
 
-        {/* Wallet Points Section */}
-        <div className="mb-8 p-4 bg-amber-500/10 border border-amber-500/30 rounded-sm">
-          <div className="text-white/60 font-header text-sm tracking-widest mb-4">WALLET POINTS</div>
-          
-          {wallet === null ? (
-            <div className="text-white/60 font-serif text-sm">Loading wallet...</div>
-          ) : wallet && wallet.points > 0 ? (
-            <>
-              <label className="flex items-center gap-3 cursor-pointer mb-3">
-                <input
-                  type="checkbox"
-                  checked={useWalletPoints}
-                  onChange={(e) => {
-                    setUseWalletPoints(e.target.checked);
-                    setPointsToUse(0);
-                  }}
-                  className="w-4 h-4 accent-amber-500"
-                />
-                <span className="text-white font-header text-sm">Use Wallet Points</span>
-                <span className="text-amber-400 font-serif ml-auto">{wallet.points} Points Available</span>
-              </label>
-
-              {useWalletPoints && (
-                <div className="mt-4 space-y-3">
-                  <div>
-                    <label className="text-white/60 text-xs block mb-3">
-                      Points to use (max: {Math.min(wallet.points, Math.floor((event.price || 0) / config.redeemRate))})
-                    </label>
-                    <input
-                      type="range"
-                      min="0"
-                      max={Math.min(wallet.points, Math.floor((event.price || 0) / config.redeemRate))}
-                      value={pointsToUse}
-                      onChange={(e) => setPointsToUse(parseInt(e.target.value))}
-                      className="w-full accent-amber-500"
-                    />
-                    <div className="flex justify-between text-xs text-white/50 mt-2">
-                      <span>0 PTS</span>
-                      <span className="text-amber-400">{pointsToUse} PTS = ₹{pointsValue.toFixed(2)}</span>
-                      <span>{Math.min(wallet.points, Math.floor((event.price || 0) / config.redeemRate))} PTS</span>
-                    </div>
-                  </div>
+        {/* Tier Perks Section */}
+        {(hasEarlyEventAccess || workshopDiscountPercent > 0 || hasVIPSeating) && (
+          <div className="mb-8 p-4 bg-gradient-to-r from-amber-500/10 to-purple-500/10 border border-amber-500/30 rounded-sm">
+            <div className="text-white/60 font-header text-sm tracking-widest mb-4 flex items-center gap-2">
+              <span className="text-2xl">👑</span> YOUR TIER PERKS
+            </div>
+            
+            <div className="space-y-3">
+              {hasEarlyEventAccess && (
+                <div className="flex items-center gap-3 text-sm">
+                  <span className="text-green-400">✓</span>
+                  <span className="text-white font-bold">Early Event Access (Player Tier)</span>
                 </div>
               )}
-            </>
-          ) : (
-            <div className="text-white/60 font-serif text-sm">
-              <p className="mb-2">No wallet points available. Earn points by attending events and making purchases.</p>
-              <a href="/wallet" className="text-amber-400 hover:text-amber-300 text-xs inline-block mt-2">
-                Check Wallet →
-              </a>
+              
+              {workshopDiscountPercent > 0 && (
+                <div className="flex items-center gap-3 text-sm">
+                  <span className="text-green-400">✓</span>
+                  <span className="text-white font-bold">{workshopDiscountPercent}% Workshop Discount (Strategist Tier)</span>
+                  <span className="ml-auto text-amber-400 font-bold">-₹{tierDiscount.toFixed(2)}</span>
+                </div>
+              )}
+              
+              {hasVIPSeating && (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-3 text-sm">
+                    <span className="text-green-400">✓</span>
+                    <span className="text-white font-bold">VIP Seating Available (Grandmaster Tier)</span>
+                  </div>
+                  <label className="flex items-center gap-3 cursor-pointer ml-6">
+                    <input
+                      type="checkbox"
+                      checked={wantsVIPSeating}
+                      onChange={(e) => setWantsVIPSeating(e.target.checked)}
+                      className="w-4 h-4 accent-amber-500"
+                    />
+                    <span className="text-white/80 font-serif text-sm">Reserve VIP Seating</span>
+                  </label>
+                </div>
+              )}
             </div>
+          </div>
+        )}
+
+        {/* Voucher Section */}
+        <div className="mb-8 p-4 bg-purple-500/10 border border-purple-500/30 rounded-sm">
+          <div className="text-white/60 font-header text-sm tracking-widest mb-4">HAVE A VOUCHER?</div>
+          
+          {!appliedVoucher ? (
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={voucherCode}
+                onChange={(e) => setVoucherCode(e.target.value.toUpperCase())}
+                placeholder="Enter voucher code"
+                className="flex-1 px-4 py-2 bg-white/5 border border-white/10 text-white placeholder:text-white/30 rounded-sm focus:outline-none focus:border-purple-500 transition-all uppercase"
+              />
+              <button
+                onClick={handleApplyVoucher}
+                disabled={checkingVoucher || !voucherCode.trim()}
+                className="px-6 py-2 bg-purple-600 text-white font-header text-xs tracking-widest hover:bg-purple-700 disabled:opacity-50 transition-all rounded-sm"
+              >
+                {checkingVoucher ? 'CHECKING...' : 'APPLY'}
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center justify-between p-3 bg-purple-500/20 border border-purple-500/50 rounded-sm">
+              <div>
+                <p className="text-white font-header text-sm">{appliedVoucher.name}</p>
+                <p className="text-purple-300 text-xs mt-1">Code: {appliedVoucher.code}</p>
+                <p className="text-green-400 text-xs mt-1">Saved ₹{voucherDiscount.toFixed(2)}</p>
+              </div>
+              <button
+                onClick={handleRemoveVoucher}
+                className="px-4 py-2 bg-red-600/80 text-white font-header text-xs tracking-widest hover:bg-red-700 transition-all rounded-sm"
+              >
+                REMOVE
+              </button>
+            </div>
+          )}
+          
+          {voucherError && (
+            <p className="text-red-400 text-xs mt-2">{voucherError}</p>
           )}
         </div>
 
@@ -431,10 +529,17 @@ export default function EventRegistrationForm({
             <span className="font-serif">₹{event.price || 0}</span>
           </div>
 
-          {useWalletPoints && pointsToUse > 0 && (
+          {workshopDiscountPercent > 0 && tierDiscount > 0 && (
             <div className="flex justify-between text-amber-400">
-              <span className="font-header text-sm">WALLET DISCOUNT:</span>
-              <span className="font-serif">-₹{pointsValue.toFixed(2)}</span>
+              <span className="font-header text-sm">TIER DISCOUNT ({workshopDiscountPercent}%):</span>
+              <span className="font-serif">-₹{tierDiscount.toFixed(2)}</span>
+            </div>
+          )}
+
+          {appliedVoucher && voucherDiscount > 0 && (
+            <div className="flex justify-between text-purple-400">
+              <span className="font-header text-sm">VOUCHER DISCOUNT:</span>
+              <span className="font-serif">-₹{voucherDiscount.toFixed(2)}</span>
             </div>
           )}
 

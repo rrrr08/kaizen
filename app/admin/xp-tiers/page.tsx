@@ -20,6 +20,7 @@ interface Tier {
 interface XPSource {
   name: string;
   baseXP: number;
+  baseJP: number;
   enabled: boolean;
 }
 
@@ -65,10 +66,10 @@ export default function XPTiersAdmin() {
   ];
 
   const getDefaultXPSources = (): XPSource[] => [
-    { name: 'Shop Purchase (per ₹100)', baseXP: 10, enabled: true },
-    { name: 'Event Registration', baseXP: 50, enabled: true },
-    { name: 'Workshop Registration', baseXP: 75, enabled: true },
-    { name: 'Game Night Attendance', baseXP: 100, enabled: true }
+    { name: 'Shop Purchase (per ₹100)', baseXP: 10, baseJP: 10, enabled: true },
+    { name: 'Event Registration', baseXP: 50, baseJP: 50, enabled: true },
+    { name: 'Workshop Registration', baseXP: 75, baseJP: 75, enabled: true },
+    { name: 'Game Night Attendance', baseXP: 100, baseJP: 100, enabled: true }
   ];
 
   const saveSettings = async () => {
@@ -316,8 +317,18 @@ export default function XPTiersAdmin() {
                   placeholder="XP"
                 />
               </div>
-              
               <span className="text-sm font-black text-black/60 uppercase">XP</span>
+              
+              <div className="w-32">
+                <input
+                  type="number"
+                  value={source.baseJP || 0}
+                  onChange={(e) => updateXPSource(index, 'baseJP', parseInt(e.target.value))}
+                  className="w-full px-4 py-3 bg-white border-3 border-black rounded-xl font-bold text-center focus:outline-none focus:ring-4 focus:ring-[#FFD93D]"
+                  placeholder="JP"
+                />
+              </div>
+              <span className="text-sm font-black text-[#6C5CE7]/80 uppercase">JP</span>
             </motion.div>
           ))}
         </div>

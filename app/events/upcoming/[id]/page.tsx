@@ -6,11 +6,13 @@ import { useParams } from 'next/navigation';
 import { GameEvent } from '@/lib/types';
 import { splitDateTime } from '@/lib/utils';
 import EventRegistrationForm from '@/components/EventRegistrationForm';
+import { useGamification } from '@/app/context/GamificationContext';
 
 export const dynamic = 'force-dynamic';
 
 export default function UpcomingEventDetail() {
   const { id } = useParams<{ id: string }>();
+  const { hasEarlyEventAccess } = useGamification();
 
   const [event, setEvent] = useState<GameEvent | null>(null);
   const [loading, setLoading] = useState(true);
@@ -165,6 +167,15 @@ export default function UpcomingEventDetail() {
                   value={event.price === 0 ? 'FREE' : `₹${event.price}`}
                 />
               </div>
+
+              {hasEarlyEventAccess && (
+                <div className="mb-4 p-3 bg-amber-500/20 border border-amber-500 rounded-sm">
+                  <div className="flex items-center gap-2 text-amber-500 font-header text-xs tracking-widest">
+                    <span className="text-lg">⚡</span>
+                    <span>EARLY ACCESS (PLAYER TIER)</span>
+                  </div>
+                </div>
+              )}
 
               <button
                 onClick={() => setShowRegistrationForm(true)}

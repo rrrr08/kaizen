@@ -18,6 +18,7 @@ const navItems = [
   { name: 'Play', path: '/play' },
   { name: 'Events', path: '/events' },
   { name: 'Community', path: '/community' },
+  { name: 'Dashboard', path: '/wallet' },
   { name: 'Rewards', path: '/rewards' },
   { name: 'Progress', path: '/progress' },
   { name: 'Blog', path: '/blog' },
@@ -64,21 +65,21 @@ const Navbar: React.FC = () => {
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-4 flex items-center justify-between bg-[#FFFDF5] border-b-2 border-black transition-all">
+      <nav className="fixed top-0 left-0 right-0 z-50 px-4 py-3 flex items-center justify-between bg-[#FFFDF5] border-b-2 border-black transition-all">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-3 group z-50">
+        <Link href="/" className="flex items-center gap-2 group z-50">
           <motion.div
             whileHover={{ rotate: [0, -10, 10, -10, 10, 0] }}
             transition={{ duration: 0.5 }}
-            className="bg-[#FFD93D] p-3 border-2 border-black rounded-[15px] neo-shadow"
+            className="bg-[#FFD93D] p-2.5 border-2 border-black rounded-[12px] neo-shadow"
           >
-            <span className="text-2xl font-black text-black">JJ</span>
+            <span className="text-xl font-black text-black">JJ</span>
           </motion.div>
-          <span className="text-2xl font-black tracking-tighter hidden md:block text-black">Joy Juncture</span>
+          <span className="text-xl font-black tracking-tighter hidden xl:block text-black">Joy Juncture</span>
         </Link>
 
         {/* Desktop Menu */}
-        <div className="relative hidden lg:flex bg-white/50 p-1.5 rounded-full border-2 border-black items-center shadow-[4px_4px_0px_rgba(0,0,0,0.1)]">
+        <div className="relative hidden lg:flex bg-white/50 p-1 rounded-full border-2 border-black items-center shadow-[4px_4px_0px_rgba(0,0,0,0.1)]">
           {navItems.map((item, idx) => {
             if (item.name === 'Events') {
               const isActive = pathname.startsWith('/events');
@@ -86,7 +87,7 @@ const Navbar: React.FC = () => {
                 <DropdownMenu.Root key={item.path}>
                   <DropdownMenu.Trigger asChild>
                     <button
-                      className={`relative px-5 py-2 rounded-full text-sm font-black uppercase tracking-wider transition-colors duration-300 z-10 flex items-center gap-1 outline-none ${isActive ? 'text-white' : 'text-black hover:bg-black/5'}`}
+                      className={`relative px-3 py-1.5 rounded-full text-xs font-black uppercase tracking-wide transition-colors duration-300 z-10 flex items-center gap-1 outline-none ${isActive ? 'text-white' : 'text-black hover:bg-black/5'}`}
                       onMouseEnter={() => setHoveredIndex(idx)}
                       onMouseLeave={() => setHoveredIndex(null)}
                     >
@@ -98,7 +99,7 @@ const Navbar: React.FC = () => {
                         />
                       )}
                       {item.name}
-                      <ChevronDown size={14} strokeWidth={3} className={isActive ? "text-white" : "text-black"} />
+                      <ChevronDown size={12} strokeWidth={3} className={isActive ? "text-white" : "text-black"} />
                     </button>
                   </DropdownMenu.Trigger>
                   <DropdownMenu.Portal>
@@ -133,7 +134,7 @@ const Navbar: React.FC = () => {
               <Link
                 key={item.path}
                 href={item.path}
-                className={`relative px-5 py-2 rounded-full text-sm font-black uppercase tracking-wider transition-colors duration-300 z-10 ${isActive ? 'text-white' : 'text-black hover:bg-black/5'
+                className={`relative px-3 py-1.5 rounded-full text-xs font-black uppercase tracking-wide transition-colors duration-300 z-10 ${isActive ? 'text-white' : 'text-black hover:bg-black/5'
                   }`}
                 onMouseEnter={() => setHoveredIndex(idx)}
                 onMouseLeave={() => setHoveredIndex(null)}
@@ -152,23 +153,23 @@ const Navbar: React.FC = () => {
         </div>
 
         {/* User Actions */}
-        <div className="flex items-center gap-4 z-50">
+        <div className="flex items-center gap-2 z-50">
           {/* Wallet Capsule (Hidden on small mobile) */}
-          <div className="hidden sm:flex items-center gap-4">
+          <div className="hidden sm:flex items-center gap-2">
             <motion.div
               whileHover={{ scale: 1.05 }}
-              className="flex items-center gap-3 bg-[#00B894] px-4 py-2 rounded-full border-2 border-black neo-shadow mr-2"
+              className="flex items-center gap-2 bg-[#00B894] px-3 py-1.5 rounded-full border-2 border-black neo-shadow"
             >
               <motion.div
                 animate={{ rotateY: [0, 360] }}
                 transition={{ duration: 2, repeat: Infinity, repeatDelay: 3, ease: "easeInOut" }}
                 className="flex items-center justify-center"
               >
-                <Coins className="text-black w-5 h-5" />
+                <Coins className="text-black w-4 h-4" />
               </motion.div>
               <div className="flex flex-col -space-y-1">
-                <span className="text-[8px] text-black font-black uppercase leading-none tracking-widest">Balance</span>
-                <span className="text-black font-black whitespace-nowrap text-sm leading-none">{balance.toLocaleString()}</span>
+                <span className="text-[7px] text-black font-black uppercase leading-none tracking-widest">Balance</span>
+                <span className="text-black font-black whitespace-nowrap text-xs leading-none">{balance.toLocaleString()}</span>
               </div>
             </motion.div>
           </div>
@@ -178,11 +179,11 @@ const Navbar: React.FC = () => {
             <motion.button
               whileHover={{ scale: 1.1, rotate: -5 }}
               whileTap={{ scale: 0.9 }}
-              className="w-12 h-12 bg-white flex items-center justify-center rounded-full border-2 border-black neo-shadow relative"
+              className="w-10 h-10 bg-white flex items-center justify-center rounded-full border-2 border-black neo-shadow relative"
             >
-              <ShoppingBag className="w-5 h-5 text-black" />
+              <ShoppingBag className="w-4 h-4 text-black" />
               {totalItems > 0 && (
-                <span className="absolute -top-1 -right-1 bg-[#FF7675] text-black text-[10px] font-black w-5 h-5 flex items-center justify-center rounded-full border-2 border-black">
+                <span className="absolute -top-1 -right-1 bg-[#FF7675] text-black text-[9px] font-black w-4 h-4 flex items-center justify-center rounded-full border-2 border-black">
                   {totalItems}
                 </span>
               )}
@@ -196,7 +197,7 @@ const Navbar: React.FC = () => {
                 <motion.button
                   whileHover={{ scale: 1.1, rotate: 5 }}
                   whileTap={{ scale: 0.9 }}
-                  className="w-12 h-12 bg-[#6C5CE7] flex items-center justify-center rounded-full border-2 border-black neo-shadow cursor-pointer outline-none"
+                  className="w-10 h-10 bg-[#6C5CE7] flex items-center justify-center rounded-full border-2 border-black neo-shadow cursor-pointer outline-none"
                 >
                   <div className="w-full h-full flex items-center justify-center text-white font-black text-sm">
                     {user.email?.[0].toUpperCase()}
@@ -256,19 +257,19 @@ const Navbar: React.FC = () => {
               <motion.button
                 whileHover={{ scale: 1.1, rotate: 5 }}
                 whileTap={{ scale: 0.9 }}
-                className="w-12 h-12 bg-[#6C5CE7] flex items-center justify-center rounded-full border-2 border-black neo-shadow"
+                className="w-10 h-10 bg-[#6C5CE7] flex items-center justify-center rounded-full border-2 border-black neo-shadow"
               >
-                <User className="w-5 h-5 text-white" />
+                <User className="w-4 h-4 text-white" />
               </motion.button>
             </Link>
           )}
 
           {/* Mobile Menu Toggle */}
           <button
-            className="lg:hidden w-12 h-12 bg-black flex items-center justify-center rounded-full text-white"
+            className="lg:hidden w-10 h-10 bg-black flex items-center justify-center rounded-full text-white"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
-            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
       </nav>

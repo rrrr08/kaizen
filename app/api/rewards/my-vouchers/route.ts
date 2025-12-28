@@ -14,17 +14,24 @@ export async function GET(req: NextRequest) {
     const decodedToken = await adminAuth.verifyIdToken(token);
     const userUid = decodedToken.uid;
 
-    // Fetch user's vouchers
+    // Fetch user's vouchers (only unused ones)
     const vouchersSnap = await adminDb
       .collection('vouchers')
       .where('userId', '==', userUid)
-      .orderBy('redeemedAt', 'desc')
+      .where('used', '==', false)
       .get();
 
-    const vouchers = vouchersSnap.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
+    const vouchers = vouchersSnap.docs
+      .map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }))
+      .sort((a: any, b: any) => {
+        // Sort by redeemedAt in descending order (newest first)
+        const aTime = a.redeemedAt?.toMillis?.() || 0;
+        const bTime = b.redeemedAt?.toMillis?.() || 0;
+        return bTime - aTime;
+      });
 
     return NextResponse.json({ vouchers });
 

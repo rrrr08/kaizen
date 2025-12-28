@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/app/context/AuthContext';
-import { Plus, Edit2, Trash2, Save } from 'lucide-react';
+import { Plus, Edit2, Trash2, Save, Ticket, AlertCircle } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 interface VoucherTemplate {
   id: string;
@@ -142,270 +143,321 @@ export default function AdminVouchersPage() {
     handleSave(newVoucher);
   };
 
+  const handleInitializeDefaults = async () => {
+    if (!user || !confirm('Initialize default vouchers? This will add 6 pre-configured vouchers.')) return;
+    
+    setSaving(true);
+    try {
+      const token = await user.getIdToken();
+      const response = await fetch('/api/admin/initialize-vouchers', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setMessage(`✅ ${data.message}`);
+        fetchVouchers();
+      } else {
+        setMessage(`❌ ${data.error || 'Failed to initialize vouchers'}`);
+      }
+    } catch (error) {
+      setMessage('❌ Network error');
+    } finally {
+      setSaving(false);
+      setTimeout(() => setMessage(''), 5000);
+    }
+  };
+
   if (loading) {
     return (
-      <div className="min-h-screen pt-28 pb-16 bg-[#FFFDF5] flex items-center justify-center">
+      <div className="min-h-screen bg-[#FFFDF5] flex items-center justify-center">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[#FFD93D] border-t-black mb-4"></div>
-          <p className="text-black/60 font-black text-xs tracking-[0.4em]">LOADING...</p>
+          <div className="w-16 h-16 border-4 border-black border-t-[#FFD93D] rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-black font-black text-xl uppercase tracking-wider">Loading...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen pt-28 pb-16 bg-[#FFFDF5]">
-      <div className="max-w-7xl mx-auto px-6 md:px-12">
-        {/* Header */}
-        <div className="mb-12 border-b-2 border-black pb-8">
-          <h1 className="font-header text-5xl md:text-7xl tracking-tighter mb-4 text-[#2D3436]">
-            VOUCHER <span className="text-[#6C5CE7]">MANAGEMENT</span>
-          </h1>
-          <p className="text-black/70 font-bold text-lg">
-            Create and manage reward vouchers
-          </p>
+    <div className="p-8 max-w-7xl mx-auto">
+      {/* Header */}
+      <motion.div 
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="mb-8"
+      >
+        <div className="flex items-center gap-4 mb-4">
+          <div className="p-3 bg-[#FFD93D] border-4 border-black rounded-2xl neo-shadow">
+            <Ticket className="w-8 h-8 text-black" />
+          </div>
+          <div>
+            <h1 className="font-header text-5xl font-black text-black tracking-tight">VOUCHER MANAGEMENT</h1>
+            <p className="text-black/60 font-bold uppercase tracking-wider text-sm">Create & Manage Reward Vouchers</p>
+          </div>
         </div>
+      </motion.div>
 
-        {/* Message */}
-        {message && (
-          <div className={`mb-6 p-4 rounded-xl border-2 ${
+      {/* Message */}
+      {message && (
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className={`mb-6 p-4 rounded-2xl border-4 border-black font-bold flex items-center gap-3 ${
             message.startsWith('✅') 
-              ? 'bg-green-100 border-green-500 text-green-800' 
-              : 'bg-red-100 border-red-500 text-red-800'
-          }`}>
-            <p className="font-bold">{message}</p>
-          </div>
-        )}
+              ? 'bg-[#00B894] text-white' 
+              : 'bg-[#FF6B6B] text-white'
+          }`}
+        >
+          <AlertCircle className="w-5 h-5" />
+          <p className="font-black">{message}</p>
+        </motion.div>
+      )}
 
-        {/* Add New Button */}
-        <div className="mb-8">
-          <button
-            onClick={() => setShowAddForm(!showAddForm)}
-            className="flex items-center gap-2 px-6 py-3 bg-[#00B894] text-white font-black text-sm uppercase tracking-widest rounded-xl border-2 border-black neo-shadow hover:translate-x-[4px] hover:translate-y-[4px] hover:shadow-none transition-all"
+      {/* Add New Button */}
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+        className="mb-8 flex gap-3"
+      >
+        <button
+          onClick={() => setShowAddForm(!showAddForm)}
+          className="flex items-center gap-3 px-6 py-4 bg-[#00B894] text-white font-black text-sm uppercase tracking-wider rounded-2xl border-4 border-black neo-shadow-hover transition-all"
+        >
+          <Plus size={24} />
+          ADD NEW VOUCHER
+        </button>
+        
+        <button
+          onClick={handleInitializeDefaults}
+          disabled={saving}
+          className="flex items-center gap-3 px-6 py-4 bg-[#FFD93D] text-black font-black text-sm uppercase tracking-wider rounded-2xl border-4 border-black neo-shadow-hover transition-all disabled:opacity-50"
+        >
+          <Ticket size={24} />
+          INITIALIZE DEFAULTS
+        </button>
+      </motion.div>
+
+      {/* Add Form */}
+      {showAddForm && (
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8 bg-white border-4 border-black p-8 rounded-3xl neo-shadow"
+        >
+          <h2 className="font-header text-3xl font-black text-black mb-6">CREATE NEW VOUCHER</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-xs font-black uppercase tracking-wider text-black/60 mb-2">Voucher Name</label>
+              <input
+                type="text"
+                value={formData.name}
+                onChange={(e) => setFormData({...formData, name: e.target.value})}
+                className="w-full px-4 py-3 bg-white border-3 border-black rounded-xl font-bold focus:outline-none focus:ring-4 focus:ring-[#FFD93D]"
+                placeholder="e.g., 20% Off Shop"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-xs font-black uppercase tracking-wider text-black/60 mb-2">Icon (Emoji)</label>
+              <input
+                type="text"
+                value={formData.icon}
+                onChange={(e) => setFormData({...formData, icon: e.target.value})}
+                className="w-full px-4 py-3 bg-white border-3 border-black rounded-xl font-bold text-2xl text-center focus:outline-none focus:ring-4 focus:ring-[#FFD93D]"
+              />
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="block text-xs font-black uppercase tracking-wider text-black/60 mb-2">Description</label>
+              <textarea
+                value={formData.description}
+                onChange={(e) => setFormData({...formData, description: e.target.value})}
+                className="w-full px-4 py-3 bg-white border-3 border-black rounded-xl font-bold focus:outline-none focus:ring-4 focus:ring-[#FFD93D]"
+                rows={2}
+                placeholder="Describe the voucher benefits"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-black uppercase tracking-wider text-black/60 mb-2">Points Cost</label>
+              <input
+                type="number"
+                value={formData.pointsCost}
+                onChange={(e) => setFormData({...formData, pointsCost: parseInt(e.target.value)})}
+                className="w-full px-4 py-3 bg-white border-3 border-black rounded-xl font-bold focus:outline-none focus:ring-4 focus:ring-[#FFD93D]"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-black uppercase tracking-wider text-black/60 mb-2">Discount Type</label>
+              <select
+                value={formData.discountType}
+                onChange={(e) => setFormData({...formData, discountType: e.target.value as 'percentage' | 'fixed'})}
+                className="w-full px-4 py-3 bg-white border-3 border-black rounded-xl font-bold focus:outline-none focus:ring-4 focus:ring-[#FFD93D]"
+              >
+                <option value="percentage">Percentage (%)</option>
+                <option value="fixed">Fixed Amount (₹)</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-black uppercase tracking-wider text-black/60 mb-2">
+                Discount Value {formData.discountType === 'percentage' ? '(%)' : '(₹)'}
+              </label>
+              <input
+                type="number"
+                value={formData.discountValue}
+                onChange={(e) => setFormData({...formData, discountValue: parseInt(e.target.value)})}
+                className="w-full px-4 py-3 bg-white border-3 border-black rounded-xl font-bold focus:outline-none focus:ring-4 focus:ring-[#FFD93D]"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-black uppercase tracking-wider text-black/60 mb-2">Category</label>
+              <select
+                value={formData.category}
+                onChange={(e) => setFormData({...formData, category: e.target.value as any})}
+                className="w-full px-4 py-3 bg-white border-3 border-black rounded-xl font-bold focus:outline-none focus:ring-4 focus:ring-[#FFD93D]"
+              >
+                <option value="shop">🛍️ Shop</option>
+                <option value="events">🎫 Events</option>
+                <option value="experiences">🎮 Experiences</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-black uppercase tracking-wider text-black/60 mb-2">Min Purchase (₹)</label>
+              <input
+                type="number"
+                value={formData.minPurchase}
+                onChange={(e) => setFormData({...formData, minPurchase: parseInt(e.target.value)})}
+                className="w-full px-4 py-3 bg-white border-3 border-black rounded-xl font-bold focus:outline-none focus:ring-4 focus:ring-[#FFD93D]"
+                placeholder="0 = No minimum"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-black uppercase tracking-wider text-black/60 mb-2">Max Discount (₹)</label>
+              <input
+                type="number"
+                value={formData.maxDiscount || ''}
+                onChange={(e) => setFormData({...formData, maxDiscount: e.target.value ? parseInt(e.target.value) : undefined})}
+                className="w-full px-4 py-3 bg-white border-3 border-black rounded-xl font-bold focus:outline-none focus:ring-4 focus:ring-[#FFD93D]"
+                placeholder="Optional"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-black uppercase tracking-wider text-black/60 mb-2">Expiry (Days)</label>
+              <input
+                type="number"
+                value={formData.expiryDays}
+                onChange={(e) => setFormData({...formData, expiryDays: parseInt(e.target.value)})}
+                className="w-full px-4 py-3 bg-white border-3 border-black rounded-xl font-bold focus:outline-none focus:ring-4 focus:ring-[#FFD93D]"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-black uppercase tracking-wider text-black/60 mb-2">Enabled</label>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={formData.enabled}
+                  onChange={(e) => setFormData({...formData, enabled: e.target.checked})}
+                  className="sr-only peer"
+                />
+                <div className="w-14 h-8 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#FFD93D] rounded-full peer border-3 border-black peer-checked:after:translate-x-6 peer-checked:after:border-black after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-black after:border-3 after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-[#00B894]"></div>
+              </label>
+            </div>
+          </div>
+
+          <div className="flex gap-3 mt-8">
+            <button
+              onClick={handleAddNew}
+              disabled={saving || !formData.name}
+              className="px-8 py-4 bg-[#6C5CE7] text-white font-black text-sm uppercase rounded-2xl border-4 border-black neo-shadow-hover disabled:opacity-50 transition-all"
+            >
+              {saving ? 'CREATING...' : 'CREATE VOUCHER'}
+            </button>
+            <button
+              onClick={() => setShowAddForm(false)}
+              className="px-8 py-4 bg-white text-black font-black text-sm uppercase rounded-2xl border-4 border-black neo-shadow-hover transition-all"
+            >
+              CANCEL
+            </button>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Vouchers List */}
+      <div className="space-y-6">
+        {vouchers.map((voucher, index) => (
+          <motion.div 
+            key={voucher.id}
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.1 * index }}
+            className="bg-white border-4 border-black p-6 rounded-3xl neo-shadow"
           >
-            <Plus size={20} />
-            ADD NEW VOUCHER
-          </button>
-        </div>
-
-        {/* Add Form */}
-        {showAddForm && (
-          <div className="mb-8 bg-white border-2 border-black p-8 rounded-[30px] neo-shadow">
-            <h2 className="font-header text-2xl text-black mb-6">Create New Voucher</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-black/60 font-bold text-xs tracking-widest mb-2">NAME</label>
-                <input
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) => setFormData({...formData, name: e.target.value})}
-                  className="w-full px-4 py-2 border-2 border-black/20 rounded-lg focus:border-[#6C5CE7] focus:outline-none"
-                />
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex items-center gap-4">
+                <div className="text-5xl">{voucher.icon}</div>
+                <div>
+                  <h3 className="font-header text-2xl font-black text-black">{voucher.name}</h3>
+                  <p className="text-black/60 font-bold text-sm">{voucher.description}</p>
+                </div>
               </div>
-              
-              <div>
-                <label className="block text-black/60 font-bold text-xs tracking-widest mb-2">ICON (Emoji)</label>
-                <input
-                  type="text"
-                  value={formData.icon}
-                  onChange={(e) => setFormData({...formData, icon: e.target.value})}
-                  className="w-full px-4 py-2 border-2 border-black/20 rounded-lg focus:border-[#6C5CE7] focus:outline-none"
-                />
-              </div>
-
-              <div className="md:col-span-2">
-                <label className="block text-black/60 font-bold text-xs tracking-widest mb-2">DESCRIPTION</label>
-                <textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData({...formData, description: e.target.value})}
-                  className="w-full px-4 py-2 border-2 border-black/20 rounded-lg focus:border-[#6C5CE7] focus:outline-none"
-                  rows={2}
-                />
-              </div>
-
-              <div>
-                <label className="block text-black/60 font-bold text-xs tracking-widest mb-2">POINTS COST</label>
-                <input
-                  type="number"
-                  value={formData.pointsCost}
-                  onChange={(e) => setFormData({...formData, pointsCost: parseInt(e.target.value)})}
-                  className="w-full px-4 py-2 border-2 border-black/20 rounded-lg focus:border-[#6C5CE7] focus:outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block text-black/60 font-bold text-xs tracking-widest mb-2">DISCOUNT TYPE</label>
-                <select
-                  value={formData.discountType}
-                  onChange={(e) => setFormData({...formData, discountType: e.target.value as 'percentage' | 'fixed'})}
-                  className="w-full px-4 py-2 border-2 border-black/20 rounded-lg focus:border-[#6C5CE7] focus:outline-none"
-                >
-                  <option value="percentage">Percentage</option>
-                  <option value="fixed">Fixed Amount</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-black/60 font-bold text-xs tracking-widest mb-2">
-                  DISCOUNT VALUE {formData.discountType === 'percentage' ? '(%)' : '(₹)'}
-                </label>
-                <input
-                  type="number"
-                  value={formData.discountValue}
-                  onChange={(e) => setFormData({...formData, discountValue: parseInt(e.target.value)})}
-                  className="w-full px-4 py-2 border-2 border-black/20 rounded-lg focus:border-[#6C5CE7] focus:outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block text-black/60 font-bold text-xs tracking-widest mb-2">CATEGORY</label>
-                <select
-                  value={formData.category}
-                  onChange={(e) => setFormData({...formData, category: e.target.value as any})}
-                  className="w-full px-4 py-2 border-2 border-black/20 rounded-lg focus:border-[#6C5CE7] focus:outline-none"
-                >
-                  <option value="shop">Shop</option>
-                  <option value="events">Events</option>
-                  <option value="experiences">Experiences</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-black/60 font-bold text-xs tracking-widest mb-2">MIN PURCHASE (₹)</label>
-                <input
-                  type="number"
-                  value={formData.minPurchase}
-                  onChange={(e) => setFormData({...formData, minPurchase: parseInt(e.target.value)})}
-                  className="w-full px-4 py-2 border-2 border-black/20 rounded-lg focus:border-[#6C5CE7] focus:outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block text-black/60 font-bold text-xs tracking-widest mb-2">MAX DISCOUNT (₹) - Optional</label>
-                <input
-                  type="number"
-                  value={formData.maxDiscount || ''}
-                  onChange={(e) => setFormData({...formData, maxDiscount: e.target.value ? parseInt(e.target.value) : undefined})}
-                  className="w-full px-4 py-2 border-2 border-black/20 rounded-lg focus:border-[#6C5CE7] focus:outline-none"
-                  placeholder="No limit"
-                />
-              </div>
-
-              <div>
-                <label className="block text-black/60 font-bold text-xs tracking-widest mb-2">EXPIRY (Days)</label>
-                <input
-                  type="number"
-                  value={formData.expiryDays}
-                  onChange={(e) => setFormData({...formData, expiryDays: parseInt(e.target.value)})}
-                  className="w-full px-4 py-2 border-2 border-black/20 rounded-lg focus:border-[#6C5CE7] focus:outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block text-black/60 font-bold text-xs tracking-widest mb-2">COLOR GRADIENT</label>
-                <select
-                  value={formData.color}
-                  onChange={(e) => setFormData({...formData, color: e.target.value})}
-                  className="w-full px-4 py-2 border-2 border-black/20 rounded-lg focus:border-[#6C5CE7] focus:outline-none"
-                >
-                  <option value="from-blue-500 to-cyan-500">Blue to Cyan</option>
-                  <option value="from-purple-500 to-pink-500">Purple to Pink</option>
-                  <option value="from-green-500 to-emerald-500">Green to Emerald</option>
-                  <option value="from-orange-500 to-red-500">Orange to Red</option>
-                  <option value="from-yellow-500 to-orange-500">Yellow to Orange</option>
-                  <option value="from-indigo-500 to-purple-500">Indigo to Purple</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="flex items-center gap-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={formData.enabled}
-                    onChange={(e) => setFormData({...formData, enabled: e.target.checked})}
-                    className="w-5 h-5"
-                  />
-                  <span className="text-black/80 font-bold text-sm">Enabled</span>
-                </label>
-              </div>
-            </div>
-
-            <div className="flex gap-3 mt-6">
               <button
-                onClick={handleAddNew}
-                disabled={saving || !formData.name}
-                className="px-6 py-3 bg-[#6C5CE7] text-white font-black text-sm uppercase rounded-xl border-2 border-black neo-shadow hover:translate-x-[4px] hover:translate-y-[4px] hover:shadow-none disabled:opacity-50 transition-all"
+                onClick={() => handleDelete(voucher.id)}
+                disabled={saving}
+                className="p-3 text-white bg-[#FF6B6B] hover:bg-[#ff5252] rounded-xl border-3 border-black transition-all disabled:opacity-50"
               >
-                CREATE VOUCHER
-              </button>
-              <button
-                onClick={() => setShowAddForm(false)}
-                className="px-6 py-3 bg-white text-black font-black text-sm uppercase rounded-xl border-2 border-black neo-shadow hover:translate-x-[4px] hover:translate-y-[4px] hover:shadow-none transition-all"
-              >
-                CANCEL
+                <Trash2 size={20} />
               </button>
             </div>
-          </div>
-        )}
 
-        {/* Vouchers List */}
-        <div className="space-y-6">
-          {vouchers.map((voucher) => (
-            <div key={voucher.id} className="bg-white border-2 border-black p-6 rounded-[30px] neo-shadow">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-4">
-                  <div className={`w-16 h-16 rounded-full bg-gradient-to-br ${voucher.color} flex items-center justify-center text-3xl border-2 border-black`}>
-                    {voucher.icon}
-                  </div>
-                  <div>
-                    <h3 className="font-header text-xl text-black">{voucher.name}</h3>
-                    <p className="text-black/60 text-sm">{voucher.description}</p>
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => handleDelete(voucher.id)}
-                    disabled={saving}
-                    className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-all"
-                  >
-                    <Trash2 size={18} />
-                  </button>
-                </div>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+              <div className="bg-[#FFFDF5] border-3 border-black rounded-xl p-3">
+                <p className="text-black/40 font-black uppercase text-xs mb-1">Cost</p>
+                <p className="text-black font-black text-lg">{voucher.pointsCost} JP</p>
               </div>
-
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                <div>
-                  <p className="text-black/40 font-bold uppercase text-xs">Cost</p>
-                  <p className="text-black font-black">{voucher.pointsCost} JP</p>
-                </div>
-                <div>
-                  <p className="text-black/40 font-bold uppercase text-xs">Discount</p>
-                  <p className="text-black font-black">
-                    {voucher.discountType === 'percentage' ? `${voucher.discountValue}%` : `₹${voucher.discountValue}`}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-black/40 font-bold uppercase text-xs">Min Purchase</p>
-                  <p className="text-black font-black">₹{voucher.minPurchase}</p>
-                </div>
-                <div>
-                  <p className="text-black/40 font-bold uppercase text-xs">Status</p>
-                  <span className={`inline-block px-2 py-1 rounded text-xs font-bold ${voucher.enabled ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
-                    {voucher.enabled ? 'ACTIVE' : 'DISABLED'}
-                  </span>
-                </div>
+              <div className="bg-[#FFFDF5] border-3 border-black rounded-xl p-3">
+                <p className="text-black/40 font-black uppercase text-xs mb-1">Discount</p>
+                <p className="text-black font-black text-lg">
+                  {voucher.discountType === 'percentage' ? `${voucher.discountValue}%` : `₹${voucher.discountValue}`}
+                </p>
+              </div>
+              <div className="bg-[#FFFDF5] border-3 border-black rounded-xl p-3">
+                <p className="text-black/40 font-black uppercase text-xs mb-1">Min Purchase</p>
+                <p className="text-black font-black text-lg">₹{voucher.minPurchase}</p>
+              </div>
+              <div className="bg-[#FFFDF5] border-3 border-black rounded-xl p-3">
+                <p className="text-black/40 font-black uppercase text-xs mb-1">Expiry</p>
+                <p className="text-black font-black text-lg">{voucher.expiryDays}d</p>
+              </div>
+              <div className="bg-[#FFFDF5] border-3 border-black rounded-xl p-3">
+                <p className="text-black/40 font-black uppercase text-xs mb-1">Status</p>
+                <span className={`inline-block px-3 py-1 rounded-full text-xs font-black uppercase ${voucher.enabled ? 'bg-[#00B894] text-white' : 'bg-gray-400 text-white'}`}>
+                  {voucher.enabled ? 'ACTIVE' : 'DISABLED'}
+                </span>
               </div>
             </div>
-          ))}
-        </div>
-
-        {vouchers.length === 0 && !showAddForm && (
-          <div className="text-center py-12">
-            <p className="text-black/40 font-bold text-lg">No vouchers created yet</p>
-            <p className="text-black/60 text-sm mt-2">Click "Add New Voucher" to get started</p>
-          </div>
-        )}
+          </motion.div>
+        ))}
       </div>
+
+      {vouchers.length === 0 && !showAddForm && (
+        <div className="text-center py-16 bg-white border-4 border-black rounded-3xl neo-shadow">
+          <p className="text-black/40 font-black text-2xl mb-2">NO VOUCHERS YET</p>
+          <p className="text-black/60 font-bold text-sm">Click "Add New Voucher" to create your first reward</p>
+        </div>
+      )}
     </div>
   );
 }
