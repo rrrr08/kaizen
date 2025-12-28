@@ -22,8 +22,6 @@ import {
   Search,
   Filter,
   X,
-  Eye,
-  EyeOff,
   Image as ImageIcon,
 } from "lucide-react";
 import ImageUpload from "@/components/ui/ImageUpload";

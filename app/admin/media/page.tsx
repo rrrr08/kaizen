@@ -7,7 +7,7 @@ import ImageUpload from '@/components/ui/ImageUpload';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Copy, Check, RefreshCw, Save, ImagePlus, Loader2 } from 'lucide-react';
+import { Copy, Check, RefreshCw, ImagePlus, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import { CldUploadWidget } from 'next-cloudinary';
 
