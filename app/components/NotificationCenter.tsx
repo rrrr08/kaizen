@@ -26,11 +26,6 @@ export function NotificationCenter() {
       const { auth } = await import('@/lib/firebase');
       if (auth && auth.currentUser) {
         loadNotifications();
-
-        // Reload notifications every 30 seconds
-        const interval = setInterval(loadNotifications, 30000);
-
-        return () => clearInterval(interval);
       }
     };
 
@@ -41,7 +36,7 @@ export function NotificationCenter() {
     try {
       // Lazy load Firebase
       const { auth } = await import('@/lib/firebase');
-      
+
       // Skip if user not authenticated
       if (!auth || !auth.currentUser) {
         setNotifications([]);
@@ -50,7 +45,7 @@ export function NotificationCenter() {
       }
 
       setLoading(true);
-      
+
       // Get the user's ID token
       const idToken = await auth.currentUser.getIdToken();
       const headers: HeadersInit = {
@@ -83,10 +78,10 @@ export function NotificationCenter() {
         const idToken = await auth.currentUser.getIdToken();
         headers['Authorization'] = `Bearer ${idToken}`;
       }
-      
-      await fetch(`/api/notifications/${id}/read`, { 
+
+      await fetch(`/api/notifications/${id}/read`, {
         method: 'POST',
-        headers 
+        headers
       });
       await loadNotifications();
     } catch (error) {
@@ -103,10 +98,10 @@ export function NotificationCenter() {
         const idToken = await auth.currentUser.getIdToken();
         headers['Authorization'] = `Bearer ${idToken}`;
       }
-      
-      await fetch(`/api/notifications/${id}/dismiss`, { 
+
+      await fetch(`/api/notifications/${id}/dismiss`, {
         method: 'POST',
-        headers 
+        headers
       });
       setNotifications(notifications.filter((n) => n.id !== id));
       if (unreadCount > 0) setUnreadCount(unreadCount - 1);
@@ -163,9 +158,8 @@ export function NotificationCenter() {
               {notifications.map((notif) => (
                 <div
                   key={notif.id}
-                  className={`p-4 hover:bg-muted/50 transition-colors cursor-pointer ${
-                    !notif.read ? 'bg-primary/5' : ''
-                  }`}
+                  className={`p-4 hover:bg-muted/50 transition-colors cursor-pointer ${!notif.read ? 'bg-primary/5' : ''
+                    }`}
                   onClick={() => !notif.read && markAsRead(notif.id)}
                 >
                   <div className="flex justify-between items-start gap-3">

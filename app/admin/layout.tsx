@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Settings, Users, BarChart3, Zap, Bell, ShoppingBag, Home, Package, Calendar, LayoutGrid, FileText } from 'lucide-react';
+import { Settings, Users, BarChart3, Zap, Bell, ShoppingBag, Home, Package, Calendar, LayoutGrid, FileText, MessageSquare } from 'lucide-react';
 import { useAuth } from '@/app/context/AuthContext';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -49,6 +49,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: '/admin/media', label: 'Media', icon: FileText },
     { href: '/admin/blog', label: 'Blog', icon: FileText },
     { href: '/admin/events', label: 'Events', icon: Calendar },
+    { href: '/admin/testimonials', label: 'Testimonials', icon: MessageSquare },
     { href: '/admin/notifications', label: 'Notifications', icon: Bell },
     { href: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
   ];

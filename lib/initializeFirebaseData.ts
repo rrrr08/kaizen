@@ -17,6 +17,10 @@ export async function initializeFirebaseData() {
       throw new Error('Firebase not initialized');
     }
 
+    // 0. Initialize Testimonials (Moved to top)
+    await initializeTestimonials(firebaseDb, setDoc, doc, addDoc);
+
+    /*
     // 1. Initialize Gamification Config
     await initializeGamificationConfig(firebaseDb, setDoc, doc, serverTimestamp);
 
@@ -34,6 +38,7 @@ export async function initializeFirebaseData() {
 
     // 6. Initialize Users
     await initializeUsers(firebaseDb, setDoc, doc, addDoc);
+    */
 
     console.log('✅ Firebase initialization complete!');
     return { success: true, message: 'Firebase initialized successfully' };
@@ -518,5 +523,96 @@ async function initializeUsers(db: any, setDoc: any, doc: any, addDoc: any) {
   } catch (error) {
     console.error('❌ Error initializing users:', error);
     throw error;
+  }
+}
+
+async function initializeTestimonials(db: any, setDoc: any, doc: any, addDoc: any) {
+  try {
+    console.log('💬 Starting testimonials initialization (Admin SDK)...');
+    // Import Admin SDK dynamically to avoid build issues if mixed with client code
+    const { db: adminDb } = await import('@/lib/firebase-admin');
+
+    // Check if we are successfully connected
+    if (!adminDb) {
+      console.error('❌ Admin DB not available, skipping testimonials.');
+      return;
+    }
+
+    const testimonialsRef = adminDb.collection('testimonials');
+    const snapshot = await testimonialsRef.get();
+
+    const mockTestimonials = [
+      {
+        name: 'Sarah M.',
+        quote: 'Joy Juncture transformed our team building! We\'ve never laughed so hard together.',
+        role: 'Corporate Team',
+        image: 'https://picsum.photos/seed/person1/100/100',
+        status: 'approved',
+        createdAt: new Date(Date.now() - 10000000).toISOString()
+      },
+      {
+        name: 'Marcus L.',
+        quote: 'The games are exceptional quality and brought our entire family together.',
+        role: 'Family Game Night',
+        image: 'https://picsum.photos/seed/person2/100/100',
+        status: 'approved',
+        createdAt: new Date(Date.now() - 5000000).toISOString()
+      },
+      {
+        name: 'Emily R.',
+        quote: 'Best decision for our wedding reception. Every guest had a blast!',
+        role: 'Wedding Reception',
+        image: 'https://picsum.photos/seed/person3/100/100',
+        status: 'approved',
+        createdAt: new Date(Date.now() - 2000000).toISOString()
+      },
+      {
+        name: 'David K.',
+        quote: 'Amazing collection of rare board games. I found pieces I thought were lost to time.',
+        role: 'Collector',
+        image: 'https://picsum.photos/seed/person4/100/100',
+        status: 'pending',
+        createdAt: new Date().toISOString()
+      },
+      {
+        name: 'Priya S.',
+        quote: 'The staff was incredibly helpful in teaching us the rules. A truly welcoming space.',
+        role: 'First Time Visitor',
+        image: 'https://picsum.photos/seed/person5/100/100',
+        status: 'pending',
+        createdAt: new Date().toISOString()
+      },
+      {
+        name: 'Rahul V.',
+        quote: 'Too loud and crowded on weekends.',
+        role: 'Visitor',
+        image: 'https://picsum.photos/seed/person6/100/100',
+        status: 'rejected',
+        createdAt: new Date(Date.now() - 8000000).toISOString()
+      }
+    ];
+
+    const existingNames = new Set();
+    snapshot.forEach((doc: any) => {
+      existingNames.add(doc.data().name);
+    });
+
+    let addedCount = 0;
+    for (const t of mockTestimonials) {
+      if (!existingNames.has(t.name)) {
+        await testimonialsRef.add(t);
+        console.log(`✅ Added testimonial (Admin): ${t.name}`);
+        addedCount++;
+      }
+    }
+
+    if (addedCount === 0) {
+      console.log('✅ All testimonials already exist, none added.');
+    } else {
+      console.log(`✅ Testimonials initialization complete - Added ${addedCount} new testimonials`);
+    }
+  } catch (error) {
+    console.error('❌ Error initializing testimonials:', error);
+    // Don't throw, just log so other initializations can proceed if this fails
   }
 }

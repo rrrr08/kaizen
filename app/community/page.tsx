@@ -10,9 +10,56 @@ export default function Community() {
   const [error, setError] = useState<string | null>(null);
   const [eventFilter, setEventFilter] = useState('All');
 
+  // Testimonials State
+  const [testimonials, setTestimonials] = useState<any[]>([]);
+  const [loadingTestimonials, setLoadingTestimonials] = useState(true);
+  const [isSubmitOpen, setIsSubmitOpen] = useState(false);
+  const [submitForm, setSubmitForm] = useState({ name: '', role: '', quote: '' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   useEffect(() => {
     fetchEvents();
+    fetchTestimonials();
   }, []);
+
+  const fetchTestimonials = async () => {
+    try {
+      const res = await fetch('/api/testimonials');
+      const data = await res.json();
+      if (data.success) {
+        setTestimonials(data.testimonials);
+      }
+    } catch (error) {
+      console.error('Error fetching testimonials:', error);
+    } finally {
+      setLoadingTestimonials(false);
+    }
+  };
+
+  const handleSubmitTestimonial = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    try {
+      const res = await fetch('/api/testimonials', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(submitForm),
+      });
+      const data = await res.json();
+      if (data.success) {
+        // Reset and close
+        setSubmitForm({ name: '', role: '', quote: '' });
+        setIsSubmitOpen(false);
+        alert('Thank you! Your story has been submitted for review.');
+      } else {
+        alert(data.error || 'Failed to submit');
+      }
+    } catch (error) {
+      alert('Error submitting testimonial');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const fetchEvents = async () => {
     try {
@@ -221,26 +268,105 @@ export default function Community() {
         </section>
 
         {/* Testimonials Section */}
-        <div className="mb-24">
-          <h2 className="font-header text-4xl md:text-5xl mb-12 tracking-tight text-center text-black">Proof of Joy</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {TESTIMONIALS.map(testimonial => (
-              <div key={testimonial.id} className="border-2 border-black p-8 rounded-[20px] bg-white neo-shadow hover:scale-[1.02] transition-transform">
-                <p className="text-black/80 font-medium italic mb-6 leading-relaxed">"{testimonial.text}"</p>
-                <div className="flex items-center gap-4">
-                  <img
-                    src={testimonial.image}
-                    alt={testimonial.author}
-                    className="w-12 h-12 rounded-full border-2 border-black"
-                  />
-                  <div>
-                    <p className="font-black text-sm text-black">{testimonial.author}</p>
-                    <p className="text-black/50 text-xs font-bold uppercase tracking-wider">{testimonial.occasion}</p>
+        <div className="mb-24 relative">
+          <div className="flex flex-col md:flex-row items-end justify-between gap-8 mb-12">
+            <div className="flex-1">
+              <h2 className="font-header text-4xl md:text-5xl mb-2 tracking-tight text-black">Proof of Joy</h2>
+              <p className="text-black/60 font-bold text-lg">Hear from our community of players and gatherers.</p>
+            </div>
+            <button
+              onClick={() => setIsSubmitOpen(true)}
+              className="px-6 py-3 bg-black text-white font-black text-xs tracking-[0.2em] hover:bg-[#6C5CE7] hover:scale-105 transition-all rounded-xl shadow-[4px_4px_0px_rgba(0,0,0,0.2)]"
+            >
+              SHARE YOUR STORY +
+            </button>
+          </div>
+
+          {loadingTestimonials ? (
+            <div className="text-center py-12">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-[#FFD93D] border-t-black"></div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {testimonials.map(testimonial => (
+                <div key={testimonial.id} className="border-2 border-black p-8 rounded-[20px] bg-white neo-shadow hover:scale-[1.02] transition-transform flex flex-col justify-between">
+                  <p className="text-black/80 font-medium italic mb-6 leading-relaxed">"{testimonial.quote}"</p>
+                  <div className="flex items-center gap-4 mt-auto">
+                    <img
+                      src={testimonial.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${testimonial.name}`}
+                      alt={testimonial.name}
+                      className="w-12 h-12 rounded-full border-2 border-black bg-gray-100"
+                    />
+                    <div>
+                      <p className="font-black text-sm text-black">{testimonial.name}</p>
+                      <p className="text-black/50 text-xs font-bold uppercase tracking-wider">{testimonial.role}</p>
+                    </div>
                   </div>
                 </div>
+              ))}
+              {testimonials.length === 0 && (
+                <div className="col-span-3 text-center py-12 border-2 border-dashed border-black/20 rounded-[20px]">
+                  <p className="text-black/40 font-black uppercase">No stories yet. Be the first!</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Submission Modal (Simple Overlay for now, or use Dialog if imported) */}
+          {isSubmitOpen && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+              <div className="bg-white border-4 border-black p-8 rounded-[30px] max-w-md w-full shadow-[8px_8px_0px_#000] relative animate-in fade-in zoom-in duration-200">
+                <button
+                  onClick={() => setIsSubmitOpen(false)}
+                  className="absolute top-4 right-4 text-black hover:rotate-90 transition-transform font-black text-xl"
+                >
+                  ✕
+                </button>
+
+                <h3 className="font-header text-2xl mb-6 text-black">Share Your Story</h3>
+
+                <form onSubmit={handleSubmitTestimonial} className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-black uppercase tracking-widest mb-2 text-black/70">Name</label>
+                    <input
+                      required
+                      value={submitForm.name}
+                      onChange={e => setSubmitForm({ ...submitForm, name: e.target.value })}
+                      className="w-full border-2 border-black rounded-xl p-3 font-bold focus:outline-none focus:ring-4 focus:ring-[#FFD93D]/50 transition-all placeholder:font-medium placeholder:text-black/20"
+                      placeholder="Your Name"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-black uppercase tracking-widest mb-2 text-black/70">Role / Occasion</label>
+                    <input
+                      value={submitForm.role}
+                      onChange={e => setSubmitForm({ ...submitForm, role: e.target.value })}
+                      className="w-full border-2 border-black rounded-xl p-3 font-bold focus:outline-none focus:ring-4 focus:ring-[#FFD93D]/50 transition-all placeholder:font-medium placeholder:text-black/20"
+                      placeholder="e.g. Wedding, Game Night"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-black uppercase tracking-widest mb-2 text-black/70">Your Story</label>
+                    <textarea
+                      required
+                      value={submitForm.quote}
+                      onChange={e => setSubmitForm({ ...submitForm, quote: e.target.value })}
+                      className="w-full border-2 border-black rounded-xl p-3 font-bold focus:outline-none focus:ring-4 focus:ring-[#FFD93D]/50 transition-all min-h-[100px] placeholder:font-medium placeholder:text-black/20 resize-none"
+                      placeholder="Tell us about your experience..."
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full py-4 bg-[#FFD93D] text-black font-black text-xs tracking-[0.2em] border-2 border-black hover:scale-[1.02] transition-all rounded-xl mt-4 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isSubmitting ? 'SENDING...' : 'SUBMIT STORY'}
+                  </button>
+                </form>
               </div>
-            ))}
-          </div>
+            </div>
+          )}
         </div>
 
         {/* Final CTA */}

@@ -39,6 +39,21 @@ export interface EventHighlight {
   text: string;
 }
 
+export interface Testimonial {
+  id: string;
+  name: string;
+  role: string; // "Corporate Team", "Family", etc. (Using 'role' instead of 'occasion' to match existing code style, or map it) - actually the UI uses 'occasion'. Let's stick to the UI.
+  quote: string;
+  image?: string;
+  avatarSeed?: string; // For multiavatar
+  status: 'pending' | 'approved' | 'rejected';
+  createdAt: string | Date; // ISO string or Date
+}
+
+// Keeping EventTestimonial for backward compatibility if needed, or we can unify. 
+// EventTestimonial was: { name, role, quote }. 
+// Let's use the new Testimonial for the main page.
+
 export interface EventTestimonial {
   name: string;
   role?: string;
