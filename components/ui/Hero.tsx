@@ -6,7 +6,21 @@ import Link from 'next/link';
 import { FloatingPatterns } from '@/lib/joy-constants';
 import Image from 'next/image';
 
-const Hero: React.FC = () => {
+interface HeroProps {
+    title?: string;
+    subtitle?: string;
+    ctaTextShops?: string;
+    ctaTextJoin?: string;
+    backgroundImage?: string;
+}
+
+const Hero: React.FC<HeroProps> = ({
+    title = 'Games are <br /> Moments, <br /> Memories, and <br /> Shared Joy.',
+    subtitle = 'Analog connection for a digital world. Join the movement of people playing, belonging, and earning joy.',
+    ctaTextShops = 'Shop Games 🎲',
+    ctaTextJoin = 'Join Game Night',
+    backgroundImage = 'https://images.unsplash.com/photo-1543807535-eceef0bc6599?auto=format&fit=crop&q=80&w=800'
+}) => {
     return (
         <section className="relative min-h-[85vh] flex items-center px-6 lg:px-20 overflow-hidden pt-12">
             <FloatingPatterns />
@@ -23,15 +37,13 @@ const Hero: React.FC = () => {
                         <span className="animate-pulse">●</span> Level up your social life
                     </div>
 
-                    <h1 className="text-6xl lg:text-[100px] font-black leading-[0.9] tracking-tighter">
-                        Games are <br />
-                        <span className="text-[#FFD93D] neo-shadow inline-block transform -rotate-1 bg-black text-white px-4 py-1 neo-border">Moments</span>, <br />
-                        Memories, and <br />
-                        <span className="text-[#6C5CE7]">Shared Joy.</span>
-                    </h1>
+                    <h1
+                        className="text-6xl lg:text-[100px] font-black leading-[0.9] tracking-tighter"
+                        dangerouslySetInnerHTML={{ __html: title }}
+                    />
 
                     <p className="text-2xl text-charcoal/90 max-w-xl font-semibold leading-relaxed">
-                        Analog connection for a digital world. Join the movement of people playing, belonging, and earning joy.
+                        {subtitle}
                     </p>
 
                     <div className="flex flex-wrap gap-8 pt-6">
@@ -41,7 +53,7 @@ const Hero: React.FC = () => {
                                 whileTap={{ scale: 0.95 }}
                                 className="bg-[#FFD93D] text-black px-12 py-6 rounded-[25px] font-black text-2xl neo-border-thick neo-shadow-lg hover:bg-yellow-400 transition-colors"
                             >
-                                Shop Games 🎲
+                                {ctaTextShops}
                             </motion.button>
                         </Link>
                         <Link href="/events">
@@ -50,7 +62,7 @@ const Hero: React.FC = () => {
                                 whileTap={{ scale: 0.95 }}
                                 className="bg-transparent text-black px-12 py-6 rounded-[25px] font-black text-2xl neo-border-thick hover:bg-black/5 transition-colors"
                             >
-                                Join Game Night
+                                {ctaTextJoin}
                             </motion.button>
                         </Link>
                     </div>
@@ -70,8 +82,8 @@ const Hero: React.FC = () => {
                             className="w-full h-full relative"
                         >
                             <Image
-                                src="https://images.unsplash.com/photo-1543807535-eceef0bc6599?auto=format&fit=crop&q=80&w=800"
-                                alt="People laughing at a game night"
+                                src={backgroundImage}
+                                alt="Hero visual"
                                 fill
                                 className="object-cover grayscale-0 group-hover:grayscale-0 group-hover:sepia-[0.3] transition-all duration-700"
                             />

@@ -41,8 +41,7 @@ export default function ProductDetail() {
           const related = allProducts
             .filter((p: any) =>
               p.id !== productData.id &&
-              (productData as any).occasion &&
-              p.occasion?.some((o: string) => (productData as any).occasion?.includes(o))
+              (productData as any).category === p.category
             )
             .slice(0, 4);
           setRelatedProducts(related);
@@ -85,16 +84,10 @@ export default function ProductDetail() {
   }
 
   const handleAddToCart = () => {
-    // Add logic to show visual feedback even if toast doesn't work right away
     console.log("Adding to cart:", product.name, quantity);
     addToCart(product, quantity);
-
-    // Try simple alert if toast fails, but toast is preferred
-    // toast({
-    //   title: "Added to Cart!",
-    //   description: `${product.name} (x${quantity}) added.`,
-    // });
     setQuantity(1);
+    alert("Added to cart!");
   };
 
   return (
@@ -105,7 +98,7 @@ export default function ProductDetail() {
           <span>←</span> Back to Repository
         </Link>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 mb-20">
           {/* Product Image */}
           <div className="flex items-center justify-center">
             <div className="aspect-[3/4] w-full max-w-md overflow-hidden rounded-[30px] border-3 border-black neo-shadow bg-white relative">
@@ -126,47 +119,52 @@ export default function ProductDetail() {
           <div className="flex flex-col justify-center">
             <div className="mb-8">
               <div className="flex items-center gap-3 mb-4">
-                <span className="bg-[#6C5CE7] text-white px-3 py-1 rounded-lg text-xs font-black uppercase tracking-wider neo-border shadow-[2px_2px_0px_#000]">
-                  {product.mood || 'FUN'}
-                </span>
-                <span className="bg-[#00B894] text-white px-3 py-1 rounded-lg text-xs font-black uppercase tracking-wider neo-border shadow-[2px_2px_0px_#000]">
-                  {product.players || '2-4 Players'}
-                </span>
+                {product.subtitle && (
+                  <span className="bg-[#6C5CE7] text-white px-3 py-1 rounded-lg text-xs font-black uppercase tracking-wider neo-border shadow-[2px_2px_0px_#000]">
+                    {product.subtitle}
+                  </span>
+                )}
+                {product.ageGroup && (
+                  <span className="bg-[#00B894] text-white px-3 py-1 rounded-lg text-xs font-black uppercase tracking-wider neo-border shadow-[2px_2px_0px_#000]">
+                    AGE: {product.ageGroup}
+                  </span>
+                )}
+                {(product.minPlayers && product.maxPlayers) && (
+                  <span className="bg-[#FF7675] text-white px-3 py-1 rounded-lg text-xs font-black uppercase tracking-wider neo-border shadow-[2px_2px_0px_#000]">
+                    {product.minPlayers}-{product.maxPlayers} Players
+                  </span>
+                )}
               </div>
-              <h1 className="font-header text-6xl md:text-7xl font-black mb-6 tracking-tight leading-none text-black">
+
+              <h1 className="font-header text-6xl md:text-7xl font-black mb-2 tracking-tight leading-none text-black">
                 {product.name}
               </h1>
-              <p className="font-bold text-xl text-[#2D3436]/80 mb-8 leading-relaxed">
-                {product.description}
+              {product.subtitle && (
+                <p className="font-bold text-lg text-black/60 mb-6 uppercase tracking-wide">{product.subtitle}</p>
+              )}
+
+              <p className="font-bold text-xl text-[#2D3436]/80 mb-8 leading-relaxed whitespace-pre-wrap">
+                {product.description || "No description available."}
               </p>
             </div>
 
             {/* Badges */}
             <div className="flex flex-wrap gap-3 mb-8">
-              {product.badges?.map((badge: string) => (
-                <span key={badge} className="px-4 py-1.5 bg-[#FFF] border-2 border-black text-black font-black text-[10px] tracking-widest rounded-full uppercase">
-                  {badge}
+              {product.category && (
+                <span className="px-4 py-1.5 bg-[#FFF] border-2 border-black text-black font-black text-[10px] tracking-widest rounded-full uppercase">
+                  {product.category}
                 </span>
-              ))}
+              )}
             </div>
 
-            {/* Story Section */}
-            {(product.story || product.howToPlay) && (
-              <div className="mb-10 p-6 bg-white rounded-2xl border-2 border-black neo-shadow">
-                {product.story && (
-                  <div className="mb-6">
-                    <h3 className="font-black text-sm tracking-wider text-[#FFD93D] drop-shadow-[1px_1px_0px_#000] mb-2 uppercase">The Story</h3>
-                    <p className="font-medium text-sm text-black/70 leading-relaxed">{product.story}</p>
-                  </div>
-                )}
-                {product.howToPlay && (
-                  <div>
-                    <h3 className="font-black text-sm tracking-wider text-[#00B894] drop-shadow-[1px_1px_0px_#000] mb-2 uppercase">How to Play</h3>
-                    <p className="font-medium text-sm text-black/70 leading-relaxed">{product.howToPlay}</p>
-                  </div>
-                )}
+            {/* Box Content (if available) */}
+            {product.boxContent && (
+              <div className="mb-8 p-4 bg-white/50 border-2 border-black/10 rounded-xl">
+                <p className="font-black text-xs uppercase tracking-widest mb-1 text-black/60">What's Inside:</p>
+                <p className="font-bold text-sm text-black">{product.boxContent}</p>
               </div>
             )}
+
 
             {/* Price & Action */}
             <div className="mt-auto bg-[#FFD93D] p-6 rounded-2xl border-3 border-black neo-shadow">
@@ -210,9 +208,72 @@ export default function ProductDetail() {
           </div>
         </div>
 
+        {/* How to Play Section */}
+        {product.howToPlay && product.howToPlay.length > 0 && (
+          <div className="mb-24">
+            <div className="text-center mb-12">
+              <div className="inline-block bg-black text-white px-6 py-2 rounded-full mb-4">
+                <h2 className="font-header text-3xl font-black uppercase tracking-widest">How to Play</h2>
+              </div>
+              <p className="text-black/60 font-bold max-w-2xl mx-auto">Master the game in {product.howToPlay.length} simple steps.</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {product.howToPlay.map((step: any, index: number) => {
+                // Rotate colors: Purple, Green, Blue, Red
+                const colors = ['bg-[#6C5CE7]', 'bg-[#00B894]', 'bg-[#74B9FF]', 'bg-[#FF7675]'];
+                const color = colors[index % colors.length];
+
+                return (
+                  <div key={index} className={`${color} p-6 rounded-[24px] border-3 border-black neo-shadow hover:-translate-y-2 transition-transform h-full flex flex-col`}>
+                    <div className="bg-white w-12 h-12 rounded-full border-2 border-black flex items-center justify-center mb-4 neo-shadow-sm">
+                      <span className="font-black text-lg text-black">{index + 1}</span>
+                    </div>
+                    <h3 className="font-black text-xl text-white mb-3 uppercase tracking-wide leading-tight">{step.title}</h3>
+                    <p className="font-bold text-sm text-white/90 leading-relaxed">{step.description}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Key Features Section */}
+        {product.features && product.features.length > 0 && (
+          <div className="mb-24 bg-white border-3 border-black rounded-[30px] p-8 md:p-12 neo-shadow relative overflow-hidden">
+            {/* Decorative background element */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-[#FFD93D] rounded-full blur-[100px] opacity-20 -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+
+            <div className="flex flex-col md:flex-row gap-12 items-start relative z-10">
+              <div className="flex-1">
+                <h2 className="font-header text-4xl md:text-5xl font-black mb-6 text-black uppercase tracking-tighter">Key Features</h2>
+                <p className="font-bold text-xl text-black/60 leading-relaxed">Everything that makes this game a must-have for your collection.</p>
+              </div>
+
+              <div className="flex-1 w-full">
+                <div className="space-y-6">
+                  {product.features.map((feature: any, index: number) => (
+                    <div key={index} className="flex gap-4 items-start group">
+                      <div className="mt-1 w-6 h-6 rounded-full bg-[#00B894] border-2 border-black flex-shrink-0 flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M10 3L4.5 8.5L2 6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      </div>
+                      <div>
+                        <h3 className="font-black text-lg text-black mb-1">{feature.title}</h3>
+                        <p className="font-medium text-sm text-black/60">{feature.description}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Related Products */}
         {relatedProducts.length > 0 && (
-          <div className="mt-24 pt-12 border-t-2 border-black/10">
+          <div className="pt-12 border-t-2 border-black/10">
             <h2 className="font-display text-4xl font-black mb-12 text-black">YOU MIGHT ALSO LIKE</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
               {relatedProducts.map(relProduct => (

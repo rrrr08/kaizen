@@ -46,7 +46,30 @@ const journeys = [
     }
 ];
 
-const BentoGrid: React.FC = () => {
+interface BentoItem {
+    title?: string;
+    description?: string; // Note: admin uses 'description', local uses 'desc'
+    image?: string;
+}
+
+interface BentoGridProps {
+    items?: BentoItem[];
+}
+
+const BentoGrid: React.FC<BentoGridProps> = ({ items }) => {
+    // Merge default journeys with provided items
+    const displayJourneys = journeys.map((journey, index) => {
+        if (items && items[index]) {
+            return {
+                ...journey,
+                title: items[index].title || journey.title,
+                desc: items[index].description || journey.desc,
+                image: items[index].image || journey.image,
+            };
+        }
+        return journey;
+    });
+
     return (
         <section className="px-6 py-32 bg-[#FFFDF5]">
             <div className="container mx-auto">
@@ -61,7 +84,7 @@ const BentoGrid: React.FC = () => {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8 group/container">
-                    {journeys.map((item) => (
+                    {displayJourneys.map((item) => (
                         <motion.div
                             key={item.id}
                             whileHover={{ scale: 1.05, zIndex: 20 }}

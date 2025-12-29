@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import ImageUpload from '@/components/ui/ImageUpload';
 
 export default function CreateEventPage() {
   const router = useRouter();
@@ -102,11 +103,14 @@ export default function CreateEventPage() {
             textarea
             onChange={handleChange}
           />
-          <Field
-            label="Cover Image URL"
-            name="image"
-            onChange={handleChange}
-          />
+          <div className="space-y-2">
+            <label className="text-xs font-header tracking-wide uppercase text-muted-foreground">Cover Image</label>
+            <ImageUpload
+              value={form.image ? [form.image] : []}
+              onChange={(url) => setForm(prev => ({ ...prev, image: url }))}
+              onRemove={() => setForm(prev => ({ ...prev, image: '' }))}
+            />
+          </div>
         </Section>
 
         {/* TIME & LOCATION */}

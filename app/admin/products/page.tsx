@@ -4,28 +4,47 @@ import { useEffect, useState } from 'react';
 import { LayoutGrid, Plus, Edit2, Trash2, Search, Filter, X } from 'lucide-react';
 import { getDocs, collection, deleteDoc, doc, setDoc, updateDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import ImageUpload from '@/components/ui/ImageUpload';
 
 interface Product {
   id: string;
   name: string;
+  subtitle?: string;
+  description?: string;
   price: number;
   cost: number;
   stock: number;
   category: string;
   image: string;
+  images?: string[];
   rating: number;
   sales: number;
+  minPlayers?: number;
+  maxPlayers?: number;
+  ageGroup?: string;
+  features?: { title: string; description: string }[];
+  howToPlay?: { title: string; description: string }[];
+  boxContent?: string;
 }
 
 interface FormData {
   name: string;
+  subtitle: string;
+  description: string;
   price: string;
   cost: string;
   stock: string;
   category: string;
   image: string;
+  images: string[];
   rating: string;
   sales: string;
+  minPlayers: string;
+  maxPlayers: string;
+  ageGroup: string;
+  features: { title: string; description: string }[];
+  howToPlay: { title: string; description: string }[];
+  boxContent: string;
 }
 
 export default function ProductsPage() {
@@ -37,13 +56,22 @@ export default function ProductsPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState<FormData>({
     name: '',
+    subtitle: '',
+    description: '',
     price: '',
     cost: '',
     stock: '',
     category: 'apparel',
     image: '',
+    images: [],
     rating: '0',
     sales: '0',
+    minPlayers: '2',
+    maxPlayers: '4',
+    ageGroup: 'Adult',
+    features: [{ title: '', description: '' }],
+    howToPlay: [{ title: '', description: '' }],
+    boxContent: '',
   });
   const [submitting, setSubmitting] = useState(false);
 
@@ -71,13 +99,22 @@ export default function ProductsPage() {
     setEditingId(null);
     setFormData({
       name: '',
+      subtitle: '',
+      description: '',
       price: '',
       cost: '',
       stock: '',
       category: 'apparel',
       image: '',
+      images: [],
       rating: '0',
       sales: '0',
+      minPlayers: '2',
+      maxPlayers: '4',
+      ageGroup: 'Adult',
+      features: [{ title: '', description: '' }],
+      howToPlay: [{ title: '', description: '' }],
+      boxContent: '',
     });
     setShowAddForm(true);
   };
@@ -85,14 +122,23 @@ export default function ProductsPage() {
   const handleEdit = (product: Product) => {
     setEditingId(product.id);
     setFormData({
-      name: product.name,
-      price: product.price.toString(),
-      cost: product.cost.toString(),
-      stock: product.stock.toString(),
-      category: product.category,
-      image: product.image,
-      rating: product.rating.toString(),
-      sales: product.sales.toString(),
+      name: product.name || '',
+      subtitle: product.subtitle || '',
+      description: product.description || '',
+      price: product.price?.toString() || '',
+      cost: product.cost?.toString() || '',
+      stock: product.stock?.toString() || '',
+      category: product.category || 'apparel',
+      image: product.image || '',
+      images: product.images || [],
+      rating: product.rating?.toString() || '0',
+      sales: product.sales?.toString() || '0',
+      minPlayers: product.minPlayers?.toString() || '2',
+      maxPlayers: product.maxPlayers?.toString() || '4',
+      ageGroup: product.ageGroup || 'Adult',
+      features: product.features && product.features.length > 0 ? product.features : [{ title: '', description: '' }],
+      howToPlay: product.howToPlay && product.howToPlay.length > 0 ? product.howToPlay : [{ title: '', description: '' }],
+      boxContent: product.boxContent || '',
     });
     setShowAddForm(true);
   };
@@ -104,9 +150,14 @@ export default function ProductsPage() {
       await deleteDoc(doc(db, 'products', id));
       setProducts(products.filter(p => p.id !== id));
       alert('Product deleted successfully!');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting product:', error);
-      alert('Failed to delete product');
+      console.error('Error details:', {
+        code: error.code,
+        message: error.message,
+        details: error.details
+      });
+      alert(`Failed to delete product: ${error.message || 'Unknown error'} (Code: ${error.code})`);
     }
   };
 
@@ -122,13 +173,22 @@ export default function ProductsPage() {
     try {
       const productData = {
         name: formData.name,
+        subtitle: formData.subtitle,
+        description: formData.description,
         price: parseFloat(formData.price),
         cost: parseFloat(formData.cost),
         stock: parseInt(formData.stock),
         category: formData.category,
         image: formData.image,
+        images: formData.images,
         rating: parseFloat(formData.rating),
         sales: parseInt(formData.sales),
+        minPlayers: parseInt(formData.minPlayers),
+        maxPlayers: parseInt(formData.maxPlayers),
+        ageGroup: formData.ageGroup,
+        features: formData.features.filter(f => f.title.trim() !== ''),
+        howToPlay: formData.howToPlay.filter(h => h.title.trim() !== ''),
+        boxContent: formData.boxContent,
         updatedAt: new Date().toISOString(),
       };
 
@@ -157,6 +217,40 @@ export default function ProductsPage() {
       setSubmitting(false);
     }
   };
+
+  const addFeature = () => {
+    setFormData({ ...formData, features: [...formData.features, { title: '', description: '' }] });
+  };
+
+  const updateFeature = (index: number, field: 'title' | 'description', value: string) => {
+    const newFeatures = [...formData.features];
+    newFeatures[index][field] = value;
+    setFormData({ ...formData, features: newFeatures });
+  };
+
+  const removeFeature = (index: number) => {
+    const newFeatures = [...formData.features];
+    newFeatures.splice(index, 1);
+    setFormData({ ...formData, features: newFeatures });
+  };
+
+
+  const addHowToPlay = () => {
+    setFormData({ ...formData, howToPlay: [...formData.howToPlay, { title: '', description: '' }] });
+  };
+
+  const updateHowToPlay = (index: number, field: 'title' | 'description', value: string) => {
+    const newSteps = [...formData.howToPlay];
+    newSteps[index][field] = value;
+    setFormData({ ...formData, howToPlay: newSteps });
+  };
+
+  const removeHowToPlay = (index: number) => {
+    const newSteps = [...formData.howToPlay];
+    newSteps.splice(index, 1);
+    setFormData({ ...formData, howToPlay: newSteps });
+  };
+
 
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -267,11 +361,17 @@ export default function ProductsPage() {
           >
             {/* Image */}
             <div className="relative h-56 bg-gray-100 overflow-hidden border-b-2 border-black">
-              <img
-                src={product.image}
-                alt={product.name}
-                className="w-full h-full object-cover group-hover:scale-110 transition duration-500"
-              />
+              {product.image || (product.images && product.images.length > 0) ? (
+                <img
+                  src={product.image || product.images?.[0]}
+                  alt={product.name}
+                  className="w-full h-full object-cover group-hover:scale-110 transition duration-500"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-gray-400">
+                  <span className="text-xs font-bold uppercase">No Image</span>
+                </div>
+              )}
               <div className="absolute top-4 right-4 bg-white border-2 border-black px-3 py-1 rounded-full neo-shadow-sm">
                 <p className="text-black font-black text-sm">⭐ {product.rating}</p>
               </div>
@@ -381,6 +481,29 @@ export default function ProductsPage() {
                   />
                 </div>
 
+                {/* Subtitle */}
+                <div className="md:col-span-2">
+                  <label className="block text-black font-black text-xs uppercase tracking-widest mb-2">Subtitle</label>
+                  <input
+                    type="text"
+                    value={formData.subtitle}
+                    onChange={(e) => setFormData({ ...formData, subtitle: e.target.value })}
+                    className="w-full bg-white border-2 border-black rounded-xl px-4 py-3 text-black placeholder-black/30 focus:outline-none focus:ring-0 focus:shadow-[4px_4px_0px_#000] transition-shadow font-bold"
+                    placeholder="e.g. Pickleball Card Game"
+                  />
+                </div>
+                {/* Description */}
+                <div className="md:col-span-2">
+                  <label className="block text-black font-black text-xs uppercase tracking-widest mb-2">Description</label>
+                  <textarea
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    className="w-full bg-white border-2 border-black rounded-xl px-4 py-3 text-black placeholder-black/30 focus:outline-none focus:ring-0 focus:shadow-[4px_4px_0px_#000] transition-shadow font-bold"
+                    placeholder="Detailed product description..."
+                    rows={4}
+                  />
+                </div>
+
                 {/* Category */}
                 <div>
                   <label className="block text-black font-black text-xs uppercase tracking-widest mb-2">Category *</label>
@@ -471,17 +594,133 @@ export default function ProductsPage() {
                   />
                 </div>
 
-                {/* Image URL */}
-                <div className="md:col-span-2">
-                  <label className="block text-black font-black text-xs uppercase tracking-widest mb-2">Image URL</label>
+                {/* Min Players */}
+                <div>
+                  <label className="block text-black font-black text-xs uppercase tracking-widest mb-2">Min Players</label>
                   <input
-                    type="url"
-                    value={formData.image}
-                    onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+                    type="number"
+                    value={formData.minPlayers}
+                    onChange={(e) => setFormData({ ...formData, minPlayers: e.target.value })}
                     className="w-full bg-white border-2 border-black rounded-xl px-4 py-3 text-black placeholder-black/30 focus:outline-none focus:shadow-[4px_4px_0px_#000] transition-shadow font-bold"
-                    placeholder="https://example.com/image.jpg"
+                    placeholder="2"
                   />
                 </div>
+
+                {/* Max Players */}
+                <div>
+                  <label className="block text-black font-black text-xs uppercase tracking-widest mb-2">Max Players</label>
+                  <input
+                    type="number"
+                    value={formData.maxPlayers}
+                    onChange={(e) => setFormData({ ...formData, maxPlayers: e.target.value })}
+                    className="w-full bg-white border-2 border-black rounded-xl px-4 py-3 text-black placeholder-black/30 focus:outline-none focus:shadow-[4px_4px_0px_#000] transition-shadow font-bold"
+                    placeholder="4"
+                  />
+                </div>
+
+                {/* Age Group */}
+                <div>
+                  <label className="block text-black font-black text-xs uppercase tracking-widest mb-2">Age Group</label>
+                  <input
+                    type="text"
+                    value={formData.ageGroup}
+                    onChange={(e) => setFormData({ ...formData, ageGroup: e.target.value })}
+                    className="w-full bg-white border-2 border-black rounded-xl px-4 py-3 text-black placeholder-black/30 focus:outline-none focus:shadow-[4px_4px_0px_#000] transition-shadow font-bold"
+                    placeholder="Adult"
+                  />
+                </div>
+
+                {/* Box Content */}
+                <div className="md:col-span-2">
+                  <label className="block text-black font-black text-xs uppercase tracking-widest mb-2">Box Content</label>
+                  <textarea
+                    value={formData.boxContent}
+                    onChange={(e) => setFormData({ ...formData, boxContent: e.target.value })}
+                    className="w-full bg-white border-2 border-black rounded-xl px-4 py-3 text-black placeholder-black/30 focus:outline-none focus:ring-0 focus:shadow-[4px_4px_0px_#000] transition-shadow font-bold"
+                    placeholder="e.g. 52 Cards, Rulebook..."
+                    rows={2}
+                  />
+                </div>
+
+
+                {/* Image URL */}
+                <div className="md:col-span-2">
+                  <label className="block text-black font-black text-xs uppercase tracking-widest mb-2">Image (Main)</label>
+                  <ImageUpload
+                    value={formData.image ? [formData.image] : []}
+                    disabled={submitting}
+                    onChange={(url) => setFormData({ ...formData, image: url })}
+                    onRemove={() => setFormData({ ...formData, image: '' })}
+                  />
+                </div>
+
+                {/* Gallery Images */}
+                <div className="md:col-span-2">
+                  <label className="block text-black font-black text-xs uppercase tracking-widest mb-2">Gallery Images</label>
+                  <ImageUpload
+                    value={formData.images}
+                    disabled={submitting}
+                    onChange={(url) => setFormData({ ...formData, images: [...formData.images, url] })}
+                    onRemove={(url) => setFormData({ ...formData, images: formData.images.filter((current) => current !== url) })}
+                    maxFiles={5}
+                  />
+                </div>
+
+                {/* Features Dynamic List */}
+                <div className="md:col-span-2 border-t-2 border-black/10 pt-4">
+                  <div className="flex justify-between items-center mb-2">
+                    <label className="block text-black font-black text-sm uppercase tracking-widest">Key Features</label>
+                    <button type="button" onClick={addFeature} className="text-xs bg-black text-white px-2 py-1 rounded">Add Feature</button>
+                  </div>
+                  {formData.features.map((feature, index) => (
+                    <div key={index} className="flex gap-2 mb-2">
+                      <input
+                        type="text"
+                        placeholder="Title"
+                        value={feature.title}
+                        onChange={(e) => updateFeature(index, 'title', e.target.value)}
+                        className="flex-1 bg-white border-2 border-black rounded-lg px-2 py-1 text-sm font-bold"
+                      />
+                      <input
+                        type="text"
+                        placeholder="Description"
+                        value={feature.description}
+                        onChange={(e) => updateFeature(index, 'description', e.target.value)}
+                        className="flex-1 bg-white border-2 border-black rounded-lg px-2 py-1 text-sm"
+                      />
+                      <button type="button" onClick={() => removeFeature(index)} className="text-red-500"><X size={16} /></button>
+                    </div>
+                  ))}
+                </div>
+
+
+                {/* How To Play Dynamic List */}
+                <div className="md:col-span-2 border-t-2 border-black/10 pt-4">
+                  <div className="flex justify-between items-center mb-2">
+                    <label className="block text-black font-black text-sm uppercase tracking-widest">How To Play Steps</label>
+                    <button type="button" onClick={addHowToPlay} className="text-xs bg-black text-white px-2 py-1 rounded">Add Step</button>
+                  </div>
+                  {formData.howToPlay.map((step, index) => (
+                    <div key={index} className="flex gap-2 mb-2">
+                      <input
+                        type="text"
+                        placeholder="Step Title (e.g. Step 1)"
+                        value={step.title}
+                        onChange={(e) => updateHowToPlay(index, 'title', e.target.value)}
+                        className="w-1/4 bg-white border-2 border-black rounded-lg px-2 py-1 text-sm font-bold"
+                      />
+                      <textarea
+                        placeholder="Step Description"
+                        value={step.description}
+                        onChange={(e) => updateHowToPlay(index, 'description', e.target.value)}
+                        className="flex-1 bg-white border-2 border-black rounded-lg px-2 py-1 text-sm"
+                        rows={2}
+                      />
+                      <button type="button" onClick={() => removeHowToPlay(index)} className="text-red-500"><X size={16} /></button>
+                    </div>
+                  ))}
+                </div>
+
               </div>
 
               {/* Buttons */}

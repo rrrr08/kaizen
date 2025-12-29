@@ -9,6 +9,9 @@ import ProductCard from '@/components/ui/ProductCard';
 import { Product } from '@/lib/types';
 import { GameEvent } from '@/lib/types';
 
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+
 // Dummy data for featured products
 const featuredProducts: Product[] = [
   {
@@ -55,12 +58,49 @@ const featuredProducts: Product[] = [
   }
 ];
 
+interface HomepageContent {
+  hero: {
+    title: string;
+    subtitle: string;
+    ctaTextShops: string;
+    ctaTextJoin: string;
+    backgroundImage: string;
+  };
+  trending: {
+    title: string;
+    subtitle: string;
+  };
+  ctaSection: {
+    title: string;
+    description: string;
+    buttonText: string;
+  };
+  bentoGrid: {
+    title: string;
+    description: string;
+    image: string;
+  }[];
+}
+
 export default function Home() {
   const [events, setEvents] = useState<GameEvent[]>([]);
   const [loadingEvents, setLoadingEvents] = useState(true);
+  const [content, setContent] = useState<HomepageContent | null>(null);
 
   useEffect(() => {
-    async function fetchEvents() {
+    async function fetchData() {
+      // Fetch Page Content
+      try {
+        const docRef = doc(db, 'content', 'homepage');
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          setContent(docSnap.data() as HomepageContent);
+        }
+      } catch (err) {
+        console.error('Error fetching homepage content:', err);
+      }
+
+      // Fetch Events
       try {
         setLoadingEvents(true);
         const res = await fetch('/api/events?status=upcoming');
@@ -73,7 +113,7 @@ export default function Home() {
         setLoadingEvents(false);
       }
     }
-    fetchEvents();
+    fetchData();
   }, []);
 
   return (
@@ -83,8 +123,10 @@ export default function Home() {
       exit={{ opacity: 0 }}
       className="pb-20 pt-24"
     >
-      <Hero />
-      <BentoGrid />
+      <Hero
+        backgroundImage={content?.hero.backgroundImage}
+      />
+      <BentoGrid items={content?.bentoGrid} />
 
       <section className="px-6 py-20 bg-white">
         <div className="container mx-auto">

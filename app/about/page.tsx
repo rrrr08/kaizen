@@ -4,67 +4,41 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+
+const DEFAULT_FOUNDERS = [
+  {
+    name: 'Khushi Poddar',
+    role: 'Dreamer-in-Chief',
+    description: 'Brings ideas to life, chaos included.',
+    image: null // Fallback handled in render
+  },
+  {
+    name: 'Muskan Poddar',
+    role: 'Design Whiz',
+    description: 'Makes sure every card, board, and token looks as good as it feels.',
+    image: null
+  }
+];
+
 export default function About() {
-  const [aboutData, setAboutData] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [founders, setFounders] = useState<any[]>(DEFAULT_FOUNDERS);
 
   useEffect(() => {
-    fetchAboutData();
-  }, []);
-
-  const fetchAboutData = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const response = await fetch('/api/about');
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch about data: ${response.status}`);
+    async function fetchContent() {
+      try {
+        const docRef = doc(db, 'content', 'about');
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists() && docSnap.data().founders) {
+          setFounders(docSnap.data().founders);
+        }
+      } catch (error) {
+        console.error('Error fetching about content:', error);
       }
-
-      const data = await response.json();
-
-      if (data.success) {
-        setAboutData(data.data);
-      } else {
-        setError(data.error || 'Failed to load about data');
-      }
-    } catch (err: any) {
-      setError(err.message || 'Failed to load about data');
-      console.error('Error:', err);
-    } finally {
-      setLoading(false);
     }
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen pt-28 pb-16 flex items-center justify-center bg-[#FFFDF5]">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[#FFD93D] border-t-black mb-4"></div>
-          <p className="text-black/60 font-black text-xs tracking-[0.4em]">LOADING ABOUT...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen pt-28 pb-16 flex flex-col items-center justify-center gap-4 bg-[#FFFDF5]">
-        <div className="text-red-500 font-black tracking-widest text-center">
-          {error}
-        </div>
-        <button
-          onClick={fetchAboutData}
-          className="px-6 py-2 border-2 border-black text-black hover:bg-black hover:text-white transition-all font-black text-xs tracking-widest rounded-lg"
-        >
-          TRY AGAIN
-        </button>
-      </div>
-    );
-  }
+    fetchContent();
+  }, []);
 
   return (
     <div className="min-h-screen pt-32 pb-16 bg-[#FFFDF5] text-[#2D3436] selection:bg-[#FFD93D]/50 font-sans">
@@ -192,58 +166,53 @@ export default function About() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-4xl mx-auto">
-            {/* Founder 1 */}
-            <div className="group relative">
-              <div className="aspect-[4/5] bg-white border-2 border-black rounded-[20px] overflow-hidden mb-6 neo-shadow group-hover:scale-[1.02] transition-transform duration-300">
-                {/* Placeholder for Founder Image - You can replace src with real images later */}
-                <div className="w-full h-full bg-[#FFD93D] flex items-center justify-center relative overflow-hidden">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-4xl mx-auto">
+        {founders.map((founder, i) => (
+          <div key={i} className="group relative">
+            <div className="aspect-[4/5] bg-white border-2 border-black rounded-[20px] overflow-hidden mb-6 neo-shadow group-hover:scale-[1.02] transition-transform duration-300 transform-gpu isolation-isolate">
+              {founder.image ? (
+                <Image 
+                  src={founder.image} 
+                  alt={founder.name} 
+                  fill 
+                  className="object-cover object-top" 
+                />
+              ) : (
+                <div className={`w-full h-full ${i === 0 ? 'bg-[#FFD93D]' : 'bg-[#00B894]'} flex items-center justify-center relative overflow-hidden`}>
                   <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#000000_1px,transparent_1px)] [background-size:16px_16px]"></div>
-                  <span className="text-black font-header text-8xl opacity-20">KP</span>
+                  <span className="text-black font-header text-8xl opacity-20">{founder.name.split(' ').map((n: string) => n[0]).join('')}</span>
                 </div>
-              </div>
-              <h3 className="font-header text-3xl mb-1 text-black">Khushi Poddar</h3>
-              <p className="text-[#FF7675] font-black text-xs tracking-[0.3em] uppercase mb-4 bg-black/5 inline-block px-2 py-1 rounded">Dreamer-in-Chief</p>
-              <p className="text-black/70 font-bold text-sm">Brings ideas to life, chaos included.</p>
+              )}
             </div>
-
-            {/* Founder 2 */}
-            <div className="group relative">
-              <div className="aspect-[4/5] bg-white border-2 border-black rounded-[20px] overflow-hidden mb-6 neo-shadow group-hover:scale-[1.02] transition-transform duration-300">
-                {/* Placeholder for Founder Image */}
-                <div className="w-full h-full bg-[#00B894] flex items-center justify-center relative overflow-hidden">
-                  <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#000000_1px,transparent_1px)] [background-size:16px_16px]"></div>
-                  <span className="text-black font-header text-8xl opacity-20">MP</span>
-                </div>
-              </div>
-              <h3 className="font-header text-3xl mb-1 text-black">Muskan Poddar</h3>
-              <p className="text-[#6C5CE7] font-black text-xs tracking-[0.3em] uppercase mb-4 bg-black/5 inline-block px-2 py-1 rounded">Design Whiz</p>
-              <p className="text-black/70 font-bold text-sm">Makes sure every card, board, and token looks as good as it feels.</p>
-            </div>
+            <h3 className="font-header text-3xl mb-1 text-black">{founder.name}</h3>
+            <p className={`${i === 0 ? 'text-[#FF7675]' : 'text-[#6C5CE7]'} font-black text-xs tracking-[0.3em] uppercase mb-4 bg-black/5 inline-block px-2 py-1 rounded`}>{founder.role}</p>
+            <p className="text-black/70 font-bold text-sm">{founder.description}</p>
           </div>
-        </section>
-
-        {/* SECTION 7 — WHY CHOOSE JOY JUNCTURE? */}
-        <section className="text-center py-20 border-t-2 border-black/10">
-          <p className="font-header text-3xl md:text-5xl mb-12 text-black leading-tight">
-            "Because life is too short for boring evenings."
-          </p>
-          <div className="flex flex-col sm:flex-row gap-6 justify-center">
-            <Link
-              href="/shop"
-              className="px-8 py-4 bg-black text-white font-black text-xs tracking-[0.4em] hover:bg-[#6C5CE7] hover:scale-110 transition-all rounded-xl shadow-[4px_4px_0px_rgba(0,0,0,0.2)]"
-            >
-              EXPLORE GAMES
-            </Link>
-            <Link
-              href="/community"
-              className="px-8 py-4 bg-[#FFD93D] text-black border-2 border-black font-black text-xs tracking-[0.4em] neo-shadow hover:scale-110 transition-all rounded-xl"
-            >
-              JOIN THE FUN
-            </Link>
-          </div>
-        </section>
+        ))}
       </div>
+    </section>
+
+        {/* SECTION 7 — WHY CHOOSE JOY JUNCTURE? */ }
+  <section className="text-center py-20 border-t-2 border-black/10">
+    <p className="font-header text-3xl md:text-5xl mb-12 text-black leading-tight">
+      "Because life is too short for boring evenings."
+    </p>
+    <div className="flex flex-col sm:flex-row gap-6 justify-center">
+      <Link
+        href="/shop"
+        className="px-8 py-4 bg-black text-white font-black text-xs tracking-[0.4em] hover:bg-[#6C5CE7] hover:scale-110 transition-all rounded-xl shadow-[4px_4px_0px_rgba(0,0,0,0.2)]"
+      >
+        EXPLORE GAMES
+      </Link>
+      <Link
+        href="/community"
+        className="px-8 py-4 bg-[#FFD93D] text-black border-2 border-black font-black text-xs tracking-[0.4em] neo-shadow hover:scale-110 transition-all rounded-xl"
+      >
+        JOIN THE FUN
+      </Link>
     </div>
+  </section>
+      </div >
+    </div >
   );
 }
