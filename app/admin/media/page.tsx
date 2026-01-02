@@ -124,6 +124,7 @@ const SiteContentManager = () => {
     // State for different sections
     const [homeContent, setHomeContent] = useState<any>({
         hero: { backgroundImage: '' },
+        trending: { title: 'Trending Games', subtitle: 'The hottest drops this week.' },
         bentoGrid: Array.from({ length: 4 }, () => ({ image: '' }))
     });
 
@@ -185,6 +186,31 @@ const SiteContentManager = () => {
             <AccordionItem value="home" className="bg-white border-2 border-black rounded-xl px-4 neo-shadow">
                 <AccordionTrigger className="font-black hover:no-underline text-lg uppercase">Home Page</AccordionTrigger>
                 <AccordionContent className="space-y-8 pt-4 pb-8">
+                    {/* HOME: TRENDING SECTION */}
+                    <div className="space-y-4 border-b-2 border-black/10 pb-6">
+                        <h3 className="font-black text-sm uppercase tracking-widest bg-[#6C5CE7] text-white inline-block px-2 py-1 border border-black rounded">Trending Section</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label className="text-xs font-black uppercase block mb-1">Section Title</label>
+                                <input
+                                    type="text"
+                                    className="w-full bg-gray-50 border border-black rounded p-2 text-sm font-bold"
+                                    value={homeContent.trending?.title || ''}
+                                    onChange={(e) => setHomeContent({ ...homeContent, trending: { ...homeContent.trending, title: e.target.value } })}
+                                />
+                            </div>
+                            <div>
+                                <label className="text-xs font-black uppercase block mb-1">Section Subtitle</label>
+                                <input
+                                    type="text"
+                                    className="w-full bg-gray-50 border border-black rounded p-2 text-sm font-bold"
+                                    value={homeContent.trending?.subtitle || ''}
+                                    onChange={(e) => setHomeContent({ ...homeContent, trending: { ...homeContent.trending, subtitle: e.target.value } })}
+                                />
+                            </div>
+                        </div>
+                    </div>
+
                     {/* HOME: HERO */}
                     <div className="space-y-4 border-b-2 border-black/10 pb-6">
                         <h3 className="font-black text-sm uppercase tracking-widest bg-[#FFD93D] inline-block px-2 py-1 border border-black rounded">Hero Section</h3>
