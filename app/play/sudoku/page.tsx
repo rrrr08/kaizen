@@ -1,4 +1,4 @@
-import SudokuGame from '@/components/games/SudokuGame';
+import { SudokuGame } from '@/components/games/SudokuGame';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 

@@ -157,22 +157,22 @@ const SudokuGame: React.FC = () => {
         setMessage('Awarding points...');
 
         try {
-            const res = await fetch('/api/games/award', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ gameId: SUDOKU_GAME_ID, retry, level, time: timer }),
+            const result = await awardGamePoints({
+                gameId: SUDOKU_GAME_ID,
+                retry,
+                level,
+                points: Math.max(10 - timer * 0.1, 1) // Logic approximation, but server handles points usually
             });
-            const data = await res.json();
 
-            if (data.success) {
-                setPoints(data.awardedPoints);
-                setMessage(data.message || `You received ${data.awardedPoints} points!${data.isGameOfDay ? ' (Game of the Day!)' : ''}`);
+            if (result.success) {
+                setPoints(result.awardedPoints || 0);
+                setMessage(result.message || `You received ${result.awardedPoints} points!`);
                 if (scratcherDrops) setShowScratcher(true);
-            } else if (res.status === 409) {
+            } else if (result.error === 'Already played today') {
                 setAlreadyPlayed(true);
-                setMessage(data.message || 'You already played today. Come back tomorrow!');
+                setMessage(result.message || 'You already played today. Come back tomorrow!');
             } else {
-                setMessage(data.error || 'Error awarding points');
+                setMessage(result.error || 'Error awarding points');
             }
         } catch (e) {
             setMessage('Error awarding points');
@@ -317,65 +317,62 @@ const SudokuGame: React.FC = () => {
                             SUBMIT SOLUTION
                         </button>
                     )}
-
-                    {message && !isWon && (
-                        <p className="mt-4 font-bold text-[#FF7675] uppercase">{message}</p>
-                    )}
-                </div>
-
-                {/* RIGHT COLUMN: Stats */}
-                <div className="space-y-6">
-                    {/* Leaderboard */}
-                    {leaderboard.length > 0 && (
-                        <div className="bg-white border-2 border-black p-6 rounded-[20px] neo-shadow">
-                            <h3 className="font-header text-xl text-black uppercase mb-4">Leaderboard</h3>
-                            <div className="overflow-hidden rounded-xl border-2 border-black">
-                                <table className="w-full text-black text-sm">
-                                    <thead className="bg-[#FFD93D] border-b-2 border-black">
-                                        <tr>
-                                            <th className="p-3 text-left font-black uppercase text-xs">User</th>
-                                            <th className="p-3 text-left font-black uppercase text-xs">Pts</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="bg-white">
-                                        {leaderboard.map((row, i) => (
-                                            <tr key={i} className="border-b border-black/10 last:border-0 hover:bg-[#FFFDF5]">
-                                                <td className="p-3 font-bold">{row.userId.slice(0, 8)}...</td>
-                                                <td className="p-3 font-black text-[#00B894]">{row.totalPoints}</td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* History */}
-                    {history.length > 0 && (
-                        <div className="bg-white border-2 border-black p-6 rounded-[20px] neo-shadow">
-                            <h3 className="font-header text-xl text-black uppercase mb-4">You</h3>
-                            <div className="overflow-hidden rounded-xl border-2 border-black">
-                                <table className="w-full text-black text-sm">
-                                    <thead className="bg-[#A29BFE] border-b-2 border-black">
-                                        <tr>
-                                            <th className="p-3 text-left font-black uppercase text-xs">Date</th>
-                                            <th className="p-3 text-left font-black uppercase text-xs">Pts</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="bg-white">
-                                        {history.map((row, i) => (
-                                            <tr key={i} className="border-b border-black/10 last:border-0 hover:bg-[#FFFDF5]">
-                                                <td className="p-3 font-bold">{new Date(row.awardedAt).toLocaleDateString(undefined, { month: 'numeric', day: 'numeric' })}</td>
-                                                <td className="p-3 font-black text-black">{row.points}</td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    )}
                 </div>
             </div>
+
+            {/* Leaderboard */}
+            {leaderboard.length > 0 && (
+                <div className="w-full max-w-xl mt-8">
+                    <h3 className="font-header text-lg text-white/80 mb-2">Leaderboard</h3>
+                    <div className="bg-black/40 border border-white/20 rounded-lg overflow-hidden">
+                        <table className="w-full text-white/80 text-sm">
+                            <thead className="bg-white/5">
+                                <tr>
+                                    <th className="p-3 text-left">User</th>
+                                    <th className="p-3 text-left">Points</th>
+                                    <th className="p-3 text-left">Games</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {leaderboard.map((row, i) => (
+                                    <tr key={i} className="border-t border-white/10">
+                                        <td className="p-3">{row.userId.slice(0, 8)}...</td>
+                                        <td className="p-3 text-amber-500 font-bold">{row.totalPoints}</td>
+                                        <td className="p-3">{row.gamesPlayed}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            )}
+
+            {/* History */}
+            {history.length > 0 && (
+                <div className="w-full max-w-xl mt-4">
+                    <h3 className="font-header text-lg text-white/80 mb-2">Your History</h3>
+                    <div className="bg-black/40 border border-white/20 rounded-lg overflow-hidden">
+                        <table className="w-full text-white/80 text-sm">
+                            <thead className="bg-white/5">
+                                <tr>
+                                    <th className="p-3 text-left">Date</th>
+                                    <th className="p-3 text-left">Points</th>
+                                    <th className="p-3 text-left">Level</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {history.map((row, i) => (
+                                    <tr key={i} className="border-t border-white/10">
+                                        <td className="p-3">{new Date(row.awardedAt).toLocaleDateString()}</td>
+                                        <td className="p-3 text-amber-500 font-bold">{row.points}</td>
+                                        <td className="p-3">{row.level || '-'}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

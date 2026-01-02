@@ -168,19 +168,17 @@ const WordSearchGame: React.FC = () => {
     setMessage('Awarding points...');
 
     try {
-      const res = await fetch('/api/games/award', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ gameId: WORD_SEARCH_ID, retry: attempts }),
+      const result = await awardGamePoints({
+        gameId: WORD_SEARCH_ID,
+        retry: attempts
       });
-      const data = await res.json();
-      if (data.success) {
-        setPoints(data.awardedPoints);
-        setMessage(data.message || `You earned ${data.awardedPoints} points!`);
+      if (result.success) {
+        setPoints(result.awardedPoints || 0);
+        setMessage(result.message || `You earned ${result.awardedPoints} points!`);
         if (scratcherDrops) setShowScratcher(true);
-      } else if (res.status === 409) {
+      } else if (result.error === 'Already played today') {
         setAlreadyPlayed(true);
-        setMessage(data.message || 'You already played today!');
+        setMessage(result.message || 'You already played today!');
       }
     } catch (e) {
       setMessage('Error awarding points');
@@ -249,7 +247,7 @@ const WordSearchGame: React.FC = () => {
                     <button
                       key={`${i}-${j}`}
                       onClick={() => handleCellClick(i, j)}
-                      className={`w-8 h-8 text-sm font-black rounded border border-black/10 transition-all ${isSelected ? 'bg-[#00B894] text-white border-black scale-110 shadow-sm z-10' : 'bg-white text-black hover:bg-[#FFD93D]'
+                      className={`w-8 h-8 text-xs font-bold rounded transition-colors ${isSelected ? 'bg-blue-500 text-white' : 'bg-white/10 text-white hover:bg-white/20'
                         }`}
                     >
                       {cell}
@@ -267,7 +265,7 @@ const WordSearchGame: React.FC = () => {
               {words.map(word => (
                 <span
                   key={word}
-                  className={`px-3 py-1 border-2 border-black rounded-lg text-xs font-black uppercase ${found.includes(word) ? 'bg-[#00B894] text-black line-through opacity-50' : 'bg-white text-black'
+                  className={`text-sm font-bold ${found.includes(word) ? 'text-green-400 line-through' : 'text-white'
                     }`}
                 >
                   {word}

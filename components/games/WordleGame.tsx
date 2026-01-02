@@ -83,25 +83,20 @@ const WordleGame: React.FC = () => {
       setMessage('Awarding points...');
 
       try {
-        const res = await fetch('/api/games/award', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            gameId: WORDLE_GAME_ID,
-            retry: newGuesses.length - 1
-          }),
+        const result = await awardGamePoints({
+          gameId: WORDLE_GAME_ID,
+          retry: newGuesses.length - 1
         });
-        const data = await res.json();
 
-        if (data.success) {
-          setPoints(data.awardedPoints);
-          setMessage(data.message || `You earned ${data.awardedPoints} points!`);
+        if (result.success) {
+          setPoints(result.awardedPoints || 0);
+          setMessage(result.message || `You earned ${result.awardedPoints} points!`);
           if (scratcherDrops) setShowScratcher(true);
-        } else if (res.status === 409) {
+        } else if (result.error === 'Already played today') {
           setAlreadyPlayed(true);
-          setMessage(data.message || 'You already played today!');
+          setMessage(result.message || 'You already played today!');
         } else {
-          setMessage(data.error || 'Error awarding points');
+          setMessage(result.error || 'Error awarding points');
         }
       } catch (e) {
         setMessage('Error awarding points');

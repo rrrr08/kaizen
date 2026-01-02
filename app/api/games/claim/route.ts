@@ -39,49 +39,56 @@ export async function POST(req: NextRequest) {
     const userRef = adminDb.collection('users').doc(userUid);
     const playRecordRef = userRef.collection('gamePlays').doc(playRecordId);
     const playRecordSnap = await playRecordRef.get();
-
-    if (playRecordSnap.exists) {
-      return NextResponse.json(
-        { 
-          error: 'Already played today',
-          message: 'You already played this game today. Come back tomorrow!'
-        },
-        { status: 409 }
-      );
-    }
+    const alreadyPlayed = playRecordSnap.exists;
 
     // Get game settings
+    console.log(`[Award API] Processing award for game: ${gameId}, User: ${userUid}`);
     const settingsSnap = await adminDb.doc('settings/gamePoints').get();
     const gameSettings = settingsSnap.exists ? settingsSnap.data()?.[gameId] : null;
-
-    if (!gameSettings && !customPoints) {
-      return NextResponse.json({ error: 'Game settings not found' }, { status: 404 });
-    }
 
     // Calculate points
     let basePoints = customPoints || gameSettings?.basePoints || 10;
     const retryPenalty = gameSettings?.retryPenalty || 0;
     let finalPoints = Math.max(basePoints - (retry * retryPenalty), 1);
+    
+    console.log(`[Award API] Calculated points: ${finalPoints} (Base: ${basePoints}, Penalty: ${retryPenalty} * ${retry})`);
 
     // Check if this is Game of the Day
     const gotdSnap = await adminDb.doc('settings/gameOfTheDay').get();
     const gotdData = gotdSnap.data();
     const isGameOfDay = gotdData?.gameId === gameId && gotdData?.date === today;
 
-    if (isGameOfDay) {
+    // Apply 2x multiplier ONLY if it's Game of the Day AND first time playing today
+    let appliedMultiplier = 1;
+    if (isGameOfDay && !alreadyPlayed) {
       finalPoints = finalPoints * 2;
+      appliedMultiplier = 2;
     }
 
-    // Record the play
-    await playRecordRef.set({
-      gameId,
-      playedAt: new Date().toISOString(),
-      date: today,
-      retry,
-      level: level || 'default',
-      pointsAwarded: finalPoints,
-      isGameOfDay
-    });
+    // Record the play (overwrite or update)
+    if (alreadyPlayed) {
+       // If already played, we might want to just update the 'lastPlayed' or keep the original 'playedAt'
+       // For now, let's update the record to show the latest activity, but distinct from first play if needed.
+       // Actually, requirements say "played other time it should give the same rewards".
+       // We'll just update the record to reflect the latest play stats.
+       await playRecordRef.update({
+         lastPlayedAt: new Date().toISOString(),
+         retry,
+         level: level || 'default',
+         latestPoints: finalPoints // tracking latest points just in case
+       });
+    } else {
+       await playRecordRef.set({
+        gameId,
+        playedAt: new Date().toISOString(),
+        date: today,
+        retry,
+        level: level || 'default',
+        pointsAwarded: finalPoints,
+        isGameOfDay,
+        appliedMultiplier
+      });
+    }
 
     // Update user's total points and XP with tier multiplier
     const userSnap = await userRef.get();
@@ -148,8 +155,9 @@ export async function POST(req: NextRequest) {
       tierMultiplier: currentTier.multiplier,
       currentTier: currentTier.name,
       isGameOfDay,
-      message: isGameOfDay 
-        ? `🎉 Game of the Day! You earned ${xpEarned} XP and ${jpEarned} JP (${currentTier.multiplier}x ${currentTier.name} bonus)!`
+      appliedMultiplier,
+      message: isGameOfDay && appliedMultiplier === 2
+        ? `🎉 Game of the Day! You earned ${xpEarned} XP and ${jpEarned} JP (${currentTier.multiplier}x ${currentTier.name} bonus + 2x GotD Bonus)!`
         : `You earned ${xpEarned} XP and ${jpEarned} JP (${currentTier.multiplier}x ${currentTier.name} bonus)!`
     });
 

@@ -39,7 +39,7 @@ export async function awardGamePoints(params: {
       return { success: false, error: 'Not authenticated' };
     }
     
-    const response = await fetch('/api/games/award', {
+    const response = await fetch('/api/games/claim', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

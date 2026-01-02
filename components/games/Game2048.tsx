@@ -21,21 +21,8 @@ const Game2048: React.FC = () => {
   const [showScratcher, setShowScratcher] = useState(false);
   const [scratcherDrops, setScratcherDrops] = useState<{ prob: number, points: number }[] | null>(null);
 
-  const addRandomTile = useCallback((grid: number[][]) => {
-    const empty: [number, number][] = [];
-    for (let i = 0; i < 4; i++) {
-      for (let j = 0; j < 4; j++) {
-        if (grid[i][j] === 0) empty.push([i, j]);
-      }
-    }
-    if (empty.length > 0) {
-      const [row, col] = empty[Math.floor(Math.random() * empty.length)];
-      grid[row][col] = Math.random() < 0.9 ? 2 : 4;
-    }
-  }, []);
-
   const initBoard = useCallback(() => {
-    const newBoard = Array(4).fill(0).map(() => Array(4).fill(0));
+    const newBoard = Array(4).fill(null).map(() => Array(4).fill(0));
     addRandomTile(newBoard);
     addRandomTile(newBoard);
     setBoard(newBoard);
@@ -43,7 +30,24 @@ const Game2048: React.FC = () => {
     setMoves(0);
     setIsWon(false);
     setIsGameOver(false);
-  }, [addRandomTile]);
+    setAlreadyPlayed(false);
+    setPoints(null);
+    setMessage('');
+    setShowScratcher(false);
+  }, []);
+
+  const addRandomTile = (grid: number[][]) => {
+    const emptyCells: [number, number][] = [];
+    for (let i = 0; i < 4; i++) {
+      for (let j = 0; j < 4; j++) {
+        if (grid[i][j] === 0) emptyCells.push([i, j]);
+      }
+    }
+    if (emptyCells.length > 0) {
+      const [row, col] = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+      grid[row][col] = Math.random() < 0.9 ? 2 : 4;
+    }
+  };
 
   useEffect(() => {
     initBoard();
@@ -145,26 +149,21 @@ const Game2048: React.FC = () => {
     setMessage('Awarding points...');
 
     try {
-      const res = await fetch('/api/games/award', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          gameId: GAME_2048_ID,
-          retry: Math.floor(moves / 10),
-          level: `${score}`
-        }),
+      const result = await awardGamePoints({
+        gameId: GAME_2048_ID,
+        retry: Math.floor(moves / 10),
+        level: `${score}`
       });
-      const data = await res.json();
 
-      if (data.success) {
-        setPoints(data.awardedPoints);
-        setMessage(data.message || `You earned ${data.awardedPoints} points!`);
+      if (result.success) {
+        setPoints(result.awardedPoints || 0);
+        setMessage(result.message || `You earned ${result.awardedPoints} points!`);
         if (scratcherDrops) setShowScratcher(true);
-      } else if (res.status === 409) {
+      } else if (result.error === 'Already played today') {
         setAlreadyPlayed(true);
-        setMessage(data.message || 'You already played today!');
+        setMessage(result.message || 'You already played today!');
       } else {
-        setMessage(data.error || 'Error awarding points');
+        setMessage(result.error || 'Error awarding points');
       }
     } catch (e) {
       setMessage('Error awarding points');
@@ -262,7 +261,7 @@ const Game2048: React.FC = () => {
               row.map((cell, j) => (
                 <div
                   key={`${i}-${j}`}
-                  className={`aspect-square rounded-lg flex items-center justify-center text-2xl md:text-3xl font-black transition-all ${cell === 0 ? 'bg-[#FFEAA7]/20 border-2 border-white/10' : getTileColor(cell)
+                  className={`aspect-square rounded-lg flex items-center justify-center text-2xl font-bold transition-all ${cell === 0 ? 'bg-amber-900/30' : getTileColor(cell)
                     }`}
                 >
                   {cell !== 0 && cell}
