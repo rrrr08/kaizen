@@ -136,6 +136,8 @@ const SiteContentManager = () => {
         communityGallery: Array(4).fill('')
     });
 
+    const [logoUrl, setLogoUrl] = useState<string>('');
+
     // Fetch all content on mount
     useEffect(() => {
         const fetchAll = async () => {
@@ -149,6 +151,9 @@ const SiteContentManager = () => {
 
                 const blogSnap = await getDoc(doc(db, 'content', 'blog'));
                 if (blogSnap.exists()) setBlogContent((prev: any) => ({ ...prev, ...blogSnap.data() }));
+
+                const logoSnap = await getDoc(doc(db, 'content', 'siteSettings'));
+                if (logoSnap.exists()) setLogoUrl(logoSnap.data().logoUrl || '');
             } catch (error) {
                 console.error("Error fetching content:", error);
             } finally {
@@ -186,6 +191,7 @@ const SiteContentManager = () => {
                         <div>
                             <label className="text-xs font-black uppercase block mb-1">Hero Image (The Blob)</label>
                             <ImageUpload
+                                uploadId="home-hero-bg"
                                 value={homeContent.hero.backgroundImage ? [homeContent.hero.backgroundImage] : []}
                                 onChange={(url) => setHomeContent({ ...homeContent, hero: { ...homeContent.hero, backgroundImage: url } })}
                                 onRemove={() => setHomeContent({ ...homeContent, hero: { ...homeContent.hero, backgroundImage: '' } })}
@@ -197,10 +203,12 @@ const SiteContentManager = () => {
                     <div className="space-y-4 border-b-2 border-black/10 pb-6">
                         <h3 className="font-black text-sm uppercase tracking-widest bg-[#00B894] text-white inline-block px-2 py-1 border border-black rounded">Bento Grid (4 Images)</h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                             {homeContent.bentoGrid.map((item: any, i: number) => (
                                 <div key={i} className="border-2 border-black/10 p-4 rounded-lg">
                                     <p className="font-black text-xs uppercase mb-2">Item #{i + 1}</p>
                                     <ImageUpload
+                                        uploadId={`home-bento-${i}`}
                                         value={item.image ? [item.image] : []}
                                         onChange={(url) => {
                                             const newGrid = [...homeContent.bentoGrid];
@@ -231,10 +239,12 @@ const SiteContentManager = () => {
                     <div className="space-y-6">
                         <h3 className="font-black text-sm uppercase tracking-widest bg-[#FF7675] text-white inline-block px-2 py-1 border border-black rounded">Founders</h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                             {aboutContent.founders.map((founder: any, i: number) => (
                                 <div key={i} className="border-2 border-black/10 p-4 rounded-lg space-y-3">
                                     <p className="font-black text-xs uppercase">Founder #{i + 1}</p>
                                     <ImageUpload
+                                        uploadId={`about-founder-${i}`}
                                         value={founder.image ? [founder.image] : []}
                                         onChange={(url) => {
                                             const newFounders = [...aboutContent.founders];
@@ -291,6 +301,7 @@ const SiteContentManager = () => {
                             <div className="space-y-4">
                                 <label className="text-xs font-black uppercase block mb-1">Story Image</label>
                                 <ImageUpload
+                                    uploadId="blog-featured-story"
                                     value={blogContent.featuredStory.image ? [blogContent.featuredStory.image] : []}
                                     onChange={(url) => setBlogContent({ ...blogContent, featuredStory: { ...blogContent.featuredStory, image: url } })}
                                     onRemove={() => setBlogContent({ ...blogContent, featuredStory: { ...blogContent.featuredStory, image: '' } })}
@@ -302,9 +313,11 @@ const SiteContentManager = () => {
                     <div className="space-y-6">
                         <h3 className="font-black text-sm uppercase tracking-widest bg-[#FFD93D] inline-block px-2 py-1 border border-black rounded">Community Gallery (4 Images)</h3>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                             {blogContent.communityGallery.map((img: string, i: number) => (
                                 <div key={i} className="space-y-2">
                                     <ImageUpload
+                                        uploadId={`blog-gallery-${i}`}
                                         value={img ? [img] : []}
                                         onChange={(url) => {
                                             const newGal = [...blogContent.communityGallery];
@@ -324,6 +337,54 @@ const SiteContentManager = () => {
 
                     <Button onClick={() => handleSave('blog', blogContent)} disabled={saving} className="w-full bg-black text-white font-black uppercase py-6 hover:bg-neutral-800">
                         {saving ? <Loader2 className="animate-spin" /> : 'Save Blog Content'}
+                    </Button>
+                </AccordionContent>
+            </AccordionItem>
+
+            {/* SITE LOGO */}
+            <AccordionItem value="logo" className="bg-white border-2 border-black rounded-xl px-4 neo-shadow">
+                <AccordionTrigger className="font-black hover:no-underline text-lg uppercase">Site Logo</AccordionTrigger>
+                <AccordionContent className="space-y-8 pt-4 pb-8">
+                    <div className="space-y-6">
+                        <h3 className="font-black text-sm uppercase tracking-widest bg-[#FF7675] text-white inline-block px-2 py-1 border border-black rounded">Global Logo</h3>
+                        <div className="border-2 border-black/10 p-6 rounded-lg space-y-4">
+                            <p className="text-xs font-bold text-black/60">Upload a custom logo that will appear across all pages (Navbar, Login, Signup, etc.). If no logo is uploaded, the default &quot;JJ&quot; logo will be used.</p>
+                            <ImageUpload
+                                uploadId="site-logo"
+                                value={logoUrl ? [logoUrl] : []}
+                                onChange={(url) => setLogoUrl(url)}
+                                onRemove={() => setLogoUrl('')}
+                            />
+                            {logoUrl && (
+                                <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-black/10">
+                                    <p className="text-xs font-black uppercase mb-2">Preview:</p>
+                                    <div className="flex items-center gap-4">
+                                        <div className="bg-[#FFD93D] p-2.5 border-2 border-black rounded-[12px] neo-shadow">
+                                            <Image src={logoUrl} alt="Logo Preview" width={40} height={40} className="object-contain" />
+                                        </div>
+                                        <p className="text-xs font-bold text-black/60">This is how your logo will appear</p>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                    <Button
+                        onClick={async () => {
+                            setSaving(true);
+                            try {
+                                await setDoc(doc(db, 'content', 'siteSettings'), { logoUrl });
+                                alert('Logo updated successfully!');
+                            } catch (error) {
+                                console.error('Error saving logo:', error);
+                                alert('Save failed');
+                            } finally {
+                                setSaving(false);
+                            }
+                        }}
+                        disabled={saving}
+                        className="w-full bg-black text-white font-black uppercase py-6 hover:bg-neutral-800"
+                    >
+                        {saving ? <Loader2 className="animate-spin" /> : 'Save Logo'}
                     </Button>
                 </AccordionContent>
             </AccordionItem>
