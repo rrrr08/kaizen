@@ -24,7 +24,7 @@ function ResetPasswordPageContent() {
             // Lazy load Firebase
             const { auth } = await import('@/lib/firebase');
             const { sendPasswordResetEmail } = await import('firebase/auth');
-            
+
             await sendPasswordResetEmail(auth, email, {
                 url: `${window.location.origin}/auth/action`,
                 handleCodeInApp: true,
@@ -49,267 +49,129 @@ function ResetPasswordPageContent() {
     };
 
     return (
-        <div className="min-h-[100dvh] w-full flex items-center justify-center bg-gradient-to-b from-dark via-accent to-highlight/90 px-4 sm:px-6">
-            <style jsx global>{`
-        .glass-card {
-          position: relative;
-          z-index: 1;
-          backdrop-filter: blur(20px) saturate(200%);
-          -webkit-backdrop-filter: blur(20px) saturate(200%);
-          background: linear-gradient(
-            to right bottom,
-            rgba(255, 255, 255, 0.9),
-            rgba(255, 255, 255, 0.7),
-            rgba(255, 255, 255, 0.4)
-          );
-          border: 1px solid rgba(255, 255, 255, 0.8);
-          box-shadow: 
-            0 8px 32px rgba(31, 38, 135, 0.15),
-            0 4px 8px rgba(0, 0, 0, 0.05),
-            inset 0 0 0 1px rgba(255, 255, 255, 0.5);
-          border-radius: 24px;
-          padding: 2.5rem;
-          width: 100%;
-          max-width: 420px;
-          animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-          overflow: hidden;
-          transform-style: preserve-3d;
-          transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
+        <div className="min-h-screen bg-[#FFFDF5] text-[#2D3436] flex items-center justify-center px-4 pt-32 pb-12">
+            <div className="relative z-10 w-full max-w-md">
 
-        .glass-card:hover {
-          transform: translateY(-5px) rotateX(2deg) rotateY(2deg);
-          box-shadow: 
-            0 12px 40px rgba(31, 38, 135, 0.2),
-            0 8px 16px rgba(0, 0, 0, 0.07),
-            inset 0 0 0 1px rgba(255, 255, 255, 0.7);
-        }
-        
-        .glass-input {
-          background: rgba(255, 255, 255, 0.8) !important;
-          border: 1px solid rgba(255, 255, 255, 0.5) !important;
-          backdrop-filter: blur(12px);
-          -webkit-backdrop-filter: blur(12px);
-          transition: all 0.3s ease !important;
-          height: 48px !important;
-          padding-left: 48px !important;
-          font-size: 0.95rem !important;
-          letter-spacing: 0.025em !important;
-          border-radius: 12px !important;
-        }
-        
-        .glass-input:focus {
-          background: rgba(255, 255, 255, 0.95) !important;
-          border-color: rgba(20, 184, 166, 0.8) !important;
-          box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.15) !important;
-          outline: none !important;
-          transform: translateY(-1px);
-        }
+                {/* Logo */}
+                <div className="text-center mb-12">
+                    <Link href="/" className="inline-block flex justify-center mb-6 hover:scale-105 transition-transform">
+                        <div className="bg-[#FFD93D] p-3 border-2 border-black rounded-[15px] neo-shadow">
+                            <span className="text-2xl font-black text-black">JJ</span>
+                        </div>
+                    </Link>
+                    <h1 className="font-header text-4xl font-black text-black mb-2 uppercase tracking-tight">
+                        {success ? 'Check Email' : 'Reset Access'}
+                    </h1>
+                    <p className="font-sans font-bold text-black/60 text-sm">
+                        {success ? 'Recovery link sent' : 'Recover your account'}
+                    </p>
+                </div>
 
-        .glass-input:hover {
-          background: rgba(255, 255, 255, 0.9) !important;
-          border-color: rgba(20, 184, 166, 0.4) !important;
-        }
-        
-        .gradient-button {
-          background: linear-gradient(135deg, #0f766e, #7c3aed) !important;
-          border: none !important;
-          transition: all 0.3s ease !important;
-          color: white !important;
-          height: 48px !important;
-          font-size: 1rem !important;
-          font-weight: 600 !important;
-          letter-spacing: 0.025em !important;
-          border-radius: 12px !important;
-          position: relative;
-          overflow: hidden;
-        }
-        
-        .gradient-button::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background: linear-gradient(135deg, #0d5757, #6d28d9);
-          opacity: 0;
-          transition: opacity 0.3s ease;
-        }
-        
-        .gradient-button:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 12px 35px rgba(15, 118, 110, 0.4) !important;
-        }
-        
-        .gradient-button:hover::before {
-          opacity: 1;
-        }
-        
-        .gradient-button > * {
-          position: relative;
-          z-index: 1;
-        }
-        
-        .gradient-text {
-          background: linear-gradient(135deg, #0f766e, #7c3aed);
-          -webkit-background-clip: text;
-          background-clip: text;
-          -webkit-text-fill-color: transparent;
-          color: transparent;
-        }
-        
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(40px) scale(0.95);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-          }
-        }
-        
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-        
-        .animate-spin {
-          animation: spin 1s linear infinite;
-        }
-      `}</style>
+                {/* Main Card */}
+                <div className="border-2 border-black bg-white p-8 rounded-[25px] neo-shadow">
 
-            <div className="w-full max-w-md">
-                <div className="glass-card p-8 rounded-2xl shadow-2xl">
-                    {/* Back to Login Link */}
+                    {/* Back Link */}
                     <div className="mb-6">
                         <Link
                             href="/auth/login"
-                            className="inline-flex items-center text-sm text-gray-600 hover:text-gray-800 transition-colors duration-200 group"
+                            className="inline-flex items-center gap-2 font-black text-xs tracking-widest text-black/40 hover:text-black uppercase transition-colors"
                         >
-                            <ArrowLeft className="h-4 w-4 mr-2 transition-transform group-hover:-translate-x-1" />
-                            Back to login
+                            <ArrowLeft className="h-3 w-3" strokeWidth={3} />
+                            Back to Login
                         </Link>
-                    </div>
-
-                    <div className="text-center mb-8">
-                        <h1 id="reset-password-title" className="text-3xl font-bold gradient-text mb-2">
-                            {success ? 'Check Your Email' : 'Reset Password'}
-                        </h1>
-                        <p className="text-gray-600">
-                            {success
-                                ? 'We\'ve sent a password reset link to your email address'
-                                : 'Enter your email address and we\'ll send you a link to reset your password'
-                            }
-                        </p>
                     </div>
 
                     {success ? (
                         <div className="text-center space-y-6">
                             <div className="flex justify-center">
-                                <CheckCircle className="h-16 w-16 text-green-500" />
+                                <div className="w-16 h-16 bg-[#00B894] rounded-full border-2 border-black flex items-center justify-center neo-shadow">
+                                    <CheckCircle className="h-8 w-8 text-white" strokeWidth={3} />
+                                </div>
                             </div>
 
                             <div className="space-y-4">
-                                <p className="text-sm text-gray-600">
-                                    If you don't see the email in your inbox, please check your spam folder.
+                                <p className="font-bold text-black/70 text-sm">
+                                    We've sent a password reset link to <span className="text-black">{email}</span>. Please check your inbox (and spam folder).
                                 </p>
 
-                                <Button
+                                <button
                                     onClick={() => {
                                         setSuccess(false);
                                         setEmail('');
                                     }}
-                                    className="w-full gradient-button"
+                                    className="w-full border-2 border-black bg-[#FFD93D] text-black hover:bg-[#ffcf0d] hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_#000] active:translate-y-[2px] active:shadow-[1px_1px_0px_#000] py-3 rounded-[12px] font-black text-xs tracking-[0.2em] uppercase transition-all flex items-center justify-center gap-2 neo-shadow"
                                 >
-                                    Send Another Email
-                                </Button>
+                                    Try Another Email
+                                </button>
                             </div>
                         </div>
                     ) : (
                         <>
                             {error && (
-                                <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg text-sm mb-6">
-                                    <div className="flex">
-                                        <div className="flex-shrink-0">
-                                            <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                                            </svg>
-                                        </div>
-                                        <div className="ml-3">
-                                            <p>{error}</p>
-                                        </div>
-                                    </div>
+                                <div className="mb-6 p-4 border-2 border-black bg-[#FF7675] rounded-[15px] neo-shadow animate-in fade-in slide-in-from-top-2">
+                                    <p className="font-black text-xs text-black uppercase tracking-wide flex items-center gap-2">
+                                        <span className="text-lg">⚠️</span> {error}
+                                    </p>
                                 </div>
                             )}
 
                             <form onSubmit={handleResetPassword} className="space-y-6">
                                 <div className="space-y-2">
-                                    <Label htmlFor="email" className="text-sm font-medium">
+                                    <label htmlFor="email" className="font-black text-xs tracking-widest text-black uppercase ml-1">
                                         Email Address
-                                    </Label>
+                                    </label>
                                     <div className="relative">
-                                        <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 transition-colors group-hover:text-primary" size={20} />
-                                        <Input
+                                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-black" />
+                                        <input
                                             id="email"
                                             type="email"
                                             value={email}
                                             onChange={(e) => setEmail(e.target.value)}
-                                            className="glass-input"
-                                            placeholder="Enter your email"
+                                            className="w-full bg-[#FFFDF5] border-2 border-black rounded-[12px] text-black placeholder:text-black/30 pl-12 pr-4 py-4 text-sm font-bold focus:bg-[#FFD93D]/20 focus:outline-none transition-all shadow-[2px_2px_0px_#000]"
+                                            placeholder="name@example.com"
                                             required
                                             autoComplete="email"
                                         />
                                     </div>
                                 </div>
 
-                                <Button
-                                    className="w-full gradient-button"
+                                <button
                                     type="submit"
                                     disabled={loading}
+                                    className="w-full border-2 border-black bg-[#6C5CE7] text-white hover:bg-[#5a4bd1] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_#000] active:translate-y-[2px] active:shadow-[2px_2px_0px_#000] py-4 rounded-[15px] font-black text-sm tracking-[0.2em] uppercase transition-all flex items-center justify-center gap-3 neo-shadow"
                                 >
                                     {loading ? (
                                         <>
-                                            <Loader2 className="h-5 w-5 animate-spin mr-2" />
-                                            <span>Sending...</span>
+                                            <Loader2 className="h-5 w-5 animate-spin" />
+                                            <span>SENDING...</span>
                                         </>
                                     ) : (
-                                        'Send Reset Link'
+                                        'SEND RESET LINK'
                                     )}
-                                </Button>
+                                </button>
                             </form>
                         </>
                     )}
 
                     {/* Sign Up Link */}
-                    <div className="text-center mt-8">
-                        <p className="text-gray-600 text-sm">
-                            Don't have an account?{' '}
-                            <Link
-                                href="/auth/signup"
-                                className="text-teal-600 hover:text-teal-700 transition-colors font-semibold inline-flex items-center group"
-                            >
-                                Sign up for free
-                                <svg className="w-4 h-4 ml-1 transform transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                </svg>
-                            </Link>
+                    <div className="mt-8 text-center bg-[#FFD93D]/10 rounded-xl p-4 border-2 border-black/5">
+                        <p className="font-bold text-black/60 text-xs mb-2">
+                            Don't have an account?
                         </p>
+                        <Link
+                            href="/auth/signup"
+                            className="inline-block font-black text-xs tracking-[0.2em] text-[#6C5CE7] hover:text-black uppercase border-b-2 border-[#6C5CE7] hover:border-black transition-all pb-1"
+                        >
+                            CREATE ACCOUNT
+                        </Link>
                     </div>
 
                     {/* Terms */}
-                    <div className="text-center mt-8 pt-6 border-t border-gray-100">
-                        <p className="text-xs text-gray-500">
-                            By using our service, you agree to our{" "}
-                            <Link href="/terms" className="text-teal-600 hover:text-teal-700 transition-colors underline decoration-teal-600/30 hover:decoration-teal-600">
-                                Terms of Service
-                            </Link>
-                            {" "}and{" "}
-                            <Link href="/privacy" className="text-teal-600 hover:text-teal-700 transition-colors underline decoration-teal-600/30 hover:decoration-teal-600">
-                                Privacy Policy
-                            </Link>
-                            .
+                    <div className="mt-6 text-center">
+                        <p className="text-[10px] text-black/40 font-bold uppercase tracking-wide">
+                            By proceeding, you agree to our{" "}
+                            <Link href="/terms" className="text-black underline">Terms</Link> &{" "}
+                            <Link href="/privacy" className="text-black underline">Privacy</Link>
                         </p>
                     </div>
                 </div>
@@ -321,7 +183,7 @@ function ResetPasswordPageContent() {
 // Loading fallback component
 function ResetPasswordPageFallback() {
     return (
-        <div className="min-h-[100dvh] w-full flex items-center justify-center bg-gradient-to-b from-dark via-accent to-highlight/90 px-4 sm:px-6">
+        <div className="min-h-[100dvh] w-full flex items-center justify-center bg-gradient-to-b from-dark via-accent to-highlight/90 px-4 sm:px-6 pt-32 pb-12">
             <div className="flex flex-col items-center justify-center">
                 <Loader2 className="h-8 w-8 animate-spin text-accent" />
                 <p className="mt-2 text-sm text-gray-500">Loading reset password page...</p>

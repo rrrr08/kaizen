@@ -3,13 +3,14 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
+import { Home, Users, PartyPopper, Gem, ArrowRight } from 'lucide-react';
 
 const journeys = [
     {
         id: 'home',
         title: 'Play at Home',
         desc: 'Curation for your living room table.',
-        icon: "🏠",
+        icon: <Home size={48} />,
         color: 'bg-white',
         gridClass: 'md:col-span-2 md:row-span-1 min-h-[400px]',
         image: 'https://images.unsplash.com/photo-1610890716171-6b1bb98ffd09?auto=format&fit=crop&q=80&w=800'
@@ -18,7 +19,7 @@ const journeys = [
         id: 'live',
         title: 'Play Together (Live)',
         desc: 'Crowded workshops and local meetups.',
-        icon: "👥",
+        icon: <Users size={48} />,
         color: 'bg-[#6C5CE7]',
         textColor: 'text-white',
         gridClass: 'md:col-span-1 md:row-span-1 min-h-[400px]',
@@ -29,7 +30,7 @@ const journeys = [
         id: 'occasions',
         title: 'Play for Occasions',
         desc: 'Parties, Weddings & Corporate Fun.',
-        icon: "🎉",
+        icon: <PartyPopper size={48} />,
         color: 'bg-[#FFD93D]',
         gridClass: 'md:col-span-1 md:row-span-1 min-h-[400px]',
         image: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?auto=format&fit=crop&q=80&w=800'
@@ -38,7 +39,7 @@ const journeys = [
         id: 'belong',
         title: 'Play & Belong',
         desc: 'Treasure your community and rewards.',
-        icon: "💎",
+        icon: <Gem size={48} />,
         color: 'bg-[#00B894]',
         textColor: 'text-white',
         gridClass: 'md:col-span-2 md:row-span-1 min-h-[400px]',
@@ -117,7 +118,7 @@ const BentoGrid: React.FC<BentoGridProps> = ({ items }) => {
                                     whileHover={{ x: 15 }}
                                     className="w-fit flex items-center gap-3 font-black text-xl mt-8 bg-black text-white px-6 py-3 rounded-2xl neo-border neo-shadow"
                                 >
-                                    Explore Journey <span className="text-2xl">➜</span>
+                                    Explore Journey <ArrowRight size={24} />
                                 </motion.button>
                             </div>
                         </motion.div>

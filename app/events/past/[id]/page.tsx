@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { GameEvent } from '@/lib/types';
 import { splitDateTime } from '@/lib/utils';
+import { ArrowLeft } from 'lucide-react';
 
 export default function EventDetail() {
   const { id } = useParams<{ id: string }>();
@@ -68,8 +69,8 @@ export default function EventDetail() {
     <div className="min-h-screen pt-28 pb-16">
       <div className="max-w-7xl mx-auto px-6 md:px-12">
 
-        <Link href="/events/past" className="font-header text-[10px] tracking-[0.4em] text-white/40 hover:text-amber-500 mb-12 inline-block">
-          ← BACK TO EVENTS
+        <Link href="/events/past" className="font-header text-[10px] tracking-[0.4em] text-white/40 hover:text-amber-500 mb-12 inline-flex items-center gap-2">
+          <ArrowLeft size={16} /> BACK TO EVENTS
         </Link>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-16">

@@ -3,6 +3,7 @@
 import { TESTIMONIALS, GAMES } from '@/lib/constants';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
+import { X, ArrowRight } from 'lucide-react';
 
 export default function Community() {
   const [events, setEvents] = useState<any[]>([]);
@@ -217,18 +218,18 @@ export default function Community() {
                 <div>
                   <p className="text-black font-black text-lg mb-3">Earn points through:</p>
                   <ul className="space-y-2 text-black/70 font-medium text-sm">
-                    <li>→ Purchasing games</li>
-                    <li>→ Attending events</li>
-                    <li>→ Playing online games</li>
-                    <li>→ Community engagement</li>
+                    <li className="flex items-center gap-2"><ArrowRight size={14} /> Purchasing games</li>
+                    <li className="flex items-center gap-2"><ArrowRight size={14} /> Attending events</li>
+                    <li className="flex items-center gap-2"><ArrowRight size={14} /> Playing online games</li>
+                    <li className="flex items-center gap-2"><ArrowRight size={14} /> Community engagement</li>
                   </ul>
                 </div>
                 <div className="pt-4 border-t-2 border-black/10">
                   <p className="text-black font-black text-lg mb-3">Redeem for:</p>
                   <ul className="space-y-2 text-black/70 font-medium text-sm">
-                    <li>→ Store discounts</li>
-                    <li>→ Event tickets</li>
-                    <li>→ Exclusive merchandise</li>
+                    <li className="flex items-center gap-2"><ArrowRight size={14} /> Store discounts</li>
+                    <li className="flex items-center gap-2"><ArrowRight size={14} /> Event tickets</li>
+                    <li className="flex items-center gap-2"><ArrowRight size={14} /> Exclusive merchandise</li>
                   </ul>
                 </div>
               </div>
@@ -318,9 +319,9 @@ export default function Community() {
               <div className="bg-white border-4 border-black p-8 rounded-[30px] max-w-md w-full shadow-[8px_8px_0px_#000] relative animate-in fade-in zoom-in duration-200">
                 <button
                   onClick={() => setIsSubmitOpen(false)}
-                  className="absolute top-4 right-4 text-black hover:rotate-90 transition-transform font-black text-xl"
+                  className="absolute top-4 right-4 text-black hover:rotate-90 transition-transform"
                 >
-                  ✕
+                  <X size={24} />
                 </button>
 
                 <h3 className="font-header text-2xl mb-6 text-black">Share Your Story</h3>
@@ -391,6 +392,6 @@ export default function Community() {
           </div>
         </div>
       </div>
-    </div>
+    </div >
   );
 }

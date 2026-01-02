@@ -26,11 +26,36 @@ const MathQuizGame: React.FC = () => {
   const [points, setPoints] = useState<number | null>(null);
   const [message, setMessage] = useState('');
   const [showScratcher, setShowScratcher] = useState(false);
-  const [scratcherDrops, setScratcherDrops] = useState<{prob:number,points:number}[]|null>(null);
+  const [scratcherDrops, setScratcherDrops] = useState<{ prob: number, points: number }[] | null>(null);
+
+  const generateQuestions = () => {
+    const qs: Question[] = [];
+    for (let i = 0; i < 10; i++) {
+      const a = Math.floor(Math.random() * 20) + 1;
+      const b = Math.floor(Math.random() * 20) + 1;
+      const op = ['+', '-', '*'][Math.floor(Math.random() * 3)];
+      let answer = 0;
+      let question = '';
+
+      if (op === '+') {
+        answer = a + b;
+        question = `${a} + ${b}`;
+      } else if (op === '-') {
+        answer = a - b;
+        question = `${a} - ${b}`;
+      } else {
+        answer = a * b;
+        question = `${a} × ${b}`;
+      }
+
+      qs.push({ question, answer });
+    }
+    setQuestions(qs);
+  };
 
   useEffect(() => {
     generateQuestions();
-    
+
     fetch('/api/games/game-of-the-day')
       .then(r => r.json())
       .then(d => { if (d.gameId === MATH_QUIZ_ID) setIsGameOfDay(true); });
@@ -45,7 +70,7 @@ const MathQuizGame: React.FC = () => {
 
   useEffect(() => {
     if (isComplete || alreadyPlayed) return;
-    
+
     const timer = setInterval(() => {
       setTimeLeft(prev => {
         if (prev <= 1) {
@@ -55,34 +80,11 @@ const MathQuizGame: React.FC = () => {
         return prev - 1;
       });
     }, 1000);
-    
+
     return () => clearInterval(timer);
   }, [currentQ, isComplete, alreadyPlayed]);
 
-  const generateQuestions = () => {
-    const qs: Question[] = [];
-    for (let i = 0; i < 10; i++) {
-      const a = Math.floor(Math.random() * 20) + 1;
-      const b = Math.floor(Math.random() * 20) + 1;
-      const op = ['+', '-', '*'][Math.floor(Math.random() * 3)];
-      let answer = 0;
-      let question = '';
-      
-      if (op === '+') {
-        answer = a + b;
-        question = `${a} + ${b}`;
-      } else if (op === '-') {
-        answer = a - b;
-        question = `${a} - ${b}`;
-      } else {
-        answer = a * b;
-        question = `${a} × ${b}`;
-      }
-      
-      qs.push({ question, answer });
-    }
-    setQuestions(qs);
-  };
+
 
   const handleTimeout = () => {
     setWrongAnswers(wrongAnswers + 1);
@@ -97,14 +99,14 @@ const MathQuizGame: React.FC = () => {
 
   const handleSubmit = () => {
     if (!userAnswer) return;
-    
+
     const correct = parseInt(userAnswer) === questions[currentQ].answer;
     if (correct) {
       setScore(score + 1);
     } else {
       setWrongAnswers(wrongAnswers + 1);
     }
-    
+
     if (currentQ + 1 >= questions.length) {
       finishQuiz();
     } else {
@@ -126,7 +128,7 @@ const MathQuizGame: React.FC = () => {
 
   const awardPoints = async () => {
     setMessage('Awarding points...');
-    
+
     const result = await awardGamePoints({
       gameId: MATH_QUIZ_ID,
       retry: wrongAnswers
@@ -148,30 +150,29 @@ const MathQuizGame: React.FC = () => {
     <div className="max-w-2xl mx-auto">
       {isGameOfDay && (
         <div className="mb-6 flex justify-center">
-          <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#FFD93D] to-[#FF7675] text-black rounded-full font-header tracking-widest text-sm border-2 border-black shadow-[4px_4px_0px_#000]">
-            <Star size={16} className="fill-current" /> GAME OF THE DAY - 2X POINTS!
+          <div className="inline-flex items-center gap-2 px-6 py-3 bg-[#FFD93D] text-black rounded-full font-black tracking-widest text-sm border-2 border-black shadow-[4px_4px_0px_#000]">
+            <Star size={16} className="fill-black" /> GAME OF THE DAY - 2X POINTS!
           </div>
         </div>
       )}
 
-      <div className="bg-black/40 border-2 border-white/20 p-8 rounded-2xl">
-        <h2 className="text-2xl font-bold text-white text-center mb-6">MATH QUIZ</h2>
+      <div className="bg-white border-2 border-black p-8 rounded-[25px] neo-shadow">
 
         {!isComplete ? (
           <>
-            <div className="flex justify-between items-center mb-6">
-              <div className="text-white">
-                <span className="text-sm">Question {currentQ + 1} / {questions.length}</span>
+            <div className="flex justify-between items-center mb-8">
+              <div className="text-black font-black uppercase text-sm tracking-widest">
+                Question {currentQ + 1} / {questions.length}
               </div>
-              <div className="flex items-center gap-2 text-white">
-                <Clock size={16} />
-                <span className={`font-bold ${timeLeft <= 5 ? 'text-red-400' : ''}`}>{timeLeft}s</span>
+              <div className="flex items-center gap-2 text-black font-black text-xl">
+                <Clock size={20} className={timeLeft <= 5 ? 'text-[#FF7675] animate-pulse' : 'text-black'} />
+                <span className={timeLeft <= 5 ? 'text-[#FF7675]' : ''}>{timeLeft}s</span>
               </div>
             </div>
 
             {questions[currentQ] && (
-              <div className="text-center mb-8">
-                <div className="text-5xl font-bold text-white mb-6">
+              <div className="text-center mb-12">
+                <div className="text-6xl font-black text-black mb-8 tracking-tighter">
                   {questions[currentQ].question} = ?
                 </div>
                 <input
@@ -179,7 +180,7 @@ const MathQuizGame: React.FC = () => {
                   value={userAnswer}
                   onChange={(e) => setUserAnswer(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleSubmit()}
-                  className="w-48 px-6 py-4 text-2xl text-center border-2 border-white/20 bg-white/10 text-white rounded-xl focus:outline-none focus:border-blue-500"
+                  className="w-full max-w-xs px-6 py-4 text-4xl text-center font-black bg-[#FFFDF5] border-2 border-black rounded-xl focus:outline-none focus:shadow-[4px_4px_0px_#000] transition-all placeholder:text-black/20"
                   placeholder="?"
                   autoFocus
                 />
@@ -189,44 +190,47 @@ const MathQuizGame: React.FC = () => {
             <button
               onClick={handleSubmit}
               disabled={!userAnswer}
-              className="w-full px-6 py-4 bg-blue-500 text-white font-bold rounded-xl hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full px-8 py-4 bg-[#6C5CE7] border-2 border-black rounded-xl text-white font-black tracking-[0.2em] text-sm uppercase shadow-[4px_4px_0px_#000] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_#000] active:translate-y-[2px] active:shadow-none transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0"
             >
               SUBMIT ANSWER
             </button>
 
-            <div className="mt-4 text-center text-white/60 text-sm">
-              Score: {score} | Wrong: {wrongAnswers}
+            <div className="mt-6 flex justify-center gap-8 text-black/60 font-bold text-sm uppercase">
+              <span>Score: {score}</span>
+              <span className="text-[#FF7675]">Mistakes: {wrongAnswers}</span>
             </div>
           </>
         ) : (
-          <div className="text-center">
+          <div className="text-center p-6 bg-[#FFFDF5] border-2 border-black rounded-xl border-dashed">
             {score >= 7 ? (
               <>
-                <Trophy className="w-16 h-16 text-emerald-400 mx-auto mb-4" />
-                <div className="text-3xl font-bold text-white mb-2">Quiz Complete!</div>
-                <div className="text-xl text-white/80 mb-4">Score: {score} / {questions.length}</div>
-                <p className={`font-header tracking-widest text-sm ${alreadyPlayed ? 'text-amber-500' : 'text-emerald-400'}`}>
+                <Trophy className="w-16 h-16 text-[#FFD93D] mx-auto mb-4 drop-shadow-[2px_2px_0px_#000]" />
+                <h3 className="text-3xl font-black text-black uppercase mb-2">QUIZ MASTER!</h3>
+                <div className="text-xl font-bold text-black mb-4">Score: {score} / {questions.length}</div>
+                <p className={`font-bold text-sm ${alreadyPlayed ? 'text-black/50' : 'text-[#00B894]'}`}>
                   {message}
                 </p>
                 {points !== null && !alreadyPlayed && (
-                  <div className="mt-4 text-4xl font-black text-[#FFD93D]">+{points} POINTS</div>
+                  <div className="mt-4 text-4xl font-black text-[#00B894]">+{points} POINTS</div>
                 )}
                 {showScratcher && scratcherDrops && !alreadyPlayed && (
-                  <div className="mt-6"><Scratcher drops={scratcherDrops} onScratch={() => {}} /></div>
+                  <div className="mt-6"><Scratcher drops={scratcherDrops} onScratch={() => { }} /></div>
                 )}
               </>
             ) : (
               <>
-                <div className="text-3xl font-bold text-red-400 mb-4">Not Enough Points</div>
-                <p className="text-white/80">{message}</p>
+                <div className="text-3xl font-black text-[#FF7675] mb-4 uppercase">KEEP PRACTICING!</div>
+                <div className="text-xl font-bold text-black mb-4">Score: {score} / {questions.length}</div>
+                <p className="text-black/60 font-bold mb-6">{message}</p>
                 <button
                   onClick={() => window.location.reload()}
-                  className="mt-6 px-6 py-3 bg-blue-500 text-white font-bold rounded-xl hover:bg-blue-600"
+                  className="px-8 py-3 bg-[#00B894] border-2 border-black text-black font-black uppercase tracking-widest rounded-xl hover:shadow-[4px_4px_0px_#000] transition-all"
                 >
                   TRY AGAIN
                 </button>
               </>
             )}
+            <button onClick={() => window.location.reload()} className="block mx-auto mt-6 text-black underline font-bold hover:text-[#6C5CE7]">Play Again</button>
           </div>
         )}
       </div>

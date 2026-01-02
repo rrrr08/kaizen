@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Eye, EyeOff, Mail, Lock, Loader2, ArrowRight } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, Loader2, ArrowRight, AlertTriangle, Check } from 'lucide-react';
 import { useCart } from '@/app/context/CartContext';
 
 export function LoginForm() {
@@ -119,7 +119,7 @@ export function LoginForm() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FFFDF5] text-[#2D3436] flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen bg-[#FFFDF5] text-[#2D3436] flex items-center justify-center px-4 pt-32 pb-12">
       <div className="relative z-10 w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-12">
@@ -136,7 +136,7 @@ export function LoginForm() {
         {error && (
           <div className="mb-6 p-4 border-2 border-black bg-[#FF7675] rounded-[15px] neo-shadow animate-in fade-in slide-in-from-top-4">
             <p className="font-black text-sm text-black uppercase tracking-wide flex items-center gap-2">
-              <span>⚠️</span> {error}
+              <AlertTriangle size={16} /> {error}
             </p>
           </div>
         )}
@@ -191,7 +191,7 @@ export function LoginForm() {
             <div className="flex items-center justify-between text-xs">
               <label className="flex items-center gap-2 text-black font-bold cursor-pointer group">
                 <div className={`w-5 h-5 border-2 border-black rounded flex items-center justify-center transition-colors ${rememberMe ? 'bg-[#00B894]' : 'bg-white'}`}>
-                  {rememberMe && <span className="text-black text-lg leading-none">✓</span>}
+                  {rememberMe && <Check size={14} className="text-black" strokeWidth={3} />}
                 </div>
                 <input
                   type="checkbox"

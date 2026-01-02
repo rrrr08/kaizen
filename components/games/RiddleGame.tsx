@@ -10,7 +10,7 @@ async function fetchRiddle() {
     try {
         const content = await getGameContent('riddle');
         const items = content?.items || [];
-        
+
         if (items.length === 0) {
             // Fallback riddle if no content
             return {
@@ -20,7 +20,7 @@ async function fetchRiddle() {
                 hint: "You use me to find your way."
             };
         }
-        
+
         // Pick one randomly
         return items[Math.floor(Math.random() * items.length)];
     } catch (error) {
@@ -44,7 +44,7 @@ const RiddleGame: React.FC = () => {
     const [isWon, setIsWon] = useState(false);
     const [error, setError] = useState('');
     const [retry, setRetry] = useState(0);
-    const [points, setPoints] = useState<number|null>(null);
+    const [points, setPoints] = useState<number | null>(null);
     const [message, setMessage] = useState('');
     const [isGameOfDay, setIsGameOfDay] = useState(false);
     const [alreadyPlayed, setAlreadyPlayed] = useState(false);
@@ -69,15 +69,15 @@ const RiddleGame: React.FC = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (isWon || !riddle || alreadyPlayed) return;
-        
+
         if (answer.toLowerCase().trim() === riddle.answer) {
             setIsWon(true);
             setError('');
             confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
             setMessage('Awarding points...');
-            
+
             const result = await awardGamePoints({ gameId: RIDDLE_GAME_ID, retry });
-            
+
             if (result.success) {
                 setPoints(result.awardedPoints || 0);
                 setMessage(result.message || `You received ${result.awardedPoints} points!`);
@@ -114,77 +114,89 @@ const RiddleGame: React.FC = () => {
             {/* Game of the Day Badge */}
             {isGameOfDay && (
                 <div className="mb-6 flex justify-center">
-                    <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#FFD93D] to-[#FF7675] text-black rounded-full font-header tracking-widest text-sm border-2 border-black shadow-[4px_4px_0px_#000]">
-                        <Star size={16} className="fill-current" /> GAME OF THE DAY - 2X POINTS!
+                    <div className="inline-flex items-center gap-2 px-6 py-3 bg-[#FFD93D] text-black rounded-full font-black tracking-widest text-sm border-2 border-black shadow-[4px_4px_0px_#000]">
+                        <Star size={16} className="fill-black" /> GAME OF THE DAY - 2X POINTS!
                     </div>
                 </div>
             )}
 
-            <div className="glass-card p-8 md:p-12 rounded-lg border border-white/10 text-center relative overflow-hidden">
-                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-amber-500 to-transparent opacity-50"></div>
-                <HelpCircle className="w-12 h-12 text-amber-500/50 mx-auto mb-6" />
-                <h2 className="font-display text-2xl md:text-3xl mb-8 leading-relaxed">
-                    "{riddle.question}"
-                </h2>
-                
+            <div className="bg-white border-2 border-black p-8 md:p-12 rounded-[25px] neo-shadow relative overflow-hidden">
+                {/* Decorative background element */}
+                <div className="absolute top-0 right-0 w-32 h-32 bg-[#FFD93D] rounded-full blur-3xl opacity-20 -mr-16 -mt-16 pointer-events-none"></div>
+
+                <div className="text-center mb-8 relative z-10">
+                    <div className="inline-flex items-center justify-center w-20 h-20 bg-[#FFFDF5] border-2 border-black rounded-full mb-6 shadow-[4px_4px_0px_#000]">
+                        <HelpCircle className="w-10 h-10 text-black" />
+                    </div>
+                    <h2 className="font-header text-2xl md:text-3xl font-black text-black leading-relaxed italic">
+                        "{riddle.question}"
+                    </h2>
+                </div>
+
                 {/* Retry Counter */}
                 {retry > 0 && !isWon && (
-                    <div className="mb-4 text-amber-500/60 text-sm font-header tracking-widest">
-                        ATTEMPTS: {retry}
+                    <div className="mb-6 text-center">
+                        <span className="inline-block px-3 py-1 bg-[#FF7675] border-2 border-black text-white text-xs font-black uppercase tracking-wider shadow-[2px_2px_0px_#000]">
+                            Attempts: {retry}
+                        </span>
                     </div>
                 )}
 
                 {isWon ? (
-                    <div className="animate-in zoom-in duration-300">
-                        <div className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-500/20 text-emerald-400 rounded-full font-header tracking-widest text-sm border border-emerald-500/50 mb-4">
+                    <div className="text-center animate-in zoom-in duration-300 p-6 bg-[#FFFDF5] border-2 border-black rounded-xl border-dashed">
+                        <div className="inline-flex items-center gap-2 px-6 py-3 bg-[#00B894] border-2 border-black text-white rounded-full font-black tracking-widest text-sm shadow-[2px_2px_0px_#000] mb-6">
                             <Trophy size={16} /> SOLVED
                         </div>
-                        <p className="text-white/60 font-serif italic">The answer was: <span className="text-white font-bold uppercase">{riddle.answer}</span></p>
-                        <p className={`font-header tracking-widest text-sm mt-4 ${alreadyPlayed ? 'text-amber-500' : 'text-emerald-400'}`}>
+                        <p className="text-black/60 font-medium mb-2">The answer was:</p>
+                        <p className="text-4xl font-black text-black uppercase mb-6">{riddle.answer}</p>
+
+                        <p className={`font-bold text-sm ${alreadyPlayed ? 'text-black/50' : 'text-[#00B894]'}`}>
                             {message}
                         </p>
                         {points !== null && (
-                            <div className="mt-6 text-4xl font-black text-[#FFD93D]">
+                            <div className="mt-4 text-4xl font-black text-[#00B894]">
                                 +{points} POINTS
                             </div>
                         )}
+                        <button onClick={() => window.location.reload()} className="block mx-auto mt-6 text-black underline font-bold hover:text-[#6C5CE7]">Next Riddle</button>
                     </div>
                 ) : (
-                    <form onSubmit={handleSubmit} className="space-y-6">
+                    <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
                         <div className="relative max-w-sm mx-auto">
                             <input
                                 type="text"
                                 value={answer}
                                 onChange={(e) => setAnswer(e.target.value)}
                                 placeholder="Type your answer..."
-                                className="w-full bg-black/50 border border-white/20 rounded px-4 py-3 text-center text-white focus:outline-none focus:border-amber-500 transition-colors font-serif italic"
+                                className="w-full bg-[#FFFDF5] border-2 border-black rounded-xl px-6 py-4 text-center text-black font-bold text-lg focus:outline-none focus:shadow-[4px_4px_0px_#000] transition-all placeholder:text-black/30"
                             />
                             {error && (
-                                <div className="absolute -bottom-6 left-0 w-full text-center text-red-500 text-xs font-header tracking-widest animate-pulse">
-                                    {error}
+                                <div className="absolute -bottom-8 left-0 w-full text-center">
+                                    <span className="text-[#FF7675] font-black text-xs uppercase tracking-widest bg-white px-2 py-1 border border-black rounded shadow-[2px_2px_0px_#000]">{error}</span>
                                 </div>
                             )}
                         </div>
+
                         <div className="flex justify-center gap-4 pt-4">
                             <button
                                 type="submit"
-                                className="px-8 py-3 bg-white text-black font-header tracking-widest text-sm hover:bg-amber-500 transition-colors"
+                                className="px-8 py-4 bg-[#6C5CE7] border-2 border-black text-white font-black tracking-[0.2em] text-sm uppercase rounded-xl shadow-[4px_4px_0px_#000] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_#000] active:translate-y-[2px] active:shadow-none transition-all"
                             >
                                 SUBMIT
                             </button>
                         </div>
 
-                        <div className="pt-8">
+                        <div className="pt-8 text-center">
                             {!hintRevealed ? (
                                 <button
                                     type="button"
                                     onClick={handleBuyHint}
-                                    className="text-white/40 text-xs font-header tracking-widest hover:text-amber-500 flex items-center justify-center gap-2 mx-auto transition-colors"
+                                    className="text-black/40 text-xs font-black tracking-widest hover:text-[#E17055] flex items-center justify-center gap-2 mx-auto transition-colors uppercase border-b-2 border-transparent hover:border-[#E17055] pb-1"
                                 >
                                     <Lightbulb size={14} /> REVEAL HINT
                                 </button>
                             ) : (
-                                <div className="text-amber-500 text-sm font-serif italic animate-in fade-in slide-in-from-bottom-2">
+                                <div className="inline-block px-6 py-3 bg-[#FFFDF5] border-2 border-black text-black text-sm font-bold rounded-xl shadow-[2px_2px_0px_#000] animate-in fade-in slide-in-from-bottom-2">
                                     Hint: {riddle.hint}
                                 </div>
                             )}

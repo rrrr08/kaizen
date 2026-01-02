@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { Dice5, Disc, ArrowRight, RotateCw } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,19 +17,19 @@ export default function Play() {
     const fetchGames = async () => {
       try {
         setLoading(true);
-        
+
         // Fetch rotation policy
         const rotationRes = await fetch('/api/games/rotation-policy');
         const rotationData = await rotationRes.json();
         setRotationPolicy(rotationData);
-        
+
         // Get today's games if rotation is enabled
         if (rotationData.enabled) {
           const today = new Date().toISOString().slice(0, 10);
           const todaysGameIds = rotationData.rotationSchedule?.[today] || [];
           setTodaysGames(todaysGameIds);
         }
-        
+
         const { getGames } = await import('@/lib/firebase');
         const data = await getGames();
         setGames(data);
@@ -55,10 +56,10 @@ export default function Play() {
           <p className="text-black/80 font-bold text-xl max-w-3xl leading-relaxed">
             Challenge yourself with our collection of free online games and puzzles. Earn points for every win and climb the leaderboard.
           </p>
-          
+
           {rotationPolicy?.enabled && (
             <div className="mt-6 inline-flex items-center gap-2 px-6 py-3 bg-[#6C5CE7] text-white rounded-full font-bold text-sm border-2 border-black shadow-[4px_4px_0px_#000]">
-              🔄 Today's {rotationPolicy.gamesPerDay} Featured Games
+              <div className="flex items-center gap-2"><RotateCw size={16} /> Today's {rotationPolicy.gamesPerDay} Featured Games</div>
             </div>
           )}
         </div>
@@ -67,8 +68,8 @@ export default function Play() {
         <div className="mb-24 bg-gradient-to-r from-[#FFD93D] via-[#FF7675] to-[#6C5CE7] border-2 border-black p-8 rounded-[30px] neo-shadow">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div>
-              <h2 className="font-header text-4xl mb-3 text-white drop-shadow-[2px_2px_0px_#000]">
-                🎡 DAILY SPIN
+              <h2 className="font-header text-4xl mb-3 text-white drop-shadow-[2px_2px_0px_#000] flex items-center gap-3">
+                <Dice5 size={40} className="text-white" /> DAILY SPIN
               </h2>
               <p className="text-white/90 font-bold text-lg mb-4">
                 Spin the wheel once per day for FREE! Win bonus points and prizes.
@@ -77,7 +78,9 @@ export default function Play() {
                 SPIN NOW
               </Link>
             </div>
-            <div className="text-8xl">🎰</div>
+            <div className="text-white">
+              <Disc size={120} strokeWidth={1} className="drop-shadow-[4px_4px_0px_#000]" />
+            </div>
           </div>
         </div>
 
@@ -94,9 +97,9 @@ export default function Play() {
               <div className="space-y-3 mb-8 pt-6 border-t-2 border-black/10">
                 <p className="text-black/40 font-black text-[10px] tracking-widest">FEATURES:</p>
                 <ul className="space-y-2 text-black/80 font-bold text-xs">
-                  <li>→ Admin can add/edit puzzles</li>
-                  <li>→ Answer key via backend</li>
-                  <li>→ Correct answers = points</li>
+                  <li className="flex items-center gap-2"><ArrowRight size={12} /> Admin can add/edit puzzles</li>
+                  <li className="flex items-center gap-2"><ArrowRight size={12} /> Answer key via backend</li>
+                  <li className="flex items-center gap-2"><ArrowRight size={12} /> Correct answers = points</li>
                 </ul>
               </div>
               <Link href="/play/sudoku" className="block w-full text-center px-6 py-4 bg-[#FFD93D] text-black font-black text-xs tracking-[0.3em] border-2 border-black shadow-[4px_4px_0px_#000] hover:translate-y-1 hover:shadow-none transition-all rounded-xl">
@@ -116,9 +119,9 @@ export default function Play() {
               <div className="space-y-3 mb-8 pt-6 border-t-2 border-black/10">
                 <p className="text-black/40 font-black text-[10px] tracking-widest">FEATURES:</p>
                 <ul className="space-y-2 text-black/80 font-bold text-xs">
-                  <li>→ Curated riddle collection</li>
-                  <li>→ Answer reveal mechanic</li>
-                  <li>→ Points for correct guesses</li>
+                  <li className="flex items-center gap-2"><ArrowRight size={12} /> Curated riddle collection</li>
+                  <li className="flex items-center gap-2"><ArrowRight size={12} /> Answer reveal mechanic</li>
+                  <li className="flex items-center gap-2"><ArrowRight size={12} /> Points for correct guesses</li>
                 </ul>
               </div>
               <Link href="/play/riddles" className="block w-full text-center px-6 py-4 bg-[#00B894] text-black font-black text-xs tracking-[0.3em] border-2 border-black shadow-[4px_4px_0px_#000] hover:translate-y-1 hover:shadow-none transition-all rounded-xl">
@@ -138,9 +141,9 @@ export default function Play() {
               <div className="space-y-3 mb-8 pt-6 border-t-2 border-black/10">
                 <p className="text-black/40 font-black text-[10px] tracking-widest">FEATURES:</p>
                 <ul className="space-y-2 text-black/80 font-bold text-xs">
-                  <li>→ 3 games in one session</li>
-                  <li>→ Win all to get scratcher</li>
-                  <li>→ Leaderboard rankings</li>
+                  <li className="flex items-center gap-2"><ArrowRight size={12} /> 3 games in one session</li>
+                  <li className="flex items-center gap-2"><ArrowRight size={12} /> Win all to get scratcher</li>
+                  <li className="flex items-center gap-2"><ArrowRight size={12} /> Leaderboard rankings</li>
                 </ul>
               </div>
               <Link href="/play/puzzles" className="block w-full text-center px-6 py-4 bg-[#FF7675] text-black font-black text-xs tracking-[0.3em] border-2 border-black shadow-[4px_4px_0px_#000] hover:translate-y-1 hover:shadow-none transition-all rounded-xl">
@@ -163,9 +166,9 @@ export default function Play() {
               <div className="space-y-3 mb-8 pt-6 border-t-2 border-black/10">
                 <p className="text-black/40 font-black text-[10px] tracking-widest">FEATURES:</p>
                 <ul className="space-y-2 text-black/80 font-bold text-xs">
-                  <li>→ 6 attempts to guess</li>
-                  <li>→ Color-coded hints</li>
-                  <li>→ Daily word challenge</li>
+                  <li className="flex items-center gap-2"><ArrowRight size={12} /> 6 attempts to guess</li>
+                  <li className="flex items-center gap-2"><ArrowRight size={12} /> Color-coded hints</li>
+                  <li className="flex items-center gap-2"><ArrowRight size={12} /> Daily word challenge</li>
                 </ul>
               </div>
               <Link href="/play/wordle" className="block w-full text-center px-6 py-4 bg-[#A29BFE] text-black font-black text-xs tracking-[0.3em] border-2 border-black shadow-[4px_4px_0px_#000] hover:translate-y-1 hover:shadow-none transition-all rounded-xl">
@@ -185,9 +188,9 @@ export default function Play() {
               <div className="space-y-3 mb-8 pt-6 border-t-2 border-black/10">
                 <p className="text-black/40 font-black text-[10px] tracking-widest">FEATURES:</p>
                 <ul className="space-y-2 text-black/80 font-bold text-xs">
-                  <li>→ Multiple difficulty levels</li>
-                  <li>→ Hint system available</li>
-                  <li>→ Learn chess tactics</li>
+                  <li className="flex items-center gap-2"><ArrowRight size={12} /> Multiple difficulty levels</li>
+                  <li className="flex items-center gap-2"><ArrowRight size={12} /> Hint system available</li>
+                  <li className="flex items-center gap-2"><ArrowRight size={12} /> Learn chess tactics</li>
                 </ul>
               </div>
               <Link href="/play/chess" className="block w-full text-center px-6 py-4 bg-[#FD79A8] text-black font-black text-xs tracking-[0.3em] border-2 border-black shadow-[4px_4px_0px_#000] hover:translate-y-1 hover:shadow-none transition-all rounded-xl">
@@ -207,9 +210,9 @@ export default function Play() {
               <div className="space-y-3 mb-8 pt-6 border-t-2 border-black/10">
                 <p className="text-black/40 font-black text-[10px] tracking-widest">FEATURES:</p>
                 <ul className="space-y-2 text-black/80 font-bold text-xs">
-                  <li>→ Multiple categories</li>
-                  <li>→ Timed questions (30s)</li>
-                  <li>→ Score tracking</li>
+                  <li className="flex items-center gap-2"><ArrowRight size={12} /> Multiple categories</li>
+                  <li className="flex items-center gap-2"><ArrowRight size={12} /> Timed questions (30s)</li>
+                  <li className="flex items-center gap-2"><ArrowRight size={12} /> Score tracking</li>
                 </ul>
               </div>
               <Link href="/play/trivia" className="block w-full text-center px-6 py-4 bg-[#74B9FF] text-black font-black text-xs tracking-[0.3em] border-2 border-black shadow-[4px_4px_0px_#000] hover:translate-y-1 hover:shadow-none transition-all rounded-xl">

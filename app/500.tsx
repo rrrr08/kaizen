@@ -5,7 +5,7 @@ import { AlertCircle, Home, RotateCcw } from 'lucide-react';
 
 export default function ServerError() {
   return (
-    <div className="min-h-screen bg-background text-foreground flex items-center justify-center px-6 pt-28 pb-16">
+    <div className="min-h-screen bg-background text-foreground flex items-center justify-center px-6 pt-32 pb-16">
       <div className="max-w-lg w-full">
         {/* Icon */}
         <div className="mb-8 flex justify-center">

@@ -10,7 +10,7 @@ interface ErrorProps {
 
 export default function Error({ error, reset }: ErrorProps) {
   return (
-    <div className="min-h-screen bg-background text-foreground flex items-center justify-center px-6">
+    <div className="min-h-screen bg-background text-foreground flex items-center justify-center px-6 pt-32 pb-16">
       <div className="max-w-lg w-full text-center">
         {/* Icon */}
         <div className="mb-8 flex justify-center">
@@ -28,7 +28,7 @@ export default function Error({ error, reset }: ErrorProps) {
           <p className="text-muted-foreground font-body text-lg mb-4">
             Something went wrong. Our team has been notified.
           </p>
-          
+
           {/* Error Details (Development Only) */}
           {process.env.NODE_ENV === 'development' && error && (
             <div className="mt-6 p-4 bg-red-950/20 border border-red-500/30 rounded-lg text-left">

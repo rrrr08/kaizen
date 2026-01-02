@@ -1,6 +1,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { FileText, ArrowRight } from 'lucide-react';
 
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
@@ -147,7 +148,7 @@ export default function Blog() {
                                 {featuredStory.excerpt}
                             </p>
                             <button className="flex items-center gap-2 text-xs font-black tracking-[0.3em] hover:gap-4 transition-all text-black uppercase bg-[#FFD93D] px-6 py-3 rounded-lg border-2 border-black shadow-[3px_3px_0px_#000]">
-                                READ STORY <span>→</span>
+                                READ STORY <ArrowRight size={14} />
                             </button>
                         </div>
                     </div>
@@ -184,7 +185,7 @@ export default function Blog() {
                                     />
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center bg-gray-100">
-                                        <span className="text-black/20 font-black text-4xl">📝</span>
+                                        <FileText size={64} className="text-black/20" />
                                     </div>
                                 )}
                             </div>
@@ -204,27 +205,27 @@ export default function Blog() {
                 </section>
 
                 {/* SECTION 5 — LEARNING & GAMEPLAY HIGHLIGHT */}
-                <section className="mb-32 bg-black text-white border-3 border-black p-12 md:p-16 rounded-[30px] relative overflow-hidden shadow-[8px_8px_0px_#FFD93D]">
-                    <div className="absolute top-0 right-0 w-96 h-96 bg-[#FFD93D]/20 blur-[100px] rounded-full pointer-events-none"></div>
+                <section className="mb-32 bg-white text-black border-2 border-black p-12 md:p-16 rounded-[30px] relative overflow-hidden neo-shadow">
+                    <div className="absolute top-0 right-0 w-96 h-96 bg-[#FFD93D]/30 blur-[100px] rounded-full pointer-events-none"></div>
                     <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
                         <div className="lg:col-span-5">
-                            <h2 className="font-header text-4xl md:text-5xl mb-6 text-white">Learn the Game. <br /><span className="text-[#FFD93D] italic font-serif">Play Better.</span></h2>
-                            <p className="text-white/80 font-medium text-lg leading-relaxed mb-8">
+                            <h2 className="font-header text-4xl md:text-5xl mb-6 text-black">Learn the Game. <br /><span className="text-[#6C5CE7] italic font-serif">Play Better.</span></h2>
+                            <p className="text-black/80 font-medium text-lg leading-relaxed mb-8">
                                 New to Joy Juncture? Or looking to master deep strategies?
                                 Explore our comprehensive guides designed to make every game night seamless.
                             </p>
-                            <button className="px-8 py-4 bg-white text-black font-black text-xs tracking-[0.3em] hover:bg-[#FFD93D] hover:scale-105 transition-all rounded-xl border-2 border-transparent">
+                            <button className="px-8 py-4 bg-black text-white font-black text-xs tracking-[0.3em] hover:bg-[#FFD93D] hover:text-black hover:scale-105 transition-all rounded-xl border-2 border-black shadow-[4px_4px_0px_rgba(0,0,0,0.2)]">
                                 EXPLORE GUIDES
                             </button>
                         </div>
                         <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-6">
                             {['How-to-Play Videos', 'Rulebooks & FAQs', 'Strategy Breakdowns', 'House Rules'].map((item, idx) => (
-                                <div key={idx} className="p-6 bg-white/10 border border-white/20 hover:border-[#FFD93D] hover:bg-white/20 transition-all rounded-xl group cursor-pointer">
-                                    <div className="w-10 h-10 flex items-center justify-center bg-[#FFD93D] text-black border-2 border-black rounded-full mb-4 group-hover:scale-110 transition-transform shadow-[2px_2px_0px_#000]">
+                                <div key={idx} className="p-6 bg-[#FFFDF5] border-2 border-black hover:translate-x-1 hover:translate-y-1 hover:shadow-none shadow-[4px_4px_0px_#000] transition-all rounded-xl group cursor-pointer">
+                                    <div className="w-10 h-10 flex items-center justify-center bg-[#FFD93D] text-black border-2 border-black rounded-full mb-4 group-hover:scale-110 transition-transform">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
                                     </div>
-                                    <h3 className="font-header text-lg text-white mb-1">{item}</h3>
-                                    <p className="text-white/60 font-bold text-xs uppercase tracking-wider">Master the mechanics</p>
+                                    <h3 className="font-header text-lg text-black mb-1">{item}</h3>
+                                    <p className="text-black/60 font-bold text-xs uppercase tracking-wider">Master the mechanics</p>
                                 </div>
                             ))}
                         </div>
@@ -299,7 +300,7 @@ export default function Blog() {
                     </p>
                     <div className="flex flex-col sm:flex-row gap-6 justify-center">
                         <Link
-                            href="/shop"
+                            href="/play"
                             className="px-8 py-4 bg-black text-white font-black text-xs tracking-[0.4em] hover:bg-neutral-800 hover:scale-105 transition-all rounded-xl"
                         >
                             EXPLORE GAMES

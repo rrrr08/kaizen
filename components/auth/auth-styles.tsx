@@ -11,7 +11,10 @@ export function AuthStyles() {
         align-items: center;
         justify-content: center;
         background: linear-gradient(135deg, #f0f9ff 0%, #ecfdf5 50%, #faf5ff 100%);
-        padding: 1rem;
+        padding-top: 8rem;
+        padding-bottom: 3rem;
+        padding-left: 1rem;
+        padding-right: 1rem;
         overflow: hidden;
         perspective: 1000px;
       }

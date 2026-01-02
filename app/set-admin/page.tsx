@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useAuth } from '@/app/context/AuthContext';
 import Link from 'next/link';
+import { ArrowLeft } from 'lucide-react';
 
 export default function SetAdminPage() {
   const { user } = useAuth();
@@ -89,7 +90,7 @@ export default function SetAdminPage() {
               href="/"
               className="inline-block text-amber-500 hover:text-amber-400 text-sm font-header tracking-wider"
             >
-              ← Back to Home
+              <ArrowLeft size={16} /> Back to Home
             </Link>
           </div>
         </div>

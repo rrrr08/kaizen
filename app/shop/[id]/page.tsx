@@ -5,11 +5,12 @@ import { useParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { useCart } from '@/app/context/CartContext';
 import { useToast } from '@/hooks/use-toast';
-import { Users, Clock, Zap, Star } from 'lucide-react';
+import { Users, Clock, Zap, Star, ArrowLeft, Check, Minus, Plus } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
 export default function ProductDetail() {
+
   const params = useParams();
   const [product, setProduct] = useState<any>(null);
   const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
@@ -95,7 +96,7 @@ export default function ProductDetail() {
       <div className="max-w-7xl mx-auto px-6 md:px-12">
         {/* Back Button */}
         <Link href="/shop" className="font-black text-xs tracking-widest text-[#2D3436]/50 hover:text-[#FFD93D] mb-12 inline-flex items-center gap-2 transition-colors uppercase">
-          <span>←</span> Back to Repository
+          <ArrowLeft size={16} /> Back to Repository
         </Link>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 mb-20">
@@ -178,16 +179,16 @@ export default function ProductDetail() {
                   <div className="flex items-center justify-center bg-white border-2 border-black rounded-xl overflow-hidden shadow-[2px_2px_0px_rgba(0,0,0,1)]">
                     <button
                       onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                      className="px-4 py-2 hover:bg-gray-100 font-black text-lg"
+                      className="px-4 py-2 hover:bg-gray-100 font-black text-lg flex items-center justify-center"
                     >
-                      −
+                      <Minus size={16} />
                     </button>
                     <span className="px-4 py-2 font-black text-lg border-x-2 border-black min-w-[3rem] text-center">{quantity}</span>
                     <button
                       onClick={() => setQuantity(quantity + 1)}
-                      className="px-4 py-2 hover:bg-gray-100 font-black text-lg"
+                      className="px-4 py-2 hover:bg-gray-100 font-black text-lg flex items-center justify-center"
                     >
-                      +
+                      <Plus size={16} />
                     </button>
                   </div>
 
@@ -255,9 +256,7 @@ export default function ProductDetail() {
                   {product.features.map((feature: any, index: number) => (
                     <div key={index} className="flex gap-4 items-start group">
                       <div className="mt-1 w-6 h-6 rounded-full bg-[#00B894] border-2 border-black flex-shrink-0 flex items-center justify-center group-hover:scale-110 transition-transform">
-                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M10 3L4.5 8.5L2 6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
+                        <Check size={12} className="text-white" strokeWidth={3} />
                       </div>
                       <div>
                         <h3 className="font-black text-lg text-black mb-1">{feature.title}</h3>

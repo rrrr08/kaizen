@@ -1,17 +1,23 @@
 import TriviaGame from '@/components/games/TriviaGame';
 import Link from 'next/link';
+import { ArrowLeft } from 'lucide-react';
 
 export default function TriviaPage() {
     return (
-        <div className="min-h-screen pt-28 pb-16 bg-black text-white">
+        <div className="min-h-screen pt-32 pb-16 bg-[#FFFDF5] text-[#2D3436]">
             <div className="max-w-4xl mx-auto px-6">
-                <Link href="/play" className="text-xs font-header tracking-widest text-white/40 hover:text-amber-500 mb-8 inline-block">
-                    ← BACK TO ARCADE
+                <Link href="/play" className="inline-flex items-center gap-2 font-black text-xs tracking-[0.2em] text-black/40 hover:text-black uppercase border-b-2 border-transparent hover:border-black transition-all pb-1 mb-8">
+                    <ArrowLeft size={16} /> BACK TO ARCADE
                 </Link>
 
                 <div className="text-center mb-12">
-                    <h1 className="font-display text-4xl mb-4">Trivia Quiz</h1>
-                    <p className="text-white/60 font-serif italic">Answer 5 questions to earn points</p>
+                    <span className="inline-block px-3 py-1 bg-[#00B894] border-2 border-black rounded-lg text-black text-xs font-black uppercase tracking-wider mb-4 shadow-[2px_2px_0px_#000]">
+                        Knowledge
+                    </span>
+                    <h1 className="font-header text-6xl font-black text-black mb-4 uppercase tracking-tighter">Trivia Quiz</h1>
+                    <p className="text-black/60 font-medium text-lg max-w-lg mx-auto leading-relaxed">
+                        Answer 5 questions to earn points.
+                    </p>
                 </div>
 
                 <TriviaGame />

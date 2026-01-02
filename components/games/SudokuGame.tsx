@@ -23,9 +23,9 @@ async function fetchSudokuBoard(difficulty = 'easy') {
 const SUDOKU_GAME_ID = 'sudoku';
 
 const LEVELS = [
-  { label: 'Easy', value: 'easy' },
-  { label: 'Medium', value: 'medium' },
-  { label: 'Hard', value: 'hard' }
+    { label: 'Easy', value: 'easy' },
+    { label: 'Medium', value: 'medium' },
+    { label: 'Hard', value: 'hard' }
 ];
 
 const SudokuGame: React.FC = () => {
@@ -38,12 +38,12 @@ const SudokuGame: React.FC = () => {
     const [isWon, setIsWon] = useState(false);
     const [mistakes, setMistakes] = useState(0);
     const [showScratcher, setShowScratcher] = useState(false);
-    const [scratcherDrops, setScratcherDrops] = useState<{prob:number,points:number}[]|null>(null);
-    const [bonusPoints, setBonusPoints] = useState<number|null>(null);
+    const [scratcherDrops, setScratcherDrops] = useState<{ prob: number, points: number }[] | null>(null);
+    const [bonusPoints, setBonusPoints] = useState<number | null>(null);
     const [leaderboard, setLeaderboard] = useState<any[]>([]);
     const [history, setHistory] = useState<any[]>([]);
     const [retry, setRetry] = useState(0);
-    const [points, setPoints] = useState<number|null>(null);
+    const [points, setPoints] = useState<number | null>(null);
     const [message, setMessage] = useState('');
     const [isGameOfDay, setIsGameOfDay] = useState(false);
     const [alreadyPlayed, setAlreadyPlayed] = useState(false);
@@ -65,13 +65,13 @@ const SudokuGame: React.FC = () => {
             setBonusPoints(null);
             setAlreadyPlayed(false);
         });
-        
+
         // Fetch leaderboard and history
         fetch(`/api/games/leaderboard?gameId=${SUDOKU_GAME_ID}&limit=10`)
-            .then(r=>r.json())
-            .then(d=>setLeaderboard(d.leaderboard||[]))
+            .then(r => r.json())
+            .then(d => setLeaderboard(d.leaderboard || []))
             .catch(console.error);
-            
+
         // Fetch history with Firebase Auth token
         (async () => {
             try {
@@ -79,7 +79,7 @@ const SudokuGame: React.FC = () => {
                 const { app } = await import('@/lib/firebase');
                 const auth = getAuth(app);
                 const user = auth.currentUser;
-                
+
                 if (user) {
                     const token = await user.getIdToken();
                     const response = await fetch(`/api/games/history?gameId=${SUDOKU_GAME_ID}`, {
@@ -94,22 +94,22 @@ const SudokuGame: React.FC = () => {
                 console.error('Error fetching history:', error);
             }
         })();
-            
+
         // Fetch scratcher config
         fetch('/api/games/settings')
-            .then(r=>r.json())
-            .then(d=>{
+            .then(r => r.json())
+            .then(d => {
                 const cfg = d.settings?.[SUDOKU_GAME_ID];
-                if(cfg?.scratcher?.enabled) setScratcherDrops(cfg.scratcher.drops||null);
+                if (cfg?.scratcher?.enabled) setScratcherDrops(cfg.scratcher.drops || null);
                 else setScratcherDrops(null);
             })
             .catch(console.error);
-            
+
         // Check if Game of the Day
         fetch('/api/games/game-of-the-day')
-            .then(r=>r.json())
-            .then(d=>{
-                if(d.gameId === SUDOKU_GAME_ID) setIsGameOfDay(true);
+            .then(r => r.json())
+            .then(d => {
+                if (d.gameId === SUDOKU_GAME_ID) setIsGameOfDay(true);
             })
             .catch(console.error);
     }, [level]);
@@ -155,7 +155,7 @@ const SudokuGame: React.FC = () => {
         setIsWon(true);
         confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
         setMessage('Awarding points...');
-        
+
         try {
             const res = await fetch('/api/games/award', {
                 method: 'POST',
@@ -163,7 +163,7 @@ const SudokuGame: React.FC = () => {
                 body: JSON.stringify({ gameId: SUDOKU_GAME_ID, retry, level, time: timer }),
             });
             const data = await res.json();
-            
+
             if (data.success) {
                 setPoints(data.awardedPoints);
                 setMessage(data.message || `You received ${data.awardedPoints} points!${data.isGameOfDay ? ' (Game of the Day!)' : ''}`);
@@ -186,163 +186,196 @@ const SudokuGame: React.FC = () => {
     };
 
     return (
-        <div className="flex flex-col items-center gap-8">
+        <div className="flex flex-col items-center gap-8 w-full">
             {/* Game of the Day Badge */}
             {isGameOfDay && (
                 <div className="mb-2">
-                    <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#FFD93D] to-[#FF7675] text-black rounded-full font-header tracking-widest text-sm border-2 border-black shadow-[4px_4px_0px_#000]">
-                        <Star size={16} className="fill-current" /> GAME OF THE DAY - 2X POINTS!
+                    <div className="inline-flex items-center gap-2 px-6 py-3 bg-[#FFD93D] text-black rounded-full font-black tracking-widest text-sm border-2 border-black shadow-[4px_4px_0px_#000]">
+                        <Star size={16} className="fill-black" /> GAME OF THE DAY - 2X POINTS!
                     </div>
                 </div>
             )}
 
-            {/* Level Selector */}
-            <div className="mb-4">
-                <label className="font-header text-white/80 mr-2">Level:</label>
-                <select
-                    value={level}
-                    onChange={e => setLevel(e.target.value)}
-                    className="bg-black text-white border border-white/20 rounded px-2 py-1"
-                    disabled={!isActive || isWon}
-                >
-                    {LEVELS.map(l => (
-                        <option key={l.value} value={l.value}>{l.label}</option>
-                    ))}
-                </select>
-            </div>
+            <div className="w-full max-w-4xl grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-            {/* HUD */}
-            <div className="flex items-center gap-8 text-white/80 font-header tracking-widest text-sm">
-                <div className="flex items-center gap-2">
-                    <Clock size={16} className="text-amber-500" />
-                    <span>{formatTime(timer)}</span>
-                </div>
-                {retry > 0 && (
-                    <div className="flex items-center gap-2">
-                        <RefreshCcw size={16} className="text-red-400" />
-                        <span>Retries: {retry}</span>
+                {/* LEFT COLUMN: Controls & HUD */}
+                <div className="space-y-6">
+                    <div className="bg-white border-2 border-black p-6 rounded-[20px] neo-shadow">
+                        <label className="font-black text-black text-xs uppercase tracking-widest block mb-2">Difficulty</label>
+                        <div className="relative">
+                            <select
+                                value={level}
+                                onChange={e => setLevel(e.target.value)}
+                                className="w-full bg-[#FFFDF5] border-2 border-black rounded-xl px-4 py-3 text-black font-bold uppercase focus:outline-none focus:shadow-[4px_4px_0px_#000] transition-all appearance-none cursor-pointer"
+                                disabled={!isActive || isWon}
+                            >
+                                {LEVELS.map(l => (
+                                    <option key={l.value} value={l.value}>{l.label}</option>
+                                ))}
+                            </select>
+                            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M2.5 4.5L6 8L9.5 4.5" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                </svg>
+                            </div>
+                        </div>
                     </div>
-                )}
-            </div>
 
-            {/* WIN STATE */}
-            {isWon && (
-                <div className="animate-in zoom-in duration-300 bg-emerald-500/20 border border-emerald-500 p-8 rounded text-center">
-                    <Trophy className="w-12 h-12 text-emerald-400 mx-auto mb-4" />
-                    <h2 className="text-2xl font-bold text-white mb-2">PUZZLE SOLVED!</h2>
-                    <p className={`font-header tracking-widest text-sm ${alreadyPlayed ? 'text-amber-500' : 'text-emerald-400'}`}>
-                        {message}
-                    </p>
-                    {points !== null && !alreadyPlayed && (
-                        <div className="mt-4 text-4xl font-black text-[#FFD93D]">
-                            +{points} POINTS
+                    <div className="bg-white border-2 border-black p-6 rounded-[20px] neo-shadow space-y-4">
+                        <div className="flex items-center justify-between">
+                            <span className="font-black text-xs uppercase tracking-widest text-black/50">TIME</span>
+                            <div className="flex items-center gap-2 font-black text-xl text-black">
+                                <Clock size={20} className="text-black" />
+                                {formatTime(timer)}
+                            </div>
+                        </div>
+                        <div className="w-full h-0.5 bg-black/10"></div>
+                        <div className="flex items-center justify-between">
+                            <span className="font-black text-xs uppercase tracking-widest text-black/50">MISTAKES</span>
+                            <div className="flex items-center gap-2 font-black text-xl text-[#FF7675]">
+                                <AlertCircle size={20} />
+                                {mistakes}
+                            </div>
+                        </div>
+                        {retry > 0 && (
+                            <>
+                                <div className="w-full h-0.5 bg-black/10"></div>
+                                <div className="flex items-center justify-between">
+                                    <span className="font-black text-xs uppercase tracking-widest text-black/50">RETRIES</span>
+                                    <div className="font-black text-xl text-black">{retry}</div>
+                                </div>
+                            </>
+                        )}
+                    </div>
+                </div>
+
+                {/* MIDDLE COLUMN: Grid */}
+                <div className="flex flex-col items-center">
+                    {/* WIN STATE */}
+                    {isWon && (
+                        <div className="w-full mb-6 animate-in zoom-in duration-300 bg-[#FFFDF5] border-2 border-black shadow-[4px_4px_0px_#000] p-8 rounded-[20px] text-center">
+                            <Trophy className="w-12 h-12 text-[#FFD93D] mx-auto mb-4 drop-shadow-[2px_2px_0px_#000]" />
+                            <h2 className="text-2xl font-black text-black uppercase mb-1">PUZZLE SOLVED!</h2>
+                            <p className={`font-bold text-sm ${alreadyPlayed ? 'text-black/50' : 'text-[#00B894]'}`}>
+                                {message}
+                            </p>
+                            {points !== null && !alreadyPlayed && (
+                                <div className="mt-4 text-4xl font-black text-[#00B894]">
+                                    +{points} POINTS
+                                </div>
+                            )}
+                            {showScratcher && scratcherDrops && !alreadyPlayed && (
+                                <div className="mt-6">
+                                    <Scratcher drops={scratcherDrops} onScratch={setBonusPoints} />
+                                </div>
+                            )}
                         </div>
                     )}
-                    {showScratcher && scratcherDrops && !alreadyPlayed && (
-                        <div className="mt-6">
-                            <Scratcher drops={scratcherDrops} onScratch={setBonusPoints} />
+
+                    {/* GRID */}
+                    <div className="grid grid-cols-9 border-2 border-black bg-black neo-shadow rounded-lg overflow-hidden">
+                        {board.map((row, rIndex) => (
+                            row.map((cell, cIndex) => {
+                                const isInitial = puzzle[rIndex][cIndex] !== 0;
+                                const borderRight = (cIndex + 1) % 3 === 0 && cIndex !== 8 ? 'border-r-2 border-black' : 'border-r border-black/20';
+                                const borderBottom = (rIndex + 1) % 3 === 0 && rIndex !== 8 ? 'border-b-2 border-black' : 'border-b border-black/20';
+                                return (
+                                    <input
+                                        key={`${rIndex}-${cIndex}`}
+                                        type="text"
+                                        maxLength={1}
+                                        value={cell === 0 ? '' : cell}
+                                        onChange={(e) => handleCellChange(rIndex, cIndex, e.target.value)}
+                                        disabled={isInitial || isWon || !isActive || alreadyPlayed}
+                                        className={`
+                                            w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-center text-lg md:text-xl font-bold focus:outline-none
+                                            ${isInitial ? 'bg-[#FFFDF5] text-black font-black' : 'bg-white text-[#6C5CE7] font-bold'}
+                                            ${!isInitial && !isWon && isActive ? 'hover:bg-[#F0F0F0] focus:bg-[#FFD93D]' : ''}
+                                            ${borderRight} ${borderBottom}
+                                            transition-colors
+                                        `}
+                                    />
+                                );
+                            })
+                        ))}
+                    </div>
+
+                    {/* Submit Button */}
+                    {isActive && !isWon && !alreadyPlayed && (
+                        <button
+                            onClick={() => {
+                                if (checkWin(board)) handleWin();
+                                else {
+                                    setMessage('Board is not solved correctly.');
+                                    setRetry(r => r + 1);
+                                    setMistakes(m => m + 1);
+                                    setTimeout(() => setMessage(''), 3000);
+                                }
+                            }}
+                            className="w-full mt-8 px-8 py-4 bg-[#00B894] border-2 border-black rounded-xl text-black font-black tracking-[0.2em] text-sm uppercase shadow-[4px_4px_0px_#000] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_#000] active:translate-y-[2px] active:shadow-none transition-all"
+                        >
+                            SUBMIT SOLUTION
+                        </button>
+                    )}
+
+                    {message && !isWon && (
+                        <p className="mt-4 font-bold text-[#FF7675] uppercase">{message}</p>
+                    )}
+                </div>
+
+                {/* RIGHT COLUMN: Stats */}
+                <div className="space-y-6">
+                    {/* Leaderboard */}
+                    {leaderboard.length > 0 && (
+                        <div className="bg-white border-2 border-black p-6 rounded-[20px] neo-shadow">
+                            <h3 className="font-header text-xl text-black uppercase mb-4">Leaderboard</h3>
+                            <div className="overflow-hidden rounded-xl border-2 border-black">
+                                <table className="w-full text-black text-sm">
+                                    <thead className="bg-[#FFD93D] border-b-2 border-black">
+                                        <tr>
+                                            <th className="p-3 text-left font-black uppercase text-xs">User</th>
+                                            <th className="p-3 text-left font-black uppercase text-xs">Pts</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="bg-white">
+                                        {leaderboard.map((row, i) => (
+                                            <tr key={i} className="border-b border-black/10 last:border-0 hover:bg-[#FFFDF5]">
+                                                <td className="p-3 font-bold">{row.userId.slice(0, 8)}...</td>
+                                                <td className="p-3 font-black text-[#00B894]">{row.totalPoints}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* History */}
+                    {history.length > 0 && (
+                        <div className="bg-white border-2 border-black p-6 rounded-[20px] neo-shadow">
+                            <h3 className="font-header text-xl text-black uppercase mb-4">You</h3>
+                            <div className="overflow-hidden rounded-xl border-2 border-black">
+                                <table className="w-full text-black text-sm">
+                                    <thead className="bg-[#A29BFE] border-b-2 border-black">
+                                        <tr>
+                                            <th className="p-3 text-left font-black uppercase text-xs">Date</th>
+                                            <th className="p-3 text-left font-black uppercase text-xs">Pts</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="bg-white">
+                                        {history.map((row, i) => (
+                                            <tr key={i} className="border-b border-black/10 last:border-0 hover:bg-[#FFFDF5]">
+                                                <td className="p-3 font-bold">{new Date(row.awardedAt).toLocaleDateString(undefined, { month: 'numeric', day: 'numeric' })}</td>
+                                                <td className="p-3 font-black text-black">{row.points}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     )}
                 </div>
-            )}
-
-            {/* GRID */}
-            <div className="grid grid-cols-9 border-2 border-white/20 bg-black/40 shadow-2xl">
-                {board.map((row, rIndex) => (
-                    row.map((cell, cIndex) => {
-                        const isInitial = puzzle[rIndex][cIndex] !== 0;
-                        const borderRight = (cIndex + 1) % 3 === 0 && cIndex !== 8 ? 'border-r-2 border-white/20' : 'border-r border-white/10';
-                        const borderBottom = (rIndex + 1) % 3 === 0 && rIndex !== 8 ? 'border-b-2 border-white/20' : 'border-b border-white/10';
-                        return (
-                            <input
-                                key={`${rIndex}-${cIndex}`}
-                                type="text"
-                                maxLength={1}
-                                value={cell === 0 ? '' : cell}
-                                onChange={(e) => handleCellChange(rIndex, cIndex, e.target.value)}
-                                disabled={isInitial || isWon || !isActive || alreadyPlayed}
-                                className={`
-                                    w-8 h-8 md:w-12 md:h-12 text-center text-lg md:text-xl font-bold focus:outline-none focus:bg-amber-500/20
-                                    ${isInitial ? 'bg-white/5 text-white/40 cursor-not-allowed' : 'bg-transparent text-white'}
-                                    ${borderRight} ${borderBottom}
-                                    transition-colors
-                                `}
-                            />
-                        );
-                    })
-                ))}
             </div>
-
-            {/* Submit Button */}
-            {isActive && !isWon && !alreadyPlayed && (
-                <button
-                    onClick={() => {
-                        if (checkWin(board)) handleWin();
-                        else {
-                            setMessage('Board is not solved correctly.');
-                            setRetry(r => r + 1);
-                            setTimeout(() => setMessage(''), 3000);
-                        }
-                    }}
-                    className="px-8 py-3 bg-amber-500 text-black font-header tracking-widest text-sm hover:scale-105 transition-transform mt-4"
-                >
-                    SUBMIT
-                </button>
-            )}
-
-            {/* Leaderboard */}
-            {leaderboard.length > 0 && (
-                <div className="w-full max-w-xl mt-8">
-                    <h3 className="font-header text-lg text-white/80 mb-2">Leaderboard</h3>
-                    <div className="bg-black/40 border border-white/20 rounded-lg overflow-hidden">
-                        <table className="w-full text-white/80 text-sm">
-                            <thead className="bg-white/5">
-                                <tr>
-                                    <th className="p-3 text-left">User</th>
-                                    <th className="p-3 text-left">Points</th>
-                                    <th className="p-3 text-left">Games</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {leaderboard.map((row,i) => (
-                                    <tr key={i} className="border-t border-white/10">
-                                        <td className="p-3">{row.userId.slice(0, 8)}...</td>
-                                        <td className="p-3 text-amber-500 font-bold">{row.totalPoints}</td>
-                                        <td className="p-3">{row.gamesPlayed}</td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            )}
-
-            {/* History */}
-            {history.length > 0 && (
-                <div className="w-full max-w-xl mt-4">
-                    <h3 className="font-header text-lg text-white/80 mb-2">Your History</h3>
-                    <div className="bg-black/40 border border-white/20 rounded-lg overflow-hidden">
-                        <table className="w-full text-white/80 text-sm">
-                            <thead className="bg-white/5">
-                                <tr>
-                                    <th className="p-3 text-left">Date</th>
-                                    <th className="p-3 text-left">Points</th>
-                                    <th className="p-3 text-left">Level</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {history.map((row,i) => (
-                                    <tr key={i} className="border-t border-white/10">
-                                        <td className="p-3">{new Date(row.awardedAt).toLocaleDateString()}</td>
-                                        <td className="p-3 text-amber-500 font-bold">{row.points}</td>
-                                        <td className="p-3">{row.level || '-'}</td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            )}
         </div>
     );
 };

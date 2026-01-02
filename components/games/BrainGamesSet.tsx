@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Star, Trophy, Brain, Grid3x3, Shuffle } from 'lucide-react';
+import { Star, Trophy, Brain, Grid3x3, Shuffle, Gamepad2, Target, Dice5, Tent } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { awardGamePoints } from '@/lib/gameApi';
 import Scratcher from '../gamification/Scratcher';
@@ -78,21 +78,24 @@ const TicTacToe: React.FC<{ onWin: () => void; onLose: () => void }> = ({ onWin,
 
   return (
     <div>
-      <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-        <Grid3x3 size={20} /> Tic-Tac-Toe
-      </h3>
       <div className="grid grid-cols-3 gap-2 max-w-xs mx-auto">
         {board.map((cell, index) => (
           <button
             key={index}
             onClick={() => handleClick(index)}
             disabled={gameOver || !isPlayerTurn}
-            className="aspect-square bg-white/10 border-2 border-white/20 rounded-lg text-3xl font-bold text-white hover:bg-white/20 transition-colors disabled:cursor-not-allowed"
+            className={`aspect-square border-2 border-black rounded-lg text-4xl font-black transition-all ${cell === 'X' ? 'bg-[#00B894] text-white' :
+              cell === 'O' ? 'bg-[#FF7675] text-white' :
+                'bg-white hover:bg-[#FFFDF5] hover:shadow-[2px_2px_0px_#000]'
+              } disabled:cursor-not-allowed`}
           >
             {cell}
           </button>
         ))}
       </div>
+      <p className="text-black/60 font-bold text-xs text-center mt-4 uppercase tracking-widest">
+        {gameOver ? 'GAME OVER' : isPlayerTurn ? 'YOUR TURN (X)' : 'AI TURN (O)'}
+      </p>
     </div>
   );
 };
@@ -104,8 +107,15 @@ const MemoryMatch: React.FC<{ onWin: () => void }> = ({ onWin }) => {
   const [matched, setMatched] = useState<number[]>([]);
   const [moves, setMoves] = useState(0);
 
+  const icons: { [key: string]: React.ReactNode } = {
+    gamepad: <Gamepad2 size={32} />,
+    target: <Target size={32} />,
+    dice: <Dice5 size={32} />,
+    tent: <Tent size={32} />
+  };
+
   useEffect(() => {
-    const symbols = ['🎮', '🎯', '🎲', '🎪'];
+    const symbols = ['gamepad', 'target', 'dice', 'tent'];
     const deck = [...symbols, ...symbols].sort(() => Math.random() - 0.5);
     setCards(deck);
   }, []);
@@ -132,21 +142,21 @@ const MemoryMatch: React.FC<{ onWin: () => void }> = ({ onWin }) => {
 
   return (
     <div>
-      <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-        <Shuffle size={20} /> Memory Match
-      </h3>
       <div className="grid grid-cols-4 gap-2 max-w-sm mx-auto">
-        {cards.map((card, index) => (
+        {cards.map((cardKey, index) => (
           <button
             key={index}
             onClick={() => handleCardClick(index)}
-            className="aspect-square bg-white/10 border-2 border-white/20 rounded-lg text-4xl hover:bg-white/20 transition-colors"
+            className={`aspect-square border-2 border-black rounded-lg text-4xl flex items-center justify-center transition-all ${flipped.includes(index) || matched.includes(index)
+              ? 'bg-white shadow-[2px_2px_0px_#000]'
+              : 'bg-[#6C5CE7] hover:bg-[#5849BE] hover:-translate-y-1 hover:shadow-[4px_4px_0px_#000] active:translate-y-0 active:shadow-none'
+              }`}
           >
-            {flipped.includes(index) || matched.includes(index) ? card : '?'}
+            {flipped.includes(index) || matched.includes(index) ? icons[cardKey] : ''}
           </button>
         ))}
       </div>
-      <p className="text-white/60 text-sm mt-4 text-center">Moves: {moves}</p>
+      <p className="text-black/60 font-bold text-xs uppercase tracking-widest text-center mt-6">Moves: {moves}</p>
     </div>
   );
 };
@@ -174,21 +184,18 @@ const NumberPuzzle: React.FC<{ onWin: () => void }> = ({ onWin }) => {
 
   return (
     <div>
-      <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-        <Brain size={20} /> Number Puzzle
-      </h3>
-      <div className="text-center mb-6">
-        <p className="text-white/60 text-sm mb-2">Target: {target}</p>
-        <p className="text-4xl font-bold text-amber-500">{current}</p>
+      <div className="text-center mb-8">
+        <p className="text-black/60 text-xs font-black tracking-widest uppercase mb-2">Target: {target}</p>
+        <p className="text-6xl font-black text-black">{current}</p>
       </div>
-      <div className="grid grid-cols-2 gap-2 max-w-xs mx-auto">
-        <button onClick={() => handleOperation('+', 5)} className="px-4 py-3 bg-green-500/20 border-2 border-green-500 rounded-lg text-white font-bold hover:bg-green-500/30">+5</button>
-        <button onClick={() => handleOperation('-', 3)} className="px-4 py-3 bg-red-500/20 border-2 border-red-500 rounded-lg text-white font-bold hover:bg-red-500/30">-3</button>
-        <button onClick={() => handleOperation('×', 2)} className="px-4 py-3 bg-blue-500/20 border-2 border-blue-500 rounded-lg text-white font-bold hover:bg-blue-500/30">×2</button>
-        <button onClick={() => handleOperation('÷', 2)} className="px-4 py-3 bg-purple-500/20 border-2 border-purple-500 rounded-lg text-white font-bold hover:bg-purple-500/30">÷2</button>
+      <div className="grid grid-cols-2 gap-4 max-w-xs mx-auto">
+        <button onClick={() => handleOperation('+', 5)} className="px-6 py-4 bg-[#00B894] border-2 border-black rounded-xl text-black font-black text-xl hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_#000] active:translate-y-[2px] active:shadow-none transition-all">+5</button>
+        <button onClick={() => handleOperation('-', 3)} className="px-6 py-4 bg-[#FF7675] border-2 border-black rounded-xl text-black font-black text-xl hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_#000] active:translate-y-[2px] active:shadow-none transition-all">-3</button>
+        <button onClick={() => handleOperation('×', 2)} className="px-6 py-4 bg-[#74B9FF] border-2 border-black rounded-xl text-black font-black text-xl hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_#000] active:translate-y-[2px] active:shadow-none transition-all">×2</button>
+        <button onClick={() => handleOperation('÷', 2)} className="px-6 py-4 bg-[#A29BFE] border-2 border-black rounded-xl text-black font-black text-xl hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_#000] active:translate-y-[2px] active:shadow-none transition-all">÷2</button>
       </div>
-      <div className="mt-4 text-center">
-        <p className="text-white/60 text-xs">Operations: {operations.join(' ')}</p>
+      <div className="mt-8 text-center bg-[#FFFDF5] border-2 border-black rounded-lg p-2 max-w-xs mx-auto overflow-hidden">
+        <p className="text-black/60 text-xs font-mono font-bold truncate">Ops: {operations.join(' ')}</p>
       </div>
     </div>
   );
@@ -204,7 +211,7 @@ const BrainGamesSet: React.FC = () => {
   const [points, setPoints] = useState<number | null>(null);
   const [message, setMessage] = useState('');
   const [showScratcher, setShowScratcher] = useState(false);
-  const [scratcherDrops, setScratcherDrops] = useState<{prob:number,points:number}[]|null>(null);
+  const [scratcherDrops, setScratcherDrops] = useState<{ prob: number, points: number }[] | null>(null);
   const [totalRetries, setTotalRetries] = useState(0);
 
   useEffect(() => {
@@ -271,23 +278,22 @@ const BrainGamesSet: React.FC = () => {
       {/* Game of the Day Badge */}
       {isGameOfDay && (
         <div className="mb-6 flex justify-center">
-          <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#FFD93D] to-[#FF7675] text-black rounded-full font-header tracking-widest text-sm border-2 border-black shadow-[4px_4px_0px_#000]">
-            <Star size={16} className="fill-current" /> GAME OF THE DAY - 2X POINTS!
+          <div className="inline-flex items-center gap-2 px-6 py-3 bg-[#FFD93D] text-black rounded-full font-black tracking-widest text-sm border-2 border-black shadow-[4px_4px_0px_#000]">
+            <Star size={16} className="fill-black" /> GAME OF THE DAY - 2X POINTS!
           </div>
         </div>
       )}
 
-      <div className="bg-black/40 border-2 border-white/20 p-8 rounded-2xl">
+      <div className="bg-white border-2 border-black p-8 rounded-[25px] neo-shadow">
         {/* Progress */}
-        <div className="flex justify-center gap-4 mb-8">
+        <div className="flex justify-center gap-4 mb-12">
           {gamesWon.map((won, index) => (
             <div
               key={index}
-              className={`w-12 h-12 rounded-full border-2 flex items-center justify-center font-bold ${
-                won ? 'bg-green-500 border-green-600 text-white' :
-                index === currentGame ? 'bg-amber-500 border-amber-600 text-black' :
-                'bg-white/10 border-white/20 text-white/40'
-              }`}
+              className={`w-12 h-12 rounded-xl border-2 border-black flex items-center justify-center font-black text-lg transition-all shadow-[2px_2px_0px_#000] ${won ? 'bg-[#00B894] text-white' :
+                index === currentGame ? 'bg-[#FFD93D] text-black scale-110 shadow-[4px_4px_0px_#000]' :
+                  'bg-[#FFFDF5] text-black/20'
+                }`}
             >
               {index + 1}
             </div>
@@ -297,30 +303,56 @@ const BrainGamesSet: React.FC = () => {
         {!allComplete ? (
           <div className="space-y-8">
             <div className="text-center mb-6">
-              <p className="text-white/60 text-sm">Complete all 3 games to earn points!</p>
+              <p className="text-black/60 text-sm font-bold uppercase tracking-widest">Complete all 3 games to earn points!</p>
             </div>
 
-            {currentGame === 0 && <TicTacToe onWin={handleGameWin} onLose={handleGameLose} />}
-            {currentGame === 1 && <MemoryMatch onWin={handleGameWin} />}
-            {currentGame === 2 && <NumberPuzzle onWin={handleGameWin} />}
+            {currentGame === 0 && (
+              <div className="bg-[#FFFDF5] p-6 rounded-xl border-2 border-black shadow-[4px_4px_0px_#000]">
+                <h3 className="text-xl font-black text-black mb-6 flex items-center gap-2 uppercase tracking-tight">
+                  <Grid3x3 size={24} /> Tic-Tac-Toe
+                </h3>
+                <div className="bg-white p-4 rounded-xl border-2 border-black inline-block">
+                  <TicTacToe onWin={handleGameWin} onLose={handleGameLose} />
+                </div>
+              </div>
+            )}
+            {currentGame === 1 && (
+              <div className="bg-[#FFFDF5] p-6 rounded-xl border-2 border-black shadow-[4px_4px_0px_#000]">
+                <h3 className="text-xl font-black text-black mb-6 flex items-center gap-2 uppercase tracking-tight">
+                  <Shuffle size={24} /> Memory Match
+                </h3>
+                <MemoryMatch onWin={handleGameWin} />
+              </div>
+            )}
+            {currentGame === 2 && (
+              <div className="bg-[#FFFDF5] p-6 rounded-xl border-2 border-black shadow-[4px_4px_0px_#000]">
+                <h3 className="text-xl font-black text-black mb-6 flex items-center gap-2 uppercase tracking-tight">
+                  <Brain size={24} /> Number Puzzle
+                </h3>
+                <NumberPuzzle onWin={handleGameWin} />
+              </div>
+            )}
           </div>
         ) : (
-          <div className="text-center">
-            <Trophy className="w-16 h-16 text-amber-500 mx-auto mb-6" />
-            <h2 className="text-3xl font-bold text-white mb-4">All Games Complete!</h2>
-            <p className={`font-header tracking-widest text-sm mb-4 ${alreadyPlayed ? 'text-amber-500' : 'text-emerald-400'}`}>
+          <div className="text-center p-6 bg-[#FFFDF5] border-2 border-black rounded-xl border-dashed">
+            <Trophy className="w-16 h-16 text-[#FFD93D] mx-auto mb-6 drop-shadow-[2px_2px_0px_#000]" />
+            <h2 className="text-4xl font-black text-black uppercase mb-4 tracking-tighter">All Games Complete!</h2>
+            <p className={`font-bold text-sm mb-4 ${alreadyPlayed ? 'text-black/50' : 'text-[#00B894]'}`}>
               {message}
             </p>
             {points !== null && !alreadyPlayed && (
-              <div className="text-4xl font-black text-[#FFD93D] mb-6">
+              <div className="text-5xl font-black text-[#00B894] mb-6">
                 +{points} POINTS
               </div>
             )}
             {showScratcher && scratcherDrops && !alreadyPlayed && (
-              <div className="mt-6">
-                <Scratcher drops={scratcherDrops} onScratch={() => {}} />
+              <div className="mt-8 mb-8">
+                <Scratcher drops={scratcherDrops} onScratch={() => { }} />
               </div>
             )}
+            <button onClick={() => window.location.reload()} className="px-8 py-4 bg-[#6C5CE7] border-2 border-black text-white font-black uppercase tracking-widest rounded-xl shadow-[4px_4px_0px_#000] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_#000] transition-all">
+              Play Again
+            </button>
           </div>
         )}
       </div>

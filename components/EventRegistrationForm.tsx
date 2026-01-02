@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { User } from 'firebase/auth';
 import { createPaymentOrder, completeRegistration } from '@/lib/db/payments';
 import { useGamification } from '@/app/context/GamificationContext';
+import { X, Check } from 'lucide-react';
 
 interface EventRegistrationFormProps {
   event: any;
@@ -251,7 +252,7 @@ export default function EventRegistrationForm({
                 }
 
                 const registrationId = paymentData.registrationId || dbOrderResult.orderId;
-                
+
                 // Store registration details in localStorage for the success page
                 const registrationDetails = {
                   registrationId,
@@ -266,14 +267,14 @@ export default function EventRegistrationForm({
                   tierDiscount: tierDiscount > 0 ? tierDiscount.toFixed(2) : null,
                   voucherDiscount: voucherDiscount > 0 ? voucherDiscount.toFixed(2) : null,
                 };
-                
+
                 if (typeof window !== 'undefined') {
                   localStorage.setItem(
                     `registration_${registrationId}`,
                     JSON.stringify(registrationDetails)
                   );
                 }
-                
+
                 // Close modal and redirect to success page
                 onClose();
                 router.push(`/events/registration-success/${registrationId}`);
@@ -308,21 +309,21 @@ export default function EventRegistrationForm({
   if (!user) {
     return (
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-        <div className="bg-black border border-white/10 rounded-sm p-8 max-w-md w-full">
-          <h2 className="font-header text-2xl text-white mb-4">Sign In Required</h2>
-          <p className="text-white/60 font-serif mb-6">
+        <div className="bg-[#FFFDF5] border-4 border-black rounded-[30px] p-8 max-w-md w-full neo-shadow">
+          <h2 className="font-header text-3xl text-black mb-4">SIGN IN REQUIRED</h2>
+          <p className="text-black/70 font-medium text-lg leading-relaxed mb-8">
             You need to be signed in to register for events.
           </p>
           <div className="flex gap-4">
             <button
               onClick={onClose}
-              className="flex-1 px-4 py-2 border border-white/20 text-white font-header text-[9px] tracking-widest hover:border-white/40 transition-all rounded-sm"
+              className="flex-1 px-6 py-3 bg-white text-black border-2 border-black rounded-xl font-black text-xs tracking-widest hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all uppercase"
             >
               CANCEL
             </button>
             <a
               href="/auth/login"
-              className="flex-1 px-4 py-2 bg-amber-500 text-black font-header text-[9px] tracking-widest hover:bg-amber-400 transition-all rounded-sm text-center"
+              className="flex-1 px-6 py-3 bg-[#FFD93D] text-black border-2 border-black rounded-xl neo-shadow font-black text-xs tracking-widest hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all text-center uppercase"
             >
               SIGN IN
             </a>
@@ -337,24 +338,22 @@ export default function EventRegistrationForm({
       {/* Error Modal */}
       {showErrorModal && error && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4">
-          <div className="bg-black border border-red-500/30 rounded-sm p-8 max-w-md w-full">
+          <div className="bg-[#FFFDF5] border-4 border-black rounded-[30px] p-8 max-w-md w-full neo-shadow">
             {/* Error Icon */}
             <div className="mb-6 flex justify-center">
-              <div className="w-16 h-16 bg-red-500/20 border border-red-500 rounded-full flex items-center justify-center">
-                <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4v.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+              <div className="w-16 h-16 bg-[#FF7675] border-3 border-black rounded-full flex items-center justify-center neo-shadow">
+                <span className="text-3xl text-black font-black">!</span>
               </div>
             </div>
 
             {/* Error Message */}
-            <h2 className="font-header text-2xl text-white mb-4 text-center">Registration Error</h2>
-            <p className="text-red-300 font-serif text-center mb-8">{error}</p>
+            <h2 className="font-header text-2xl text-black mb-4 text-center uppercase">Registration Error</h2>
+            <p className="text-black/70 font-medium text-center mb-8">{error}</p>
 
             {/* Action Button */}
             <button
               onClick={() => setShowErrorModal(false)}
-              className="w-full px-4 py-3 bg-red-600 text-white font-header text-[10px] tracking-widest hover:bg-red-700 transition-all rounded-sm"
+              className="w-full px-6 py-3 bg-[#FF7675] text-black border-2 border-black rounded-xl neo-shadow font-black text-xs tracking-widest hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all uppercase"
             >
               TRY AGAIN
             </button>
@@ -362,10 +361,8 @@ export default function EventRegistrationForm({
         </div>
       )}
 
-
-
       {/* Registration Form */}
-      <div 
+      <div
         className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto"
         onClick={(e) => {
           // Close modal when clicking on the backdrop (outside the modal content)
@@ -374,206 +371,222 @@ export default function EventRegistrationForm({
           }
         }}
       >
-      <div className="bg-black border border-white/10 rounded-sm p-8 max-w-2xl w-full my-8" onClick={(e) => e.stopPropagation()}>
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h2 className="font-header text-3xl text-white">{event.title}</h2>
-            <p className="text-amber-500 font-header text-[10px] tracking-widest mt-2">
-              EVENT REGISTRATION
-            </p>
-          </div>
-          <button
-            onClick={onClose}
-            className="text-white/40 hover:text-white transition-colors text-2xl"
-          >
-            ✕
-          </button>
-        </div>
-
-        {/* Form Section */}
-        <div className="space-y-4 mb-8 pb-8 border-b border-white/10">
-          <div>
-            <label className="text-white/60 text-sm font-header tracking-widest mb-2 block">
-              FULL NAME *
-            </label>
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleInputChange}
-              placeholder="Enter your full name"
-              className="w-full px-4 py-2 bg-white/5 border border-white/10 text-white placeholder:text-white/30 rounded-sm focus:outline-none focus:border-amber-500 transition-all"
-            />
-          </div>
-
-          <div>
-            <label className="text-white/60 text-sm font-header tracking-widest mb-2 block">
-              EMAIL *
-            </label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              placeholder="Enter your email"
-              className="w-full px-4 py-2 bg-white/5 border border-white/10 text-white placeholder:text-white/30 rounded-sm focus:outline-none focus:border-amber-500 transition-all"
-            />
-          </div>
-
-          <div>
-            <label className="text-white/60 text-sm font-header tracking-widest mb-2 block">
-              PHONE *
-            </label>
-            <input
-              type="tel"
-              name="phone"
-              value={formData.phone}
-              onChange={handleInputChange}
-              placeholder="10-digit phone number"
-              className="w-full px-4 py-2 bg-white/5 border border-white/10 text-white placeholder:text-white/30 rounded-sm focus:outline-none focus:border-amber-500 transition-all"
-            />
-          </div>
-        </div>
-
-        {/* Tier Perks Section */}
-        {(hasEarlyEventAccess || workshopDiscountPercent > 0 || hasVIPSeating) && (
-          <div className="mb-8 p-4 bg-gradient-to-r from-amber-500/10 to-purple-500/10 border border-amber-500/30 rounded-sm">
-            <div className="text-white/60 font-header text-sm tracking-widest mb-4 flex items-center gap-2">
-              <span className="text-2xl">👑</span> YOUR TIER PERKS
+        <div className="bg-[#FFFDF5] border-4 border-black rounded-[30px] p-8 md:p-10 max-w-2xl w-full my-8 neo-shadow relative" onClick={(e) => e.stopPropagation()}>
+          {/* Header */}
+          <div className="flex items-start justify-between mb-8">
+            <div>
+              <div className="bg-[#FFD93D] text-black px-3 py-1 rounded-lg border-2 border-black inline-block font-black text-[10px] tracking-[0.2em] mb-4 uppercase">
+                EVENT REGISTRATION
+              </div>
+              <h2 className="font-header text-3xl md:text-4xl text-black leading-none">{event.title}</h2>
             </div>
-            
-            <div className="space-y-3">
-              {hasEarlyEventAccess && (
-                <div className="flex items-center gap-3 text-sm">
-                  <span className="text-green-400">✓</span>
-                  <span className="text-white font-bold">Early Event Access (Player Tier)</span>
-                </div>
-              )}
-              
-              {workshopDiscountPercent > 0 && (
-                <div className="flex items-center gap-3 text-sm">
-                  <span className="text-green-400">✓</span>
-                  <span className="text-white font-bold">{workshopDiscountPercent}% Workshop Discount (Strategist Tier)</span>
-                  <span className="ml-auto text-amber-400 font-bold">-₹{tierDiscount.toFixed(2)}</span>
-                </div>
-              )}
-              
-              {hasVIPSeating && (
-                <div className="space-y-2">
-                  <div className="flex items-center gap-3 text-sm">
-                    <span className="text-green-400">✓</span>
-                    <span className="text-white font-bold">VIP Seating Available (Grandmaster Tier)</span>
-                  </div>
-                  <label className="flex items-center gap-3 cursor-pointer ml-6">
-                    <input
-                      type="checkbox"
-                      checked={wantsVIPSeating}
-                      onChange={(e) => setWantsVIPSeating(e.target.checked)}
-                      className="w-4 h-4 accent-amber-500"
-                    />
-                    <span className="text-white/80 font-serif text-sm">Reserve VIP Seating</span>
-                  </label>
-                </div>
-              )}
-            </div>
+            <button
+              onClick={onClose}
+              className="w-10 h-10 flex items-center justify-center bg-white border-2 border-black rounded-full hover:bg-black hover:text-white transition-colors"
+            >
+              <X className="w-5 h-5" strokeWidth={3} />
+            </button>
           </div>
-        )}
 
-        {/* Voucher Section */}
-        <div className="mb-8 p-4 bg-purple-500/10 border border-purple-500/30 rounded-sm">
-          <div className="text-white/60 font-header text-sm tracking-widest mb-4">HAVE A VOUCHER?</div>
-          
-          {!appliedVoucher ? (
-            <div className="flex gap-2">
+          {/* Form Section */}
+          <div className="space-y-6 mb-10">
+            <div>
+              <label className="font-black text-xs tracking-widest text-black/60 mb-2 block uppercase">
+                FULL NAME *
+              </label>
               <input
                 type="text"
-                value={voucherCode}
-                onChange={(e) => setVoucherCode(e.target.value.toUpperCase())}
-                placeholder="Enter voucher code"
-                className="flex-1 px-4 py-2 bg-white/5 border border-white/10 text-white placeholder:text-white/30 rounded-sm focus:outline-none focus:border-purple-500 transition-all uppercase"
+                name="name"
+                value={formData.name}
+                onChange={handleInputChange}
+                placeholder="Enter your full name"
+                className="w-full px-4 py-3 bg-white border-2 border-black rounded-xl text-black placeholder:text-black/30 focus:outline-none focus:shadow-[4px_4px_0px_#000] transition-all font-medium"
               />
-              <button
-                onClick={handleApplyVoucher}
-                disabled={checkingVoucher || !voucherCode.trim()}
-                className="px-6 py-2 bg-purple-600 text-white font-header text-xs tracking-widest hover:bg-purple-700 disabled:opacity-50 transition-all rounded-sm"
-              >
-                {checkingVoucher ? 'CHECKING...' : 'APPLY'}
-              </button>
             </div>
-          ) : (
-            <div className="flex items-center justify-between p-3 bg-purple-500/20 border border-purple-500/50 rounded-sm">
-              <div>
-                <p className="text-white font-header text-sm">{appliedVoucher.name}</p>
-                <p className="text-purple-300 text-xs mt-1">Code: {appliedVoucher.code}</p>
-                <p className="text-green-400 text-xs mt-1">Saved ₹{voucherDiscount.toFixed(2)}</p>
+
+            <div>
+              <label className="font-black text-xs tracking-widest text-black/60 mb-2 block uppercase">
+                EMAIL *
+              </label>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                placeholder="Enter your email"
+                className="w-full px-4 py-3 bg-white border-2 border-black rounded-xl text-black placeholder:text-black/30 focus:outline-none focus:shadow-[4px_4px_0px_#000] transition-all font-medium"
+              />
+            </div>
+
+            <div>
+              <label className="font-black text-xs tracking-widest text-black/60 mb-2 block uppercase">
+                PHONE *
+              </label>
+              <input
+                type="tel"
+                name="phone"
+                value={formData.phone}
+                onChange={handleInputChange}
+                placeholder="10-digit phone number"
+                className="w-full px-4 py-3 bg-white border-2 border-black rounded-xl text-black placeholder:text-black/30 focus:outline-none focus:shadow-[4px_4px_0px_#000] transition-all font-medium"
+              />
+            </div>
+          </div>
+
+          {/* Tier Perks Section */}
+          {(hasEarlyEventAccess || workshopDiscountPercent > 0 || hasVIPSeating) && (
+            <div className="mb-8 p-6 bg-[#FFD93D]/30 border-2 border-black rounded-xl border-dashed">
+              <div className="font-black text-xs tracking-widest text-black/60 mb-4 flex items-center gap-2 uppercase">
+                <span className="text-xl">👑</span> YOUR TIER PERKS
               </div>
-              <button
-                onClick={handleRemoveVoucher}
-                className="px-4 py-2 bg-red-600/80 text-white font-header text-xs tracking-widest hover:bg-red-700 transition-all rounded-sm"
-              >
-                REMOVE
-              </button>
+
+              <div className="space-y-3">
+                {hasEarlyEventAccess && (
+                  <div className="flex items-center gap-3 text-sm font-bold text-black">
+                    <div className="w-5 h-5 bg-[#00B894] rounded-full flex items-center justify-center border border-black text-white text-xs">
+                      <Check className="w-3 h-3" strokeWidth={4} />
+                    </div>
+                    <span>Early Event Access (Player Tier)</span>
+                  </div>
+                )}
+
+                {workshopDiscountPercent > 0 && (
+                  <div className="flex items-center gap-3 text-sm font-bold text-black">
+                    <div className="w-5 h-5 bg-[#00B894] rounded-full flex items-center justify-center border border-black text-white text-xs">
+                      <Check className="w-3 h-3" strokeWidth={4} />
+                    </div>
+                    <span>{workshopDiscountPercent}% Workshop Discount (Strategist Tier)</span>
+                    <span className="ml-auto bg-black text-[#FFD93D] px-2 py-0.5 rounded text-xs">-₹{tierDiscount.toFixed(2)}</span>
+                  </div>
+                )}
+
+                {hasVIPSeating && (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3 text-sm font-bold text-black">
+                      <div className="w-5 h-5 bg-[#00B894] rounded-full flex items-center justify-center border border-black text-white text-xs">
+                        <Check className="w-3 h-3" strokeWidth={4} />
+                      </div>
+                      <span>VIP Seating Available (Grandmaster Tier)</span>
+                    </div>
+                    <label className="flex items-center gap-3 cursor-pointer ml-8 p-3 bg-white border-2 border-black rounded-lg hover:shadow-[2px_2px_0px_#000] transition-all">
+                      <div className="relative">
+                        <input
+                          type="checkbox"
+                          checked={wantsVIPSeating}
+                          onChange={(e) => setWantsVIPSeating(e.target.checked)}
+                          className="peer appearance-none w-5 h-5 border-2 border-black rounded bg-white checked:bg-[#6C5CE7] checked:border-black transition-all cursor-pointer"
+                        />
+                        <Check className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white pointer-events-none opacity-0 peer-checked:opacity-100 transition-opacity" strokeWidth={4} />
+                      </div>
+                      <span className="text-black font-bold text-sm select-none">Reserve VIP Seating</span>
+                    </label>
+                  </div>
+                )}
+              </div>
             </div>
           )}
-          
-          {voucherError && (
-            <p className="text-red-400 text-xs mt-2">{voucherError}</p>
-          )}
-        </div>
 
-        {/* Price Breakdown */}
-        <div className="mb-8 p-4 bg-white/5 border border-white/10 rounded-sm space-y-3">
-          <div className="flex justify-between text-white/60">
-            <span className="font-header text-sm">EVENT PRICE:</span>
-            <span className="font-serif">₹{event.price || 0}</span>
+          {/* Voucher Section */}
+          <div className="mb-8 p-6 bg-[#6C5CE7]/10 border-2 border-black rounded-xl">
+            <div className="font-black text-xs tracking-widest text-[#6C5CE7] mb-4 uppercase">HAVE A VOUCHER?</div>
+
+            {!appliedVoucher ? (
+              <div className="flex gap-3">
+                <input
+                  type="text"
+                  value={voucherCode}
+                  onChange={(e) => setVoucherCode(e.target.value.toUpperCase())}
+                  placeholder="PROMO CODE"
+                  className="flex-1 px-4 py-3 bg-white border-2 border-black rounded-xl text-black placeholder:text-black/30 focus:outline-none focus:shadow-[4px_4px_0px_#000] transition-all uppercase font-bold"
+                />
+                <button
+                  onClick={handleApplyVoucher}
+                  disabled={checkingVoucher || !voucherCode.trim()}
+                  className="px-6 py-3 bg-[#6C5CE7] text-white border-2 border-black rounded-xl font-black text-xs tracking-widest hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all uppercase disabled:opacity-50 disabled:hover:translate-x-0 disabled:hover:translate-y-0"
+                >
+                  {checkingVoucher ? '...' : 'APPLY'}
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between p-4 bg-white border-2 border-black rounded-xl neo-shadow">
+                <div>
+                  <p className="text-black font-black text-sm uppercase">{appliedVoucher.name}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-xs font-mono bg-black text-white px-1.5 py-0.5 rounded">{appliedVoucher.code}</span>
+                    <span className="text-[#00B894] font-bold text-xs">SAVED ₹{voucherDiscount.toFixed(2)}</span>
+                  </div>
+                </div>
+                <button
+                  onClick={handleRemoveVoucher}
+                  className="px-3 py-1.5 bg-[#FF7675] text-black border-2 border-black rounded-lg font-black text-[10px] tracking-widest hover:bg-red-400 transition-all uppercase"
+                >
+                  REMOVE
+                </button>
+              </div>
+            )}
+
+            {voucherError && (
+              <p className="text-[#FF7675] font-bold text-xs mt-2 flex items-center gap-1">
+                <span>!</span> {voucherError}
+              </p>
+            )}
           </div>
 
-          {workshopDiscountPercent > 0 && tierDiscount > 0 && (
-            <div className="flex justify-between text-amber-400">
-              <span className="font-header text-sm">TIER DISCOUNT ({workshopDiscountPercent}%):</span>
-              <span className="font-serif">-₹{tierDiscount.toFixed(2)}</span>
+          {/* Price Breakdown */}
+          <div className="mb-10 bg-white border-2 border-black rounded-xl overflow-hidden">
+            <div className="p-6 space-y-3">
+              <div className="flex justify-between text-black/60">
+                <span className="font-black text-xs tracking-widest uppercase">EVENT PRICE</span>
+                <span className="font-bold font-mono">₹{event.price || 0}</span>
+              </div>
+
+              {workshopDiscountPercent > 0 && tierDiscount > 0 && (
+                <div className="flex justify-between text-[#00B894]">
+                  <span className="font-black text-xs tracking-widest uppercase">TIER DISCOUNT ({workshopDiscountPercent}%)</span>
+                  <span className="font-bold font-mono">-₹{tierDiscount.toFixed(2)}</span>
+                </div>
+              )}
+
+              {appliedVoucher && voucherDiscount > 0 && (
+                <div className="flex justify-between text-[#6C5CE7]">
+                  <span className="font-black text-xs tracking-widest uppercase">VOUCHER DISCOUNT</span>
+                  <span className="font-bold font-mono">-₹{voucherDiscount.toFixed(2)}</span>
+                </div>
+              )}
+            </div>
+
+            <div className="bg-[#FFFDF5] border-t-2 border-black p-6 flex justify-between items-center">
+              <span className="font-black text-sm tracking-widest uppercase text-black">TOTAL AMOUNT</span>
+              <span className="font-header text-3xl text-black">₹{finalAmount.toFixed(2)}</span>
+            </div>
+          </div>
+
+          {/* Error Message */}
+          {error && (
+            <div className="mb-6 p-4 bg-[#FF7675]/20 border-2 border-[#FF7675] rounded-xl flex gap-3 items-start">
+              <div className="mt-0.5 min-w-[20px] h-5 bg-[#FF7675] rounded-full flex items-center justify-center text-white text-xs font-black">!</div>
+              <p className="text-[#D63031] text-sm font-bold">{error}</p>
             </div>
           )}
 
-          {appliedVoucher && voucherDiscount > 0 && (
-            <div className="flex justify-between text-purple-400">
-              <span className="font-header text-sm">VOUCHER DISCOUNT:</span>
-              <span className="font-serif">-₹{voucherDiscount.toFixed(2)}</span>
-            </div>
-          )}
-
-          <div className="border-t border-white/10 pt-3 flex justify-between">
-            <span className="font-header text-white">FINAL AMOUNT:</span>
-            <span className="font-header text-amber-500 text-xl">₹{finalAmount.toFixed(2)}</span>
+          {/* Buttons */}
+          <div className="grid grid-cols-2 gap-4">
+            <button
+              onClick={onClose}
+              disabled={isProcessing}
+              className="px-6 py-4 bg-white text-black border-2 border-black rounded-xl font-black text-xs tracking-widest hover:bg-gray-50 transition-all uppercase disabled:opacity-50"
+            >
+              CANCEL
+            </button>
+            <button
+              onClick={handlePayment}
+              disabled={isProcessing}
+              className="px-6 py-4 bg-[#6C5CE7] text-white border-2 border-black rounded-xl neo-shadow font-black text-xs tracking-widest hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all uppercase disabled:opacity-50 disabled:shadow-none disabled:translate-x-0 disabled:translate-y-0"
+            >
+              {isProcessing ? 'PROCESSING...' : `PAY ₹${finalAmount.toFixed(2)}`}
+            </button>
           </div>
         </div>
-
-        {/* Error Message */}
-        {error && (
-          <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-sm">
-            <p className="text-red-400 text-sm font-serif">{error}</p>
-          </div>
-        )}
-
-        {/* Buttons */}
-        <div className="flex gap-3">
-          <button
-            onClick={onClose}
-            disabled={isProcessing}
-            className="flex-1 px-4 py-3 border border-white/20 text-white font-header text-[9px] tracking-widest hover:border-white/40 disabled:opacity-50 transition-all rounded-sm"
-          >
-            CANCEL
-          </button>
-          <button
-            onClick={handlePayment}
-            disabled={isProcessing}
-            className="flex-1 px-4 py-3 bg-amber-500 text-black font-header text-[9px] tracking-widest hover:bg-amber-400 disabled:opacity-50 transition-all rounded-sm"
-          >
-            {isProcessing ? 'PROCESSING...' : `PAY ₹${finalAmount.toFixed(2)}`}
-          </button>
-        </div>
-      </div>
       </div>
     </>
   );

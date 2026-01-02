@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Star, Trophy } from 'lucide-react';
+import { Star, Trophy, Smile, Meh, Frown, Skull } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { awardGamePoints } from '@/lib/gameApi';
 import Scratcher from '../gamification/Scratcher';
@@ -14,12 +14,12 @@ const fetchWords = async (): Promise<string[]> => {
     const res = await fetch('/api/games/content?gameId=hangman');
     const data = await res.json();
     const items = data.content?.items || [];
-    
+
     if (items.length === 0) {
       // Fallback words
       return ['JAVASCRIPT', 'PYTHON', 'REACT', 'TYPESCRIPT', 'DATABASE'];
     }
-    
+
     return items.map((item: any) => item.word.toUpperCase());
   } catch (error) {
     console.error('Error fetching hangman words:', error);
@@ -38,7 +38,7 @@ const HangmanGame: React.FC = () => {
   const [points, setPoints] = useState<number | null>(null);
   const [message, setMessage] = useState('');
   const [showScratcher, setShowScratcher] = useState(false);
-  const [scratcherDrops, setScratcherDrops] = useState<{prob:number,points:number}[]|null>(null);
+  const [scratcherDrops, setScratcherDrops] = useState<{ prob: number, points: number }[] | null>(null);
 
   useEffect(() => {
     // Fetch and select random word from Firebase
@@ -46,9 +46,9 @@ const HangmanGame: React.FC = () => {
       const words = await fetchWords();
       setWord(words[Math.floor(Math.random() * words.length)]);
     };
-    
+
     loadWord();
-    
+
     fetch('/api/games/game-of-the-day')
       .then(r => r.json())
       .then(d => { if (d.gameId === HANGMAN_GAME_ID) setIsGameOfDay(true); });
@@ -87,7 +87,7 @@ const HangmanGame: React.FC = () => {
   const awardPoints = async () => {
     setMessage('Awarding points...');
     const result = await awardGamePoints({ gameId: HANGMAN_GAME_ID, retry: wrongGuesses });
-    
+
     if (result.success) {
       setPoints(result.awardedPoints || 0);
       setMessage(result.message || `You earned ${result.awardedPoints} points!`);
@@ -106,26 +106,36 @@ const HangmanGame: React.FC = () => {
     <div className="max-w-2xl mx-auto">
       {isGameOfDay && (
         <div className="mb-6 flex justify-center">
-          <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#FFD93D] to-[#FF7675] text-black rounded-full font-header tracking-widest text-sm border-2 border-black shadow-[4px_4px_0px_#000]">
-            <Star size={16} className="fill-current" /> GAME OF THE DAY - 2X POINTS!
+          <div className="inline-flex items-center gap-2 px-6 py-3 bg-[#FFD93D] text-black rounded-full font-black tracking-widest text-sm border-2 border-black shadow-[4px_4px_0px_#000]">
+            <Star size={16} className="fill-black" /> GAME OF THE DAY - 2X POINTS!
           </div>
         </div>
       )}
 
-      <div className="bg-black/40 border-2 border-white/20 p-8 rounded-2xl">
-        <h2 className="text-2xl font-bold text-white text-center mb-6">HANGMAN</h2>
+      <div className="bg-white border-2 border-black p-8 rounded-[25px] neo-shadow">
+
+        <div className="flex justify-between items-center mb-8">
+          <h2 className="text-4xl font-black text-black uppercase tracking-tighter">HANGMAN</h2>
+          <div className="px-4 py-2 bg-[#FFFDF5] border-2 border-black rounded-xl font-bold text-sm">
+            Attempts: {6 - wrongGuesses} Left
+          </div>
+        </div>
 
         {/* Hangman Drawing */}
-        <div className="text-center mb-8 text-6xl">
-          {wrongGuesses >= 1 && '😟'}
-          {wrongGuesses >= 3 && '😰'}
-          {wrongGuesses >= 5 && '😱'}
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center justify-center w-32 h-32 bg-[#FFFDF5] border-2 border-black rounded-full text-black shadow-[4px_4px_0px_#000]">
+            {wrongGuesses === 0 && <Smile size={64} />}
+            {wrongGuesses >= 1 && wrongGuesses < 3 && <Meh size={64} />}
+            {wrongGuesses >= 3 && wrongGuesses < 5 && <Frown size={64} />}
+            {wrongGuesses >= 5 && wrongGuesses < 6 && <Frown size={64} className="text-[#E17055]" />}
+            {wrongGuesses >= 6 && <Skull size={64} className="text-black" />}
+          </div>
         </div>
 
         {/* Word Display */}
-        <div className="flex justify-center gap-2 mb-8">
+        <div className="flex justify-center flex-wrap gap-2 mb-12">
           {word.split('').map((letter, i) => (
-            <div key={i} className="w-12 h-16 border-b-4 border-white/40 flex items-center justify-center text-3xl font-bold text-white">
+            <div key={i} className="w-12 h-16 border-b-4 border-black flex items-center justify-center text-4xl font-black text-black">
               {guessed.includes(letter) ? letter : ''}
             </div>
           ))}
@@ -133,23 +143,30 @@ const HangmanGame: React.FC = () => {
 
         {/* Win/Loss State */}
         {(isWon || isLost) && (
-          <div className="text-center mb-6">
+          <div className="text-center mb-8 p-6 bg-[#FFFDF5] border-2 border-black rounded-xl border-dashed">
             {isWon ? (
               <>
-                <Trophy className="w-12 h-12 text-emerald-400 mx-auto mb-4" />
-                <p className={`font-header tracking-widest text-sm ${alreadyPlayed ? 'text-amber-500' : 'text-emerald-400'}`}>
+                <Trophy className="w-12 h-12 text-[#FFD93D] mx-auto mb-4 drop-shadow-[2px_2px_0px_#000]" />
+                <h3 className="text-2xl font-black text-black uppercase mb-1">YOU SAVED HIM!</h3>
+                <p className={`font-bold text-sm ${alreadyPlayed ? 'text-black/50' : 'text-[#00B894]'}`}>
                   {message}
                 </p>
                 {points !== null && !alreadyPlayed && (
-                  <div className="mt-4 text-4xl font-black text-[#FFD93D]">+{points} POINTS</div>
+                  <div className="mt-4 text-4xl font-black text-[#00B894]">+{points} POINTS</div>
                 )}
                 {showScratcher && scratcherDrops && !alreadyPlayed && (
-                  <div className="mt-6"><Scratcher drops={scratcherDrops} onScratch={() => {}} /></div>
+                  <div className="mt-6"><Scratcher drops={scratcherDrops} onScratch={() => { }} /></div>
                 )}
               </>
             ) : (
-              <p className="text-red-400 font-header tracking-widest text-sm">{message}</p>
+              <>
+                <Skull size={64} className="mx-auto mb-4 text-black" />
+                <h3 className="text-2xl font-black text-black uppercase mb-2">GAME OVER</h3>
+                <p className="font-bold text-black mb-1">The word was:</p>
+                <div className="inline-block bg-black text-white text-xl font-black px-4 py-2 rounded-lg">{word}</div>
+              </>
             )}
+            <button onClick={() => window.location.reload()} className="block mx-auto mt-6 text-black underline font-bold hover:text-[#6C5CE7]">Play Again Tomorrow</button>
           </div>
         )}
 
@@ -161,21 +178,18 @@ const HangmanGame: React.FC = () => {
                 key={letter}
                 onClick={() => handleGuess(letter)}
                 disabled={guessed.includes(letter)}
-                className={`px-3 py-2 rounded font-bold transition-colors ${
-                  guessed.includes(letter)
-                    ? word.includes(letter)
-                      ? 'bg-green-500/20 text-green-400 cursor-not-allowed'
-                      : 'bg-red-500/20 text-red-400 cursor-not-allowed'
-                    : 'bg-white/10 text-white hover:bg-white/20'
-                }`}
+                className={`px-1 py-3 rounded-lg font-black text-lg border-2 border-black transition-all ${guessed.includes(letter)
+                  ? word.includes(letter)
+                    ? 'bg-[#00B894] text-white cursor-not-allowed opacity-50'
+                    : 'bg-[#FF7675] text-white cursor-not-allowed opacity-50'
+                  : 'bg-white text-black hover:bg-[#FFFDF5] hover:-translate-y-1 hover:shadow-[2px_2px_0px_#000] active:translate-y-0 active:shadow-none'
+                  }`}
               >
                 {letter}
               </button>
             ))}
           </div>
         )}
-
-        <p className="text-white/60 text-sm text-center mt-4">Wrong guesses: {wrongGuesses} / 6</p>
       </div>
     </div>
   );

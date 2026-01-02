@@ -14,12 +14,12 @@ const fetchWordList = async (): Promise<string[]> => {
     const res = await fetch('/api/games/content?gameId=wordle');
     const data = await res.json();
     const items = data.content?.items || [];
-    
+
     if (items.length === 0) {
       // Fallback words
       return ['REACT', 'CHESS', 'BRAIN', 'LOGIC', 'SMART', 'QUICK', 'FLASH', 'POWER'];
     }
-    
+
     return items.map((item: any) => item.word.toUpperCase());
   } catch (error) {
     console.error('Error fetching word list:', error);
@@ -38,7 +38,7 @@ const WordleGame: React.FC = () => {
   const [alreadyPlayed, setAlreadyPlayed] = useState(false);
   const [points, setPoints] = useState<number | null>(null);
   const [showScratcher, setShowScratcher] = useState(false);
-  const [scratcherDrops, setScratcherDrops] = useState<{prob:number,points:number}[]|null>(null);
+  const [scratcherDrops, setScratcherDrops] = useState<{ prob: number, points: number }[] | null>(null);
 
   useEffect(() => {
     // Fetch and select random word from Firebase
@@ -47,7 +47,7 @@ const WordleGame: React.FC = () => {
       const word = wordList[Math.floor(Math.random() * wordList.length)];
       setTargetWord(word);
     };
-    
+
     loadWord();
 
     // Check Game of the Day
@@ -86,9 +86,9 @@ const WordleGame: React.FC = () => {
         const res = await fetch('/api/games/award', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            gameId: WORDLE_GAME_ID, 
-            retry: newGuesses.length - 1 
+          body: JSON.stringify({
+            gameId: WORDLE_GAME_ID,
+            retry: newGuesses.length - 1
           }),
         });
         const data = await res.json();
@@ -115,11 +115,11 @@ const WordleGame: React.FC = () => {
 
   const getLetterColor = (letter: string, index: number, guess: string) => {
     if (guess[index] === targetWord[index]) {
-      return 'bg-green-500 border-green-600 text-white'; // Correct position
+      return 'bg-[#00B894] border-black text-white'; // Correct position
     } else if (targetWord.includes(letter)) {
-      return 'bg-yellow-500 border-yellow-600 text-white'; // Wrong position
+      return 'bg-[#FFD93D] border-black text-black'; // Wrong position
     } else {
-      return 'bg-gray-600 border-gray-700 text-white'; // Not in word
+      return 'bg-[#B2BEC3] border-black text-black/50'; // Not in word
     }
   };
 
@@ -128,29 +128,32 @@ const WordleGame: React.FC = () => {
       {/* Game of the Day Badge */}
       {isGameOfDay && (
         <div className="mb-6 flex justify-center">
-          <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#FFD93D] to-[#FF7675] text-black rounded-full font-header tracking-widest text-sm border-2 border-black shadow-[4px_4px_0px_#000]">
-            <Star size={16} className="fill-current" /> GAME OF THE DAY - 2X POINTS!
+          <div className="inline-flex items-center gap-2 px-6 py-3 bg-[#FFD93D] text-black rounded-full font-black tracking-widest text-sm border-2 border-black shadow-[4px_4px_0px_#000]">
+            <Star size={16} className="fill-black" /> GAME OF THE DAY - 2X POINTS!
           </div>
         </div>
       )}
 
-      <div className="bg-black/40 border-2 border-white/20 p-8 rounded-2xl">
-        <h2 className="text-center text-2xl font-bold text-white mb-6">WORDLE</h2>
-        <p className="text-center text-white/60 text-sm mb-8">Guess the 5-letter word in 6 tries</p>
+      <div className="bg-white border-2 border-black p-8 rounded-[25px] neo-shadow">
+
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-black text-black uppercase tracking-tighter">Enter Guess</h2>
+          <p className="text-black/60 font-medium text-sm">Attempt {guesses.length + 1} of 6</p>
+        </div>
 
         {/* Guesses Grid */}
-        <div className="space-y-2 mb-6">
+        <div className="space-y-2 mb-8">
           {Array.from({ length: 6 }).map((_, rowIndex) => (
             <div key={rowIndex} className="flex gap-2 justify-center">
               {Array.from({ length: 5 }).map((_, colIndex) => {
                 const guess = guesses[rowIndex];
                 const letter = guess ? guess[colIndex] : '';
-                const colorClass = guess ? getLetterColor(letter, colIndex, guess) : 'bg-white/10 border-white/20';
+                const colorClass = guess ? getLetterColor(letter, colIndex, guess) : 'bg-white border-black text-black shadow-[2px_2px_0px_#000]';
 
                 return (
                   <div
                     key={colIndex}
-                    className={`w-14 h-14 border-2 rounded flex items-center justify-center text-2xl font-bold ${colorClass} transition-all`}
+                    className={`w-14 h-14 border-2 rounded-xl flex items-center justify-center text-3xl font-black ${colorClass} transition-all`}
                   >
                     {letter}
                   </div>
@@ -162,30 +165,34 @@ const WordleGame: React.FC = () => {
 
         {/* Win/Loss State */}
         {(isWon || isLost) && (
-          <div className="text-center mb-6">
+          <div className="text-center mb-8 p-6 bg-[#FFFDF5] border-2 border-black rounded-xl border-dashed">
             {isWon ? (
               <div className="animate-in zoom-in duration-300">
-                <Trophy className="w-12 h-12 text-emerald-400 mx-auto mb-4" />
-                <p className={`font-header tracking-widest text-sm ${alreadyPlayed ? 'text-amber-500' : 'text-emerald-400'}`}>
+                <Trophy className="w-12 h-12 text-[#FFD93D] mx-auto mb-4 drop-shadow-[2px_2px_0px_#000]" />
+                <h3 className="text-2xl font-black text-black uppercase mb-1">IMPRESSIVE!</h3>
+                <p className={`font-bold text-sm ${alreadyPlayed ? 'text-black/50' : 'text-[#00B894]'}`}>
                   {message}
                 </p>
                 {points !== null && !alreadyPlayed && (
-                  <div className="mt-4 text-4xl font-black text-[#FFD93D]">
+                  <div className="mt-4 text-4xl font-black text-[#00B894]">
                     +{points} POINTS
                   </div>
                 )}
                 {showScratcher && scratcherDrops && !alreadyPlayed && (
                   <div className="mt-6">
-                    <Scratcher drops={scratcherDrops} onScratch={() => {}} />
+                    <Scratcher drops={scratcherDrops} onScratch={() => { }} />
                   </div>
                 )}
               </div>
             ) : (
               <div>
-                <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
-                <p className="text-red-400 font-header tracking-widest text-sm">{message}</p>
+                <AlertCircle className="w-12 h-12 text-[#FF7675] mx-auto mb-4" />
+                <h3 className="text-2xl font-black text-black uppercase mb-1">SO CLOSE!</h3>
+                <p className="text-black font-bold mb-2">The word was:</p>
+                <div className="bg-black text-white inline-block px-4 py-2 rounded-lg font-black text-2xl tracking-widest">{targetWord}</div>
               </div>
             )}
+            <button onClick={() => window.location.reload()} className="block mx-auto mt-6 text-black underline font-bold hover:text-[#6C5CE7]">Play Again Tomorrow</button>
           </div>
         )}
 
@@ -196,25 +203,20 @@ const WordleGame: React.FC = () => {
               type="text"
               value={currentGuess}
               onChange={(e) => setCurrentGuess(e.target.value.toUpperCase().slice(0, 5))}
-              placeholder="Enter 5-letter word"
+              placeholder="TYPE WORD..."
               maxLength={5}
-              className="w-full bg-black/50 border border-white/20 rounded px-4 py-3 text-center text-white text-xl font-bold uppercase focus:outline-none focus:border-amber-500 transition-colors"
+              className="w-full bg-[#FFFDF5] border-2 border-black rounded-xl px-4 py-4 text-center text-black text-3xl font-black uppercase focus:outline-none focus:shadow-[4px_4px_0px_#000] placeholder:text-black/20 transition-all"
               autoFocus
             />
             <button
               type="submit"
               disabled={currentGuess.length !== 5}
-              className="w-full px-8 py-3 bg-amber-500 text-black font-header tracking-widest text-sm hover:scale-105 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full px-8 py-4 bg-[#6C5CE7] border-2 border-black rounded-xl text-white font-black tracking-[0.2em] text-sm uppercase shadow-[4px_4px_0px_#000] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_#000] active:translate-y-[2px] active:shadow-none transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0"
             >
               SUBMIT GUESS
             </button>
           </form>
         )}
-
-        {/* Attempts Counter */}
-        <div className="text-center mt-4 text-white/60 text-sm">
-          Attempts: {guesses.length} / 6
-        </div>
       </div>
     </div>
   );

@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
+import { ArrowRight } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -91,8 +92,7 @@ export default function Experiences() {
                   <ul className="space-y-4 mb-8">
                     {exp.details?.map((detail: string, i: number) => (
                       <li key={i} className="flex gap-4 items-start">
-                        <span className="text-[#6C5CE7] mt-1 font-black">→</span>
-                        <span className="text-black/90 font-bold">{detail}</span>
+                        <span className="flex items-center gap-2"><ArrowRight size={16} className="text-[#6C5CE7]" />{detail}</span>
                       </li>
                     ))}
                   </ul>

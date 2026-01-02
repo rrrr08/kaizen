@@ -13,7 +13,7 @@ function SignupPageContent() {
 
 function SignupPageFallback() {
     return (
-        <div className="min-h-[100dvh] w-full flex items-center justify-center bg-gradient-to-b from-dark via-accent to-highlight/90 px-4 sm:px-6">
+        <div className="min-h-[100dvh] w-full flex items-center justify-center bg-gradient-to-b from-dark via-accent to-highlight/90 px-4 sm:px-6 pt-32 pb-12">
             <div className="flex flex-col items-center justify-center">
                 <Loader2 className="h-8 w-8 animate-spin text-accent" />
                 <p className="mt-2 text-sm text-gray-500">Loading signup page...</p>

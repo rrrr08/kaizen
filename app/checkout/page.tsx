@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
-import { Coins } from 'lucide-react';
+import { Coins, ArrowLeft, AlertTriangle, Check } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -115,11 +115,11 @@ export default function CheckoutPage() {
   const totalPrice = getTotalPrice();
   const maxRedeemable = getMaxRedeemableAmount(totalPrice, walletPoints);
   const pointsWorthRupees = calculatePointWorth(redeemPoints);
-  
+
   // Calculate with voucher
   let subtotalAfterPoints = totalPrice - pointsWorthRupees;
   let voucherDiscountAmount = 0;
-  
+
   if (appliedVoucher) {
     if (appliedVoucher.discountType === 'percentage') {
       voucherDiscountAmount = (subtotalAfterPoints * appliedVoucher.discountValue) / 100;
@@ -130,7 +130,7 @@ export default function CheckoutPage() {
       voucherDiscountAmount = appliedVoucher.discountValue;
     }
   }
-  
+
   const subtotal = subtotalAfterPoints - voucherDiscountAmount;
   const gstAmount = Math.round(subtotal * (gstRate / 100));
   const finalPrice = subtotal + gstAmount;
@@ -525,8 +525,8 @@ export default function CheckoutPage() {
       <div className="max-w-7xl mx-auto px-6 md:px-12">
         {/* Header */}
         <div className="mb-16">
-          <Link href="/shop" className="font-black text-xs uppercase tracking-[0.3em] text-[#6C5CE7] hover:text-black mb-8 inline-block transition-colors">
-            ← BACK TO SHOP
+          <Link href="/shop" className="font-black text-xs uppercase tracking-[0.3em] text-[#6C5CE7] hover:text-black mb-8 inline-flex items-center gap-2 transition-colors">
+            <ArrowLeft size={16} /> BACK TO SHOP
           </Link>
           <h1 className="font-header text-6xl md:text-7xl font-black tracking-tighter mb-6 text-black">CHECKOUT</h1>
           <p className="text-xl text-black/60 font-medium">Complete your order and earn amazing rewards points</p>
@@ -607,7 +607,7 @@ export default function CheckoutPage() {
               {/* Voucher Code Section */}
               <div className="bg-white border-2 border-black p-6 rounded-[20px] neo-shadow">
                 <h3 className="font-header text-lg font-black mb-4 text-black">HAVE A VOUCHER?</h3>
-                
+
                 {!appliedVoucher ? (
                   <div className="space-y-3">
                     <div className="flex gap-2">
@@ -628,13 +628,13 @@ export default function CheckoutPage() {
                       </button>
                     </div>
                     {voucherError && (
-                      <p className="text-red-600 text-sm font-bold">❌ {voucherError}</p>
+                      <p className="text-red-600 text-sm font-bold flex items-center gap-2"><AlertTriangle size={16} /> {voucherError}</p>
                     )}
                   </div>
                 ) : (
                   <div className="bg-[#00B894]/10 border-2 border-[#00B894] rounded-lg p-4 flex items-center justify-between">
                     <div>
-                      <p className="font-black text-black text-sm">✅ {appliedVoucher.name}</p>
+                      <p className="font-black text-black text-sm flex items-center gap-2"><Check size={16} /> {appliedVoucher.name}</p>
                       <p className="text-xs text-black/60 font-bold">Code: {voucherCode}</p>
                       <p className="text-xs text-[#00B894] font-bold mt-1">
                         Saved ₹{voucherDiscountAmount.toFixed(2)}

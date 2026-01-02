@@ -61,7 +61,7 @@ export function usePushNotifications() {
             badge: '/icons/badge-96x96.png',
             tag: payload.data?.campaignId,
           };
-          
+
           // Add image if available (image is not in standard NotificationOptions but browsers support it)
           if (payload.notification?.image) {
             (notifOptions as any).image = payload.notification.image;
@@ -76,6 +76,24 @@ export function usePushNotifications() {
       console.error('Error setting up messaging:', error);
     }
   }, []);
+
+  const getFCMToken = useCallback(async (): Promise<string | null> => {
+    if (!isSupported) return null;
+
+    try {
+      const app = getApps().length === 0 ? initializeApp({}) : getApps()[0];
+      const messaging = getMessaging(app);
+
+      const fcmToken = await getToken(messaging, {
+        vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
+      });
+
+      return fcmToken;
+    } catch (error) {
+      console.error('Error getting FCM token:', error);
+      return null;
+    }
+  }, [isSupported]);
 
   const requestPermission = useCallback(async (): Promise<boolean> => {
     if (!isSupported) {
@@ -101,25 +119,9 @@ export function usePushNotifications() {
       console.error('Error requesting notification permission:', error);
       return false;
     }
-  }, [isSupported]);
+  }, [isSupported, getFCMToken]);
 
-  const getFCMToken = useCallback(async (): Promise<string | null> => {
-    if (!isSupported) return null;
 
-    try {
-      const app = getApps().length === 0 ? initializeApp({}) : getApps()[0];
-      const messaging = getMessaging(app);
-
-      const fcmToken = await getToken(messaging, {
-        vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
-      });
-
-      return fcmToken;
-    } catch (error) {
-      console.error('Error getting FCM token:', error);
-      return null;
-    }
-  }, [isSupported]);
 
   return {
     token,

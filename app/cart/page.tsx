@@ -2,7 +2,7 @@
 
 import { useCart } from '@/app/context/CartContext';
 import Link from 'next/link';
-import { ShoppingCart, Trash2, Plus, Minus } from 'lucide-react';
+import { ShoppingCart, Trash2, Plus, Minus, ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function CartPage() {
@@ -43,9 +43,9 @@ export default function CartPage() {
           <div>
             <Link
               href="/shop"
-              className="font-black text-xs tracking-[0.3em] text-[#6C5CE7] hover:text-black mb-4 inline-block transition-colors uppercase"
+              className="font-black text-xs tracking-[0.3em] text-[#6C5CE7] hover:text-black mb-4 inline-flex items-center gap-2 transition-colors uppercase"
             >
-              ← BACK TO SHOP
+              <ArrowLeft size={16} /> BACK TO SHOP
             </Link>
             <h1 className="font-header text-6xl md:text-7xl font-black tracking-tighter mb-2 text-black">SHOPPING CART</h1>
             <p className="text-xl text-black/60 font-bold">

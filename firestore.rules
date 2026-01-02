@@ -1,0 +1,232 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function to check if user is admin
+    function isAdmin() {
+      return request.auth != null && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    // Users collection - users can read/write their own data
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read: if isAdmin();
+      
+      // User subcollections - gamePlays, walletTransactions, transactions, notifications
+      match /gamePlays/{playId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+      
+      match /walletTransactions/{txId} {
+        allow read: if request.auth != null && request.auth.uid == userId;
+        allow read: if isAdmin();
+      }
+      
+      match /transactions/{txId} {
+        allow read: if request.auth != null && request.auth.uid == userId;
+        allow write: if isAdmin();
+      }
+      
+      match /notifications/{notificationId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+        allow write: if isAdmin();
+      }
+    }
+    
+    // Settings collection - read by authenticated users, write by admins
+    match /settings/{document=**} {
+      allow read: if request.auth != null;
+      allow write: if isAdmin();
+    }
+    
+    // Game content - read by all authenticated users, write by admins only
+    match /gameContent/{document=**} {
+      allow read: if request.auth != null;
+      allow write: if isAdmin();
+    }
+    
+    // Game history - users can read/write their own history
+    match /gameHistory/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Leaderboards - read by all authenticated users, write by server only
+    match /leaderboards/{document=**} {
+      allow read: if request.auth != null;
+      allow write: if false; // Only server can write via Admin SDK
+    }
+    
+    // Orders - users can read their own orders
+    match /orders/{orderId} {
+      allow read: if request.auth != null && 
+        (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if request.auth != null;
+      allow update: if isAdmin();
+    }
+    
+    // Payment orders - users can read their own, write by admins
+    match /payment_orders/{orderId} {
+      allow read: if request.auth != null && 
+        (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if request.auth != null;
+      allow update: if isAdmin();
+    }
+    
+    // Products - read by all, write by admins only
+    match /products/{productId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    // Games - read by all, write by admins only
+    match /games/{gameId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    // Experiences - read by all, write by admins only
+    match /experiences/{experienceId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    // Events - read by all, write by admins only
+    match /events/{eventId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    // Event registrations - users can read/create their own
+    match /event_registrations/{registrationId} {
+      allow read: if request.auth != null && 
+        (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if request.auth != null;
+      allow update: if isAdmin();
+    }
+    
+    // Blog posts (OLD collection name) - read by all, write by admins only
+    match /blog/{postId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    // Blog posts (NEW collection name) - read by all, write by admins only
+    match /blog_posts/{postId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    // Testimonials - read by all, write by admins only
+    match /testimonials/{testimonialId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    // Notifications (standalone) - users can read their own notifications
+    match /notifications/{notificationId} {
+      allow read: if request.auth != null && 
+        (resource.data.userId == request.auth.uid || isAdmin());
+      allow write: if isAdmin();
+    }
+    
+    // Campaigns - read by admins, write by admins
+    match /campaigns/{campaignId} {
+      allow read: if isAdmin();
+      allow write: if isAdmin();
+    }
+    
+    // Push campaigns - read/write by admins only
+    match /pushCampaigns/{campaignId} {
+      allow read: if isAdmin();
+      allow write: if isAdmin();
+    }
+    
+    // Push activities - read/write by admins only
+    match /pushActivities/{activityId} {
+      allow read: if isAdmin();
+      allow write: if isAdmin();
+    }
+    
+    // User device tokens - users can manage their own
+    match /userDeviceTokens/{tokenId} {
+      allow read: if request.auth != null && 
+        (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if request.auth != null;
+      allow delete: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow update: if isAdmin();
+    }
+    
+    // User notification preferences
+    match /userNotificationPreferences/{email} {
+      allow read, write: if request.auth != null && request.auth.token.email == email;
+      allow read: if isAdmin();
+    }
+    
+    // Voucher templates - read by all authenticated users, write by admins only
+    match /voucherTemplates/{templateId} {
+      allow read: if request.auth != null;
+      allow write: if isAdmin();
+    }
+    
+    // Vouchers (user redeemed) - users can read their own vouchers
+    match /vouchers/{voucherId} {
+      allow read: if request.auth != null && 
+        (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if request.auth != null;
+      allow update: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow delete: if isAdmin();
+    }
+    
+    // Wallets - users can read their own wallet
+    match /wallets/{userId} {
+      allow read: if request.auth != null && 
+        (request.auth.uid == userId || isAdmin());
+      allow write: if isAdmin();
+    }
+    
+    // Transactions (standalone) - read/write by admins
+    match /transactions/{txId} {
+      allow read: if isAdmin();
+      allow write: if isAdmin();
+    }
+    
+    // Stats - read by admins, write by server
+    match /stats/{statId} {
+      allow read: if isAdmin();
+      allow write: if false; // Server only
+    }
+    
+    // Conversations - users can read/write their own conversations
+    match /conversations/{conversationId} {
+      allow read, write: if request.auth != null && 
+        (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if request.auth != null;
+    }
+    
+    // Site Content (Home, About, Blog layout, Community)
+    // Used by Admin Media Manager
+    match /content/{document=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    // About collection (legacy)
+    match /about/{document=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    // Community collection
+    match /community/{document=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    // Catch-all for any other collections - read by authenticated users
+    match /{document=**} {
+      allow read: if request.auth != null;
+      allow write: if false; // Only server can write via Admin SDK
+    }
+  }
+}

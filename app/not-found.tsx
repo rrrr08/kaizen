@@ -1,11 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { AlertTriangle, Home } from 'lucide-react';
+import { AlertTriangle, Home, ArrowRight } from 'lucide-react';
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-background text-foreground flex items-center justify-center px-6">
+    <div className="min-h-screen bg-background text-foreground flex items-center justify-center px-6 pt-32 pb-16">
       <div className="max-w-lg w-full text-center">
         {/* Icon */}
         <div className="mb-8 flex justify-center">
@@ -30,17 +30,17 @@ export default function NotFound() {
         <div className="mb-8 p-6 bg-white/5 border border-white/10 rounded-lg">
           <p className="text-sm text-muted-foreground mb-4 font-header">You might want to visit:</p>
           <div className="grid grid-cols-2 gap-3 text-xs">
-            <Link href="/shop" className="text-primary hover:text-primary/80 transition-colors">
-              → Shop
+            <Link href="/shop" className="text-primary hover:text-primary/80 transition-colors flex items-center gap-1">
+              <ArrowRight size={12} /> Shop
             </Link>
-            <Link href="/wallet" className="text-primary hover:text-primary/80 transition-colors">
-              → Wallet
+            <Link href="/wallet" className="text-primary hover:text-primary/80 transition-colors flex items-center gap-1">
+              <ArrowRight size={12} /> Wallet
             </Link>
-            <Link href="/events" className="text-primary hover:text-primary/80 transition-colors">
-              → Events
+            <Link href="/events" className="text-primary hover:text-primary/80 transition-colors flex items-center gap-1">
+              <ArrowRight size={12} /> Events
             </Link>
-            <Link href="/community" className="text-primary hover:text-primary/80 transition-colors">
-              → Community
+            <Link href="/community" className="text-primary hover:text-primary/80 transition-colors flex items-center gap-1">
+              <ArrowRight size={12} /> Community
             </Link>
           </div>
         </div>

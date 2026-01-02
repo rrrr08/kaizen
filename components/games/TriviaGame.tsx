@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Star, Trophy, Clock, CheckCircle, XCircle } from 'lucide-react';
+import { Star, Trophy, Clock, CheckCircle, XCircle, Brain } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { awardGamePoints } from '@/lib/gameApi';
 import Scratcher from '../gamification/Scratcher';
@@ -21,7 +21,7 @@ const fetchQuestions = async (): Promise<Question[]> => {
     const res = await fetch('/api/games/content?gameId=trivia');
     const data = await res.json();
     const items = data.content?.items || [];
-    
+
     if (items.length === 0) {
       // Fallback questions
       return [
@@ -57,7 +57,7 @@ const fetchQuestions = async (): Promise<Question[]> => {
         }
       ];
     }
-    
+
     return items;
   } catch (error) {
     console.error('Error fetching trivia questions:', error);
@@ -86,7 +86,7 @@ const TriviaGame: React.FC = () => {
   const [points, setPoints] = useState<number | null>(null);
   const [message, setMessage] = useState('');
   const [showScratcher, setShowScratcher] = useState(false);
-  const [scratcherDrops, setScratcherDrops] = useState<{prob:number,points:number}[]|null>(null);
+  const [scratcherDrops, setScratcherDrops] = useState<{ prob: number, points: number }[] | null>(null);
   const [wrongAnswers, setWrongAnswers] = useState(0);
 
   useEffect(() => {
@@ -97,7 +97,7 @@ const TriviaGame: React.FC = () => {
       const shuffled = [...allQuestions].sort(() => Math.random() - 0.5).slice(0, 5);
       setQuestions(shuffled);
     };
-    
+
     loadQuestions();
 
     // Check Game of the Day
@@ -146,10 +146,10 @@ const TriviaGame: React.FC = () => {
 
   const handleAnswer = (index: number) => {
     if (showResult || isGameOver) return;
-    
+
     setSelectedAnswer(index);
     setShowResult(true);
-    
+
     const isCorrect = index === questions[currentIndex].correct;
     if (isCorrect) {
       setScore(score + 1);
@@ -180,8 +180,8 @@ const TriviaGame: React.FC = () => {
       const res = await fetch('/api/games/award', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          gameId: TRIVIA_GAME_ID, 
+        body: JSON.stringify({
+          gameId: TRIVIA_GAME_ID,
           retry: wrongAnswers,
           level: `${score}/${questions.length}`
         }),
@@ -221,57 +221,64 @@ const TriviaGame: React.FC = () => {
       {/* Game of the Day Badge */}
       {isGameOfDay && (
         <div className="mb-6 flex justify-center">
-          <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#FFD93D] to-[#FF7675] text-black rounded-full font-header tracking-widest text-sm border-2 border-black shadow-[4px_4px_0px_#000]">
-            <Star size={16} className="fill-current" /> GAME OF THE DAY - 2X POINTS!
+          <div className="inline-flex items-center gap-2 px-6 py-3 bg-[#FFD93D] text-black rounded-full font-black tracking-widest text-sm border-2 border-black shadow-[4px_4px_0px_#000]">
+            <Star size={16} className="fill-black" /> GAME OF THE DAY - 2X POINTS!
           </div>
         </div>
       )}
 
-      <div className="bg-black/40 border-2 border-white/20 p-8 rounded-2xl">
+      <div className="bg-white border-2 border-black p-8 rounded-[25px] neo-shadow">
         {!isGameOver ? (
           <>
             {/* Header */}
-            <div className="flex justify-between items-center mb-6">
-              <div className="text-white/60 text-sm">
+            <div className="flex justify-between items-center mb-8 bg-[#FFFDF5] p-4 rounded-xl border-2 border-black shadow-sm">
+              <div className="text-black font-black uppercase text-xs tracking-widest">
                 Question {currentIndex + 1} / {questions.length}
               </div>
-              <div className="flex items-center gap-2 text-amber-500">
-                <Clock size={16} />
-                <span className="font-bold">{timer}s</span>
+              <div className="flex items-center gap-2 text-black font-black text-xl">
+                <Clock size={20} className={timer <= 5 ? 'text-[#FF7675] animate-pulse' : 'text-black'} />
+                <span className={timer <= 5 ? 'text-[#FF7675]' : ''}>{timer}s</span>
               </div>
-              <div className="text-white/60 text-sm">
+              <div className="text-black font-black uppercase text-xs tracking-widest">
                 Score: {score}
               </div>
             </div>
 
             {/* Category */}
-            <div className="text-center mb-4">
-              <span className="inline-block px-4 py-1 bg-purple-500/20 text-purple-400 rounded-full text-xs font-bold">
+            <div className="text-center mb-6">
+              <span className="inline-block px-4 py-1 bg-[#A29BFE] text-black border-2 border-black rounded-lg text-xs font-black uppercase tracking-wider shadow-[2px_2px_0px_#000]">
                 {currentQuestion.category}
               </span>
             </div>
 
             {/* Question */}
-            <h2 className="text-2xl font-bold text-white text-center mb-8">
-              {currentQuestion.question}
+            <h2 className="text-3xl font-black text-black text-center mb-10 leading-tight">
+              "{currentQuestion.question}"
             </h2>
 
             {/* Options */}
             <div className="grid grid-cols-1 gap-4">
               {currentQuestion.options.map((option, index) => {
-                let bgColor = 'bg-white/10 hover:bg-white/20';
-                let borderColor = 'border-white/20';
+                let bgColor = 'bg-white hover:bg-[#FFFDF5] hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_#000]';
+                let borderColor = 'border-black';
+                let textColor = 'text-black';
+                let shadow = 'shadow-[2px_2px_0px_#000]';
                 let icon = null;
 
                 if (showResult) {
                   if (index === currentQuestion.correct) {
-                    bgColor = 'bg-green-500/20';
-                    borderColor = 'border-green-500';
-                    icon = <CheckCircle size={20} className="text-green-500" />;
+                    bgColor = 'bg-[#00B894]';
+                    textColor = 'text-white';
+                    shadow = 'shadow-[4px_4px_0px_#000]';
+                    icon = <CheckCircle size={24} className="text-white" />;
                   } else if (index === selectedAnswer) {
-                    bgColor = 'bg-red-500/20';
-                    borderColor = 'border-red-500';
-                    icon = <XCircle size={20} className="text-red-500" />;
+                    bgColor = 'bg-[#FF7675]';
+                    textColor = 'text-white';
+                    shadow = 'shadow-[4px_4px_0px_#000]';
+                    icon = <XCircle size={24} className="text-white" />;
+                  } else {
+                    bgColor = 'bg-gray-100 opacity-50';
+                    shadow = 'shadow-none';
                   }
                 }
 
@@ -280,7 +287,7 @@ const TriviaGame: React.FC = () => {
                     key={index}
                     onClick={() => handleAnswer(index)}
                     disabled={showResult}
-                    className={`${bgColor} border-2 ${borderColor} p-4 rounded-xl text-white font-bold text-left transition-all flex items-center justify-between disabled:cursor-not-allowed`}
+                    className={`${bgColor} ${textColor} border-2 ${borderColor} ${shadow} p-6 rounded-xl font-bold text-lg text-left transition-all flex items-center justify-between disabled:cursor-not-allowed disabled:transform-none`}
                   >
                     <span>{option}</span>
                     {icon}
@@ -290,25 +297,38 @@ const TriviaGame: React.FC = () => {
             </div>
           </>
         ) : (
-          <div className="text-center">
-            <Trophy className="w-16 h-16 text-amber-500 mx-auto mb-6" />
-            <h2 className="text-3xl font-bold text-white mb-4">Quiz Complete!</h2>
-            <p className="text-2xl text-white/80 mb-6">
-              You scored {score} out of {questions.length}
-            </p>
-            <p className={`font-header tracking-widest text-sm mb-4 ${alreadyPlayed ? 'text-amber-500' : 'text-emerald-400'}`}>
-              {message}
-            </p>
-            {points !== null && !alreadyPlayed && (
-              <div className="text-4xl font-black text-[#FFD93D] mb-6">
-                +{points} POINTS
-              </div>
+          <div className="text-center p-6">
+            {score > 0 ? (
+              <Trophy className="w-16 h-16 text-[#FFD93D] mx-auto mb-6 drop-shadow-[2px_2px_0px_#000]" />
+            ) : (
+              <Brain className="w-16 h-16 text-black/20 mx-auto mb-6" />
             )}
+
+            <h2 className="text-4xl font-black text-black uppercase mb-4 tracking-tighter">Quiz Complete!</h2>
+            <p className="text-2xl font-bold text-black mb-8">
+              You scored <span className="text-[#00B894]">{score}</span> out of {questions.length}
+            </p>
+
+            <div className="bg-[#FFFDF5] border-2 border-black rounded-xl p-6 mb-8 border-dashed">
+              <p className={`font-black uppercase tracking-widest text-sm mb-2 ${alreadyPlayed ? 'text-black/50' : 'text-[#00B894]'}`}>
+                {message}
+              </p>
+              {points !== null && !alreadyPlayed && (
+                <div className="text-5xl font-black text-[#00B894] mb-2">
+                  +{points} POINTS
+                </div>
+              )}
+            </div>
+
             {showScratcher && scratcherDrops && !alreadyPlayed && (
-              <div className="mt-6">
-                <Scratcher drops={scratcherDrops} onScratch={() => {}} />
+              <div className="mt-8 mb-8">
+                <Scratcher drops={scratcherDrops} onScratch={() => { }} />
               </div>
             )}
+
+            <button onClick={() => window.location.reload()} className="px-8 py-4 bg-[#6C5CE7] border-2 border-black text-white font-black uppercase tracking-widest rounded-xl shadow-[4px_4px_0px_#000] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_#000] transition-all">
+              Play Again
+            </button>
           </div>
         )}
       </div>

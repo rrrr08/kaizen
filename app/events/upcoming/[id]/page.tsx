@@ -7,6 +7,7 @@ import { GameEvent } from '@/lib/types';
 import { splitDateTime } from '@/lib/utils';
 import EventRegistrationForm from '@/components/EventRegistrationForm';
 import { useGamification } from '@/app/context/GamificationContext';
+import { ArrowLeft, Zap } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,7 +25,7 @@ export default function UpcomingEventDetail() {
     (async () => {
       const { auth } = await import('@/lib/firebase');
       const { onAuthStateChanged } = await import('firebase/auth');
-      
+
       const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
         setUser(currentUser);
       });
@@ -60,9 +61,10 @@ export default function UpcomingEventDetail() {
 
   if (loading) {
     return (
-      <div className="min-h-screen pt-28 pb-16 flex items-center justify-center">
-        <div className="text-amber-500 font-header tracking-[0.3em] animate-pulse">
-          LOADING EVENT...
+      <div className="min-h-screen pt-28 pb-16 flex items-center justify-center bg-[#FFFDF5]">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[#FFD93D] border-t-black mb-4"></div>
+          <p className="text-black/60 font-black text-xs tracking-[0.4em]">LOADING EVENT...</p>
         </div>
       </div>
     );
@@ -70,14 +72,14 @@ export default function UpcomingEventDetail() {
 
   if (error || !event) {
     return (
-      <div className="min-h-screen pt-28 pb-16 flex items-center justify-center">
+      <div className="min-h-screen pt-28 pb-16 flex items-center justify-center bg-[#FFFDF5]">
         <div className="text-center">
-          <h1 className="font-header text-4xl mb-4">EVENT NOT FOUND</h1>
+          <h1 className="font-header text-4xl md:text-6xl mb-6 text-black">EVENT NOT FOUND</h1>
           <Link
             href="/events/upcoming"
-            className="text-amber-500 font-header text-[10px] tracking-[0.4em]"
+            className="px-6 py-3 bg-[#FFD93D] text-black border-2 border-black rounded-xl neo-shadow font-black text-xs tracking-widest hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all inline-flex items-center gap-2"
           >
-            RETURN TO EVENTS
+            <ArrowLeft size={16} /> RETURN TO EVENTS
           </Link>
         </div>
       </div>
@@ -88,23 +90,23 @@ export default function UpcomingEventDetail() {
   const { date, time } = splitDateTime(event.datetime);
 
   return (
-    <div className="min-h-screen pt-28 pb-16">
+    <div className="min-h-screen pt-28 pb-16 bg-[#FFFDF5]">
       <div className="max-w-7xl mx-auto px-6 md:px-12">
 
         <Link
           href="/events/upcoming"
-          className="font-header text-[10px] tracking-[0.4em] text-white/40 hover:text-amber-500 mb-12 inline-block"
+          className="font-black text-xs tracking-widest text-black/50 hover:text-[#6C5CE7] mb-12 inline-flex items-center gap-2 transition-colors uppercase"
         >
-          ← BACK TO EVENTS
+          <ArrowLeft size={16} /> BACK TO EVENTS
         </Link>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-16">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 md:gap-16">
 
           {/* LEFT */}
-          <div className="md:col-span-2">
+          <div className="lg:col-span-2">
 
             {/* Image */}
-            <div className="aspect-video overflow-hidden rounded-sm border border-white/10 bg-white/5 mb-8">
+            <div className="aspect-video overflow-hidden rounded-[30px] border-3 border-black neo-shadow bg-white mb-12">
               {event.image && <img
                 src={event.image}
                 alt={event.title}
@@ -112,18 +114,28 @@ export default function UpcomingEventDetail() {
               />}
             </div>
 
+            {/* Title */}
+            <div className="mb-12">
+              <div className="bg-[#FFD93D] text-black px-4 py-1.5 rounded-lg neo-border shadow-[2px_2px_0px_#000] inline-block font-black text-[10px] tracking-[0.2em] mb-6 uppercase">
+                {date} • {time}
+              </div>
+              <h1 className="font-header text-5xl md:text-7xl text-black mb-6 tracking-tight leading-none">
+                {event.title}
+              </h1>
+            </div>
+
             {/* Description */}
             <Section title="Event Details">
-              <p className="text-white/70 font-serif italic text-lg leading-relaxed">
+              <p className="text-black/70 font-medium text-lg leading-relaxed">
                 {event.description}
               </p>
             </Section>
 
             {/* Info Grid */}
-            <div className="grid grid-cols-2 gap-8 mb-12">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-12">
               <Info label="DATE & TIME">
                 <p>{date}</p>
-                <p className="text-white/60">{time}</p>
+                <p className="text-black/60 text-sm">{time}</p>
               </Info>
 
               <Info label="LOCATION">{event.location}</Info>
@@ -137,30 +149,32 @@ export default function UpcomingEventDetail() {
 
             {/* Availability */}
             <div className="mb-12">
-              <p className="font-header text-[8px] tracking-widest text-white/40 mb-3">
+              <p className="font-black text-xs tracking-widest text-black/60 mb-3 uppercase">
                 AVAILABILITY
               </p>
-              <div className="w-full bg-white/10 rounded-full h-2">
+              <div className="w-full bg-gray-200 rounded-full h-4 border-2 border-black overflow-hidden">
                 <div
-                  className={`h-full rounded-full ${
-                    isFull ? 'bg-red-500' : 'bg-amber-500'
-                  }`}
+                  className={`h-full ${isFull ? 'bg-[#FF7675]' : 'bg-[#00B894]'
+                    } transition-all`}
                   style={{
                     width: `${(event.registered / event.capacity) * 100}%`,
                   }}
                 />
               </div>
+              <p className="text-black/60 font-bold text-sm mt-2">
+                {event.capacity - event.registered} spots remaining
+              </p>
             </div>
           </div>
 
           {/* RIGHT */}
-          <div className="md:col-span-1">
-            <div className="border border-white/10 p-8 rounded-sm sticky top-32">
-              <h3 className="font-header text-[10px] tracking-[0.4em] text-amber-500 mb-6 uppercase">
+          <div className="lg:col-span-1">
+            <div className="bg-white border-3 border-black p-8 rounded-[30px] neo-shadow sticky top-32">
+              <h3 className="font-black text-xs tracking-widest text-[#6C5CE7] mb-8 uppercase">
                 EVENT SUMMARY
               </h3>
 
-              <div className="space-y-6 mb-8 pb-8 border-b border-white/10">
+              <div className="space-y-8 mb-8 pb-8 border-b-2 border-black/10">
                 <Stat label="REGISTERED" value={event.registered} />
                 <Stat
                   label="PRICE"
@@ -169,25 +183,31 @@ export default function UpcomingEventDetail() {
               </div>
 
               {hasEarlyEventAccess && (
-                <div className="mb-4 p-3 bg-amber-500/20 border border-amber-500 rounded-sm">
-                  <div className="flex items-center gap-2 text-amber-500 font-header text-xs tracking-widest">
-                    <span className="text-lg">⚡</span>
-                    <span>EARLY ACCESS (PLAYER TIER)</span>
+                <div className="mb-6 p-4 bg-[#FFD93D]/30 border-2 border-[#FFD93D] rounded-xl">
+                  <div className="flex items-center gap-3 text-black font-black text-xs tracking-widest">
+                    <Zap size={16} className="text-black" fill="black" />
+                    <span>EARLY ACCESS</span>
                   </div>
+                  <p className="text-black/60 font-bold text-xs mt-2">Player Tier Perk</p>
                 </div>
               )}
 
               <button
                 onClick={() => setShowRegistrationForm(true)}
                 disabled={isFull}
-                className={`w-full px-6 py-4 font-header text-[10px] tracking-[0.4em] rounded-sm transition-all ${
-                  isFull
-                    ? 'bg-red-500/20 text-red-500/60 cursor-not-allowed'
-                    : 'bg-amber-500 text-black hover:bg-amber-400'
-                }`}
+                className={`w-full px-6 py-4 font-black text-xs tracking-widest rounded-xl border-2 border-black transition-all ${isFull
+                    ? 'bg-[#FF7675]/30 text-[#D63031] cursor-not-allowed opacity-60'
+                    : 'bg-[#6C5CE7] text-white neo-shadow hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none'
+                  }`}
               >
-                {isFull ? 'WAITLIST' : 'REGISTER NOW'}
+                {isFull ? 'EVENT FULL' : 'REGISTER NOW'}
               </button>
+
+              {!isFull && (
+                <p className="text-center text-black/40 font-bold text-xs mt-4">
+                  Secure your spot today!
+                </p>
+              )}
             </div>
           </div>
         </div>
@@ -214,7 +234,7 @@ export default function UpcomingEventDetail() {
 function Section({ title, children }: { title: string; children: any }) {
   return (
     <div className="mb-12">
-      <h2 className="font-header text-[10px] tracking-[0.4em] text-amber-500 mb-4 uppercase">
+      <h2 className="font-black text-xs tracking-widest text-[#6C5CE7] mb-6 uppercase">
         {title}
       </h2>
       {children}
@@ -224,11 +244,11 @@ function Section({ title, children }: { title: string; children: any }) {
 
 function Info({ label, children }: { label: string; children: any }) {
   return (
-    <div className="border-b border-white/10 pb-6">
-      <div className="font-header text-[8px] tracking-widest text-white/40 mb-3">
+    <div className="bg-white border-2 border-black rounded-xl p-6 neo-shadow hover:-translate-y-1 transition-transform">
+      <div className="font-black text-[10px] tracking-widest text-black/40 mb-3 uppercase">
         {label}
       </div>
-      <div className="font-serif text-white">{children}</div>
+      <div className="font-bold text-black text-lg">{children}</div>
     </div>
   );
 }
@@ -236,10 +256,10 @@ function Info({ label, children }: { label: string; children: any }) {
 function Stat({ label, value }: { label: string; value: any }) {
   return (
     <div>
-      <p className="font-header text-[8px] tracking-widest text-white/40 mb-2">
+      <p className="font-black text-[10px] tracking-widest text-black/40 mb-2 uppercase">
         {label}
       </p>
-      <p className="font-serif italic text-2xl text-amber-500">{value}</p>
+      <p className="font-header text-4xl text-[#6C5CE7] font-black">{value}</p>
     </div>
   );
 }

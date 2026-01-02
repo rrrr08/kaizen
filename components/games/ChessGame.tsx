@@ -52,7 +52,7 @@ const ChessGame: React.FC = () => {
   const [alreadyPlayed, setAlreadyPlayed] = useState(false);
   const [points, setPoints] = useState<number | null>(null);
   const [showScratcher, setShowScratcher] = useState(false);
-  const [scratcherDrops, setScratcherDrops] = useState<{prob:number,points:number}[]|null>(null);
+  const [scratcherDrops, setScratcherDrops] = useState<{ prob: number, points: number }[] | null>(null);
   const [wrongAttempts, setWrongAttempts] = useState(0);
 
   useEffect(() => {
@@ -141,38 +141,42 @@ const ChessGame: React.FC = () => {
       {/* Game of the Day Badge */}
       {isGameOfDay && (
         <div className="mb-6 flex justify-center">
-          <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#FFD93D] to-[#FF7675] text-black rounded-full font-header tracking-widest text-sm border-2 border-black shadow-[4px_4px_0px_#000]">
-            <Star size={16} className="fill-current" /> GAME OF THE DAY - 2X POINTS!
+          <div className="inline-flex items-center gap-2 px-6 py-3 bg-[#FFD93D] text-black rounded-full font-black tracking-widest text-sm border-2 border-black shadow-[4px_4px_0px_#000]">
+            <Star size={16} className="fill-black" /> GAME OF THE DAY - 2X POINTS!
           </div>
         </div>
       )}
 
-      <div className="bg-black/40 border-2 border-white/20 p-8 rounded-2xl">
-        <div className="text-center mb-6">
-          <h2 className="text-2xl font-bold text-white mb-2">Chess Puzzle</h2>
-          <p className="text-white/60 text-sm">{puzzle.description}</p>
-          <span className="inline-block mt-2 px-4 py-1 bg-purple-500/20 text-purple-400 rounded-full text-xs font-bold">
+      <div className="bg-white border-2 border-black p-8 rounded-[25px] neo-shadow">
+        <div className="text-center mb-8">
+          <span className="inline-block px-4 py-1 bg-[#6C5CE7] text-white border-2 border-black rounded-lg text-xs font-black uppercase tracking-wider mb-2 shadow-[2px_2px_0px_#000]">
             {puzzle.difficulty}
           </span>
+          <h2 className="text-4xl font-black text-black uppercase tracking-tighter mb-2">Chess Puzzle</h2>
+          <p className="text-black/60 font-medium text-lg">{puzzle.description}</p>
         </div>
 
         {/* Chess Board Visualization (Simplified) */}
-        <div className="bg-gradient-to-br from-amber-100 to-amber-200 p-4 rounded-xl mb-6 border-4 border-amber-900">
-          <div className="aspect-square bg-white/90 rounded-lg flex items-center justify-center">
-            <div className="text-center">
-              <div className="text-6xl mb-4">♔♕♖♗♘♙</div>
-              <p className="text-gray-600 text-sm font-mono">{puzzle.fen.slice(0, 30)}...</p>
-              <p className="text-gray-500 text-xs mt-2">Position: {puzzle.id}</p>
+        <div className="bg-[#FFFDF5] p-6 rounded-xl mb-8 border-2 border-black shadow-[4px_4px_0px_#000]">
+          <div className="aspect-square bg-white border-2 border-black rounded-lg flex items-center justify-center relative overflow-hidden">
+            {/* Simple visual placeholder for the board */}
+            <div className="w-full h-full opacity-10" style={{ backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', backgroundSize: '12.5% 12.5%' }}></div>
+            <div className="text-center absolute inset-0 flex flex-col items-center justify-center">
+              <div className="text-8xl mb-4 text-black drop-shadow-md">♔♕♖♗♘♙</div>
+              <div className="bg-[#FFD93D] border-2 border-black p-4 rounded-xl transform rotate-1 max-w-sm">
+                <p className="text-black text-xs font-mono font-bold break-all">{puzzle.fen}</p>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Moves Display */}
-        <div className="mb-6">
-          <h3 className="text-white/80 text-sm font-bold mb-2">Your Moves:</h3>
+        <div className="mb-8">
+          <h3 className="text-black font-black uppercase text-sm mb-3 tracking-widest">Your Moves:</h3>
           <div className="flex flex-wrap gap-2">
+            {userMoves.length === 0 && <p className="text-black/40 text-sm font-medium italic">No moves yet...</p>}
             {userMoves.map((move, index) => (
-              <span key={index} className="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-sm font-mono">
+              <span key={index} className="px-4 py-2 bg-[#00B894] border-2 border-black text-black rounded-xl text-sm font-black shadow-[2px_2px_0px_#000]">
                 {index + 1}. {move}
               </span>
             ))}
@@ -181,21 +185,23 @@ const ChessGame: React.FC = () => {
 
         {/* Win State */}
         {isWon && (
-          <div className="text-center mb-6 animate-in zoom-in duration-300">
-            <Trophy className="w-12 h-12 text-emerald-400 mx-auto mb-4" />
-            <p className={`font-header tracking-widest text-sm ${alreadyPlayed ? 'text-amber-500' : 'text-emerald-400'}`}>
+          <div className="text-center mb-8 animate-in zoom-in duration-300 p-6 bg-[#FFFDF5] border-2 border-black rounded-xl border-dashed">
+            <Trophy className="w-12 h-12 text-[#FFD93D] mx-auto mb-4 drop-shadow-[2px_2px_0px_#000]" />
+            <h3 className="text-2xl font-black text-black uppercase mb-1">MATE DELIVERED!</h3>
+            <p className={`font-bold text-sm ${alreadyPlayed ? 'text-black/50' : 'text-[#00B894]'}`}>
               {message}
             </p>
             {points !== null && !alreadyPlayed && (
-              <div className="mt-4 text-4xl font-black text-[#FFD93D]">
+              <div className="mt-4 text-4xl font-black text-[#00B894]">
                 +{points} POINTS
               </div>
             )}
             {showScratcher && scratcherDrops && !alreadyPlayed && (
               <div className="mt-6">
-                <Scratcher drops={scratcherDrops} onScratch={() => {}} />
+                <Scratcher drops={scratcherDrops} onScratch={() => { }} />
               </div>
             )}
+            <button onClick={() => window.location.reload()} className="mt-4 text-black underline font-bold hover:text-[#6C5CE7]">Next Puzzle</button>
           </div>
         )}
 
@@ -204,38 +210,38 @@ const ChessGame: React.FC = () => {
           <>
             <form onSubmit={handleSubmitMove} className="space-y-4">
               <div>
-                <label className="text-white/60 text-sm mb-2 block">
-                  Enter move {moveIndex + 1} of {puzzle.solution.length} (e.g., Qh5, Nf6, Qxf7#)
+                <label className="text-black font-black text-xs uppercase tracking-widest mb-2 block">
+                  Enter move {moveIndex + 1} of {puzzle.solution.length}
                 </label>
                 <input
                   type="text"
                   value={currentMove}
                   onChange={(e) => setCurrentMove(e.target.value)}
-                  placeholder="Enter chess move..."
-                  className="w-full bg-black/50 border border-white/20 rounded px-4 py-3 text-white font-mono focus:outline-none focus:border-amber-500 transition-colors"
+                  placeholder="e.g. Qh5"
+                  className="w-full bg-[#FFFDF5] border-2 border-black rounded-xl px-4 py-4 text-black font-bold text-xl placeholder:text-black/30 focus:outline-none focus:shadow-[4px_4px_0px_#000] transition-all"
                   autoFocus
                 />
               </div>
               <button
                 type="submit"
                 disabled={!currentMove}
-                className="w-full px-8 py-3 bg-amber-500 text-black font-header tracking-widest text-sm hover:scale-105 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full px-8 py-4 bg-[#6C5CE7] border-2 border-black rounded-xl text-white font-black tracking-[0.2em] text-sm uppercase shadow-[4px_4px_0px_#000] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_#000] active:translate-y-[2px] active:shadow-none transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0"
               >
                 SUBMIT MOVE
               </button>
             </form>
 
             {/* Hint Button */}
-            <div className="mt-4 text-center">
+            <div className="mt-6 text-center">
               {!showHint ? (
                 <button
                   onClick={() => setShowHint(true)}
-                  className="text-white/40 text-xs font-header tracking-widest hover:text-amber-500 flex items-center justify-center gap-2 mx-auto transition-colors"
+                  className="text-black/50 text-xs font-black tracking-widest hover:text-[#E17055] flex items-center justify-center gap-2 mx-auto transition-colors uppercase border-b-2 border-transparent hover:border-[#E17055] pb-1"
                 >
                   <Lightbulb size={14} /> SHOW HINT
                 </button>
               ) : (
-                <div className="text-amber-500 text-sm font-mono animate-in fade-in">
+                <div className="inline-block px-4 py-2 bg-[#FFFDF5] border-2 border-black rounded-lg text-black text-sm font-bold animate-in fade-in shadow-[2px_2px_0px_#000]">
                   Hint: Next move is {puzzle.solution[moveIndex]}
                 </div>
               )}
@@ -243,15 +249,10 @@ const ChessGame: React.FC = () => {
 
             {/* Message */}
             {message && !isWon && (
-              <div className="mt-4 text-center text-white/80 text-sm">
-                {message}
-              </div>
-            )}
-
-            {/* Wrong Attempts */}
-            {wrongAttempts > 0 && (
-              <div className="mt-4 text-center text-red-400 text-sm">
-                Wrong attempts: {wrongAttempts}
+              <div className="mt-4 text-center">
+                <span className="inline-block px-4 py-2 bg-[#FF7675] border-2 border-black text-white font-black rounded-lg shadow-[2px_2px_0px_#000]">
+                  {message}
+                </span>
               </div>
             )}
           </>
@@ -260,5 +261,6 @@ const ChessGame: React.FC = () => {
     </div>
   );
 };
+
 
 export default ChessGame;

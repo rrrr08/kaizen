@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Loader2 } from "lucide-react";
+import { Loader2, Mail, AlertTriangle, CheckCircle2, ArrowLeft } from "lucide-react";
 
 export const dynamic = 'force-dynamic';
 
@@ -35,33 +35,33 @@ function VerifyPageContent() {
     useEffect(() => {
         // Lazy load Firebase
         import('@/lib/firebase').then(({ auth }) => {
-          import('firebase/auth').then(({ onAuthStateChanged }) => {
-            const unsubscribe = onAuthStateChanged(auth, (user) => {
-                setSessionChecking(true);
-                if (user) {
-                    setCurrentUserEmail(user.email);
-                    setEmailVerified(user.emailVerified);
-                    if (user.emailVerified) {
-                        setMessage("Your email is already verified! Redirecting...");
-                        setTimeout(() => {
-                            router.push(decodeURIComponent(redirectUrl) || '/');
-                        }, 2000);
+            import('firebase/auth').then(({ onAuthStateChanged }) => {
+                const unsubscribe = onAuthStateChanged(auth, (user) => {
+                    setSessionChecking(true);
+                    if (user) {
+                        setCurrentUserEmail(user.email);
+                        setEmailVerified(user.emailVerified);
+                        if (user.emailVerified) {
+                            setMessage("Your email is already verified! Redirecting...");
+                            setTimeout(() => {
+                                router.push(decodeURIComponent(redirectUrl) || '/');
+                            }, 2000);
+                        } else {
+                            setMessage("Please verify your email. If you received a code, enter it below, or request a new verification email.");
+                        }
                     } else {
-                        setMessage("Please verify your email. If you received a code, enter it below, or request a new verification email.");
+                        setCurrentUserEmail(null);
+                        setEmailVerified(false);
+                        if (!emailFromQuery) {
+                            setError("No user session found. Please log in or ensure you have an email in the link to verify.");
+                        } else {
+                            setMessage(`Attempting to verify for ${emailFromQuery}. If you received a code, enter it below.`);
+                        }
                     }
-                } else {
-                    setCurrentUserEmail(null);
-                    setEmailVerified(false);
-                    if (!emailFromQuery) {
-                        setError("No user session found. Please log in or ensure you have an email in the link to verify.");
-                    } else {
-                        setMessage(`Attempting to verify for ${emailFromQuery}. If you received a code, enter it below.`);
-                    }
-                }
-                setSessionChecking(false);
+                    setSessionChecking(false);
+                });
+                return () => unsubscribe();
             });
-            return () => unsubscribe();
-          });
         });
     }, [router, redirectUrl, emailFromQuery]);
 
@@ -69,7 +69,7 @@ function VerifyPageContent() {
         // Lazy load Firebase
         const { auth } = await import('@/lib/firebase');
         const { sendEmailVerification } = await import('firebase/auth');
-        
+
         const targetEmail = auth.currentUser?.email || emailFromQuery;
         if (!targetEmail) {
             setError("Email is required to resend verification link.");
@@ -98,59 +98,89 @@ function VerifyPageContent() {
 
     if (sessionChecking) {
         return (
-            <div className="min-h-[100dvh] w-full flex items-center justify-center bg-gradient-to-b from-dark via-accent to-highlight/90 px-4 sm:px-6">
+            <div className="min-h-screen bg-[#FFFDF5] text-[#2D3436] flex items-center justify-center px-4 pt-32 pb-12">
                 <div className="flex flex-col items-center justify-center gap-4">
-                    <Loader2 className="h-8 w-8 animate-spin text-accent" />
-                    <p className="text-sm text-gray-500">Checking verification status...</p>
+                    <div className="w-12 h-12 border-4 border-black border-t-[#6C5CE7] rounded-full animate-spin"></div>
+                    <p className="font-black text-xs tracking-[0.2em] uppercase text-black/50">Status Check...</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-[100dvh] w-full flex items-center justify-center bg-gradient-to-b from-dark via-accent to-highlight/90 px-4 sm:px-6">
-            <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8">
-                <div className="text-center mb-8">
-                    <h1 className="text-3xl font-cal font-bold text-accent">Verify Email</h1>
-                    <p className="text-sm text-gray-500 mt-2">
-                        Please check your email inbox for a verification link sent to{" "}
-                        <span className="font-medium">{currentUserEmail || emailFromQuery || "your email"}</span>.
-                    </p>
-                    <p className="text-sm text-gray-500 mt-1">If your email is not verified, click the link in the email.</p>
+        <div className="min-h-screen bg-[#FFFDF5] text-[#2D3436] flex items-center justify-center px-4 pt-32 pb-12">
+            <div className="relative z-10 w-full max-w-md">
+
+                {/* Logo */}
+                <div className="text-center mb-10">
+                    <Link href="/" className="inline-block flex justify-center mb-6 hover:scale-105 transition-transform">
+                        <div className="bg-[#FFD93D] p-3 border-2 border-black rounded-[15px] neo-shadow">
+                            <span className="text-2xl font-black text-black">JJ</span>
+                        </div>
+                    </Link>
+                    <h1 className="font-header text-4xl font-black text-black mb-2 uppercase tracking-tight">
+                        Verify Email
+                    </h1>
                 </div>
 
-                {error && (
-                    <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-sm">
-                        {error}
-                    </div>
-                )}
+                <div className="bg-white border-2 border-black rounded-[25px] p-8 neo-shadow">
 
-                {message && (
-                    <div className="bg-green-50 text-green-600 p-3 rounded-lg mb-4 text-sm">
-                        {message}
-                    </div>
-                )}
+                    <div className="text-center mb-8">
+                        <div className="inline-flex justify-center mb-6">
+                            <div className="w-20 h-20 bg-[#6C5CE7]/20 rounded-full border-2 border-black flex items-center justify-center neo-shadow">
+                                <Mail size={40} className="text-[#6C5CE7]" />
+                            </div>
+                        </div>
 
-                {currentUserEmail && !emailVerified && (
-                    <div className="mt-6 text-center text-sm text-gray-500">
-                        <p>
-                            Didn&apos;t receive a verification email?{" "}
+                        <p className="font-bold text-black/70 text-sm leading-relaxed">
+                            Check your inbox for a verification link sent to:<br />
+                            <span className="text-black font-black bg-[#FFD93D] px-2 py-0.5 rounded-md border text-xs">{currentUserEmail || emailFromQuery || "your email"}</span>
+                        </p>
+                        <p className="text-xs font-bold text-black/40 mt-4 uppercase tracking-wide">
+                            Click the link in the email to verify
+                        </p>
+                    </div>
+
+                    {error && (
+                        <div className="mb-6 p-4 border-2 border-black bg-[#FF7675] rounded-[15px] neo-shadow">
+                            <p className="font-black text-xs text-black uppercase tracking-wide flex items-center gap-2">
+                                <AlertTriangle size={16} /> {error}
+                            </p>
+                        </div>
+                    )}
+
+                    {message && (
+                        <div className="mb-6 p-4 border-2 border-black bg-[#00B894] rounded-[15px] neo-shadow">
+                            <p className="font-black text-xs text-black uppercase tracking-wide flex items-center gap-2">
+                                <CheckCircle2 size={16} /> {message}
+                            </p>
+                        </div>
+                    )}
+
+                    {currentUserEmail && !emailVerified && (
+                        <div className="mt-6 text-center">
+                            <p className="font-bold text-black/60 text-xs mb-3">
+                                Didn't receive an email?
+                            </p>
                             <button
                                 onClick={handleResendOTP}
                                 disabled={resending}
-                                className="text-accent hover:underline font-medium disabled:opacity-50"
+                                className="w-full border-2 border-black bg-[#FFD93D] text-black hover:bg-[#ffcf0d] hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_#000] active:translate-y-[2px] active:shadow-[1px_1px_0px_#000] py-3 rounded-[12px] font-black text-xs tracking-[0.2em] uppercase transition-all flex items-center justify-center gap-2 neo-shadow disabled:opacity-50"
                             >
-                                {resending ? "Sending..." : "Resend verification email"}
+                                {resending ? "Sending..." : "Resend Verification Email"}
                             </button>
-                        </p>
-                    </div>
-                )}
+                        </div>
+                    )}
 
-                <p className="mt-4 text-center text-sm text-gray-500">
-                    <Link href="/auth/login" className="text-accent hover:underline font-medium">
-                        Back to login
-                    </Link>
-                </p>
+                    <div className="mt-8 text-center pt-6 border-t-2 border-black/5">
+                        <Link
+                            href="/auth/login"
+                            className="inline-flex items-center gap-2 font-black text-xs tracking-[0.2em] text-black/50 hover:text-black uppercase transition-colors"
+                        >
+                            <ArrowLeft size={16} /> Back to Login
+                        </Link>
+                    </div>
+                </div>
             </div>
         </div>
     );
@@ -158,10 +188,10 @@ function VerifyPageContent() {
 
 function VerifyPageFallback() {
     return (
-        <div className="min-h-[100dvh] w-full flex items-center justify-center bg-gradient-to-b from-dark via-accent to-highlight/90 px-4 sm:px-6">
-            <div className="flex flex-col items-center justify-center">
-                <Loader2 className="h-8 w-8 animate-spin text-accent" />
-                <p className="mt-2 text-sm text-gray-500">Loading verification page...</p>
+        <div className="min-h-screen bg-[#FFFDF5] text-[#2D3436] flex items-center justify-center px-4 pt-32 pb-12">
+            <div className="flex flex-col items-center justify-center gap-4">
+                <div className="w-12 h-12 border-4 border-black border-t-[#6C5CE7] rounded-full animate-spin"></div>
+                <p className="font-black text-xs tracking-[0.2em] uppercase text-black/50">Loading Verify...</p>
             </div>
         </div>
     );

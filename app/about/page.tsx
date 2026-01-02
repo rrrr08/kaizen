@@ -170,7 +170,7 @@ export default function About() {
         {founders.map((founder, i) => (
           <div key={i} className="group relative">
             <div className="aspect-[4/5] bg-white border-2 border-black rounded-[20px] overflow-hidden mb-6 neo-shadow group-hover:scale-[1.02] transition-transform duration-300 transform-gpu isolation-isolate">
-              {founder.image ? (
+              {founder.image && founder.image.trim() !== "" ? (
                 <Image 
                   src={founder.image} 
                   alt={founder.name} 

@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { FloatingPatterns } from '@/lib/joy-constants';
 import Image from 'next/image';
+import { Sparkles, Dice5 } from 'lucide-react';
 
 interface HeroProps {
     title?: string;
@@ -17,7 +18,7 @@ interface HeroProps {
 const Hero: React.FC<HeroProps> = ({
     title = 'Games are <br /> Moments, <br /> Memories, and <br /> Shared Joy.',
     subtitle = 'Analog connection for a digital world. Join the movement of people playing, belonging, and earning joy.',
-    ctaTextShops = 'Shop Games 🎲',
+    ctaTextShops = 'Shop Games',
     ctaTextJoin = 'Join Game Night',
     backgroundImage = 'https://images.unsplash.com/photo-1543807535-eceef0bc6599?auto=format&fit=crop&q=80&w=800'
 }) => {
@@ -93,7 +94,7 @@ const Hero: React.FC<HeroProps> = ({
                         {/* Play Overlay */}
                         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                             <div className="bg-white p-6 rounded-full neo-border neo-shadow">
-                                <span className="text-4xl">✨</span>
+                                <Sparkles size={36} className="text-black" />
                             </div>
                         </div>
                     </div>
@@ -115,8 +116,7 @@ const Hero: React.FC<HeroProps> = ({
                         transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 1 }}
                         className="absolute -bottom-12 -left-12 w-40 h-40 bg-[#FFD93D] rounded-[30px] neo-border neo-shadow flex items-center justify-center -rotate-12"
                     >
-                        {/* Dice Icon placeholder */}
-                        <div className="text-4xl">🎲</div>
+                        <Dice5 size={48} className="text-black" />
                     </motion.div>
                 </motion.div>
             </div>

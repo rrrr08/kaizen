@@ -129,7 +129,7 @@ export default function ProgressPage() {
     : 100;
 
   return (
-    <div className="min-h-screen bg-[#FFFDF5] py-12 px-4">
+    <div className="min-h-screen bg-[#FFFDF5] pt-28 pb-16 px-4">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <motion.div 

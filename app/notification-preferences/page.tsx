@@ -145,40 +145,48 @@ export default function NotificationPreferencesPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen pt-28 pb-16 flex items-center justify-center bg-background">
-        <p className="text-muted-foreground">Loading...</p>
+      <div className="min-h-screen pt-32 pb-16 flex items-center justify-center bg-[#FFFDF5]">
+        <div className="flex flex-col items-center justify-center gap-4">
+          <div className="w-12 h-12 border-4 border-black border-t-[#6C5CE7] rounded-full animate-spin"></div>
+          <p className="font-black text-xs tracking-[0.2em] uppercase text-black/50">Loading settings...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen pt-28 pb-16 bg-background">
-      <div className="max-w-2xl mx-auto px-6 md:px-12">
+    <div className="min-h-screen pt-32 pb-16 bg-[#FFFDF5] text-[#2D3436]">
+      <div className="max-w-3xl mx-auto px-6">
         {/* Header */}
-        <div className="mb-12">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 rounded-lg bg-primary/20 flex items-center justify-center">
-              <Bell className="w-6 h-6 text-primary" />
-            </div>
-            <div>
-              <h1 className="font-display text-4xl font-bold">Notification Preferences</h1>
-              <p className="text-muted-foreground mt-1">
-                Control how and when you receive notifications
-              </p>
-            </div>
+        <div className="mb-12 flex flex-col items-center text-center">
+          <div className="w-16 h-16 rounded-2xl bg-[#FFD93D] border-2 border-black flex items-center justify-center mb-6 neo-shadow rotate-3 transform hover:rotate-6 transition-transform">
+            <Bell className="w-8 h-8 text-black" strokeWidth={2.5} />
           </div>
+          <h1 className="font-header text-4xl md:text-5xl font-black text-black uppercase tracking-tight mb-2">
+            Notification<br />Preferences
+          </h1>
+          <p className="font-medium text-black/60 max-w-md mx-auto">
+            Control how and when you receive pings, alerts, and other noise.
+          </p>
         </div>
 
         {/* Main Preferences */}
-        <div className="glass-card p-8 rounded-lg mb-8">
-          <h2 className="font-display text-2xl font-bold mb-6">Push Notifications</h2>
+        <div className="bg-white border-2 border-black rounded-[25px] p-8 neo-shadow mb-8 relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
+            <Bell size={120} strokeWidth={1} />
+          </div>
+
+          <h2 className="font-header text-2xl font-black uppercase text-black mb-6 flex items-center gap-3">
+            <span className="w-8 h-8 bg-[#6C5CE7] rounded-lg border-2 border-black text-white flex items-center justify-center text-sm shadow-[2px_2px_0px_#000]">1</span>
+            Push Notifications
+          </h2>
 
           {/* Enable/Disable */}
-          <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg mb-6">
+          <div className="flex items-center justify-between p-6 bg-[#FFFDF5] border-2 border-black rounded-xl mb-8 shadow-[4px_4px_0px_#000] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_#000] transition-all">
             <div>
-              <p className="font-header font-semibold">Enable Push Notifications</p>
-              <p className="text-sm text-muted-foreground mt-1">
-                Receive real-time notifications on your devices
+              <p className="font-black text-lg uppercase">Enable Push</p>
+              <p className="text-xs font-bold text-black/50 uppercase tracking-wider mt-1">
+                Receive real-time alerts
               </p>
             </div>
             <Switch
@@ -189,27 +197,31 @@ export default function NotificationPreferencesPage() {
                   pushEnabled: checked,
                 }))
               }
+              className="data-[state=checked]:bg-[#00B894] data-[state=unchecked]:bg-gray-200 border-2 border-black"
             />
           </div>
 
           {/* Notification Categories */}
-          <div className="space-y-3 mb-8">
-            <h3 className="font-header font-semibold">What to Receive</h3>
+          <div className="space-y-4 mb-10">
+            <h3 className="font-black text-sm uppercase tracking-widest text-black/40 mb-4 border-b-2 border-black/10 pb-2">What to Receive</h3>
 
             {[
-              { key: 'promotional', label: 'Promotional Offers', description: 'Latest deals and promotions' },
-              { key: 'offers', label: 'Special Offers', description: 'Limited-time special offers just for you' },
-              { key: 'ordersShipping', label: 'Order & Shipping Updates', description: 'Order confirmation and shipping updates' },
-              { key: 'gamification', label: 'Level Up & Achievements', description: 'When you level up or unlock rewards' },
-              { key: 'announcements', label: 'Announcements', description: 'Important platform announcements' },
-            ].map(({ key, label, description }) => (
+              { key: 'promotional', label: 'Promotional Offers', description: 'Latest deals and promotions', color: 'bg-[#FF7675]' },
+              { key: 'offers', label: 'Special Offers', description: 'Limited-time special offers', color: 'bg-[#74B9FF]' },
+              { key: 'ordersShipping', label: 'Order Updates', description: 'Confirmation and shipping', color: 'bg-[#FFEAA7]' },
+              { key: 'gamification', label: 'Game Rewards', description: 'Level ups and badges', color: 'bg-[#A29BFE]' },
+              { key: 'announcements', label: 'Announcements', description: 'Platform news', color: 'bg-[#55EFC4]' },
+            ].map(({ key, label, description, color }) => (
               <div
                 key={key}
-                className="flex items-center justify-between p-4 bg-muted/50 rounded-lg"
+                className="flex items-center justify-between p-4 border-2 border-black rounded-lg hover:bg-black/5 transition-colors"
               >
-                <div>
-                  <p className="font-header font-semibold">{label}</p>
-                  <p className="text-sm text-muted-foreground">{description}</p>
+                <div className="flex items-center gap-4">
+                  <div className={`w-3 h-3 rounded-full border border-black ${color}`}></div>
+                  <div>
+                    <p className="font-bold text-sm uppercase">{label}</p>
+                    <p className="text-xs text-black/60 font-medium">{description}</p>
+                  </div>
                 </div>
                 <Switch
                   checked={preferences.categories[key as keyof typeof preferences.categories]}
@@ -222,25 +234,29 @@ export default function NotificationPreferencesPage() {
                       },
                     }))
                   }
+                  className="data-[state=checked]:bg-black border-2 border-black"
                 />
               </div>
             ))}
           </div>
 
           {/* Frequency */}
-          <div className="space-y-3 mb-8">
-            <h3 className="font-header font-semibold">Notification Frequency</h3>
+          <div className="space-y-4 mb-10">
+            <h3 className="font-black text-sm uppercase tracking-widest text-black/40 mb-4 border-b-2 border-black/10 pb-2">Frequency</h3>
 
-            <div className="space-y-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {[
-                { value: 'all', label: 'All Notifications', description: 'Receive all notifications' },
-                { value: 'daily', label: 'Daily Digest', description: 'Receive max 1 notification per day' },
-                { value: 'weekly', label: 'Weekly Digest', description: 'Receive max 1 notification per week' },
-                { value: 'none', label: 'Disable All', description: 'Turn off all notifications' },
-              ].map(({ value, label, description }) => (
+                { value: 'all', label: 'All Pings', emoji: '⚡' },
+                { value: 'daily', label: 'Daily Digest', emoji: '📅' },
+                { value: 'weekly', label: 'Weekly', emoji: '📆' },
+                { value: 'none', label: 'Silence', emoji: '🔕' },
+              ].map(({ value, label, emoji }) => (
                 <label
                   key={value}
-                  className="flex items-center p-4 bg-muted/50 rounded-lg cursor-pointer hover:bg-muted/70 transition-colors"
+                  className={`flex items-center p-4 border-2 border-black rounded-xl cursor-pointer transition-all ${preferences.frequency === value
+                      ? 'bg-[#FFD93D] shadow-[4px_4px_0px_#000] -translate-y-1'
+                      : 'bg-white hover:bg-black/5'
+                    }`}
                 >
                   <input
                     type="radio"
@@ -253,11 +269,11 @@ export default function NotificationPreferencesPage() {
                         frequency: e.target.value as any,
                       }))
                     }
-                    className="mr-4"
+                    className="hidden"
                   />
+                  <span className="text-2xl mr-3">{emoji}</span>
                   <div>
-                    <p className="font-header font-semibold">{label}</p>
-                    <p className="text-sm text-muted-foreground">{description}</p>
+                    <p className="font-black uppercase text-sm">{label}</p>
                   </div>
                 </label>
               ))}
@@ -265,13 +281,13 @@ export default function NotificationPreferencesPage() {
           </div>
 
           {/* Quiet Hours */}
-          <div className="space-y-3">
-            <h3 className="font-header font-semibold">Quiet Hours</h3>
+          <div className="space-y-4">
+            <h3 className="font-black text-sm uppercase tracking-widest text-black/40 mb-4 border-b-2 border-black/10 pb-2">Quiet Hours</h3>
 
-            <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg mb-3">
+            <div className="flex items-center justify-between p-4 border-2 border-black rounded-lg">
               <div>
-                <p className="font-header font-semibold">Enable Quiet Hours</p>
-                <p className="text-sm text-muted-foreground">Don't show notifications during specific hours</p>
+                <p className="font-bold uppercase text-sm">Enable Quiet Hours</p>
+                <p className="text-xs text-black/60">Silence notifications during set times</p>
               </div>
               <Switch
                 checked={preferences.quietHours?.enabled || false}
@@ -284,13 +300,14 @@ export default function NotificationPreferencesPage() {
                     },
                   }))
                 }
+                className="data-[state=checked]:bg-black border-2 border-black"
               />
             </div>
 
             {preferences.quietHours?.enabled && (
-              <div className="space-y-3 p-4 bg-primary/5 border border-primary/20 rounded-lg">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 bg-black/5 rounded-xl border-2 border-black border-dashed">
                 <div>
-                  <label className="block text-sm font-header font-semibold mb-2">From</label>
+                  <label className="block text-xs font-black uppercase mb-2 ml-1">From</label>
                   <input
                     type="time"
                     value={preferences.quietHours?.startTime || '22:00'}
@@ -303,12 +320,12 @@ export default function NotificationPreferencesPage() {
                         },
                       }))
                     }
-                    className="w-full px-3 py-2 border rounded-lg"
+                    className="w-full px-3 py-2 bg-white border-2 border-black rounded-lg font-bold text-sm focus:outline-none focus:shadow-[2px_2px_0px_#000]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-header font-semibold mb-2">To</label>
+                  <label className="block text-xs font-black uppercase mb-2 ml-1">To</label>
                   <input
                     type="time"
                     value={preferences.quietHours?.endTime || '08:00'}
@@ -321,12 +338,12 @@ export default function NotificationPreferencesPage() {
                         },
                       }))
                     }
-                    className="w-full px-3 py-2 border rounded-lg"
+                    className="w-full px-3 py-2 bg-white border-2 border-black rounded-lg font-bold text-sm focus:outline-none focus:shadow-[2px_2px_0px_#000]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-header font-semibold mb-2">Timezone</label>
+                  <label className="block text-xs font-black uppercase mb-2 ml-1">Timezone</label>
                   <select
                     value={preferences.quietHours?.timezone || 'Asia/Kolkata'}
                     onChange={(e) =>
@@ -338,7 +355,7 @@ export default function NotificationPreferencesPage() {
                         },
                       }))
                     }
-                    className="w-full px-3 py-2 border rounded-lg"
+                    className="w-full px-3 py-2 bg-white border-2 border-black rounded-lg font-bold text-sm focus:outline-none focus:shadow-[2px_2px_0px_#000]"
                   >
                     <option value="Asia/Kolkata">Asia/Kolkata (IST)</option>
                     <option value="UTC">UTC</option>
@@ -351,48 +368,73 @@ export default function NotificationPreferencesPage() {
           </div>
 
           {/* Save Button */}
-          <div className="mt-8 flex gap-3">
-            <Button onClick={savePreferences} disabled={saving}>
-              {saving ? 'Saving...' : 'Save Preferences'}
+          <div className="mt-8 flex flex-col sm:flex-row gap-4 pt-6 border-t-2 border-black">
+            <Button
+              onClick={savePreferences}
+              disabled={saving}
+              className="flex-1 bg-[#00B894] hover:bg-[#00a180] text-black border-2 border-black p-6 rounded-xl font-black text-sm uppercase tracking-widest hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_#000] active:translate-y-[2px] active:shadow-none transition-all neo-shadow"
+            >
+              {saving ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin mr-2"></div>
+                  Saving...
+                </>
+              ) : 'Save Changes'}
             </Button>
-            <Button variant="outline" onClick={() => loadPreferencesAndDevices()}>
-              Reset
+            <Button
+              variant="outline"
+              onClick={() => loadPreferencesAndDevices()}
+              className="flex-1 bg-white hover:bg-black/5 text-black border-2 border-black p-6 rounded-xl font-black text-sm uppercase tracking-widest hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_#000] active:translate-y-[2px] active:shadow-none transition-all neo-shadow"
+            >
+              Reset Defaults
             </Button>
           </div>
         </div>
 
         {/* Registered Devices */}
-        <div className="glass-card p-8 rounded-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <Smartphone className="w-5 h-5" />
-            <h2 className="font-display text-2xl font-bold">Registered Devices</h2>
+        <div className="bg-white border-2 border-black rounded-[25px] p-8 neo-shadow relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
+            <Smartphone size={100} strokeWidth={1} />
+          </div>
+
+          <div className="flex items-center gap-3 mb-8">
+            <div className="w-8 h-8 bg-[#FF7675] rounded-lg border-2 border-black text-white flex items-center justify-center text-sm shadow-[2px_2px_0px_#000]">2</div>
+            <h2 className="font-header text-2xl font-black uppercase text-black">Registered Devices</h2>
           </div>
 
           {devices.length === 0 ? (
-            <div className="text-center py-8">
-              <Smartphone className="w-12 h-12 mx-auto mb-3 text-muted-foreground opacity-50" />
-              <p className="text-muted-foreground">No devices registered yet</p>
-              <p className="text-sm text-muted-foreground mt-2">
-                Enable notifications to register your device
+            <div className="text-center py-12 px-6 border-2 border-black border-dashed rounded-xl bg-[#FFFDF5]">
+              <div className="w-16 h-16 bg-[#FFD93D]/30 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-black">
+                <Smartphone className="w-8 h-8 text-black" strokeWidth={2} />
+              </div>
+              <p className="font-bold text-black uppercase mb-1">No devices found</p>
+              <p className="text-xs text-black/60 font-medium">
+                Log in on a mobile device to enable push notifications
               </p>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-4">
               {devices.map((device) => (
                 <div
                   key={device.id}
-                  className="flex items-center justify-between p-4 bg-muted/50 rounded-lg"
+                  className="flex items-center justify-between p-4 border-2 border-black rounded-lg bg-white shadow-[2px_2px_0px_#000]"
                 >
-                  <div>
-                    <p className="font-header font-semibold">{device.deviceName}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {new Date(device.registeredAt).toLocaleDateString()}
-                    </p>
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 bg-black text-white rounded-lg flex items-center justify-center border-2 border-black">
+                      <Smartphone size={20} />
+                    </div>
+                    <div>
+                      <p className="font-black text-sm uppercase">{device.deviceName}</p>
+                      <p className="text-xs font-bold text-black/50 uppercase tracking-wider">
+                        Registered: {new Date(device.registeredAt).toLocaleDateString()}
+                      </p>
+                    </div>
                   </div>
                   <Button
                     variant="destructive"
                     size="sm"
                     onClick={() => unregisterDevice(device.id)}
+                    className="bg-[#FF7675] hover:bg-[#ff5e5d] text-black border-2 border-black font-bold uppercase text-xs tracking-wide shadow-[2px_2px_0px_#000] hover:shadow-[3px_3px_0px_#000] hover:translate-y-[-1px]"
                   >
                     Remove
                   </Button>
@@ -403,13 +445,10 @@ export default function NotificationPreferencesPage() {
         </div>
 
         {/* Help Section */}
-        <div className="mt-12 p-6 bg-secondary/10 border border-secondary/20 rounded-lg text-center">
-          <p className="text-sm text-muted-foreground">
-            Questions about notifications?{' '}
-            <Link href="/contact" className="text-secondary font-semibold hover:underline">
-              Contact Support
-            </Link>
-          </p>
+        <div className="mt-8 text-center">
+          <Link href="/contact" className="inline-block font-black text-xs tracking-[0.2em] text-black/40 hover:text-black uppercase border-b-2 border-transparent hover:border-black transition-all pb-1">
+            Need Help with Notifications?
+          </Link>
         </div>
       </div>
     </div>

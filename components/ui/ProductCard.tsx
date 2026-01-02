@@ -88,8 +88,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                         <div className="space-y-2">
                             <h3 className="text-3xl font-black leading-none text-black">{product.name}</h3>
                             <div className="flex items-center gap-3">
-                                <span className="text-2xl font-black text-[#6C5CE7]">${product.price}</span>
-                                <span className="text-sm font-bold opacity-40 uppercase line-through text-black">${product.price + 15}</span>
+                                <span className="text-2xl font-black text-[#6C5CE7]">₹{product.price}</span>
+                                <span className="text-sm font-bold opacity-40 uppercase line-through text-black">₹{product.price + 15}</span>
                             </div>
                         </div>
 
@@ -151,7 +151,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                         onClick={handleAddToCart}
                         className="w-full bg-[#FFD93D] text-black py-5 rounded-2xl font-black text-xl neo-border-thick neo-shadow hover:bg-yellow-400 transition-all"
                     >
-                        Add to Bag — ${product.price}
+                        Add to Bag — ₹{product.price}
                     </motion.button>
                 </div>
             </motion.div >

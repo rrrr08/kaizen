@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Coins, ShoppingBag, Menu, X, User, LogOut, Settings, LayoutDashboard, ChevronDown } from 'lucide-react';
+import { Coins, ShoppingBag, Menu, X, User, LogOut, Settings, LayoutDashboard, ChevronDown, ArrowRight } from 'lucide-react';
 import { useCart } from '@/app/context/CartContext';
 import { useGamification } from '@/app/context/GamificationContext';
 import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
@@ -294,14 +294,14 @@ const Navbar: React.FC = () => {
                         onClick={() => setIsMobileMenuOpen(false)}
                         className="text-2xl font-black text-black hover:text-[#FFD93D] uppercase tracking-tighter pl-4"
                       >
-                        → Upcoming
+                        <span className="flex items-center gap-2"><ArrowRight size={16} /> Upcoming</span>
                       </Link>
                       <Link
                         href="/events/past"
                         onClick={() => setIsMobileMenuOpen(false)}
                         className="text-2xl font-black text-black hover:text-[#6C5CE7] uppercase tracking-tighter pl-4"
                       >
-                        → Past
+                        <span className="flex items-center gap-2"><ArrowRight size={16} /> Past</span>
                       </Link>
                     </div>
                   );

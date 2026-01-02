@@ -14,7 +14,7 @@ const fetchWordLists = async (): Promise<string[][]> => {
     const res = await fetch('/api/games/content?gameId=wordsearch');
     const data = await res.json();
     const items = data.content?.items || [];
-    
+
     if (items.length === 0) {
       // Fallback word lists
       return [
@@ -23,7 +23,7 @@ const fetchWordLists = async (): Promise<string[][]> => {
         ['CLOUD', 'SERVER', 'API', 'DATA', 'CACHE']
       ];
     }
-    
+
     return items.map((item: any) => item.words);
   } catch (error) {
     console.error('Error fetching word lists:', error);
@@ -42,7 +42,7 @@ const WordSearchGame: React.FC = () => {
   const [points, setPoints] = useState<number | null>(null);
   const [message, setMessage] = useState('');
   const [showScratcher, setShowScratcher] = useState(false);
-  const [scratcherDrops, setScratcherDrops] = useState<{prob:number,points:number}[]|null>(null);
+  const [scratcherDrops, setScratcherDrops] = useState<{ prob: number, points: number }[] | null>(null);
   const [attempts, setAttempts] = useState(0);
 
   useEffect(() => {
@@ -50,9 +50,9 @@ const WordSearchGame: React.FC = () => {
       const wordLists = await fetchWordLists();
       initGameWithWords(wordLists);
     };
-    
+
     loadGame();
-    
+
     fetch('/api/games/game-of-the-day')
       .then(r => r.json())
       .then(d => { if (d.gameId === WORD_SEARCH_ID) setIsGameOfDay(true); });
@@ -69,7 +69,7 @@ const WordSearchGame: React.FC = () => {
     const size = 10;
     const newGrid: string[][] = Array(size).fill(0).map(() => Array(size).fill(''));
     const wordList = wordLists[Math.floor(Math.random() * wordLists.length)];
-    
+
     // Place words
     wordList.forEach(word => {
       let placed = false;
@@ -78,7 +78,7 @@ const WordSearchGame: React.FC = () => {
         const dir = Math.random() < 0.5 ? 'h' : 'v';
         const row = Math.floor(Math.random() * size);
         const col = Math.floor(Math.random() * size);
-        
+
         if (dir === 'h' && col + word.length <= size) {
           let canPlace = true;
           for (let i = 0; i < word.length; i++) {
@@ -111,7 +111,7 @@ const WordSearchGame: React.FC = () => {
         attempts++;
       }
     });
-    
+
     // Fill empty cells
     for (let i = 0; i < size; i++) {
       for (let j = 0; j < size; j++) {
@@ -120,7 +120,7 @@ const WordSearchGame: React.FC = () => {
         }
       }
     }
-    
+
     setGrid(newGrid);
     setWords(wordList);
     setFound([]);
@@ -131,10 +131,10 @@ const WordSearchGame: React.FC = () => {
 
   const handleCellClick = (row: number, col: number) => {
     if (isWon || alreadyPlayed) return;
-    
+
     const newSelected = [...selected, [row, col]];
     setSelected(newSelected as [number, number][]);
-    
+
     if (newSelected.length >= 2) {
       checkWord(newSelected as [number, number][]);
     }
@@ -143,7 +143,7 @@ const WordSearchGame: React.FC = () => {
   const checkWord = (cells: [number, number][]) => {
     const word = cells.map(([r, c]) => grid[r][c]).join('');
     const reverseWord = word.split('').reverse().join('');
-    
+
     if (words.includes(word) && !found.includes(word)) {
       setFound([...found, word]);
       setSelected([]);
@@ -191,55 +191,66 @@ const WordSearchGame: React.FC = () => {
     <div className="max-w-3xl mx-auto">
       {isGameOfDay && (
         <div className="mb-6 flex justify-center">
-          <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#FFD93D] to-[#FF7675] text-black rounded-full font-header tracking-widest text-sm border-2 border-black shadow-[4px_4px_0px_#000]">
-            <Star size={16} className="fill-current" /> GAME OF THE DAY - 2X POINTS!
+          <div className="inline-flex items-center gap-2 px-6 py-3 bg-[#FFD93D] text-black rounded-full font-black tracking-widest text-sm border-2 border-black shadow-[4px_4px_0px_#000]">
+            <Star size={16} className="fill-black" /> GAME OF THE DAY - 2X POINTS!
           </div>
         </div>
       )}
 
-      <div className="bg-black/40 border-2 border-white/20 p-8 rounded-2xl">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-white">WORD SEARCH</h2>
+      <div className="bg-white border-2 border-black p-8 rounded-[25px] neo-shadow">
+        <div className="flex justify-between items-center mb-8">
+          <h2 className="text-4xl font-black text-black uppercase tracking-tighter">WORD SEARCH</h2>
           <button
             onClick={async () => {
               const wordLists = await fetchWordLists();
               initGameWithWords(wordLists);
             }}
-            className="px-4 py-2 bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2"
+            className="px-6 py-3 bg-[#6C5CE7] border-2 border-black text-white font-black uppercase text-xs tracking-wider rounded-xl shadow-[4px_4px_0px_#000] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_#000] active:translate-y-[2px] active:shadow-none transition-all flex items-center gap-2"
           >
             <RotateCcw size={16} /> New Game
           </button>
         </div>
 
         {isWon && (
-          <div className="text-center mb-6">
-            <Trophy className="w-12 h-12 text-emerald-400 mx-auto mb-4" />
-            <p className={`font-header tracking-widest text-sm ${alreadyPlayed ? 'text-amber-500' : 'text-emerald-400'}`}>
+          <div className="text-center mb-8 p-6 bg-[#FFFDF5] border-2 border-black rounded-xl border-dashed">
+            <Trophy className="w-12 h-12 text-[#FFD93D] mx-auto mb-4 drop-shadow-[2px_2px_0px_#000]" />
+            <h3 className="text-2xl font-black text-black uppercase mb-1">ALL WORDS FOUND!</h3>
+            <p className={`font-bold text-sm ${alreadyPlayed ? 'text-black/50' : 'text-[#00B894]'}`}>
               {message}
             </p>
             {points !== null && !alreadyPlayed && (
-              <div className="mt-4 text-4xl font-black text-[#FFD93D]">+{points} POINTS</div>
+              <div className="mt-4 text-4xl font-black text-[#00B894]">+{points} POINTS</div>
             )}
             {showScratcher && scratcherDrops && !alreadyPlayed && (
-              <div className="mt-6"><Scratcher drops={scratcherDrops} onScratch={() => {}} /></div>
+              <div className="mt-6"><Scratcher drops={scratcherDrops} onScratch={() => { }} /></div>
             )}
+            <button onClick={() => window.location.reload()} className="block mx-auto mt-6 text-black underline font-bold hover:text-[#00B894]">Play Again</button>
           </div>
         )}
 
-        <div className="grid grid-cols-2 gap-8 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
           {/* Grid */}
-          <div className="bg-white/5 p-4 rounded-xl">
+          <div className="bg-[#FFFDF5] p-4 rounded-xl border-2 border-black shadow-[4px_4px_0px_#000]">
             <div className="grid grid-cols-10 gap-1">
               {grid.map((row, i) =>
                 row.map((cell, j) => {
                   const isSelected = selected.some(([r, c]) => r === i && c === j);
+                  const isFound = found.some(word => {
+                    // Check if this cell is part of any found word (simplified check, ideally should store found cells)
+                    // For now, let's just use the grid content, but that's not accurate enough if multiple words share letters.
+                    // Ideally we'd calculate found cells.
+                    return false;
+                  });
+                  // Actually, let's just trust the user selection feedback for now or improvements later.
+                  // To highlight found words correctly, we'd need to store the coordinates of found words.
+                  // For now, let's just stick to selection highlighting.
+
                   return (
                     <button
                       key={`${i}-${j}`}
                       onClick={() => handleCellClick(i, j)}
-                      className={`w-8 h-8 text-xs font-bold rounded transition-colors ${
-                        isSelected ? 'bg-blue-500 text-white' : 'bg-white/10 text-white hover:bg-white/20'
-                      }`}
+                      className={`w-8 h-8 text-sm font-black rounded border border-black/10 transition-all ${isSelected ? 'bg-[#00B894] text-white border-black scale-110 shadow-sm z-10' : 'bg-white text-black hover:bg-[#FFD93D]'
+                        }`}
                     >
                       {cell}
                     </button>
@@ -250,25 +261,25 @@ const WordSearchGame: React.FC = () => {
           </div>
 
           {/* Word List */}
-          <div className="bg-white/5 p-4 rounded-xl">
-            <h3 className="text-white font-bold mb-4">Find these words:</h3>
-            <ul className="space-y-2">
+          <div className="bg-[#FFFDF5] p-6 rounded-xl border-2 border-black h-fit">
+            <h3 className="text-black font-black uppercase tracking-widest mb-4 border-b-2 border-black pb-2">Find these words:</h3>
+            <div className="flex flex-wrap gap-2">
               {words.map(word => (
-                <li
+                <span
                   key={word}
-                  className={`text-sm font-bold ${
-                    found.includes(word) ? 'text-green-400 line-through' : 'text-white'
-                  }`}
+                  className={`px-3 py-1 border-2 border-black rounded-lg text-xs font-black uppercase ${found.includes(word) ? 'bg-[#00B894] text-black line-through opacity-50' : 'bg-white text-black'
+                    }`}
                 >
                   {word}
-                </li>
+                </span>
               ))}
-            </ul>
-            <p className="text-white/60 text-xs mt-4">Found: {found.length} / {words.length}</p>
+            </div>
+            <p className="text-black/60 text-xs font-bold mt-6 pt-4 border-t-2 border-black/10">
+              Found: {found.length} / {words.length} <br />
+              Wrong attempts: {attempts}
+            </p>
           </div>
         </div>
-
-        <p className="text-white/60 text-xs text-center">Click cells to select • Wrong attempts: {attempts}</p>
       </div>
     </div>
   );

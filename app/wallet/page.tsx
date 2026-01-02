@@ -2,7 +2,7 @@
 
 import { useGamification } from '@/app/context/GamificationContext';
 import Link from 'next/link';
-import { Wallet as WalletIcon, TrendingUp, Gift, Zap, Crown } from 'lucide-react';
+import { Wallet as WalletIcon, TrendingUp, Gift, Zap, Crown, ArrowLeft, Flame, Snowflake } from 'lucide-react';
 import LevelBadge from '@/components/gamification/LevelBadge';
 import WheelOfJoy from '@/components/gamification/WheelOfJoy';
 
@@ -30,8 +30,8 @@ export default function WalletPage() {
         {/* Header */}
         <div className="mb-12 flex flex-col md:flex-row justify-between items-end gap-6">
           <div>
-            <Link href="/shop" className="font-header text-[10px] tracking-[0.2em] text-[#2D3436]/60 hover:text-[#FFD93D] mb-6 inline-block transition-colors">
-              ← BACK TO SHOP
+            <Link href="/shop" className="font-header text-[10px] tracking-[0.2em] text-[#2D3436]/60 hover:text-[#FFD93D] mb-6 inline-flex items-center gap-2 transition-colors">
+              <ArrowLeft size={16} /> BACK TO SHOP
             </Link>
             <h1 className="font-display text-5xl md:text-6xl font-black mb-2">MY DASHBOARD</h1>
             <p className="text-lg text-[#2D3436]/80 font-bold">Your journey through the playground.</p>
@@ -42,18 +42,20 @@ export default function WalletPage() {
             <div className="flex flex-col items-center">
               <div className="font-header text-[10px] tracking-widest text-[#2D3436]/60">STREAK</div>
               <div className="text-2xl font-black text-[#FFD93D] flex items-center gap-2 drop-shadow-[2px_2px_0px_rgba(0,0,0,1)]">
-                🔥 {streak.count} <span className="text-xs text-[#2D3436]/60">DAYS</span>
+                <Flame size={24} fill="#FFD93D" /> {streak.count} <span className="text-xs text-[#2D3436]/60">DAYS</span>
               </div>
             </div>
             <div className="h-8 w-[2px] bg-black/10"></div>
             {streak.freezeCount > 0 ? (
-              <div className="text-[#6C5CE7] text-xs font-black">❄️ ACTIVE</div>
+              <div className="text-[#6C5CE7] text-xs font-black flex items-center gap-1">
+                <Snowflake size={14} /> ACTIVE
+              </div>
             ) : (
               <button
                 onClick={buyStreakFreeze}
-                className="text-[10px] font-black text-[#2D3436]/60 hover:text-[#6C5CE7] transition-colors uppercase"
+                className="text-[10px] font-black text-[#2D3436]/60 hover:text-[#6C5CE7] transition-colors uppercase flex items-center gap-1"
               >
-                + Buy Freeze
+                <Snowflake size={12} /> Buy Freeze
               </button>
             )}
           </div>
@@ -171,15 +173,15 @@ export default function WalletPage() {
               <h3 className="font-black text-sm tracking-widest mb-4 text-black/70">HOW THE ECONOMY WORKS</h3>
               <ul className="space-y-4">
                 <li className="flex gap-3 text-sm text-black/80 font-bold">
-                  <span className="text-[#FFD93D] text-lg leading-none drop-shadow-[1px_1px_0px_rgba(0,0,0,1)]">•</span>
+                  <span className="text-[#FFD93D] drop-shadow-[1px_1px_0px_rgba(0,0,0,1)]"><Zap size={20} fill="#FFD93D" /></span>
                   <span><strong>Joy Points (JP)</strong> are spent on rewards, coupons, and spins.</span>
                 </li>
                 <li className="flex gap-3 text-sm text-black/80 font-bold">
-                  <span className="text-[#6C5CE7] text-lg leading-none drop-shadow-[1px_1px_0px_rgba(0,0,0,1)]">•</span>
+                  <span className="text-[#6C5CE7] drop-shadow-[1px_1px_0px_rgba(0,0,0,1)]"><Crown size={20} fill="#6C5CE7" /></span>
                   <span><strong>Experience (XP)</strong> is permanent and determines your Tier Status.</span>
                 </li>
                 <li className="flex gap-3 text-sm text-black/80 font-bold">
-                  <span className="text-[#00B894] text-lg leading-none drop-shadow-[1px_1px_0px_rgba(0,0,0,1)]">•</span>
+                  <span className="text-[#00B894] drop-shadow-[1px_1px_0px_rgba(0,0,0,1)]"><WalletIcon size={20} fill="#00B894" /></span>
                   <span>Earn <strong>1 JP & 1 XP</strong> for every ₹10 spent in the shop.</span>
                 </li>
               </ul>

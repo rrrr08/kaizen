@@ -3,8 +3,7 @@
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Loader2 } from "lucide-react";
-import { AuthStyles } from "@/components/auth/auth-styles";
+import { Loader2, ArrowLeft, CheckCircle, AlertTriangle, Check } from "lucide-react";
 
 export const dynamic = 'force-dynamic';
 
@@ -73,6 +72,7 @@ function AuthActionPageContent() {
     const [emailForReset, setEmailForReset] = useState<string | null>(null);
 
     useEffect(() => {
+        // ... (keep existing useEffect logic for URL parsing and Firebase actions) ...
         console.log("useEffect running with:", { mode, oobCode });
 
         if (mode === "resetPassword" && oobCode) {
@@ -81,7 +81,7 @@ function AuthActionPageContent() {
                 try {
                     const { auth: authModule } = await import('@/lib/firebase');
                     const { verifyPasswordResetCode } = await import('firebase/auth');
-                    
+
                     const email = await verifyPasswordResetCode(authModule, oobCode);
                     console.log("Password reset code verified for email:", email);
                     setEmailForReset(email);
@@ -101,7 +101,7 @@ function AuthActionPageContent() {
                 try {
                     const { auth: authModule } = await import('@/lib/firebase');
                     const { applyActionCode } = await import('firebase/auth');
-                    
+
                     await applyActionCode(authModule, oobCode);
                     console.log("Email verification successful");
                     setMessage(
@@ -167,7 +167,7 @@ function AuthActionPageContent() {
         try {
             const { auth: authModule } = await import('@/lib/firebase');
             const { confirmPasswordReset } = await import('firebase/auth');
-            
+
             await confirmPasswordReset(authModule, oobCode, newPassword);
             setMessage(
                 "Your password has been reset successfully! You can now log in with your new password."
@@ -187,41 +187,45 @@ function AuthActionPageContent() {
 
     if (isVerifying) {
         return (
-            <div className="auth-container">
-                <AuthStyles />
-                <div className="w-full max-w-md">
-                    <div className="glass-card p-8 rounded-2xl shadow-2xl flex flex-col items-center justify-center">
-                        <Loader2 className="h-10 w-10 animate-spin text-teal-600 mb-4" />
-                        <p className="text-gray-600">Verifying link...</p>
+            <div className="min-h-screen bg-[#FFFDF5] text-[#2D3436] flex items-center justify-center px-4 pt-32 pb-12">
+                <div className="relative z-10 w-full max-w-md text-center">
+                    <div className="bg-white border-2 border-black rounded-[25px] p-12 neo-shadow flex flex-col items-center">
+                        <div className="w-16 h-16 border-4 border-black border-t-[#FFD93D] rounded-full animate-spin mb-6"></div>
+                        <h2 className="font-header text-2xl font-black text-black uppercase tracking-tight mb-2">
+                            Verifying Action...
+                        </h2>
+                        <p className="font-medium text-black/60">Please wait a moment.</p>
                     </div>
                 </div>
             </div>
         );
     }
 
+    // Success State for Email Verification
     if (mode !== "resetPassword" || !emailForReset) {
         if (mode === "verifyEmail" && !error && message) {
             return (
-                <div className="auth-container" role="main" aria-labelledby="email-verified-title">
-                    <AuthStyles />
-                    <div className="w-full max-w-md">
-                        <div className="glass-card p-8 rounded-2xl shadow-2xl text-center">
-                            <div className="text-center mb-8">
-                                <h1 id="email-verified-title" className="text-3xl font-bold gradient-text mb-2">
-                                    Email Verified!
-                                </h1>
-                                <p className="text-gray-600">
-                                    Your email has been successfully verified.
-                                </p>
+                <div className="min-h-screen bg-[#FFFDF5] text-[#2D3436] flex items-center justify-center px-4 pt-32 pb-12">
+                    <div className="relative z-10 w-full max-w-md">
+                        <div className="bg-white border-2 border-black rounded-[25px] p-8 neo-shadow text-center">
+
+                            <div className="inline-flex justify-center mb-6">
+                                <div className="w-20 h-20 bg-[#00B894] rounded-full border-2 border-black flex items-center justify-center neo-shadow">
+                                    <Check className="w-10 h-10 text-white" strokeWidth={3} />
+                                </div>
                             </div>
 
-                            <div className="bg-green-50 border border-green-200 text-green-700 p-4 rounded-lg text-sm mb-6">
-                                <p>{message}</p>
+                            <h1 className="font-header text-3xl font-black text-black mb-4 uppercase">
+                                Email Verified!
+                            </h1>
+
+                            <div className="bg-[#00B894]/10 border-2 border-[#00B894] p-4 rounded-xl mb-8">
+                                <p className="font-bold text-[#00B894] text-sm">{message}</p>
                             </div>
 
                             <Link
                                 href="/auth/login"
-                                className="gradient-button inline-flex items-center justify-center px-6"
+                                className="inline-flex w-full items-center justify-center px-6 py-4 bg-[#FFD93D] text-black border-2 border-black rounded-xl font-black text-sm tracking-[0.2em] uppercase hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_#000] active:translate-y-[2px] active:shadow-none transition-all neo-shadow"
                             >
                                 Proceed to Login
                             </Link>
@@ -230,35 +234,31 @@ function AuthActionPageContent() {
                 </div>
             );
         }
+
+        // Error State
         return (
-            <div className="auth-container" role="main" aria-labelledby="action-required-title">
-                <AuthStyles />
-                <div className="w-full max-w-md">
-                    <div className="glass-card p-8 rounded-2xl shadow-2xl text-center">
-                        <div className="text-center mb-8">
-                            <h1 id="action-required-title" className="text-3xl font-bold gradient-text mb-2">
-                                Action Required
-                            </h1>
-                            <p className="text-gray-600">
-                                Please complete the requested action to continue.
+            <div className="min-h-screen bg-[#FFFDF5] text-[#2D3436] flex items-center justify-center px-4 pt-32 pb-12">
+                <div className="relative z-10 w-full max-w-md">
+                    <div className="bg-white border-2 border-black rounded-[25px] p-8 neo-shadow text-center">
+                        <div className="inline-flex justify-center mb-6">
+                            <div className="w-20 h-20 bg-[#FF7675] rounded-full border-2 border-black flex items-center justify-center neo-shadow">
+                                <AlertTriangle size={40} strokeWidth={2.5} />
+                            </div>
+                        </div>
+
+                        <h1 className="font-header text-3xl font-black text-black mb-4 uppercase">
+                            Action Required
+                        </h1>
+
+                        <div className="bg-[#FF7675]/10 border-2 border-[#FF7675] p-4 rounded-xl mb-8">
+                            <p className="font-bold text-[#D63031] text-sm">
+                                {error || message || "Unknown state."}
                             </p>
                         </div>
 
-                        {error && (
-                            <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg text-sm mb-6">
-                                <p>{error}</p>
-                            </div>
-                        )}
-
-                        {message && (
-                            <div className="bg-blue-50 border border-blue-200 text-blue-700 p-4 rounded-lg text-sm mb-6">
-                                <p>{message}</p>
-                            </div>
-                        )}
-
                         <Link
                             href="/auth/login"
-                            className="gradient-button inline-flex items-center justify-center px-6"
+                            className="inline-flex w-full items-center justify-center px-6 py-4 bg-[#2D3436] text-white border-2 border-black rounded-xl font-black text-sm tracking-[0.2em] uppercase hover:bg-black hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_#000] active:translate-y-[2px] active:shadow-none transition-all neo-shadow"
                         >
                             Back to Login
                         </Link>
@@ -268,81 +268,84 @@ function AuthActionPageContent() {
         );
     }
 
+    // Reset Password Form
     return (
-        <div className="auth-container" role="main" aria-labelledby="set-password-title">
-            <AuthStyles />
-            <div className="w-full max-w-md">
-                <div className="glass-card p-8 rounded-2xl shadow-2xl">
-                    <div className="text-center mb-8">
-                        <h1 id="set-password-title" className="text-3xl font-bold gradient-text mb-2">
-                            Set New Password
-                        </h1>
-                        <p className="text-gray-600">
-                            Enter a new password for {emailForReset}.
-                        </p>
-                    </div>
+        <div className="min-h-screen bg-[#FFFDF5] text-[#2D3436] flex items-center justify-center px-4 pt-32 pb-12">
+            <div className="relative z-10 w-full max-w-md">
+
+                <div className="text-center mb-10">
+                    <Link href="/" className="inline-block flex justify-center mb-6 hover:scale-105 transition-transform">
+                        <div className="bg-[#FFD93D] p-3 border-2 border-black rounded-[15px] neo-shadow">
+                            <span className="text-2xl font-black text-black">JJ</span>
+                        </div>
+                    </Link>
+                    <h1 className="font-header text-4xl font-black text-black mb-2 uppercase tracking-tight">
+                        Set New Password
+                    </h1>
+                    <p className="font-sans font-bold text-black/60 text-sm">
+                        Secure your account regarding <span className="text-black">{emailForReset}</span>
+                    </p>
+                </div>
+
+                <div className="bg-white border-2 border-black rounded-[25px] p-8 neo-shadow">
 
                     {error && (
-                        <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg text-sm mb-6">
-                            <p>{error}</p>
+                        <div className="mb-6 p-4 border-2 border-black bg-[#FF7675] rounded-[15px] neo-shadow">
+                            <p className="font-black text-xs text-black uppercase tracking-wide flex items-center gap-2">
+                                <AlertTriangle size={16} /> {error}
+                            </p>
                         </div>
                     )}
+
                     {message && !error && (
-                        <div className="bg-green-50 border border-green-200 text-green-700 p-4 rounded-lg text-sm mb-6">
-                            <p>{message}</p>
+                        <div className="mb-6 p-4 border-2 border-black bg-[#00B894] rounded-[15px] neo-shadow">
+                            <p className="font-black text-xs text-black uppercase tracking-wide flex items-center gap-2">
+                                <CheckCircle size={16} /> {message}
+                            </p>
                         </div>
                     )}
 
                     <form onSubmit={handleConfirmResetPassword} className="space-y-6">
                         <div className="space-y-2">
-                            <label
-                                htmlFor="newPassword"
-                                className="text-sm font-medium"
-                            >
+                            <label htmlFor="newPassword" className="font-black text-xs tracking-widest text-black uppercase ml-1">
                                 New Password
                             </label>
-                            <div className="relative">
-                                <input
-                                    id="newPassword"
-                                    type="password"
-                                    value={newPassword}
-                                    onChange={(e) => setNewPassword(e.target.value)}
-                                    className="glass-input w-full"
-                                    required
-                                    minLength={6}
-                                    placeholder="Enter new password"
-                                />
-                            </div>
+                            <input
+                                id="newPassword"
+                                type="password"
+                                value={newPassword}
+                                onChange={(e) => setNewPassword(e.target.value)}
+                                className="w-full bg-[#FFFDF5] border-2 border-black rounded-[12px] text-black placeholder:text-black/30 px-4 py-4 text-sm font-bold focus:bg-[#FFD93D]/20 focus:outline-none transition-all shadow-[2px_2px_0px_#000]"
+                                placeholder="Min. 6 characters"
+                                required
+                                minLength={6}
+                            />
                         </div>
                         <div className="space-y-2">
-                            <label
-                                htmlFor="confirmNewPassword"
-                                className="text-sm font-medium"
-                            >
+                            <label htmlFor="confirmNewPassword" className="font-black text-xs tracking-widest text-black uppercase ml-1">
                                 Confirm New Password
                             </label>
-                            <div className="relative">
-                                <input
-                                    id="confirmNewPassword"
-                                    type="password"
-                                    value={confirmNewPassword}
-                                    onChange={(e) => setConfirmNewPassword(e.target.value)}
-                                    className="glass-input w-full"
-                                    required
-                                    minLength={6}
-                                    placeholder="Confirm new password"
-                                />
-                            </div>
+                            <input
+                                id="confirmNewPassword"
+                                type="password"
+                                value={confirmNewPassword}
+                                onChange={(e) => setConfirmNewPassword(e.target.value)}
+                                className="w-full bg-[#FFFDF5] border-2 border-black rounded-[12px] text-black placeholder:text-black/30 px-4 py-4 text-sm font-bold focus:bg-[#FFD93D]/20 focus:outline-none transition-all shadow-[2px_2px_0px_#000]"
+                                placeholder="Re-enter password"
+                                required
+                                minLength={6}
+                            />
                         </div>
+
                         <button
                             type="submit"
                             disabled={loading || isVerifying}
-                            className="gradient-button w-full flex items-center justify-center"
+                            className="w-full border-2 border-black bg-[#6C5CE7] text-white hover:bg-[#5a4bd1] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_#000] active:translate-y-[2px] active:shadow-[2px_2px_0px_#000] py-4 rounded-[15px] font-black text-sm tracking-[0.2em] uppercase transition-all flex items-center justify-center gap-3 neo-shadow"
                         >
                             {loading ? (
                                 <>
-                                    <Loader2 className="h-5 w-5 animate-spin mr-2" />
-                                    <span>Resetting...</span>
+                                    <Loader2 className="h-5 w-5 animate-spin" />
+                                    <span>Updating...</span>
                                 </>
                             ) : (
                                 'Reset Password'
@@ -350,16 +353,13 @@ function AuthActionPageContent() {
                         </button>
                     </form>
 
-                    <div className="text-center mt-8 pt-6 border-t border-gray-100">
-                        <p className="text-gray-600 text-sm">
-                            Remember your password?{" "}
-                            <Link
-                                href="/auth/login"
-                                className="text-teal-600 hover:text-teal-700 transition-colors font-semibold"
-                            >
-                                Back to Login
-                            </Link>
-                        </p>
+                    <div className="mt-8 text-center pt-6 border-t-2 border-black/5">
+                        <Link
+                            href="/auth/login"
+                            className="inline-block font-black text-xs tracking-[0.2em] text-black/50 hover:text-black uppercase transition-colors"
+                        >
+                            <ArrowLeft size={16} className="inline mr-2" /> Back to Login
+                        </Link>
                     </div>
                 </div>
             </div>
@@ -369,13 +369,10 @@ function AuthActionPageContent() {
 
 function AuthActionPageFallback() {
     return (
-        <div className="auth-container">
-            <AuthStyles />
-            <div className="w-full max-w-md">
-                <div className="glass-card p-8 rounded-2xl shadow-2xl flex flex-col items-center justify-center">
-                    <Loader2 className="h-10 w-10 animate-spin text-teal-600 mb-4" />
-                    <p className="text-gray-600">Loading action page...</p>
-                </div>
+        <div className="min-h-screen bg-[#FFFDF5] text-[#2D3436] flex items-center justify-center px-4 pt-32 pb-12">
+            <div className="flex flex-col items-center justify-center">
+                <div className="w-12 h-12 border-4 border-black border-t-[#6C5CE7] rounded-full animate-spin mb-4"></div>
+                <p className="font-black text-xs tracking-[0.2em] uppercase text-black/50">Processing Action...</p>
             </div>
         </div>
     );
