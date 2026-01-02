@@ -7,11 +7,25 @@ import { WHEEL_PRIZES, SPIN_COST, WheelPrize } from '@/lib/gamification';
 import { Trophy, Loader2 } from 'lucide-react';
 
 const WheelOfJoy: React.FC = () => {
-    const { spinWheel, spendPoints, dailyStats, balance, loading } = useGamification();
+    const { spinWheel, spendPoints, dailyStats, balance, loading: contextLoading } = useGamification();
     const [isSpinning, setIsSpinning] = useState(false);
     const [result, setResult] = useState<WheelPrize | null>(null);
     const [currentRotation, setCurrentRotation] = useState(0);
+    const [prizes, setPrizes] = useState<WheelPrize[]>(WHEEL_PRIZES);
+    const [loadingPrizes, setLoadingPrizes] = useState(true);
     const controls = useAnimation();
+
+    useEffect(() => {
+        const loadPrizes = async () => {
+            const { fetchWheelPrizesFromFirebase } = await import('@/lib/gamification');
+            const fetchedPrizes = await fetchWheelPrizesFromFirebase();
+            if (fetchedPrizes && fetchedPrizes.length > 0) {
+                setPrizes(fetchedPrizes);
+            }
+            setLoadingPrizes(false);
+        };
+        loadPrizes();
+    }, []);
 
     const canFreeSpin = (() => {
         if (!dailyStats.lastSpinDate) return true;
@@ -24,121 +38,102 @@ const WheelOfJoy: React.FC = () => {
 
     const handleSpin = async () => {
         if (isSpinning) return;
+
         let isFree = false;
         if (canFreeSpin) {
             isFree = true;
-        } else if (canPaidSpin) {
-            const success = await spendPoints(SPIN_COST, 'Wheel Spin');
-            if (!success) {
-                alert("Insufficient Points!");
-                return;
-            }
-        } else {
+        } else if (!canPaidSpin) {
+            alert("Insufficient Points!");
             return;
         }
+
         setIsSpinning(true);
         setResult(null);
-        // 1. Determine Result (Weighted Random)
-        const rand = Math.random();
-        let cumulative = 0;
-        let selectedPrize = WHEEL_PRIZES[0];
-        for (const prize of WHEEL_PRIZES) {
-            cumulative += prize.probability;
-            if (rand <= cumulative) {
-                selectedPrize = prize;
-                break;
+
+        try {
+            // Get Firebase Auth token
+            const { getAuth } = await import('firebase/auth');
+            const { app } = await import('@/lib/firebase');
+            const auth = getAuth(app);
+            const user = auth.currentUser;
+
+            if (!user) {
+                alert("Please login first");
+                setIsSpinning(false);
+                return;
             }
-        }
 
-        console.log('🎯 Selected Prize:', selectedPrize.label, 'at index:', WHEEL_PRIZES.findIndex(p => p.id === selectedPrize.id));
+            const token = await user.getIdToken();
 
-        // 2. Calculate Rotation (accounting for current rotation)
-        const prizeIndex = WHEEL_PRIZES.findIndex(p => p.id === selectedPrize.id);
-        const segmentAngle = 360 / WHEEL_PRIZES.length;
-        const fullSpins = 5 * 360; // 5 full rotations
+            // 1. Call API to get result
+            const res = await fetch('/api/games/spin', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ isFreeSpin: isFree }),
+            });
 
-        // IMPORTANT: conic-gradient starts at 0° (3 o'clock / right side) and goes clockwise
-        // Our pointer is at 12 o'clock (top), which is 270° in standard coords (or -90°)
-        // 
-        // Prize at index 0 occupies: 0° to 72° (starting from 3 o'clock)
-        // Prize at index 1 occupies: 72° to 144°, etc.
-        //
-        // To get prize index 0 to point at top (270°), we need to rotate wheel by:
-        // 270° - 36° (center of segment 0) = 234°
+            const data = await res.json();
 
-        // Calculate the center angle of the selected prize segment (from 3 o'clock, going clockwise)
-        const segmentStartAngle = prizeIndex * segmentAngle;
-        const segmentCenterAngle = segmentStartAngle + (segmentAngle / 2);
-
-        // Pointer is at 270° (top), we want segment center to align there
-        // But we rotate the wheel, not move the pointer
-        // So we need: (270° - segmentCenterAngle)
-        const pointerAngle = 270; // Top position in standard coordinates
-        const targetAngle = pointerAngle - segmentCenterAngle;
-
-        console.log('� Segrment angle:', segmentAngle, '| Center:', segmentCenterAngle, '| Target rotation:', targetAngle);
-
-        // Add to current rotation to continue from where we are
-        const newRotation = currentRotation + fullSpins + targetAngle;
-
-        console.log('🔄 Current rotation:', currentRotation, '| New rotation:', newRotation);
-
-        // 3. Animate
-        await controls.start({
-            rotate: newRotation,
-            transition: { duration: 4, ease: "circOut" }
-        });
-
-        // Update current rotation for next spin (keep the full value, don't use modulo)
-        setCurrentRotation(newRotation);
-
-        // 4. Commit Result via award API
-        // Use different game IDs for free vs paid spins
-        // Free spin: 'wheel-free' (once per day)
-        // Paid spin: 'wheel-paid-{timestamp}' (unlimited)
-        let awardedPoints = 0;
-        if (selectedPrize.type === 'JP' || selectedPrize.type === 'JACKPOT') {
-            try {
-                // Get Firebase Auth token
-                const { getAuth } = await import('firebase/auth');
-                const { app } = await import('@/lib/firebase');
-                const auth = getAuth(app);
-                const user = auth.currentUser;
-
-                if (user) {
-                    const token = await user.getIdToken();
-
-                    // For paid spins, use unique game ID to bypass daily restriction
-                    const gameId = isFree ? 'wheel-free' : `wheel-paid-${Date.now()}`;
-
-                    const res = await fetch('/api/games/award', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${token}`
-                        },
-                        body: JSON.stringify({ gameId, retry: 0, points: selectedPrize.value }),
-                    });
-                    const data = await res.json();
-                    if (data.success) {
-                        awardedPoints = data.awardedPoints;
-                    } else if (data.error === 'Already played today' && isFree) {
-                        // Free spin already used today, just show the prize without awarding
-                        console.log('Free spin already used today');
-                    }
-                }
-            } catch (error) {
-                console.error('Error awarding points:', error);
+            if (!res.ok) {
+                throw new Error(data.error || 'Spin failed');
             }
+
+            const selectedPrize = data.result.prize;
+            const awardedAmount = data.result.awardedValue;
+
+            console.log('🎯 Server Selected Prize:', selectedPrize.label, 'at index:', prizes.findIndex(p => p.id === selectedPrize.id));
+
+            // 2. Calculate Rotation (accounting for current rotation)
+            const prizeIndex = prizes.findIndex(p => p.id === selectedPrize.id);
+            if (prizeIndex === -1) {
+                console.error("Prize returned by server not found in local configuration. Ensure admin settings match.");
+                // Fallback?
+            }
+
+            const segmentAngle = 360 / prizes.length;
+            const fullSpins = 5 * 360; // 5 full rotations
+
+            // Prize at index 0 occupies: 0° to 72° (3 o'clock)
+            // Pointer at 270 (top)
+
+            const segmentStartAngle = prizeIndex * segmentAngle;
+            const segmentCenterAngle = segmentStartAngle + (segmentAngle / 2);
+
+            // Pointer is at 0° (top) in CSS terms
+            const pointerAngle = 0;
+            const targetAngle = pointerAngle - segmentCenterAngle;
+
+            // Add to current rotation
+            const newRotation = currentRotation + fullSpins + targetAngle;
+
+            // 3. Animate
+            await controls.start({
+                rotate: newRotation,
+                transition: { duration: 4, ease: "circOut" }
+            });
+
+            setCurrentRotation(newRotation);
+
+            // 4. Update Context/UI
+            // The API already updated the backend, but we might want to refresh local context
+            // 'spinWheel' in context updates local state optimistically or re-fetches
+            await spinWheel({ ...selectedPrize, value: awardedAmount });
+            setResult({ ...selectedPrize, value: awardedAmount });
+
+        } catch (error: any) {
+            console.error('Spin Loop Error:', error);
+            alert(error.message);
+        } finally {
+            setIsSpinning(false);
         }
-        await spinWheel(selectedPrize);
-        setResult({ ...selectedPrize, value: awardedPoints || selectedPrize.value });
-        setIsSpinning(false);
     };
 
-    if (loading) return <div className="p-8 flex justify-center"><Loader2 className="animate-spin text-gold" /></div>;
+    if (contextLoading || loadingPrizes) return <div className="p-8 flex justify-center"><Loader2 className="animate-spin text-gold" /></div>;
 
-    const segmentAngle = 360 / WHEEL_PRIZES.length;
+    const segmentAngle = 360 / prizes.length;
 
     return (
         <div className="flex flex-col items-center gap-12 relative">
@@ -158,14 +153,14 @@ const WheelOfJoy: React.FC = () => {
                     {/* Background via Conic Gradient - simplified for Neo-Brutalism */}
                     <div className="absolute inset-0 rounded-full z-0" style={{
                         background: `conic-gradient(
-                            ${WHEEL_PRIZES.map((p, i) =>
-                            `${p.color} ${i * (100 / WHEEL_PRIZES.length)}% ${(i + 1) * (100 / WHEEL_PRIZES.length)}%`
+                            ${prizes.map((p, i) =>
+                            `${p.color} ${i * (100 / prizes.length)}% ${(i + 1) * (100 / prizes.length)}%`
                         ).join(', ')}
                         )`
                     }}></div>
 
                     {/* Segment Dividers */}
-                    {WHEEL_PRIZES.map((prize, index) => (
+                    {prizes.map((prize, index) => (
                         <div
                             key={`divider-${prize.id}`}
                             className="absolute w-1 h-1/2 left-1/2 top-0 origin-bottom bg-black/20 z-10"
@@ -176,7 +171,7 @@ const WheelOfJoy: React.FC = () => {
                     ))}
 
                     {/* Labels Layer */}
-                    {WHEEL_PRIZES.map((prize, index) => (
+                    {prizes.map((prize, index) => (
                         <div
                             key={prize.id}
                             className="absolute w-full h-1/2 left-0 top-0 origin-bottom flex justify-center pt-8 z-10"

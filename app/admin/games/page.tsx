@@ -185,14 +185,14 @@ export default function AdminGamesPage() {
       });
       const data = await res.json();
       if (data.success) {
-        setMessage('✓ Rotation policy saved successfully!');
+        setMessage(' Rotation policy saved successfully!');
         fetchRotationPolicy();
         setTimeout(() => setMessage(''), 3000);
       } else {
-        setMessage(`✗ Error: ${data.error}`);
+        setMessage(` Error: ${data.error}`);
       }
     } catch (error) {
-      setMessage('✗ Error saving rotation policy');
+      setMessage(' Error saving rotation policy');
     } finally {
       setSaving(false);
     }
@@ -210,12 +210,12 @@ export default function AdminGamesPage() {
       });
       const data = await res.json();
       if (data.success) {
-        setMessage('✓ Games rotated successfully!');
+        setMessage('Games rotated successfully!');
         fetchRotationPolicy();
         setTimeout(() => setMessage(''), 3000);
       }
     } catch (error) {
-      setMessage('✗ Error rotating games');
+      setMessage('Error rotating games');
     } finally {
       setSaving(false);
     }
