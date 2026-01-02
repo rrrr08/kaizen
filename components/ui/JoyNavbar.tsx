@@ -11,6 +11,7 @@ import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
 import { doc, getDoc, getFirestore } from 'firebase/firestore';
 import { app } from '@/lib/firebase';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
+import Logo from '@/components/ui/Logo';
 
 const navItems = [
   { name: 'Shop', path: '/shop' },
@@ -64,16 +65,7 @@ const Navbar: React.FC = () => {
     <>
       <nav className="fixed top-0 left-0 right-0 z-50 px-4 py-3 flex items-center justify-between bg-[#FFFDF5] border-b-2 border-black transition-all">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 group z-50">
-          <motion.div
-            whileHover={{ rotate: [0, -10, 10, -10, 10, 0] }}
-            transition={{ duration: 0.5 }}
-            className="bg-[#FFD93D] p-2.5 border-2 border-black rounded-[12px] neo-shadow"
-          >
-            <span className="text-xl font-black text-black">JJ</span>
-          </motion.div>
-          <span className="text-xl font-black tracking-tighter hidden xl:block text-black">Joy Juncture</span>
-        </Link>
+        <Logo size="medium" linkTo="/" showText={true} />
 
         {/* Desktop Menu */}
         <div className="relative hidden lg:flex bg-white/50 p-1 rounded-full border-2 border-black items-center shadow-[4px_4px_0px_rgba(0,0,0,0.1)]">
@@ -164,7 +156,7 @@ const Navbar: React.FC = () => {
               >
                 <Coins className="text-black w-4 h-4" />
               </motion.div>
-              <div className="flex flex-col -space-y-1">
+              <div className="flex flex-col">
                 <span className="text-[7px] text-black font-black uppercase leading-none tracking-widest">Balance</span>
                 <span className="text-black font-black whitespace-nowrap text-xs leading-none">{balance.toLocaleString()}</span>
               </div>

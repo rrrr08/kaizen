@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Eye, EyeOff, Mail, Lock, Loader2, ArrowRight, AlertTriangle, Check } from 'lucide-react';
 import { useCart } from '@/app/context/CartContext';
+import Logo from '@/components/ui/Logo';
 
 export function LoginForm() {
   const router = useRouter();
@@ -123,11 +124,9 @@ export function LoginForm() {
       <div className="relative z-10 w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-12">
-          <Link href="/" className="inline-block flex justify-center mb-6 hover:scale-105 transition-transform">
-            <div className="bg-[#FFD93D] p-3 border-2 border-black rounded-[15px] neo-shadow">
-              <span className="text-2xl font-black text-black">JJ</span>
-            </div>
-          </Link>
+          <div className="flex justify-center mb-6">
+            <Logo size="large" linkTo="/" />
+          </div>
           <h1 className="font-header text-4xl font-black text-black mb-2 uppercase tracking-tight">Access Portal</h1>
           <p className="font-sans font-bold text-black/60 text-sm">Enter the Loop</p>
         </div>
