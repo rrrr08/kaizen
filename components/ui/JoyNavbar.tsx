@@ -18,9 +18,6 @@ const navItems = [
   { name: 'Play', path: '/play' },
   { name: 'Events', path: '/events' },
   { name: 'Community', path: '/community' },
-  { name: 'Dashboard', path: '/wallet' },
-  { name: 'Rewards', path: '/rewards' },
-  { name: 'Progress', path: '/progress' },
   { name: 'Blog', path: '/blog' },
   { name: 'About', path: '/about' },
 ];
