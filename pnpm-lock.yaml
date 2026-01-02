@@ -131,6 +131,9 @@ importers:
       recharts:
         specifier: ^3.6.0
         version: 3.6.0(@types/react@19.2.7)(react-dom@19.2.1(react@19.2.1))(react-is@16.13.1)(react@19.2.1)(redux@5.0.1)
+      sudoku-gen:
+        specifier: ^1.0.2
+        version: 1.0.2
       tailwind-merge:
         specifier: ^3.4.0
         version: 3.4.0
@@ -3523,6 +3526,9 @@ packages:
         optional: true
       babel-plugin-macros:
         optional: true
+
+  sudoku-gen@1.0.2:
+    resolution: {integrity: sha512-zQFQNbar9qGpbteAH7CQShGoR5lk7r4KYlt0Wsvts1eVMzLb2EZUovzc7gAmoHp+HmXGYadmqCyyXoY7QVEyhA==}
 
   supports-color@7.2.0:
     resolution: {integrity: sha512-qpCAvRl9stuOHveKsn7HncJRvv501qIacKzQlO/+Lwxc9+0q2wLyv4Dfvt80/DPn2pqOBsJdDiogXGR9+OvwRw==}
@@ -7525,6 +7531,8 @@ snapshots:
       react: 19.2.1
     optionalDependencies:
       '@babel/core': 7.28.5
+
+  sudoku-gen@1.0.2: {}
 
   supports-color@7.2.0:
     dependencies:

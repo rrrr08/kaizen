@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { useAuth } from './AuthContext';
 import { UserProfile } from '@/lib/types';
-import { getTier, fetchTiersFromFirebase, STREAK_REWARDS, STREAK_FREEZE_COST, CONFIG, calculatePoints, calculatePointWorth, getMaxRedeemableAmount } from '@/lib/gamification';
+import { getTier, fetchTiersFromFirebase, fetchRewardsConfigFromFirebase, REWARDS as DEFAULT_REWARDS, STREAK_REWARDS, STREAK_FREEZE_COST, CONFIG, calculatePoints, calculatePointWorth, getMaxRedeemableAmount } from '@/lib/gamification';
 import { doc, onSnapshot, updateDoc, increment, setDoc, getFirestore, getDoc } from 'firebase/firestore';
 import { app } from '@/lib/firebase';
 
@@ -24,10 +24,12 @@ interface GamificationContextType {
   tier: Tier;
   nextTier: Tier | null;
   allTiers: Tier[];
+  rewardsConfig: typeof DEFAULT_REWARDS;
   streak: {
     count: number;
     lastActiveDate: string | null;
     freezeCount: number;
+    visual?: string;
   };
   dailyStats: {
     lastSpinDate: string | null;
@@ -59,18 +61,23 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
   const [xp, setXp] = useState(0);
   const [balance, setBalance] = useState(0);
   const [allTiers, setAllTiers] = useState<Tier[]>([]);
+  const [rewardsConfig, setRewardsConfig] = useState(DEFAULT_REWARDS);
   const [streak, setStreak] = useState({ count: 0, lastActiveDate: null as string | null, freezeCount: 0 });
   const [dailyStats, setDailyStats] = useState({ lastSpinDate: null as string | null, eggsFound: 0 });
 
   const db = getFirestore(app);
 
-  // Load tiers from Firebase on mount
+  // Load tiers and rewards from Firebase on mount
   useEffect(() => {
-    const loadTiers = async () => {
-      const tiers = await fetchTiersFromFirebase();
+    const loadConfigs = async () => {
+      const [tiers, fetchedRewards] = await Promise.all([
+        fetchTiersFromFirebase(),
+        fetchRewardsConfigFromFirebase()
+      ]);
       setAllTiers(tiers);
+      if (fetchedRewards) setRewardsConfig(fetchedRewards);
     };
-    loadTiers();
+    loadConfigs();
   }, []);
 
   useEffect(() => {
@@ -156,7 +163,7 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
   const tier = allTiers.length > 0 ? getTier(xp, allTiers) : { name: 'Newbie', minXP: 0, multiplier: 1.0, badge: 'Grey Meeple', perk: 'None', color: 'text-slate-400', icon: '♟️' };
   const nextTierIndex = allTiers.findIndex(t => t.name === tier.name) + 1;
   const nextTier = nextTierIndex < allTiers.length ? allTiers[nextTierIndex] : null;
-  
+
   // Tier Perks - Dynamic based on loaded tiers
   const hasEarlyEventAccess = allTiers.length > 1 ? xp >= allTiers[1].minXP : xp >= 500;
   const workshopDiscountPercent = allTiers.length > 2 && xp >= allTiers[2].minXP ? 5 : 0;
@@ -282,7 +289,7 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
 
   return (
     <GamificationContext.Provider value={{
-      xp, balance, tier, nextTier, allTiers, streak, dailyStats, loading,
+      xp, balance, tier, nextTier, allTiers, rewardsConfig, streak, dailyStats, loading,
       awardPoints, spendPoints, spinWheel, updateStreak, buyStreakFreeze, foundEasterEgg,
       config: CONFIG, calculatePoints, calculatePointWorth, getMaxRedeemableAmount,
       hasEarlyEventAccess, workshopDiscountPercent, hasVIPSeating

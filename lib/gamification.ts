@@ -51,20 +51,36 @@ const DEFAULT_TIERS = [
 
 // Fetch tiers from Firebase
 export const fetchTiersFromFirebase = async () => {
-  try {
-    const db = getFirestore(app);
-    const settingsRef = doc(db, 'settings', 'xpSystem');
-    const snap = await getDoc(settingsRef);
-    
-    if (snap.exists() && snap.data()?.tiers) {
-      return snap.data()!.tiers;
+    try {
+        const db = getFirestore(app);
+        const settingsRef = doc(db, 'settings', 'xpSystem');
+        const snap = await getDoc(settingsRef);
+
+        if (snap.exists() && snap.data()?.tiers) {
+            return snap.data()!.tiers;
+        }
+        return DEFAULT_TIERS;
+    } catch (error) {
+        console.error('Error fetching tiers from Firebase:', error);
+        return DEFAULT_TIERS;
     }
-    return DEFAULT_TIERS;
-  } catch (error) {
-    console.error('Error fetching tiers from Firebase:', error);
-    return DEFAULT_TIERS;
-  }
 };
+
+export const fetchWheelPrizesFromFirebase = async () => {
+    try {
+        const db = getFirestore(app);
+        const settingsRef = doc(db, 'settings', 'wheelPrizes');
+        const snap = await getDoc(settingsRef);
+
+        if (snap.exists() && snap.data()?.prizes) {
+            return snap.data()!.prizes;
+        }
+        return WHEEL_PRIZES; // Fallback
+    } catch (error) {
+        console.error('Error fetching wheel prizes from Firebase:', error);
+        return WHEEL_PRIZES;
+    }
+}
 
 // Get tier based on XP (requires tiers array)
 export const getTier = (xp: number, tiers: any[]) => {
@@ -99,7 +115,7 @@ export const getTierDiscount = (xp: number, tiers: any[]): number => {
 // ------------------------------------------------------------------
 // 2. ECONOMY & REWARDS
 // ------------------------------------------------------------------
-export const REWARDS = {
+export const DEFAULT_REWARDS = {
   SUDOKU: {
     EASY: 20,
     MEDIUM: 50,
@@ -118,6 +134,28 @@ export const REWARDS = {
   SHOP: {
     POINTS_PER_RUPEE: 0.1 // 1 JP per 10 Rupees spent
   }
+};
+
+export const REWARDS = DEFAULT_REWARDS;
+
+export const fetchRewardsConfigFromFirebase = async () => {
+    try {
+        const db = getFirestore(app);
+        const settingsRef = doc(db, 'settings', 'gamificationRewards');
+        const snap = await getDoc(settingsRef);
+
+        if (snap.exists() && snap.data()) {
+            // merge with defaults to ensure structure
+            return {
+                ...DEFAULT_REWARDS,
+                ...snap.data()
+            };
+        }
+        return DEFAULT_REWARDS;
+    } catch (error) {
+        console.error('Error fetching rewards config:', error);
+        return DEFAULT_REWARDS;
+    }
 };
 
 // ------------------------------------------------------------------
