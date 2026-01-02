@@ -6,8 +6,20 @@ import { ShoppingCart, Trash2, Plus, Minus } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function CartPage() {
-  const { items, removeFromCart, updateQuantity, getTotalPrice, getTotalItems } = useCart();
+  const { items, removeFromCart, updateQuantity, getTotalPrice, getTotalItems, isLoading } = useCart();
   const points = Math.floor(getTotalPrice() * 0.1);
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen pt-28 pb-16 flex items-center justify-center bg-[#FFFDF5]">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-black border-t-[#FFD93D] mb-4"></div>
+          <p className="text-black font-black text-xs tracking-[0.4em]">LOADING CART...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (items.length === 0) {
     return (
@@ -68,8 +80,8 @@ export default function CartPage() {
                   <div className="flex-shrink-0 relative">
                     <div className="w-24 h-32 rounded-xl overflow-hidden border-2 border-black shadow-[2px_2px_0px_#000]">
                       <img
-                        src={item.product.image}
-                        alt={item.product.name}
+                        src={item.product?.image || '/placeholder-product.png'}
+                        alt={item.product?.name || 'Product'}
                         className="w-full h-full object-cover"
                       />
                     </div>
@@ -83,14 +95,14 @@ export default function CartPage() {
                           href={`/shop/${item.productId}`}
                           className="font-header text-2xl tracking-tight text-black hover:text-[#6C5CE7] transition"
                         >
-                          {item.product.name}
+                          {item.product?.name || 'Product'}
                         </Link>
                         <p className="font-black text-xl text-black">
-                          ₹{item.product.price}
+                          ₹{item.product?.price || 0}
                         </p>
                       </div>
                       <p className="text-sm text-black/60 mb-4 font-medium line-clamp-2 mt-1">
-                        {item.product.description}
+                        {item.product?.description || ''}
                       </p>
                     </div>
 
@@ -119,7 +131,7 @@ export default function CartPage() {
                         <div className="text-right hidden sm:block">
                           <p className="text-[10px] font-black uppercase tracking-widest text-black/40">Subtotal</p>
                           <p className="font-black text-lg text-[#6C5CE7]">
-                            ₹{item.product.price * item.quantity}
+                            ₹{(item.product?.price || 0) * item.quantity}
                           </p>
                         </div>
 
@@ -149,9 +161,9 @@ export default function CartPage() {
                 {items.map((item) => (
                   <div key={item.productId} className="flex justify-between text-sm font-bold">
                     <span className="text-black/70">
-                      {item.product.name} <span className="text-black/40">x{item.quantity}</span>
+                      {item.product?.name || 'Product'} <span className="text-black/40">x{item.quantity}</span>
                     </span>
-                    <span className="text-black">₹{item.product.price * item.quantity}</span>
+                    <span className="text-black">₹{(item.product?.price || 0) * item.quantity}</span>
                   </div>
                 ))}
               </div>

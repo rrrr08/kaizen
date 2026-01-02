@@ -836,8 +836,55 @@ export async function updateUserCart(userId: string, cartItems: any[]) {
   const firebaseDb = await getFirebaseDb();
   const userRef = doc(firebaseDb, 'users', userId);
 
+  // Store FULL product details for better UX (no API calls on load)
+  const fullCartItems = cartItems.map(item => {
+    // Handle addedAt conversion safely with validation
+    let addedAtString;
+    try {
+      if (item.addedAt instanceof Date && !isNaN(item.addedAt.getTime())) {
+        // Valid Date object
+        addedAtString = item.addedAt.toISOString();
+      } else if (typeof item.addedAt === 'string' && item.addedAt) {
+        // Already a string, validate it's a valid date
+        const testDate = new Date(item.addedAt);
+        if (!isNaN(testDate.getTime())) {
+          addedAtString = item.addedAt;
+        } else {
+          addedAtString = new Date().toISOString();
+        }
+      } else {
+        // Invalid or missing, use current date
+        addedAtString = new Date().toISOString();
+      }
+    } catch (error) {
+      console.error('Error converting addedAt:', error);
+      addedAtString = new Date().toISOString();
+    }
+
+    return {
+      productId: item.productId,
+      quantity: item.quantity,
+      addedAt: addedAtString,
+      product: item.product || {
+        id: item.productId,
+        name: item.name || 'Product',
+        price: item.price || 0,
+        description: item.description || '',
+        image: item.image || '',
+        story: item.story || '',
+        howToPlay: item.howToPlay || '',
+        players: item.players || '',
+        occasion: item.occasion || [],
+        mood: item.mood || '',
+        badges: item.badges || [],
+        time: item.time || '',
+        stock: item.stock || 0,
+      },
+    };
+  });
+
   await updateDoc(userRef, {
-    cart: cartItems,
+    cart: fullCartItems,
     cartUpdatedAt: serverTimestamp(),
     updated_at: serverTimestamp(),
   });

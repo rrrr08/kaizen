@@ -19,7 +19,7 @@ declare global {
 }
 
 export default function CheckoutPage() {
-  const { items, getTotalPrice, clearCart, appliedPointsDiscount, setAppliedPointsDiscount, getFinalPrice, mergeLocalCartWithFirebase } = useCart();
+  const { items, getTotalPrice, clearCart, appliedPointsDiscount, setAppliedPointsDiscount, getFinalPrice, mergeLocalCartWithFirebase, isLoading } = useCart();
   const { user, loading: authLoading } = useAuth();
   const { config, calculatePoints, calculatePointWorth, getMaxRedeemableAmount } = useGamification();
   const router = useRouter();
@@ -30,6 +30,13 @@ export default function CheckoutPage() {
   const [redeemPoints, setRedeemPoints] = useState(0);
   const [isFirstTime, setIsFirstTime] = useState(false);
   const [gstRate, setGstRate] = useState(18); // Default 18%
+
+  // Debug: Log cart items structure
+  useEffect(() => {
+    if (items.length > 0) {
+      console.log('Cart items structure:', JSON.stringify(items[0], null, 2));
+    }
+  }, [items]);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -381,9 +388,6 @@ export default function CheckoutPage() {
             orderId_New
           );
 
-          // Clear cart from Firebase
-          await clearUserCart(currentUser.uid);
-
           // Mark voucher as used if one was applied
           if (appliedVoucherId) {
             try {
@@ -405,17 +409,29 @@ export default function CheckoutPage() {
             }
           }
 
+          // Clear cart - use context method for consistency
+          try {
+            console.log('Starting cart clear process...');
+            
+            // Use the CartContext clearCart method which handles everything
+            await clearCart();
+            console.log('Cart cleared successfully');
+            
+          } catch (clearError) {
+            console.error('Error clearing cart:', clearError);
+            // Continue anyway - cart will be cleared on next load
+          }
+
           addToast({
             title: 'Payment Successful!',
             description: `You earned ${earnedPoints} points! Order ID: ${orderId_New}`,
           });
 
-          clearCart();
-
-          // Use window.location.href for a complete page navigation
+          // Use location.replace to force full page reload and clear cache
           setTimeout(() => {
-            window.location.href = `/order-confirmation/${orderId_New}`;
-          }, 1500);
+            console.log('Redirecting to order confirmation...');
+            window.location.replace(`/order-confirmation/${orderId_New}`);
+          }, 300);
         },
         prefill: {
           name: formData.name,
@@ -489,7 +505,7 @@ export default function CheckoutPage() {
     }
   };
 
-  if (items.length === 0 && !authLoading) {
+  if (items.length === 0 && !authLoading && !isLoading) {
     return (
       <div className="min-h-screen pt-28 pb-16 flex items-center justify-center bg-[#FFFDF5]">
         <div className="text-center">
@@ -503,8 +519,8 @@ export default function CheckoutPage() {
     );
   }
 
-  // Show loading while checking authentication
-  if (authLoading || (user === null && authLoading === false && items.length > 0)) {
+  // Show loading while checking authentication or loading cart
+  if (authLoading || isLoading || (user === null && authLoading === false && items.length > 0)) {
     return (
       <div className="min-h-screen pt-28 pb-16 flex items-center justify-center bg-[#FFFDF5]">
         <div className="text-center">
@@ -678,7 +694,7 @@ export default function CheckoutPage() {
                       <p className="text-xs text-black/60 font-bold">x{item.quantity}</p>
                     </div>
                     <p className="text-right font-black text-black">
-                      ₹{item.product.price * item.quantity}
+                      ₹{(item.product.price * item.quantity).toFixed(2)}
                     </p>
                   </div>
                 ))}
