@@ -417,6 +417,13 @@ export default function CheckoutPage() {
             await clearCart();
             console.log('Cart cleared successfully');
             
+            // Clear voucher state
+            setVoucherCode('');
+            setAppliedVoucher(null);
+            setAppliedVoucherId(null);
+            setVoucherDiscount(0);
+            setVoucherError('');
+            
           } catch (clearError) {
             console.error('Error clearing cart:', clearError);
             // Continue anyway - cart will be cleared on next load
