@@ -12,6 +12,7 @@ import { doc, getDoc, getFirestore } from 'firebase/firestore';
 import { app } from '@/lib/firebase';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import Logo from '@/components/ui/Logo';
+import { NotificationCenter } from '@/app/components/NotificationCenter';
 
 const navItems = [
   { name: 'Shop', path: '/shop' },
@@ -178,6 +179,13 @@ const Navbar: React.FC = () => {
               )}
             </motion.button>
           </Link>
+
+          {/* Notification Bell */}
+          {user && (
+            <div className="relative">
+              <NotificationCenter />
+            </div>
+          )}
 
           {/* Profile / Auth Button (Dropdown) */}
           {user ? (

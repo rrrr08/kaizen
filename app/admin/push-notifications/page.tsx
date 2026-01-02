@@ -16,6 +16,7 @@ export default function PushNotificationsPage() {
   const [loading, setLoading] = useState(false);
   const [selectedSegment, setSelectedSegment] = useState('all');
   const [recipientPreview, setRecipientPreview] = useState(0);
+  const [totalUsers, setTotalUsers] = useState(0);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -30,6 +31,7 @@ export default function PushNotificationsPage() {
 
   useEffect(() => {
     loadCampaigns();
+    loadUserCount();
   }, []);
 
   async function loadCampaigns() {
@@ -39,6 +41,30 @@ export default function PushNotificationsPage() {
     } catch (error) {
       console.error('Error loading campaigns:', error);
       setCampaigns([]);
+    }
+  }
+
+  async function loadUserCount() {
+    try {
+      const { auth } = await import('@/lib/firebase');
+      const currentUser = auth.currentUser;
+      
+      if (currentUser) {
+        const token = await currentUser.getIdToken();
+        const response = await fetch('/api/admin/users/count', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          setTotalUsers(data.count || 0);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading user count:', error);
+      setTotalUsers(0);
     }
   }
 
@@ -90,11 +116,42 @@ export default function PushNotificationsPage() {
     setLoading(true);
 
     try {
+      // Send in-app notifications to users
+      const { auth } = await import('@/lib/firebase');
+      const currentUser = auth.currentUser;
+      
+      if (currentUser) {
+        const token = await currentUser.getIdToken();
+        
+        const sendResponse = await fetch('/api/notifications/send', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            title: formData.title,
+            message: formData.message,
+            type: 'info',
+            actionUrl: formData.actionUrl || null,
+            recipientSegment: formData.recipientSegment,
+            image: formData.image || null
+          })
+        });
+
+        if (!sendResponse.ok) {
+          throw new Error('Failed to send notifications');
+        }
+
+        const sendData = await sendResponse.json();
+        console.log('Notifications sent:', sendData);
+      }
+
       const newCampaign = {
         title: formData.title,
         message: formData.message,
         status: 'sent',
-        recipientCount: formData.recipientSegment === 'all' ? 1250 : 100,
+        recipientCount: formData.recipientSegment === 'all' ? totalUsers : Math.floor(totalUsers * 0.1),
         image: formData.image || undefined,
         actionUrl: formData.actionUrl || undefined,
         priority: formData.priority,
@@ -290,10 +347,17 @@ export default function PushNotificationsPage() {
                       setFormData((prev) => ({ ...prev, recipientSegment: value }))
                     }>
                       <SelectTrigger className="w-full bg-[#FFFDF5] border-2 border-black rounded-xl px-4 py-3 text-black font-bold focus:ring-0 focus:ring-offset-0 h-auto">
-                        <SelectValue />
+                        <SelectValue>
+                          {formData.recipientSegment === 'all' && (totalUsers > 0 ? `All Users (${totalUsers.toLocaleString()})` : 'All Users (Loading...)')}
+                          {formData.recipientSegment === 'first-time' && 'First-Time Customers'}
+                          {formData.recipientSegment === 'loyal' && 'Loyal Users (Level 3+)'}
+                          {formData.recipientSegment === 'inactive' && 'Inactive (No purchase in 30 days)'}
+                        </SelectValue>
                       </SelectTrigger>
                       <SelectContent className="bg-white border-2 border-black rounded-xl neo-shadow">
-                        <SelectItem value="all" className="font-bold focus:bg-[#FFD93D] focus:text-black cursor-pointer">All Users</SelectItem>
+                        <SelectItem value="all" className="font-bold focus:bg-[#FFD93D] focus:text-black cursor-pointer">
+                          All Users ({totalUsers > 0 ? totalUsers.toLocaleString() : 'Loading...'})
+                        </SelectItem>
                         <SelectItem value="first-time" className="font-bold focus:bg-[#FFD93D] focus:text-black cursor-pointer">First-Time Customers</SelectItem>
                         <SelectItem value="loyal" className="font-bold focus:bg-[#FFD93D] focus:text-black cursor-pointer">Loyal Users (Level 3+)</SelectItem>
                         <SelectItem value="inactive" className="font-bold focus:bg-[#FFD93D] focus:text-black cursor-pointer">Inactive (No purchase in 30 days)</SelectItem>
