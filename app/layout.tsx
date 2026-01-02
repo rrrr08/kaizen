@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
 import { Outfit, Fredoka } from "next/font/google"; // Import fonts
 import "./globals.css";
-import Navbar from "@/components/ui/JoyNavbar";
-import Footer from "@/components/ui/Footer";
 import { CartProvider } from "@/app/context/CartContext";
 import { GamificationProvider } from "@/app/context/GamificationContext";
 import { AuthProvider } from "@/app/context/AuthContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import ClientLayout from "@/components/ClientLayout";
 
 // Configure fonts
 const outfit = Outfit({
@@ -45,9 +44,9 @@ export default function RootLayout({
           <AuthProvider>
             <GamificationProvider>
               <CartProvider>
-                <Navbar />
-                {children}
-                <Footer />
+                <ClientLayout>
+                  {children}
+                </ClientLayout>
 
                 {/* SVG Definition for Blob Mask */}
                 <svg width="0" height="0" className="absolute">
