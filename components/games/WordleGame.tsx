@@ -14,12 +14,12 @@ const fetchWordList = async (): Promise<string[]> => {
     const res = await fetch('/api/games/content?gameId=wordle');
     const data = await res.json();
     const items = data.content?.items || [];
-    
+
     if (items.length === 0) {
       // Fallback words
       return ['REACT', 'CHESS', 'BRAIN', 'LOGIC', 'SMART', 'QUICK', 'FLASH', 'POWER'];
     }
-    
+
     return items.map((item: any) => item.word.toUpperCase());
   } catch (error) {
     console.error('Error fetching word list:', error);
@@ -38,7 +38,7 @@ const WordleGame: React.FC = () => {
   const [alreadyPlayed, setAlreadyPlayed] = useState(false);
   const [points, setPoints] = useState<number | null>(null);
   const [showScratcher, setShowScratcher] = useState(false);
-  const [scratcherDrops, setScratcherDrops] = useState<{prob:number,points:number}[]|null>(null);
+  const [scratcherDrops, setScratcherDrops] = useState<{ prob: number, points: number }[] | null>(null);
 
   useEffect(() => {
     // Fetch and select random word from Firebase
@@ -47,7 +47,7 @@ const WordleGame: React.FC = () => {
       const word = wordList[Math.floor(Math.random() * wordList.length)];
       setTargetWord(word);
     };
-    
+
     loadWord();
 
     // Check Game of the Day
@@ -83,25 +83,20 @@ const WordleGame: React.FC = () => {
       setMessage('Awarding points...');
 
       try {
-        const res = await fetch('/api/games/award', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            gameId: WORDLE_GAME_ID, 
-            retry: newGuesses.length - 1 
-          }),
+        const result = await awardGamePoints({
+          gameId: WORDLE_GAME_ID,
+          retry: newGuesses.length - 1
         });
-        const data = await res.json();
 
-        if (data.success) {
-          setPoints(data.awardedPoints);
-          setMessage(data.message || `You earned ${data.awardedPoints} points!`);
+        if (result.success) {
+          setPoints(result.awardedPoints || 0);
+          setMessage(result.message || `You earned ${result.awardedPoints} points!`);
           if (scratcherDrops) setShowScratcher(true);
-        } else if (res.status === 409) {
+        } else if (result.error === 'Already played today') {
           setAlreadyPlayed(true);
-          setMessage(data.message || 'You already played today!');
+          setMessage(result.message || 'You already played today!');
         } else {
-          setMessage(data.error || 'Error awarding points');
+          setMessage(result.error || 'Error awarding points');
         }
       } catch (e) {
         setMessage('Error awarding points');
@@ -176,7 +171,7 @@ const WordleGame: React.FC = () => {
                 )}
                 {showScratcher && scratcherDrops && !alreadyPlayed && (
                   <div className="mt-6">
-                    <Scratcher drops={scratcherDrops} onScratch={() => {}} />
+                    <Scratcher drops={scratcherDrops} onScratch={() => { }} />
                   </div>
                 )}
               </div>

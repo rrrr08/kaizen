@@ -19,11 +19,11 @@ const Game2048: React.FC = () => {
   const [points, setPoints] = useState<number | null>(null);
   const [message, setMessage] = useState('');
   const [showScratcher, setShowScratcher] = useState(false);
-  const [scratcherDrops, setScratcherDrops] = useState<{prob:number,points:number}[]|null>(null);
+  const [scratcherDrops, setScratcherDrops] = useState<{ prob: number, points: number }[] | null>(null);
 
   useEffect(() => {
     initBoard();
-    
+
     // Check Game of the Day
     fetch('/api/games/game-of-the-day')
       .then(r => r.json())
@@ -143,26 +143,21 @@ const Game2048: React.FC = () => {
     setMessage('Awarding points...');
 
     try {
-      const res = await fetch('/api/games/award', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          gameId: GAME_2048_ID, 
-          retry: Math.floor(moves / 10),
-          level: `${score}`
-        }),
+      const result = await awardGamePoints({
+        gameId: GAME_2048_ID,
+        retry: Math.floor(moves / 10),
+        level: `${score}`
       });
-      const data = await res.json();
 
-      if (data.success) {
-        setPoints(data.awardedPoints);
-        setMessage(data.message || `You earned ${data.awardedPoints} points!`);
+      if (result.success) {
+        setPoints(result.awardedPoints || 0);
+        setMessage(result.message || `You earned ${result.awardedPoints} points!`);
         if (scratcherDrops) setShowScratcher(true);
-      } else if (res.status === 409) {
+      } else if (result.error === 'Already played today') {
         setAlreadyPlayed(true);
-        setMessage(data.message || 'You already played today!');
+        setMessage(result.message || 'You already played today!');
       } else {
-        setMessage(data.error || 'Error awarding points');
+        setMessage(result.error || 'Error awarding points');
       }
     } catch (e) {
       setMessage('Error awarding points');
@@ -182,7 +177,7 @@ const Game2048: React.FC = () => {
   }, [board, isWon, isGameOver, alreadyPlayed]);
 
   const getTileColor = (value: number) => {
-    const colors: {[key: number]: string} = {
+    const colors: { [key: number]: string } = {
       2: 'bg-amber-100 text-gray-800',
       4: 'bg-amber-200 text-gray-800',
       8: 'bg-orange-400 text-white',
@@ -237,7 +232,7 @@ const Game2048: React.FC = () => {
                 )}
                 {showScratcher && scratcherDrops && !alreadyPlayed && (
                   <div className="mt-6">
-                    <Scratcher drops={scratcherDrops} onScratch={() => {}} />
+                    <Scratcher drops={scratcherDrops} onScratch={() => { }} />
                   </div>
                 )}
               </>
@@ -253,9 +248,8 @@ const Game2048: React.FC = () => {
               row.map((cell, j) => (
                 <div
                   key={`${i}-${j}`}
-                  className={`aspect-square rounded-lg flex items-center justify-center text-2xl font-bold transition-all ${
-                    cell === 0 ? 'bg-amber-900/30' : getTileColor(cell)
-                  }`}
+                  className={`aspect-square rounded-lg flex items-center justify-center text-2xl font-bold transition-all ${cell === 0 ? 'bg-amber-900/30' : getTileColor(cell)
+                    }`}
                 >
                   {cell !== 0 && cell}
                 </div>

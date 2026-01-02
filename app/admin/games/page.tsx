@@ -86,7 +86,7 @@ export default function AdminGamesPage() {
       const token = await user?.getIdToken();
       const res = await fetch('/api/games/settings', {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
@@ -115,7 +115,7 @@ export default function AdminGamesPage() {
       const token = await user?.getIdToken();
       const res = await fetch('/api/games/game-of-the-day', {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
@@ -135,6 +135,13 @@ export default function AdminGamesPage() {
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleRandomizeGotD = async () => {
+    const gameIds = Object.keys(settings);
+    if (gameIds.length === 0) return;
+    const randomGameId = gameIds[Math.floor(Math.random() * gameIds.length)];
+    await handleSetGameOfDay(randomGameId);
   };
 
   const updateGameSetting = (gameId: string, field: string, value: any) => {
@@ -170,7 +177,7 @@ export default function AdminGamesPage() {
       const token = await user?.getIdToken();
       const res = await fetch('/api/games/rotation-policy', {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
@@ -257,6 +264,24 @@ export default function AdminGamesPage() {
               {gameOfTheDay.gameName || gameOfTheDay.gameId} - <span className="text-white">2x Points!</span>
             </p>
             <p className="text-black/60 text-sm mt-2">Date: {gameOfTheDay.date}</p>
+            <button
+              onClick={handleRandomizeGotD}
+              disabled={saving}
+              className="mt-4 px-4 py-2 bg-black text-white font-black text-xs tracking-[0.2em] hover:bg-black/80 transition-colors rounded-lg disabled:opacity-50"
+            >
+              🎲 RANDOMIZE
+            </button>
+          </div>
+        )}
+        {!gameOfTheDay && (
+          <div className="mb-12">
+            <button
+              onClick={handleRandomizeGotD}
+              disabled={saving}
+              className="px-6 py-3 bg-[#FF7675] text-black font-black text-sm tracking-[0.2em] border-2 border-black shadow-[4px_4px_0px_#000] hover:translate-y-1 hover:shadow-none transition-all rounded-xl disabled:opacity-50"
+            >
+              🎲 SET RANDOM GAM OF THE DAY
+            </button>
           </div>
         )}
 
@@ -267,30 +292,30 @@ export default function AdminGamesPage() {
             <p className="text-white/90 font-bold text-sm mb-6">
               Control which games appear on the play page each day
             </p>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
               <div>
                 <label className="flex items-center gap-3 cursor-pointer mb-4">
                   <input
                     type="checkbox"
                     checked={rotationPolicy.enabled || false}
-                    onChange={(e) => setRotationPolicy({...rotationPolicy, enabled: e.target.checked})}
+                    onChange={(e) => setRotationPolicy({ ...rotationPolicy, enabled: e.target.checked })}
                     className="w-5 h-5"
                   />
                   <span className="text-white font-bold text-sm">Enable Daily Rotation</span>
                 </label>
-                
+
                 <label className="block text-white/80 font-bold text-xs tracking-widest mb-2">GAMES PER DAY</label>
                 <input
                   type="number"
                   min="1"
                   max="20"
                   value={rotationPolicy.gamesPerDay || 5}
-                  onChange={(e) => setRotationPolicy({...rotationPolicy, gamesPerDay: parseInt(e.target.value)})}
+                  onChange={(e) => setRotationPolicy({ ...rotationPolicy, gamesPerDay: parseInt(e.target.value) })}
                   className="w-full px-4 py-2 border-2 border-white/20 bg-white/10 text-white rounded-lg focus:border-white focus:outline-none"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-white/80 font-bold text-xs tracking-widest mb-2">LAST ROTATION</label>
                 <p className="text-white font-bold text-lg">{rotationPolicy.lastRotation || 'Never'}</p>

@@ -21,7 +21,7 @@ const fetchQuestions = async (): Promise<Question[]> => {
     const res = await fetch('/api/games/content?gameId=trivia');
     const data = await res.json();
     const items = data.content?.items || [];
-    
+
     if (items.length === 0) {
       // Fallback questions
       return [
@@ -57,7 +57,7 @@ const fetchQuestions = async (): Promise<Question[]> => {
         }
       ];
     }
-    
+
     return items;
   } catch (error) {
     console.error('Error fetching trivia questions:', error);
@@ -86,7 +86,7 @@ const TriviaGame: React.FC = () => {
   const [points, setPoints] = useState<number | null>(null);
   const [message, setMessage] = useState('');
   const [showScratcher, setShowScratcher] = useState(false);
-  const [scratcherDrops, setScratcherDrops] = useState<{prob:number,points:number}[]|null>(null);
+  const [scratcherDrops, setScratcherDrops] = useState<{ prob: number, points: number }[] | null>(null);
   const [wrongAnswers, setWrongAnswers] = useState(0);
 
   useEffect(() => {
@@ -97,7 +97,7 @@ const TriviaGame: React.FC = () => {
       const shuffled = [...allQuestions].sort(() => Math.random() - 0.5).slice(0, 5);
       setQuestions(shuffled);
     };
-    
+
     loadQuestions();
 
     // Check Game of the Day
@@ -146,10 +146,10 @@ const TriviaGame: React.FC = () => {
 
   const handleAnswer = (index: number) => {
     if (showResult || isGameOver) return;
-    
+
     setSelectedAnswer(index);
     setShowResult(true);
-    
+
     const isCorrect = index === questions[currentIndex].correct;
     if (isCorrect) {
       setScore(score + 1);
@@ -177,26 +177,21 @@ const TriviaGame: React.FC = () => {
     setMessage('Awarding points...');
 
     try {
-      const res = await fetch('/api/games/award', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          gameId: TRIVIA_GAME_ID, 
-          retry: wrongAnswers,
-          level: `${score}/${questions.length}`
-        }),
+      const result = await awardGamePoints({
+        gameId: TRIVIA_GAME_ID,
+        retry: wrongAnswers,
+        level: `${score}/${questions.length}`
       });
-      const data = await res.json();
 
-      if (data.success) {
-        setPoints(data.awardedPoints);
-        setMessage(data.message || `You earned ${data.awardedPoints} points!`);
+      if (result.success) {
+        setPoints(result.awardedPoints || 0);
+        setMessage(result.message || `You earned ${result.awardedPoints} points!`);
         if (scratcherDrops) setShowScratcher(true);
-      } else if (res.status === 409) {
+      } else if (result.error === 'Already played today') {
         setAlreadyPlayed(true);
-        setMessage(data.message || 'You already played today!');
+        setMessage(result.message || 'You already played today!');
       } else {
-        setMessage(data.error || 'Error awarding points');
+        setMessage(result.error || 'Error awarding points');
       }
     } catch (e) {
       setMessage('Error awarding points');
@@ -306,7 +301,7 @@ const TriviaGame: React.FC = () => {
             )}
             {showScratcher && scratcherDrops && !alreadyPlayed && (
               <div className="mt-6">
-                <Scratcher drops={scratcherDrops} onScratch={() => {}} />
+                <Scratcher drops={scratcherDrops} onScratch={() => { }} />
               </div>
             )}
           </div>

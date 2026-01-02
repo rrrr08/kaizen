@@ -14,7 +14,7 @@ const fetchWordLists = async (): Promise<string[][]> => {
     const res = await fetch('/api/games/content?gameId=wordsearch');
     const data = await res.json();
     const items = data.content?.items || [];
-    
+
     if (items.length === 0) {
       // Fallback word lists
       return [
@@ -23,7 +23,7 @@ const fetchWordLists = async (): Promise<string[][]> => {
         ['CLOUD', 'SERVER', 'API', 'DATA', 'CACHE']
       ];
     }
-    
+
     return items.map((item: any) => item.words);
   } catch (error) {
     console.error('Error fetching word lists:', error);
@@ -42,7 +42,7 @@ const WordSearchGame: React.FC = () => {
   const [points, setPoints] = useState<number | null>(null);
   const [message, setMessage] = useState('');
   const [showScratcher, setShowScratcher] = useState(false);
-  const [scratcherDrops, setScratcherDrops] = useState<{prob:number,points:number}[]|null>(null);
+  const [scratcherDrops, setScratcherDrops] = useState<{ prob: number, points: number }[] | null>(null);
   const [attempts, setAttempts] = useState(0);
 
   useEffect(() => {
@@ -50,9 +50,9 @@ const WordSearchGame: React.FC = () => {
       const wordLists = await fetchWordLists();
       initGameWithWords(wordLists);
     };
-    
+
     loadGame();
-    
+
     fetch('/api/games/game-of-the-day')
       .then(r => r.json())
       .then(d => { if (d.gameId === WORD_SEARCH_ID) setIsGameOfDay(true); });
@@ -69,7 +69,7 @@ const WordSearchGame: React.FC = () => {
     const size = 10;
     const newGrid: string[][] = Array(size).fill(0).map(() => Array(size).fill(''));
     const wordList = wordLists[Math.floor(Math.random() * wordLists.length)];
-    
+
     // Place words
     wordList.forEach(word => {
       let placed = false;
@@ -78,7 +78,7 @@ const WordSearchGame: React.FC = () => {
         const dir = Math.random() < 0.5 ? 'h' : 'v';
         const row = Math.floor(Math.random() * size);
         const col = Math.floor(Math.random() * size);
-        
+
         if (dir === 'h' && col + word.length <= size) {
           let canPlace = true;
           for (let i = 0; i < word.length; i++) {
@@ -111,7 +111,7 @@ const WordSearchGame: React.FC = () => {
         attempts++;
       }
     });
-    
+
     // Fill empty cells
     for (let i = 0; i < size; i++) {
       for (let j = 0; j < size; j++) {
@@ -120,7 +120,7 @@ const WordSearchGame: React.FC = () => {
         }
       }
     }
-    
+
     setGrid(newGrid);
     setWords(wordList);
     setFound([]);
@@ -131,10 +131,10 @@ const WordSearchGame: React.FC = () => {
 
   const handleCellClick = (row: number, col: number) => {
     if (isWon || alreadyPlayed) return;
-    
+
     const newSelected = [...selected, [row, col]];
     setSelected(newSelected as [number, number][]);
-    
+
     if (newSelected.length >= 2) {
       checkWord(newSelected as [number, number][]);
     }
@@ -143,7 +143,7 @@ const WordSearchGame: React.FC = () => {
   const checkWord = (cells: [number, number][]) => {
     const word = cells.map(([r, c]) => grid[r][c]).join('');
     const reverseWord = word.split('').reverse().join('');
-    
+
     if (words.includes(word) && !found.includes(word)) {
       setFound([...found, word]);
       setSelected([]);
@@ -168,19 +168,17 @@ const WordSearchGame: React.FC = () => {
     setMessage('Awarding points...');
 
     try {
-      const res = await fetch('/api/games/award', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ gameId: WORD_SEARCH_ID, retry: attempts }),
+      const result = await awardGamePoints({
+        gameId: WORD_SEARCH_ID,
+        retry: attempts
       });
-      const data = await res.json();
-      if (data.success) {
-        setPoints(data.awardedPoints);
-        setMessage(data.message || `You earned ${data.awardedPoints} points!`);
+      if (result.success) {
+        setPoints(result.awardedPoints || 0);
+        setMessage(result.message || `You earned ${result.awardedPoints} points!`);
         if (scratcherDrops) setShowScratcher(true);
-      } else if (res.status === 409) {
+      } else if (result.error === 'Already played today') {
         setAlreadyPlayed(true);
-        setMessage(data.message || 'You already played today!');
+        setMessage(result.message || 'You already played today!');
       }
     } catch (e) {
       setMessage('Error awarding points');
@@ -221,7 +219,7 @@ const WordSearchGame: React.FC = () => {
               <div className="mt-4 text-4xl font-black text-[#FFD93D]">+{points} POINTS</div>
             )}
             {showScratcher && scratcherDrops && !alreadyPlayed && (
-              <div className="mt-6"><Scratcher drops={scratcherDrops} onScratch={() => {}} /></div>
+              <div className="mt-6"><Scratcher drops={scratcherDrops} onScratch={() => { }} /></div>
             )}
           </div>
         )}
@@ -237,9 +235,8 @@ const WordSearchGame: React.FC = () => {
                     <button
                       key={`${i}-${j}`}
                       onClick={() => handleCellClick(i, j)}
-                      className={`w-8 h-8 text-xs font-bold rounded transition-colors ${
-                        isSelected ? 'bg-blue-500 text-white' : 'bg-white/10 text-white hover:bg-white/20'
-                      }`}
+                      className={`w-8 h-8 text-xs font-bold rounded transition-colors ${isSelected ? 'bg-blue-500 text-white' : 'bg-white/10 text-white hover:bg-white/20'
+                        }`}
                     >
                       {cell}
                     </button>
@@ -256,9 +253,8 @@ const WordSearchGame: React.FC = () => {
               {words.map(word => (
                 <li
                   key={word}
-                  className={`text-sm font-bold ${
-                    found.includes(word) ? 'text-green-400 line-through' : 'text-white'
-                  }`}
+                  className={`text-sm font-bold ${found.includes(word) ? 'text-green-400 line-through' : 'text-white'
+                    }`}
                 >
                   {word}
                 </li>

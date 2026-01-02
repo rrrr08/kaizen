@@ -23,9 +23,9 @@ async function fetchSudokuBoard(difficulty = 'easy') {
 const SUDOKU_GAME_ID = 'sudoku';
 
 const LEVELS = [
-  { label: 'Easy', value: 'easy' },
-  { label: 'Medium', value: 'medium' },
-  { label: 'Hard', value: 'hard' }
+    { label: 'Easy', value: 'easy' },
+    { label: 'Medium', value: 'medium' },
+    { label: 'Hard', value: 'hard' }
 ];
 
 const SudokuGame: React.FC = () => {
@@ -38,12 +38,12 @@ const SudokuGame: React.FC = () => {
     const [isWon, setIsWon] = useState(false);
     const [mistakes, setMistakes] = useState(0);
     const [showScratcher, setShowScratcher] = useState(false);
-    const [scratcherDrops, setScratcherDrops] = useState<{prob:number,points:number}[]|null>(null);
-    const [bonusPoints, setBonusPoints] = useState<number|null>(null);
+    const [scratcherDrops, setScratcherDrops] = useState<{ prob: number, points: number }[] | null>(null);
+    const [bonusPoints, setBonusPoints] = useState<number | null>(null);
     const [leaderboard, setLeaderboard] = useState<any[]>([]);
     const [history, setHistory] = useState<any[]>([]);
     const [retry, setRetry] = useState(0);
-    const [points, setPoints] = useState<number|null>(null);
+    const [points, setPoints] = useState<number | null>(null);
     const [message, setMessage] = useState('');
     const [isGameOfDay, setIsGameOfDay] = useState(false);
     const [alreadyPlayed, setAlreadyPlayed] = useState(false);
@@ -65,13 +65,13 @@ const SudokuGame: React.FC = () => {
             setBonusPoints(null);
             setAlreadyPlayed(false);
         });
-        
+
         // Fetch leaderboard and history
         fetch(`/api/games/leaderboard?gameId=${SUDOKU_GAME_ID}&limit=10`)
-            .then(r=>r.json())
-            .then(d=>setLeaderboard(d.leaderboard||[]))
+            .then(r => r.json())
+            .then(d => setLeaderboard(d.leaderboard || []))
             .catch(console.error);
-            
+
         // Fetch history with Firebase Auth token
         (async () => {
             try {
@@ -79,7 +79,7 @@ const SudokuGame: React.FC = () => {
                 const { app } = await import('@/lib/firebase');
                 const auth = getAuth(app);
                 const user = auth.currentUser;
-                
+
                 if (user) {
                     const token = await user.getIdToken();
                     const response = await fetch(`/api/games/history?gameId=${SUDOKU_GAME_ID}`, {
@@ -94,22 +94,22 @@ const SudokuGame: React.FC = () => {
                 console.error('Error fetching history:', error);
             }
         })();
-            
+
         // Fetch scratcher config
         fetch('/api/games/settings')
-            .then(r=>r.json())
-            .then(d=>{
+            .then(r => r.json())
+            .then(d => {
                 const cfg = d.settings?.[SUDOKU_GAME_ID];
-                if(cfg?.scratcher?.enabled) setScratcherDrops(cfg.scratcher.drops||null);
+                if (cfg?.scratcher?.enabled) setScratcherDrops(cfg.scratcher.drops || null);
                 else setScratcherDrops(null);
             })
             .catch(console.error);
-            
+
         // Check if Game of the Day
         fetch('/api/games/game-of-the-day')
-            .then(r=>r.json())
-            .then(d=>{
-                if(d.gameId === SUDOKU_GAME_ID) setIsGameOfDay(true);
+            .then(r => r.json())
+            .then(d => {
+                if (d.gameId === SUDOKU_GAME_ID) setIsGameOfDay(true);
             })
             .catch(console.error);
     }, [level]);
@@ -155,24 +155,24 @@ const SudokuGame: React.FC = () => {
         setIsWon(true);
         confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
         setMessage('Awarding points...');
-        
+
         try {
-            const res = await fetch('/api/games/award', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ gameId: SUDOKU_GAME_ID, retry, level, time: timer }),
+            const result = await awardGamePoints({
+                gameId: SUDOKU_GAME_ID,
+                retry,
+                level,
+                points: Math.max(10 - timer * 0.1, 1) // Logic approximation, but server handles points usually
             });
-            const data = await res.json();
-            
-            if (data.success) {
-                setPoints(data.awardedPoints);
-                setMessage(data.message || `You received ${data.awardedPoints} points!${data.isGameOfDay ? ' (Game of the Day!)' : ''}`);
+
+            if (result.success) {
+                setPoints(result.awardedPoints || 0);
+                setMessage(result.message || `You received ${result.awardedPoints} points!`);
                 if (scratcherDrops) setShowScratcher(true);
-            } else if (res.status === 409) {
+            } else if (result.error === 'Already played today') {
                 setAlreadyPlayed(true);
-                setMessage(data.message || 'You already played today. Come back tomorrow!');
+                setMessage(result.message || 'You already played today. Come back tomorrow!');
             } else {
-                setMessage(data.error || 'Error awarding points');
+                setMessage(result.error || 'Error awarding points');
             }
         } catch (e) {
             setMessage('Error awarding points');
@@ -304,7 +304,7 @@ const SudokuGame: React.FC = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {leaderboard.map((row,i) => (
+                                {leaderboard.map((row, i) => (
                                     <tr key={i} className="border-t border-white/10">
                                         <td className="p-3">{row.userId.slice(0, 8)}...</td>
                                         <td className="p-3 text-amber-500 font-bold">{row.totalPoints}</td>
@@ -331,7 +331,7 @@ const SudokuGame: React.FC = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {history.map((row,i) => (
+                                {history.map((row, i) => (
                                     <tr key={i} className="border-t border-white/10">
                                         <td className="p-3">{new Date(row.awardedAt).toLocaleDateString()}</td>
                                         <td className="p-3 text-amber-500 font-bold">{row.points}</td>
