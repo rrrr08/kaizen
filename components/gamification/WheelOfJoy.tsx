@@ -96,18 +96,29 @@ const WheelOfJoy: React.FC = () => {
             const segmentAngle = 360 / prizes.length;
             const fullSpins = 5 * 360; // 5 full rotations
 
-            // Prize at index 0 occupies: 0° to 72° (3 o'clock)
-            // Pointer at 270 (top)
-
+            // Segment center is at (index * angle) + (angle / 2)
             const segmentStartAngle = prizeIndex * segmentAngle;
             const segmentCenterAngle = segmentStartAngle + (segmentAngle / 2);
 
-            // Pointer is at 0° (top) in CSS terms
-            const pointerAngle = 0;
-            const targetAngle = pointerAngle - segmentCenterAngle;
+            // We want to bring 'segmentCenterAngle' to the top (0 degrees).
+            // Current wheel position is 'currentRotation'.
+            // The required absolute rotation (modulo 360) is: 360 - segmentCenterAngle.
+            // (e.g. if center is 90, we need to be at 270 absolute to bring 90 to 0)
 
-            // Add to current rotation
-            const newRotation = currentRotation + fullSpins + targetAngle;
+            const correctionAngle = 360 - segmentCenterAngle;
+
+            // Calculate current offset modulo 360
+            const currentOffset = currentRotation % 360;
+
+            // Calculate delta needed to reach correctionAngle from currentOffset
+            let delta = correctionAngle - currentOffset;
+
+            // Ensure delta is positive (clockwise spin)
+            // If delta is negative, add 360 to ensure we spin forward
+            if (delta < 0) delta += 360;
+
+            // Add full spins plus the delta
+            const newRotation = currentRotation + fullSpins + delta;
 
             // 3. Animate
             await controls.start({
