@@ -70,6 +70,23 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
     const [isVisible, setIsVisible] = useState(true);
     const [phase, setPhase] = useState(1);
     const [logoUrl, setLogoUrl] = useState<string | null>(null);
+    const [greetingIndex, setGreetingIndex] = useState(0);
+
+    // Greetings in different languages
+    const greetings = [
+        { text: 'Hello!', emoji: '👋', lang: 'English' },
+        { text: 'नमस्ते!', emoji: '🙏', lang: 'Hindi' },
+        { text: 'Hola!', emoji: '🇪🇸', lang: 'Spanish' },
+        { text: 'Bonjour!', emoji: '🇫🇷', lang: 'French' },
+        { text: 'こんにちは!', emoji: '🇯🇵', lang: 'Japanese' },
+        { text: '你好!', emoji: '🇨🇳', lang: 'Chinese' },
+        { text: 'Hallo!', emoji: '🇩🇪', lang: 'German' },
+        { text: '안녕하세요!', emoji: '🇰🇷', lang: 'Korean' },
+        { text: 'مرحباً!', emoji: '🇸🇦', lang: 'Arabic' },
+        { text: 'Merhaba!', emoji: '🇹🇷', lang: 'Turkish' },
+        { text: 'Ciao!', emoji: '🇮🇹', lang: 'Italian' },
+        { text: 'Olá!', emoji: '🇧🇷', lang: 'Portuguese' },
+    ];
 
     useEffect(() => {
         // Fetch logo from API
@@ -88,6 +105,15 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
     }, []);
 
     useEffect(() => {
+        if (phase === 5) {
+            const interval = setInterval(() => {
+                setGreetingIndex((prev) => (prev + 1) % greetings.length);
+            }, 600); // 600ms cycle per language
+            return () => clearInterval(interval);
+        }
+    }, [phase, greetings.length]);
+
+    useEffect(() => {
 
         // Phase transitions
         const phase2Timer = setTimeout(() => setPhase(2), 800);
@@ -97,7 +123,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
         const completeTimer = setTimeout(() => {
             setIsVisible(false);
             onComplete?.();
-        }, 4500);
+        }, 8500);
 
         return () => {
             clearTimeout(phase2Timer);
@@ -292,21 +318,29 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
                         </motion.p>
                     )}
 
-                    {/* Greeting */}
+                    {/* Greeting - cycles through languages */}
                     {phase >= 5 && (
                         <motion.div
                             initial={{ opacity: 0, scale: 0.8 }}
                             animate={{ opacity: 1, scale: 1 }}
-                            transition={{ duration: 0.6, type: "spring", stiffness: 150 }}
+                            transition={{ duration: 0.4, type: "spring", stiffness: 200 }}
                             className="mt-8 md:mt-12 text-center"
                         >
-                            <motion.p
-                                className="text-3xl md:text-5xl font-black text-[#6C5CE7]"
-                                animate={{ y: [0, -5, 0] }}
-                                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-                            >
-                                🙏 Hello Namaste!
-                            </motion.p>
+                            <AnimatePresence mode="wait">
+                                <motion.div
+                                    key={greetingIndex}
+                                    initial={{ opacity: 0, y: 20, scale: 0.8 }}
+                                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                                    exit={{ opacity: 0, y: -20, scale: 0.5 }}
+                                    transition={{ duration: 0.2, ease: "easeOut" }}
+                                    className="flex flex-col items-center gap-2"
+                                >
+                                    <span className="text-4xl md:text-6xl">{greetings[greetingIndex].emoji}</span>
+                                    <p className="text-3xl md:text-5xl font-black text-[#6C5CE7]">
+                                        {greetings[greetingIndex].text}
+                                    </p>
+                                </motion.div>
+                            </AnimatePresence>
                         </motion.div>
                     )}
 
@@ -322,17 +356,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
                         Skip →
                     </motion.button>
 
-                    {/* Loading bar */}
-                    <motion.div
-                        initial={{ scaleX: 0 }}
-                        animate={{ scaleX: 1 }}
-                        transition={{ duration: 4.2, ease: "linear" }}
-                        className="absolute bottom-0 left-0 h-1 origin-left"
-                        style={{
-                            width: '100%',
-                            background: `linear-gradient(90deg, ${colors.yellow}, ${colors.purple}, ${colors.green}, ${colors.coral})`,
-                        }}
-                    />
+
                 </motion.div>
             )}
         </AnimatePresence>
