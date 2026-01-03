@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebaseAdmin';
+import { Timestamp, FieldValue } from 'firebase-admin/firestore';
 
 export async function GET(req: NextRequest) {
   try {
@@ -83,13 +84,13 @@ export async function POST(req: NextRequest) {
     const payload: any = {
       title,
       description,
-      datetime: adminDb.Timestamp.fromDate(new Date(datetime)),
+      datetime: Timestamp.fromDate(new Date(datetime)),
       location,
       status: status ?? 'upcoming',
       registered: registered || 0,
       capacity: Number(capacity),
-      createdAt: adminDb.FieldValue.serverTimestamp(),
-      updatedAt: adminDb.FieldValue.serverTimestamp(),
+      createdAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
     };
 
     if (price !== undefined) payload.price = Number(price);
