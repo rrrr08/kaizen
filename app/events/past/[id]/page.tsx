@@ -44,7 +44,7 @@ export default function EventDetail() {
     } else {
       setMyTestimonial(null);
     }
-  }, [user, event]);
+  }, [user, event])
 
   useEffect(() => {
     if (!id) return;
@@ -85,17 +85,24 @@ export default function EventDetail() {
       const res = await fetch(`/api/events/${event.id}/testimonial`, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ rating, comment }),
+        body: JSON.stringify({
+          rating,
+          comment,
+        }),
       });
 
       if (!res.ok) throw new Error('Failed to save testimonial');
 
       const data = await res.json();
 
+      // backend should return updated testimonials
       setEvent(prev =>
-        prev ? { ...prev, testimonials: data.testimonials } : prev
+        prev
+          ? { ...prev, testimonials: data.testimonials }
+          : prev
       );
     } catch (err) {
+      console.error(err);
       alert('Could not save testimonial');
     } finally {
       setSubmitting(false);
@@ -182,29 +189,36 @@ export default function EventDetail() {
               </Section>
             )}
 
-            {user && (
+            {/* Testimonials */}
+            {user && myTestimonial && (
               <Section title="Your Experience">
                 <div className="space-y-4 max-w-xl">
-                  <p className="text-charcoal/50 text-xs">RATING</p>
-                  <div className="flex gap-2">
-                    {[1, 2, 3, 4, 5].map(n => (
-                      <button
-                        key={n}
-                        onClick={() => setRating(n)}
-                        className={`text-2xl ${n <= rating ? 'text-amber-500' : 'text-charcoal/30'
-                          }`}
-                      >
-                        ★
-                      </button>
-                    ))}
+
+                  {/* Rating */}
+                  <div>
+                    <p className="text-white/40 text-xs mb-2">RATING</p>
+                    <div className="flex gap-2">
+                      {[1, 2, 3, 4, 5].map(n => (
+                        <button
+                          key={n}
+                          type="button"
+                          onClick={() => setRating(n)}
+                          className={`text-2xl transition ${n <= rating ? 'text-amber-500' : 'text-white/20'
+                            }`}
+                        >
+                          ★
+                        </button>
+                      ))}
+                    </div>
                   </div>
 
+                  {/* Comment */}
                   <textarea
                     value={comment}
                     onChange={e => setComment(e.target.value)}
-                    rows={4}
                     placeholder="Share your experience..."
-                    className="w-full bg-black/5 border border-black/10 p-4 text-charcoal rounded-sm focus:outline-none focus:border-amber-500"
+                    rows={4}
+                    className="w-full bg-white/5 border border-white/10 p-4 text-white text-sm rounded-sm focus:outline-none focus:border-amber-500"
                   />
 
                   <button
@@ -212,23 +226,25 @@ export default function EventDetail() {
                     disabled={submitting}
                     className="px-6 py-2 bg-amber-500 text-black text-xs font-header tracking-widest hover:bg-amber-400 disabled:opacity-50"
                   >
-                    {myTestimonial ? 'UPDATE TESTIMONIAL' : 'SUBMIT TESTIMONIAL'}
+                    {myTestimonial?.comment ? 'UPDATE TESTIMONIAL' : 'SUBMIT TESTIMONIAL'}
                   </button>
                 </div>
               </Section>
             )}
 
-            {event.testimonials && event.testimonials.length > 0 && (
+            {event.testimonials && event.testimonials?.length > 0 && (
               <Section title="What People Said">
                 <div className="space-y-6">
                   {event.testimonials.map((t, i) => (
-                    <blockquote
-                      key={i}
-                      className="border-l-2 border-amber-500 pl-6 text-charcoal/70 font-serif italic"
-                    >
+                    <blockquote key={i} className="border-l-2 border-amber-500 pl-6 text-white/70 font-serif italic">
                       "{t.comment}"
-                      <footer className="mt-2 text-charcoal/50 text-sm not-italic">
+                      <footer className="mt-2 text-white/40 text-sm not-italic">
                         — {t.name}
+                        {t.edited && (
+                          <span className="ml-2 text-[10px] uppercase tracking-widest text-amber-500">
+                            Edited
+                          </span>
+                        )}
                       </footer>
                     </blockquote>
                   ))}

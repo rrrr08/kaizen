@@ -9,6 +9,8 @@ import { getAuth } from 'firebase/auth';
 
 export const dynamic = 'force-dynamic';
 
+export const dynamic = 'force-dynamic';
+
 export default function CreateEventPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -27,9 +29,20 @@ export default function CreateEventPage() {
     registered: ''
   });
 
+  useEffect(() => {
+    (async () => {
+      const { auth } = await import('@/lib/firebase');
+      const { onAuthStateChanged } = await import('firebase/auth');
 
+      const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+        setUser(currentUser);
+      });
 
-  // Derived state: past/upcoming decided by datetime
+      return () => unsubscribe();
+    })();
+  }, []);
+
+  // ✅ Derived state: past/upcoming decided by datetime
   const isPast =
     form.datetime &&
     new Date(form.datetime).getTime() < Date.now();
