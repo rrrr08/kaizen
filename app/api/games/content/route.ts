@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
     await adminDb.doc(`gameContent/${gameId}`).set({
       ...content,
       updatedAt: new Date().toISOString(),
-      updatedBy: session.user.email
+      updatedBy: decodedToken.email || userData?.email || decodedToken.uid
     }, { merge: true });
     
     return NextResponse.json({ success: true });
