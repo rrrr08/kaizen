@@ -147,17 +147,23 @@ export default function PushNotificationsPage() {
         console.log('Notifications sent:', sendData);
       }
 
-      const newCampaign = {
+      const newCampaign: any = {
         title: formData.title,
         message: formData.message,
         status: 'sent',
         recipientCount: formData.recipientSegment === 'all' ? totalUsers : Math.floor(totalUsers * 0.1),
-        image: formData.image || undefined,
-        actionUrl: formData.actionUrl || undefined,
         priority: formData.priority,
       };
 
-      const docId = await addCampaign(newCampaign as any);
+      // Only add optional fields if they have values
+      if (formData.image && formData.image.trim()) {
+        newCampaign.image = formData.image;
+      }
+      if (formData.actionUrl && formData.actionUrl.trim()) {
+        newCampaign.actionUrl = formData.actionUrl;
+      }
+
+      const docId = await addCampaign(newCampaign);
 
       setCampaigns([
         {
