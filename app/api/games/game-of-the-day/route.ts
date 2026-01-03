@@ -19,7 +19,7 @@ export async function GET() {
     
     // Auto-select a random game for today
     const settingsSnap = await adminDb.doc('settings/gamePoints').get();
-    const settings = settingsSnap.exists ? settingsSnap.data() : {};
+    const settings = settingsSnap.exists ? settingsSnap.data() ?? {} : {};
     const gameIds = Object.keys(settings);
     
     if (!gameIds.length) {

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminAuth, adminDb } from '@/lib/firebaseAdmin';
+import { FieldValue } from 'firebase-admin/firestore';
 import { headers } from 'next/headers';
 
 // POST /api/user/unlock-tier - Purchase tier unlock with JP
@@ -58,7 +59,7 @@ export async function POST(req: NextRequest) {
       xp: xpGrant, // Set XP to tier minimum
       points: currentPoints - price, // Deduct JP
       lastTierUnlock: new Date().toISOString(),
-      unlockedTiers: adminDb.FieldValue.arrayUnion(tierName)
+      unlockedTiers: FieldValue.arrayUnion(tierName)
     }, { merge: true });
 
     // Log transaction

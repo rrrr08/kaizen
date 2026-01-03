@@ -130,6 +130,9 @@ export async function PUT(req: NextRequest) {
     }
     
     const policy = policySnap.data();
+    if (!policy) {
+      return NextResponse.json({ error: 'No rotation policy data' }, { status: 404 });
+    }
     const today = new Date().toISOString().slice(0, 10);
     
     // Generate new rotation

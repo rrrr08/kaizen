@@ -1,13 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { adminDb } from '@/lib/firebaseAdmin';
+import { adminAuth, adminDb } from '@/lib/firebaseAdmin';
 
 // POST /api/games/initialize - Admin only: Initialize default game settings
 export async function POST(req: NextRequest) {
   try {
-    const session = await getServerSession();
-    if (!session?.user?.isAdmin) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    // Get Firebase Auth token from Authorization header
+    const authorization = req.headers.get('authorization');
+    
+    if (!authorization?.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Unauthorized - No token provided' }, { status: 401 });
+    }
+
+    const token = authorization.split('Bearer ')[1];
+    let decodedToken;
+    
+    try {
+      decodedToken = await adminAuth.verifyIdToken(token);
+    } catch (error) {
+      console.error('Token verification failed:', error);
+      return NextResponse.json({ error: 'Unauthorized - Invalid token' }, { status: 401 });
+    }
+
+    // Check if user is admin
+    const userRef = adminDb.collection('users').doc(decodedToken.uid);
+    const userSnap = await userRef.get();
+    const userData = userSnap.data();
+    
+    if (!userData?.isAdmin && userData?.role !== 'admin') {
+      return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
     }
     
     // Default game configurations
