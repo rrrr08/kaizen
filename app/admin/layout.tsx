@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Settings, Users, BarChart3, Zap, Bell, ShoppingBag, Home, Calendar, LayoutGrid, FileText, Gamepad2, Trophy, Database, Ticket, TrendingUp,MessageSquare } from 'lucide-react';
+import { Settings, Users, BarChart3, Zap, Bell, ShoppingBag, Home, Calendar, LayoutGrid, FileText, Gamepad2, Trophy, Database, Ticket, TrendingUp, MessageSquare, Mail } from 'lucide-react';
 
 import { useAuth } from '@/app/context/AuthContext';
 
@@ -58,6 +58,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: '/admin/events', label: 'Events', icon: Calendar },
     { href: '/admin/testimonials', label: 'Testimonials', icon: MessageSquare },
     { href: '/admin/push-notifications', label: 'Notifications', icon: Bell },
+    { href: '/admin/emails', label: 'Send Emails', icon: Mail },
     { href: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
   ];
 

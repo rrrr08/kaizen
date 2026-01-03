@@ -4,11 +4,16 @@ import { useEffect, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-import { Bell, Settings, Smartphone } from 'lucide-react';
+import { Bell, Settings, Smartphone, MessageSquare } from 'lucide-react';
 import Link from 'next/link';
+import PhoneVerification from '@/components/PhoneVerification';
+import { auth, db } from '@/lib/firebase';
+import { doc, onSnapshot } from 'firebase/firestore';
 
 interface Preferences {
   pushEnabled: boolean;
+  inAppEnabled: boolean;
+  smsEnabled: boolean;
   categories: {
     promotional: boolean;
     offers: boolean;
@@ -35,7 +40,9 @@ interface Device {
 export default function NotificationPreferencesPage() {
   const { addToast } = useToast();
   const [preferences, setPreferences] = useState<Preferences>({
-    pushEnabled: false,
+    pushEnabled: true,
+    inAppEnabled: true,
+    smsEnabled: true,
     categories: {
       promotional: true,
       offers: true,
@@ -55,9 +62,26 @@ export default function NotificationPreferencesPage() {
   const [devices, setDevices] = useState<Device[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [phoneNumber, setPhoneNumber] = useState<string>('');
+  const [phoneVerified, setPhoneVerified] = useState(false);
 
   useEffect(() => {
     loadPreferencesAndDevices();
+    
+    // Subscribe to real-time phone number updates
+    const currentUser = auth.currentUser;
+    if (currentUser) {
+      const userRef = doc(db, 'users', currentUser.uid);
+      const unsubscribe = onSnapshot(userRef, (snapshot) => {
+        if (snapshot.exists()) {
+          const userData = snapshot.data();
+          setPhoneNumber(userData.phoneNumber || '');
+          setPhoneVerified(userData.phoneVerified || false);
+        }
+      });
+
+      return () => unsubscribe();
+    }
   }, []);
 
   async function loadPreferencesAndDevices() {
@@ -178,16 +202,19 @@ export default function NotificationPreferencesPage() {
 
           <h2 className="font-header text-2xl font-black uppercase text-black mb-6 flex items-center gap-3">
             <span className="w-8 h-8 bg-[#6C5CE7] rounded-lg border-2 border-black text-white flex items-center justify-center text-sm shadow-[2px_2px_0px_#000]">1</span>
-            Push Notifications
+            Notification Channels
           </h2>
 
-          {/* Enable/Disable */}
-          <div className="flex items-center justify-between p-6 bg-[#FFFDF5] border-2 border-black rounded-xl mb-8 shadow-[4px_4px_0px_#000] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_#000] transition-all">
-            <div>
-              <p className="font-black text-lg uppercase">Enable Push</p>
-              <p className="text-xs font-bold text-black/50 uppercase tracking-wider mt-1">
-                Receive real-time alerts
-              </p>
+          {/* Push Notifications Toggle */}
+          <div className="flex items-center justify-between p-6 bg-[#FFFDF5] border-2 border-black rounded-xl mb-4 shadow-[4px_4px_0px_#000] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_#000] transition-all">
+            <div className="flex items-center gap-3">
+              <Smartphone className="w-5 h-5 text-[#6C5CE7]" />
+              <div>
+                <p className="font-black text-lg uppercase">Push Notifications</p>
+                <p className="text-xs font-bold text-black/50 uppercase tracking-wider mt-1">
+                  Real-time alerts to your device
+                </p>
+              </div>
             </div>
             <Switch
               checked={preferences.pushEnabled}
@@ -200,6 +227,75 @@ export default function NotificationPreferencesPage() {
               className="data-[state=checked]:bg-[#00B894] data-[state=unchecked]:bg-gray-200 border-2 border-black"
             />
           </div>
+
+          {/* In-App Notifications Toggle */}
+          <div className="flex items-center justify-between p-6 bg-[#FFFDF5] border-2 border-black rounded-xl mb-4 shadow-[4px_4px_0px_#000] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_#000] transition-all">
+            <div className="flex items-center gap-3">
+              <Bell className="w-5 h-5 text-[#FF7675]" />
+              <div>
+                <p className="font-black text-lg uppercase">In-App Notifications</p>
+                <p className="text-xs font-bold text-black/50 uppercase tracking-wider mt-1">
+                  Notification bell icon updates
+                </p>
+              </div>
+            </div>
+            <Switch
+              checked={preferences.inAppEnabled}
+              onCheckedChange={(checked) =>
+                setPreferences((prev) => ({
+                  ...prev,
+                  inAppEnabled: checked,
+                }))
+              }
+              className="data-[state=checked]:bg-[#00B894] data-[state=unchecked]:bg-gray-200 border-2 border-black"
+            />
+          </div>
+
+          {/* SMS Notifications Toggle */}
+          <div className="flex items-center justify-between p-6 bg-[#FFFDF5] border-2 border-black rounded-xl mb-8 shadow-[4px_4px_0px_#000] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_#000] transition-all">
+            <div className="flex items-center gap-3">
+              <MessageSquare className="w-5 h-5 text-[#00B894]" />
+              <div>
+                <p className="font-black text-lg uppercase">SMS Notifications</p>
+                <p className="text-xs font-bold text-black/50 uppercase tracking-wider mt-1">
+                  Text message alerts
+                </p>
+              </div>
+            </div>
+            <Switch
+              checked={preferences.smsEnabled}
+              onCheckedChange={(checked) =>
+                setPreferences((prev) => ({
+                  ...prev,
+                  smsEnabled: checked,
+                }))
+              }
+              className="data-[state=checked]:bg-[#00B894] data-[state=unchecked]:bg-gray-200 border-2 border-black"
+            />
+          </div>
+
+          {/* Phone Verification Section for SMS */}
+          {preferences.smsEnabled && (
+            <div className="mt-8 mb-10 pt-8 border-t-2 border-black/10">
+              <h3 className="font-black text-xl uppercase text-black mb-4 flex items-center gap-2">
+                <MessageSquare className="w-5 h-5 text-[#00B894]" />
+                Phone Verification
+              </h3>
+              <p className="text-sm font-bold text-black/60 mb-6">
+                Verify your phone number to receive SMS notifications
+              </p>
+              <PhoneVerification
+                currentPhone={phoneNumber}
+                isVerified={phoneVerified}
+                onVerified={() => {
+                  addToast({
+                    title: 'Success!',
+                    description: 'Phone number verified. You can now receive SMS notifications.',
+                  });
+                }}
+              />
+            </div>
+          )}
 
           {/* Notification Categories */}
           <div className="space-y-4 mb-10">

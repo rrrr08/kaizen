@@ -17,7 +17,9 @@ export async function GET(request: Request) {
       // Return default preferences
       return Response.json({
         preferences: {
-          pushEnabled: false,
+          pushEnabled: true,
+          inAppEnabled: true,
+          smsEnabled: true,
           categories: {
             promotional: true,
             offers: true,

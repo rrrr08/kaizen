@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Bell, Send, Clock, BarChart3, Users } from 'lucide-react';
+import { Bell, Send, Clock, BarChart3, Users, Smartphone, MessageSquare } from 'lucide-react';
 import { getCampaigns, addCampaign, Campaign } from '@/lib/firebase';
 
 export default function PushNotificationsPage() {
@@ -27,6 +27,7 @@ export default function PushNotificationsPage() {
     priority: 'normal',
     recipientSegment: 'all',
     scheduledFor: '',
+    channels: ['push', 'in-app'] as ('push' | 'in-app' | 'sms')[],
   });
 
   useEffect(() => {
@@ -135,7 +136,8 @@ export default function PushNotificationsPage() {
             type: 'info',
             actionUrl: formData.actionUrl || null,
             recipientSegment: formData.recipientSegment,
-            image: formData.image || null
+            image: formData.image || null,
+            channels: formData.channels
           })
         });
 
@@ -145,6 +147,14 @@ export default function PushNotificationsPage() {
 
         const sendData = await sendResponse.json();
         console.log('Notifications sent:', sendData);
+
+        // Show quiet hours info if applicable
+        if (sendData.skippedDueToQuietHours?.total > 0) {
+          addToast({
+            title: 'Quiet Hours Active',
+            description: `${sendData.skippedDueToQuietHours.total} users skipped due to quiet hours (Normal priority respects user preferences)`,
+          });
+        }
       }
 
       const newCampaign: any = {
@@ -190,6 +200,7 @@ export default function PushNotificationsPage() {
         priority: 'normal',
         recipientSegment: 'all',
         scheduledFor: '',
+        channels: ['push', 'in-app'],
       });
     } catch (error) {
       console.error('Error sending campaign:', error);
@@ -322,6 +333,122 @@ export default function PushNotificationsPage() {
                   />
                 </div>
 
+                {/* Notification Channels */}
+                <div>
+                  <label className="block text-black font-black text-xs uppercase tracking-widest mb-3">
+                    Notification Channels <span className="text-[#FF7675]">*</span>
+                  </label>
+                  <div className="space-y-3">
+                    <div
+                      onClick={() => {
+                        const newChannels = formData.channels.includes('push')
+                          ? formData.channels.filter(c => c !== 'push')
+                          : [...formData.channels, 'push'];
+                        setFormData(prev => ({ ...prev, channels: newChannels as ('push' | 'in-app')[] }));
+                      }}
+                      className={`
+                        flex items-center gap-3 p-4 border-2 border-black rounded-xl cursor-pointer transition-all
+                        ${formData.channels.includes('push')
+                          ? 'bg-[#6C5CE7] text-white shadow-[4px_4px_0px_#000]'
+                          : 'bg-[#FFFDF5] text-black hover:translate-y-[-2px] hover:shadow-[2px_2px_0px_#000]'
+                        }
+                      `}
+                    >
+                      <div className={`
+                        w-6 h-6 rounded-lg border-2 flex items-center justify-center font-black text-lg
+                        ${formData.channels.includes('push')
+                          ? 'bg-white text-[#6C5CE7] border-white'
+                          : 'bg-white border-black'
+                        }
+                      `}>
+                        {formData.channels.includes('push') && '✓'}
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-black text-sm uppercase">Push Notifications</p>
+                        <p className={`text-xs font-bold uppercase tracking-wider mt-0.5 ${
+                          formData.channels.includes('push') ? 'text-white/80' : 'text-black/50'
+                        }`}>
+                          Real-time device alerts
+                        </p>
+                      </div>
+                    </div>
+
+                    <div
+                      onClick={() => {
+                        const newChannels = formData.channels.includes('in-app')
+                          ? formData.channels.filter(c => c !== 'in-app')
+                          : [...formData.channels, 'in-app'];
+                        setFormData(prev => ({ ...prev, channels: newChannels as ('push' | 'in-app' | 'sms')[] }));
+                      }}
+                      className={`
+                        flex items-center gap-3 p-4 border-2 border-black rounded-xl cursor-pointer transition-all
+                        ${formData.channels.includes('in-app')
+                          ? 'bg-[#FF7675] text-white shadow-[4px_4px_0px_#000]'
+                          : 'bg-[#FFFDF5] text-black hover:translate-y-[-2px] hover:shadow-[2px_2px_0px_#000]'
+                        }
+                      `}
+                    >
+                      <div className={`
+                        w-6 h-6 rounded-lg border-2 flex items-center justify-center font-black text-lg
+                        ${formData.channels.includes('in-app')
+                          ? 'bg-white text-[#FF7675] border-white'
+                          : 'bg-white border-black'
+                        }
+                      `}>
+                        {formData.channels.includes('in-app') && '✓'}
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-black text-sm uppercase">In-App Notifications</p>
+                        <p className={`text-xs font-bold uppercase tracking-wider mt-0.5 ${
+                          formData.channels.includes('in-app') ? 'text-white/80' : 'text-black/50'
+                        }`}>
+                          Notification bell icon
+                        </p>
+                      </div>
+                    </div>
+
+                    <div
+                      onClick={() => {
+                        const newChannels = formData.channels.includes('sms')
+                          ? formData.channels.filter(c => c !== 'sms')
+                          : [...formData.channels, 'sms'];
+                        setFormData(prev => ({ ...prev, channels: newChannels as ('push' | 'in-app' | 'sms')[] }));
+                      }}
+                      className={`
+                        flex items-center gap-3 p-4 border-2 border-black rounded-xl cursor-pointer transition-all
+                        ${formData.channels.includes('sms')
+                          ? 'bg-[#00B894] text-white shadow-[4px_4px_0px_#000]'
+                          : 'bg-[#FFFDF5] text-black hover:translate-y-[-2px] hover:shadow-[2px_2px_0px_#000]'
+                        }
+                      `}
+                    >
+                      <div className={`
+                        w-6 h-6 rounded-lg border-2 flex items-center justify-center font-black text-lg
+                        ${formData.channels.includes('sms')
+                          ? 'bg-white text-[#00B894] border-white'
+                          : 'bg-white border-black'
+                        }
+                      `}>
+                        {formData.channels.includes('sms') && '✓'}
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-black text-sm uppercase">SMS Notifications</p>
+                        <p className={`text-xs font-bold uppercase tracking-wider mt-0.5 ${
+                          formData.channels.includes('sms') ? 'text-white/80' : 'text-black/50'
+                        }`}>
+                          Text message alerts
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <p className="text-xs text-black/40 font-bold mt-2 uppercase tracking-wide">
+                    {formData.channels.length === 0 && '⚠️ Select at least one channel'}
+                    {formData.channels.length === 1 && `Selected: ${formData.channels[0] === 'push' ? 'Push only' : formData.channels[0] === 'sms' ? 'SMS only' : 'In-App only'}`}
+                    {formData.channels.length > 1 && `${formData.channels.length} channels selected`}
+                  </p>
+                </div>
+
+                {/* 
                 {/* Priority */}
                 <div>
                   <label className="block text-black font-black text-xs uppercase tracking-widest mb-2">Priority</label>
@@ -416,6 +543,7 @@ export default function PushNotificationsPage() {
                       priority: 'normal',
                       recipientSegment: 'all',
                       scheduledFor: '',
+                      channels: ['push', 'in-app'],
                     })}
                     className="px-6 py-4 bg-white text-black font-black uppercase tracking-widest rounded-xl border-2 border-black hover:bg-gray-50 transition-all"
                   >
