@@ -6,10 +6,10 @@ export async function GET() {
   try {
     const today = new Date().toISOString().slice(0, 10);
     const gotdSnap = await adminDb.doc('settings/gameOfTheDay').get();
-    const gotd = gotdSnap.exists ? gotdSnap.data() : {};
+    const gotd = gotdSnap.exists ? gotdSnap.data() : undefined;
     
     // If already set for today, return it
-    if (gotd.date === today && gotd.gameId) {
+    if (gotd && gotd.date === today && gotd.gameId) {
       return NextResponse.json({ 
         gameId: gotd.gameId, 
         date: gotd.date,
