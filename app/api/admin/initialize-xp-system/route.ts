@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
     const xpSystemRef = adminDb.doc('settings/xpSystem');
     const xpSystemSnap = await xpSystemRef.get();
 
-    if (xpSystemSnap.exists()) {
+    if (xpSystemSnap.exists) {
       return NextResponse.json({
         success: false,
         message: 'XP system already initialized. Use the admin panel to modify settings.',
