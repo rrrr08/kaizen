@@ -11,7 +11,7 @@ interface ClientLayoutProps {
 }
 
 export default function ClientLayout({ children }: ClientLayoutProps) {
-    const [showSplash, setShowSplash] = useState(false);
+    const [showSplash, setShowSplash] = useState(true);
     const [isClient, setIsClient] = useState(false);
     const { user, loading } = useAuth();
 
@@ -44,9 +44,13 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
     return (
         <>
             {showSplash && <SplashScreen onComplete={handleSplashComplete} />}
-            <Navbar />
-            {children}
-            <Footer />
+            {!showSplash && (
+                <>
+                    <Navbar />
+                    {children}
+                    <Footer />
+                </>
+            )}
         </>
     );
 }
