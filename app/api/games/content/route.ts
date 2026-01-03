@@ -67,9 +67,21 @@ export async function POST(req: NextRequest) {
 // DELETE /api/games/content - Delete content item (Admin only)
 export async function DELETE(req: NextRequest) {
   try {
-    const session = await getServerSession();
-    if (!session?.user?.isAdmin) {
+    const authorization = req.headers.get('authorization');
+    
+    if (!authorization?.startsWith('Bearer ')) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const token = authorization.split('Bearer ')[1];
+    const decodedToken = await adminAuth.verifyIdToken(token);
+    
+    // Check if user is admin
+    const userDoc = await adminDb.collection('users').doc(decodedToken.uid).get();
+    const userData = userDoc.data();
+    
+    if (!userData?.isAdmin && userData?.role !== 'admin') {
+      return NextResponse.json({ error: 'Forbidden - Admin access required' }, { status: 403 });
     }
     
     const { searchParams } = new URL(req.url);
