@@ -12,51 +12,7 @@ import { GameEvent } from '@/lib/types';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
-// Dummy data for featured products
-const featuredProducts: Product[] = [
-  {
-    id: '1',
-    name: 'Catan: Starfarers',
-    price: 99,
-    image: 'https://images.unsplash.com/photo-1611195974226-a6a9be9dd763?auto=format&fit=crop&q=80&w=800',
-    players: '3-4',
-    time: '120m',
-    mood: 'Strategic',
-    badges: ['Staff Pick', 'Collector Edition'],
-    description: 'Explore the vast galaxy in this simplified Catan variant designed for space exploration enthusiasts.',
-    story: 'The year is 2700. Humanity has taken to the stars. You are the leader of a faction seeking to establish a foothold in the galaxy.',
-    howToPlay: 'Roll dice to gather resources, trade with other players, and build your starships to explore new plan',
-    occasion: ['Game Night', 'Strategy Session']
-  },
-  {
-    id: '2',
-    name: 'Exploding Kittens',
-    price: 25,
-    image: 'https://images.unsplash.com/photo-1626027063853-9d22080a97c4?auto=format&fit=crop&q=80&w=800',
-    players: '2-5',
-    time: '15m',
-    mood: 'Chaotic Fun',
-    badges: ['Bestseller', 'First-time Friendly'],
-    description: 'A kitty-powered version of Russian Roulette. Players draw cards until someone draws an Exploding Kitten.',
-    story: 'In a world where kittens explore grenades, only one can survive.',
-    howToPlay: 'Draw cards. Don\'t explode. Use defuse cards and other actions to avoid the kittens.',
-    occasion: ['Party', 'Ice Breaker']
-  },
-  {
-    id: '3',
-    name: 'Dixit',
-    price: 35,
-    image: 'https://images.unsplash.com/photo-1606821165181-42cb06d0ba41?auto=format&fit=crop&q=80&w=800',
-    players: '3-6',
-    time: '30m',
-    mood: 'Creative',
-    badges: ['Family Favorite'],
-    description: 'An illustrated game of creative guesswork, where your imagination unlocks the tale.',
-    story: 'A picture is worth a thousand words. Can you guess which picture matches the storyteller\'s phrase?',
-    howToPlay: 'One player acts as the storyteller and gives a clue. Others choose a card that best matches. Vote for the correct card.',
-    occasion: ['Family Night', 'Creative Workshop']
-  }
-];
+// Product interface is already imported from @/lib/types
 
 interface HomepageContent {
   hero: {
@@ -85,6 +41,8 @@ interface HomepageContent {
 export default function Home() {
   const [events, setEvents] = useState<GameEvent[]>([]);
   const [loadingEvents, setLoadingEvents] = useState(true);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loadingProducts, setLoadingProducts] = useState(true);
   const [content, setContent] = useState<HomepageContent | null>(null);
 
   useEffect(() => {
@@ -98,6 +56,18 @@ export default function Home() {
         }
       } catch (err) {
         console.error('Error fetching homepage content:', err);
+      }
+
+      // Fetch Products (Actual Games)
+      try {
+        setLoadingProducts(true);
+        const { getProducts } = await import('@/lib/firebase');
+        const data = await getProducts();
+        setProducts(data as Product[]);
+      } catch (err) {
+        console.error('Error fetching products:', err);
+      } finally {
+        setLoadingProducts(false);
       }
 
       // Fetch Events
@@ -132,8 +102,8 @@ export default function Home() {
         <div className="container mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
             <div>
-              <h2 className="text-4xl font-black mb-4">Trending Games</h2>
-              <p className="text-xl font-medium text-charcoal/60">The hottest drops this week.</p>
+              <h2 className="text-4xl font-black mb-4">{content?.trending?.title || 'Trending Games'}</h2>
+              <p className="text-xl font-medium text-charcoal/60">{content?.trending?.subtitle || 'The hottest drops this week.'}</p>
             </div>
             <Link href="/shop">
               <button className="bg-black text-white px-8 py-4 rounded-full font-bold neo-shadow hover:translate-y-[-2px] transition-transform">
@@ -143,9 +113,15 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-            {featuredProducts.map(product => (
-              <ProductCard key={product.id} product={product} />
-            ))}
+            {loadingProducts ? (
+              <div className="col-span-3 text-center text-xl font-bold py-12">Loading Trending Games...</div>
+            ) : products.length > 0 ? (
+              products.slice(0, 3).map(product => (
+                <ProductCard key={product.id} product={product} />
+              ))
+            ) : (
+              <div className="col-span-3 text-center text-xl font-bold py-12 text-black/40">No games found in the repository yet.</div>
+            )}
           </div>
         </div>
       </section>
