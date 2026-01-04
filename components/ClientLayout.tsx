@@ -45,12 +45,12 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
         if (!isClient || loading || !hasShownInitialSplash || previousAuthState === null) return;
 
         const isAuthenticated = !!user;
-        
+
         // Show splash when transitioning from unauthenticated to authenticated
         if (previousAuthState === false && isAuthenticated) {
             setShowSplash(true);
         }
-        
+
         setPreviousAuthState(isAuthenticated);
     }, [user, loading, isClient, hasShownInitialSplash, previousAuthState]);
 
@@ -67,13 +67,15 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
         );
     }
 
+    const isAdminPage = pathname?.startsWith('/admin');
+
     // For other pages or after splash completes
     return (
         <>
             {showSplash && <SplashScreen onComplete={handleSplashComplete} />}
-            <Navbar />
+            {!isAdminPage && <Navbar />}
             {children}
-            <Footer />
+            {!isAdminPage && <Footer />}
         </>
     );
 }

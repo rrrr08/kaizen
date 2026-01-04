@@ -1,0 +1,30 @@
+
+> kaizen@0.1.0 build D:\CODING\kaizen
+> next build
+
+   ▲ Next.js 16.0.10 (Turbopack)
+   - Environments: .env.production, .env
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 13.0s
+   Running TypeScript ...
+Failed to compile.
+
+.next/dev/types/validator.ts:729:31
+Type error: Type 'typeof import("D:/CODING/kaizen/app/api/admin/shipments/[id]/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/admin/shipments/[id]">'.
+  Types of property 'GET' are incompatible.
+    Type '(req: NextRequest, { params }: { params: { id: string; }; }) => Promise<NextResponse<{ createdAt: any; id: string; }> | NextResponse<{ message: any; }>>' is not assignable to type '(request: NextRequest, context: { params: Promise<{ id: string; }>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{ id: string; }>; }' is not assignable to type '{ params: { id: string; }; }'.
+          Types of property 'params' are incompatible.
+            Property 'id' is missing in type 'Promise<{ id: string; }>' but required in type '{ id: string; }'.
+
+[0m [90m 727 |[39m   type __IsExpected[33m<[39m[33mSpecific[39m [36mextends[39m [33mRouteHandlerConfig[39m[33m<[39m[32m"/api/admin/shipments/[id]"[39m[33m>>[39m [33m=[39m [33mSpecific[39m
+ [90m 728 |[39m   [36mconst[39m handler [33m=[39m {} [36mas[39m [36mtypeof[39m [36mimport[39m([32m"../../../app/api/admin/shipments/[id]/route.js"[39m)
+[31m[1m>[22m[39m[90m 729 |[39m   type __Check [33m=[39m __IsExpected[33m<[39m[36mtypeof[39m handler[33m>[39m
+ [90m     |[39m                               [31m[1m^[22m[39m
+ [90m 730 |[39m   [90m// @ts-ignore[39m
+ [90m 731 |[39m   type __Unused [33m=[39m __Check
+ [90m 732 |[39m }[0m
+Next.js build worker exited with code: 1 and signal: null
+ ELIFECYCLE  Command failed with exit code 1.

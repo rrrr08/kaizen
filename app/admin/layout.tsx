@@ -1,9 +1,10 @@
+
 'use client';
 
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Settings, Users, BarChart3, Zap, Bell, ShoppingBag, Home, Calendar, LayoutGrid, FileText, Gamepad2, Trophy, Database, Ticket, TrendingUp,MessageSquare } from 'lucide-react';
+import { Settings, Users, BarChart3, Zap, Bell, ShoppingBag, Home, Calendar, LayoutGrid, FileText, Gamepad2, Trophy, Database, Ticket, TrendingUp, MessageSquare, Truck, ChevronLeft, ChevronRight, Menu, X } from 'lucide-react';
 
 import { useAuth } from '@/app/context/AuthContext';
 
@@ -11,6 +12,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname();
   const router = useRouter();
   const { user, loading, isAdmin } = useAuth();
+
+  // Sidebar State
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -52,6 +57,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: '/admin/vouchers', label: 'Vouchers', icon: Ticket },
     { href: '/admin/api-test', label: 'API Test', icon: Zap },
     { href: '/admin/orders', label: 'Orders', icon: ShoppingBag },
+    { href: '/admin/shipments', label: 'Shipments', icon: Truck },
     { href: '/admin/products', label: 'Products', icon: LayoutGrid },
     { href: '/admin/media', label: 'Media', icon: FileText },
     { href: '/admin/blog', label: 'Blog', icon: FileText },
@@ -63,13 +69,55 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <div className="flex min-h-screen bg-[#FFFDF5] text-black font-sans">
+
+      {/* Mobile Header */}
+      <div className="md:hidden fixed top-0 w-full bg-white border-b-2 border-black z-50 p-4 flex justify-between items-center">
+        <div className="flex items-center gap-2">
+          <h2 className="font-header text-xl font-black">JOY ADMIN</h2>
+        </div>
+        <button onClick={() => setIsMobileOpen(!isMobileOpen)} className="p-2 neo-border">
+          {isMobileOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
+      </div>
+
+      {/* Overlay for Mobile */}
+      {isMobileOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-30 md:hidden"
+          onClick={() => setIsMobileOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <div className="w-64 bg-white border-r-2 border-black fixed h-screen pt-24 overflow-y-auto z-40">
-        <div className="p-6 space-y-4">
-          <div className="mb-8">
-            <h2 className="font-header text-4xl font-black text-black mb-1">JOY</h2>
-            <p className="font-black text-xs text-black/40 tracking-[0.2em] uppercase">ADMIN PANEL</p>
+      <div
+        className={`
+           fixed h-screen bg-white border-r-2 border-black z-40 transition-all duration-300
+           ${isCollapsed ? 'w-20' : 'w-64'}
+           ${isMobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+           pt-24 md:pt-8
+         `}
+      >
+        {/* Toggle Button (Desktop Only) */}
+        <button
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className="hidden md:flex absolute -right-3 top-10 bg-white border-2 border-black rounded-full p-1 hover:bg-yellow transition-colors"
+        >
+          {isCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+        </button>
+
+        <div className={`p-4 h-full overflow-y-auto ${isCollapsed ? 'px-2' : ''}`}>
+          {/* Logo Area */}
+          <div className={`mb-8 ${isCollapsed ? 'text-center' : 'px-2'}`}>
+            {isCollapsed ? (
+              <span className="font-header text-2xl font-black">J</span>
+            ) : (
+              <>
+                <h2 className="font-header text-3xl font-black text-black leading-none">JOY</h2>
+                <p className="font-black text-[10px] text-black/40 tracking-[0.2em] uppercase">ADMIN PANEL</p>
+              </>
+            )}
           </div>
+
           <nav className="space-y-2">
             {adminMenuItems.map((item) => {
               const Icon = item.icon;
@@ -78,13 +126,26 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-[12px] transition-all duration-200 text-sm font-black uppercase tracking-wide border-2 ${isActive
-                    ? 'bg-[#FFD93D] text-black border-black neo-shadow-sm'
-                    : 'text-black/60 border-transparent hover:bg-black/5 hover:text-black'
-                    }`}
+                  title={isCollapsed ? item.label : ''}
+                  className={`
+                    flex items-center gap-3 px-3 py-3 rounded-[12px] transition-all duration-200 
+                    font-black uppercase tracking-wide border-2 group
+                    ${isActive
+                      ? 'bg-[#FFD93D] text-black border-black neo-shadow-sm'
+                      : 'text-black/60 border-transparent hover:bg-black/5 hover:text-black'
+                    }
+                    ${isCollapsed ? 'justify-center' : ''}
+                  `}
                 >
-                  <Icon size={18} strokeWidth={2.5} />
-                  <span>{item.label}</span>
+                  <Icon size={20} strokeWidth={2.5} className="flex-shrink-0" />
+                  {!isCollapsed && <span className="text-sm truncate">{item.label}</span>}
+
+                  {/* Tooltip for collapsed state */}
+                  {isCollapsed && (
+                    <div className="absolute left-full ml-2 px-2 py-1 bg-black text-white text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50">
+                      {item.label}
+                    </div>
+                  )}
                 </Link>
               );
             })}
@@ -93,8 +154,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 ml-64 pt-24">
-        <div className="min-h-screen bg-[#FFFDF5] p-6">
+      <div
+        className={`
+            flex-1 min-h-screen transition-all duration-300
+            ${isCollapsed ? 'md:ml-20' : 'md:ml-64'}
+            pt-16 md:pt-0
+         `}
+      >
+        <div className="p-6">
           {children}
         </div>
       </div>
