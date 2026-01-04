@@ -169,6 +169,21 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
   const workshopDiscountPercent = allTiers.length > 2 && xp >= allTiers[2].minXP ? 5 : 0;
   const hasVIPSeating = allTiers.length > 3 && xp >= allTiers[3].minXP;
 
+  /**
+   * Automatic Streak Update
+   * Check and update streak when user visits (loads context)
+   */
+  useEffect(() => {
+    if (user && !loading) {
+      const today = new Date().toISOString().split('T')[0];
+      // Only attempt update if local state shows it's not updated yet
+      // updateStreak() has internal checks strictly against DB/logic too
+      if (streak.lastActiveDate !== today) {
+        updateStreak().catch(err => console.error("Auto-streak update failed:", err));
+      }
+    }
+  }, [user, loading, streak.lastActiveDate]);
+
   // Actions
   const awardPoints = async (amount: number, reason: string) => {
     if (!user) return;
