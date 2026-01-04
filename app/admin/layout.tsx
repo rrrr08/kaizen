@@ -65,6 +65,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: '/admin/testimonials', label: 'Testimonials', icon: MessageSquare },
     { href: '/admin/push-notifications', label: 'Notifications', icon: Bell },
     { href: '/admin/emails', label: 'Send Emails', icon: Mail },
+    { href: '/admin/inquiries', label: 'Enquiries', icon: MessageSquare },
     { href: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
   ];
 

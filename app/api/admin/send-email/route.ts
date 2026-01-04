@@ -5,18 +5,18 @@ import nodemailer from 'nodemailer';
 export async function POST(req: NextRequest) {
   try {
     const authorization = req.headers.get('authorization');
-    
+
     if (!authorization?.startsWith('Bearer ')) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const token = authorization.split('Bearer ')[1];
     const decodedToken = await adminAuth.verifyIdToken(token);
-    
+
     // Check if user is admin
     const userDoc = await adminDb.collection('users').doc(decodedToken.uid).get();
     const userData = userDoc.data();
-    
+
     if (!userData?.isAdmin && userData?.role !== 'admin') {
       return NextResponse.json({ error: 'Forbidden - Admin access required' }, { status: 403 });
     }
@@ -34,28 +34,30 @@ export async function POST(req: NextRequest) {
 
     if (!emailUser || !emailPass) {
       console.error('Email credentials not configured');
-      return NextResponse.json({ 
-        error: 'Email service not configured. Please add EMAIL_USER and EMAIL_APP_PASSWORD to environment variables.' 
+      return NextResponse.json({
+        error: 'Email service not configured. Please add EMAIL_USER and EMAIL_APP_PASSWORD to environment variables.'
       }, { status: 500 });
     }
 
-    // Create transporter with explicit port 587 and STARTTLS
+    // Create transporter using Gmail service with debugging
     const transporter = nodemailer.createTransport({
       host: 'smtp.gmail.com',
       port: 587,
-      secure: false, // use STARTTLS
+      secure: false,
       auth: {
         user: emailUser,
         pass: emailPass,
       },
+      logger: true,
+      debug: true,
       tls: {
-        rejectUnauthorized: false // Allow self-signed certificates (for development)
+        rejectUnauthorized: false
       }
     });
 
     // Get users based on segment
     let usersSnapshot;
-    
+
     if (recipientSegment !== 'all') {
       usersSnapshot = await adminDb.collection('users')
         .where('tier', '==', recipientSegment)
@@ -69,8 +71,8 @@ export async function POST(req: NextRequest) {
       .filter(user => user.email);
 
     if (users.length === 0) {
-      return NextResponse.json({ 
-        error: 'No users found with email addresses' 
+      return NextResponse.json({
+        error: 'No users found with email addresses'
       }, { status: 400 });
     }
 
@@ -122,9 +124,9 @@ export async function POST(req: NextRequest) {
 
   } catch (error: any) {
     console.error('Error sending emails:', error);
-    return NextResponse.json({ 
+    return NextResponse.json({
       error: 'Internal server error',
-      details: error.message 
+      details: error.message
     }, { status: 500 });
   }
 }

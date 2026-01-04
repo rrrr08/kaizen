@@ -30,7 +30,7 @@ const Footer = () => {
             <a href="https://www.youtube.com/@Joy_Juncture" target="_blank" rel="noopener noreferrer" className="p-3 bg-white neo-border neo-shadow hover:translate-y-[-2px] transition-transform text-black">
               <Youtube size={20} />
             </a>
-           
+
           </div>
         </div>
 
@@ -49,7 +49,7 @@ const Footer = () => {
           <ul className="space-y-2 font-bold text-[#2D3436]/60">
             <li><Link href="/blog" className="hover:text-black">Blog</Link></li>
             <li><Link href="/community" className="hover:text-black">Community</Link></li>
-            <li><Link href="/community" className="hover:text-black">Contact</Link></li>
+            <li><Link href="/contact" className="hover:text-black">Contact</Link></li>
           </ul>
         </div>
       </div>

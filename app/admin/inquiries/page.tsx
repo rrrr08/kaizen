@@ -1,0 +1,236 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { adminAuth, auth } from '@/lib/firebase';
+import { Trash2, ExternalLink, Calendar, User, Mail, MessageSquare, AlertCircle } from 'lucide-react';
+import RoleProtected from '@/components/auth/RoleProtected';
+import { USER_ROLES } from '@/lib/roles';
+import { format } from 'date-fns';
+
+interface Inquiry {
+    id: string;
+    name: string;
+    email: string;
+    subject: string;
+    message: string;
+    createdAt: any;
+    status: string;
+}
+
+export default function AdminInquiriesPage() {
+    const [inquiries, setInquiries] = useState<Inquiry[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [selectedInquiry, setSelectedInquiry] = useState<Inquiry | null>(null);
+
+    const fetchInquiries = async () => {
+        try {
+            const currentUser = auth.currentUser;
+            if (!currentUser) return;
+
+            const token = await currentUser.getIdToken();
+            const response = await fetch('/api/admin/inquiries', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            const data = await response.json();
+            setInquiries(data.inquiries || []);
+        } catch (error) {
+            console.error('Error fetching inquiries:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchInquiries();
+    }, []);
+
+    const handleDelete = async (id: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (!confirm('Are you sure you want to delete this inquiry?')) return;
+
+        try {
+            const currentUser = auth.currentUser;
+            if (!currentUser) return;
+
+            const token = await currentUser.getIdToken();
+            await fetch(`/api/admin/inquiries/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            setInquiries(inquiries.filter(iq => iq.id !== id));
+            if (selectedInquiry?.id === id) setSelectedInquiry(null);
+        } catch (error) {
+            console.error('Error deleting inquiry:', error);
+        }
+    };
+
+    return (
+        <RoleProtected allowedRoles={[USER_ROLES.ADMIN]}>
+            <div className="min-h-screen pt-8 pb-16">
+                <div className="mb-12 border-b-2 border-black pb-8 flex justify-between items-end">
+                    <div>
+                        <div className="flex items-center gap-4 mb-4">
+                            <div className="w-16 h-16 rounded-xl bg-[#6C5CE7] border-2 border-black flex items-center justify-center shadow-[4px_4px_0px_#000]">
+                                <MessageSquare className="w-8 h-8 text-white" />
+                            </div>
+                            <div>
+                                <h1 className="font-header text-5xl font-black text-black uppercase tracking-tighter">Inquiries</h1>
+                                <p className="text-black/60 font-bold text-lg">Manage user submissions from the contact form</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="bg-white border-2 border-black px-6 py-3 rounded-xl neo-shadow font-black uppercase text-sm">
+                        Total Inquiries: {inquiries.length}
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                    {/* List Section */}
+                    <div className="lg:col-span-12">
+                        <div className="bg-white border-2 border-black rounded-[25px] overflow-hidden shadow-[8px_8px_0px_#000]">
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr className="bg-black text-white">
+                                            <th className="p-4 font-black uppercase tracking-wider text-xs">Date</th>
+                                            <th className="p-4 font-black uppercase tracking-wider text-xs">Sender</th>
+                                            <th className="p-4 font-black uppercase tracking-wider text-xs">Subject</th>
+                                            <th className="p-4 font-black uppercase tracking-wider text-xs">Status</th>
+                                            <th className="p-4 font-black uppercase tracking-wider text-xs text-right">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {loading ? (
+                                            <tr>
+                                                <td colSpan={5} className="p-12 text-center text-black/40 font-black uppercase animate-pulse">
+                                                    Loading Inquiries...
+                                                </td>
+                                            </tr>
+                                        ) : inquiries.length === 0 ? (
+                                            <tr>
+                                                <td colSpan={5} className="p-12 text-center">
+                                                    <AlertCircle className="w-12 h-12 text-black/20 mx-auto mb-4" />
+                                                    <p className="font-black text-black/40 uppercase">No inquiries found yet!</p>
+                                                </td>
+                                            </tr>
+                                        ) : (
+                                            inquiries.map((iq) => (
+                                                <tr
+                                                    key={iq.id}
+                                                    onClick={() => setSelectedInquiry(iq)}
+                                                    className={`border-b-2 border-black/5 hover:bg-gray-50 cursor-pointer transition-colors ${selectedInquiry?.id === iq.id ? 'bg-[#FFD93D]/10' : ''}`}
+                                                >
+                                                    <td className="p-4 font-bold text-sm">
+                                                        <div className="flex items-center gap-2">
+                                                            <Calendar size={14} className="text-black/40" />
+                                                            {iq.createdAt ? format(new Date(iq.createdAt), 'MMM dd, HH:mm') : 'N/A'}
+                                                        </div>
+                                                    </td>
+                                                    <td className="p-4">
+                                                        <div className="flex flex-col">
+                                                            <span className="font-black text-sm uppercase">{iq.name}</span>
+                                                            <span className="text-xs text-black/50 font-bold">{iq.email}</span>
+                                                        </div>
+                                                    </td>
+                                                    <td className="p-4">
+                                                        <span className="font-bold text-sm line-clamp-1">{iq.subject}</span>
+                                                    </td>
+                                                    <td className="p-4 text-xs">
+                                                        <span className="px-3 py-1 bg-[#EEF2FF] text-[#6366F1] border-2 border-[#6366F1]/20 rounded-full font-black uppercase">
+                                                            New
+                                                        </span>
+                                                    </td>
+                                                    <td className="p-4 text-right">
+                                                        <button
+                                                            onClick={(e) => handleDelete(iq.id, e)}
+                                                            className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors border-2 border-transparent hover:border-red-100"
+                                                        >
+                                                            <Trash2 size={18} />
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Modal/Detail View */}
+                {selectedInquiry && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/40 backdrop-blur-sm">
+                        <div
+                            className="bg-white border-[3px] border-black rounded-[30px] w-full max-w-2xl overflow-hidden shadow-[12px_12px_0px_#000] relative"
+                            onClick={e => e.stopPropagation()}
+                        >
+                            <div className="bg-[#6C5CE7] p-6 border-b-[3px] border-black flex justify-between items-center">
+                                <h3 className="text-2xl font-black text-white uppercase tracking-tight">Inquiry Details</h3>
+                                <button
+                                    onClick={() => setSelectedInquiry(null)}
+                                    className="w-10 h-10 bg-white border-2 border-black rounded-full flex items-center justify-center font-black hover:bg-gray-100 transition-colors"
+                                >
+                                    ✕
+                                </button>
+                            </div>
+                            <div className="p-8 space-y-6">
+                                <div className="grid grid-cols-2 gap-6">
+                                    <div className="space-y-1">
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-black/40">Sender</p>
+                                        <div className="flex items-center gap-2 font-black text-sm">
+                                            <User size={16} className="text-[#6C5CE7]" />
+                                            {selectedInquiry.name}
+                                        </div>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-black/40">Email</p>
+                                        <div className="flex items-center gap-2 font-black text-sm">
+                                            <Mail size={16} className="text-[#6C5CE7]" />
+                                            {selectedInquiry.email}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-1">
+                                    <p className="text-[10px] font-black uppercase tracking-widest text-black/40">Subject</p>
+                                    <p className="font-black text-lg">{selectedInquiry.subject}</p>
+                                </div>
+
+                                <div className="bg-[#FFFDF5] border-2 border-black p-6 rounded-2xl relative shadow-[4px_4px_0px_rgba(0,0,0,0.05)]">
+                                    <div className="absolute top-0 right-6 -translate-y-1/2 px-3 py-1 bg-[#FFD93D] border-2 border-black rounded-lg text-[10px] font-black uppercase tracking-widest">
+                                        Message
+                                    </div>
+                                    <p className="font-medium text-black/80 leading-relaxed whitespace-pre-wrap">
+                                        {selectedInquiry.message}
+                                    </p>
+                                </div>
+
+                                <div className="flex gap-4 pt-4">
+                                    <a
+                                        href={`mailto:${selectedInquiry.email}?subject=Re: ${selectedInquiry.subject}`}
+                                        className="flex-1 py-4 bg-[#00B894] text-white font-black uppercase tracking-widest rounded-xl border-2 border-black shadow-[4px_4px_0px_#000] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all flex items-center justify-center gap-2"
+                                    >
+                                        <Mail size={18} />
+                                        Reply via Email
+                                    </a>
+                                    <button
+                                        onClick={(e) => handleDelete(selectedInquiry.id, e as any)}
+                                        className="px-6 py-4 bg-white text-red-500 font-black uppercase tracking-widest rounded-xl border-2 border-black hover:bg-red-50 transition-all flex items-center gap-2"
+                                    >
+                                        <Trash2 size={18} />
+                                        Delete
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
+        </RoleProtected>
+    );
+}

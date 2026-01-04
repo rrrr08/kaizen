@@ -369,6 +369,24 @@ export default function CheckoutPage() {
           // Save to Firebase
           const orderId_New = await createOrder(currentUser.uid, orderData);
 
+          // Send confirmation email via backend
+          try {
+            await fetch('/api/orders/send-confirmation', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                orderId: orderId_New,
+                email: formData.email,
+                name: formData.name,
+                items: items,
+                totalPrice: finalPrice,
+                shippingAddress: formData,
+              }),
+            });
+          } catch (emailError) {
+            console.error('Failed to send confirmation email:', emailError);
+          }
+
           // Update wallet in Firebase
           await updateUserWallet(currentUser.uid, earnedPoints - redeemPoints);
 
@@ -412,18 +430,18 @@ export default function CheckoutPage() {
           // Clear cart - use context method for consistency
           try {
             console.log('Starting cart clear process...');
-            
+
             // Use the CartContext clearCart method which handles everything
             await clearCart();
             console.log('Cart cleared successfully');
-            
+
             // Clear voucher state
             setVoucherCode('');
             setAppliedVoucher(null);
             setAppliedVoucherId(null);
             setVoucherDiscount(0);
             setVoucherError('');
-            
+
           } catch (clearError) {
             console.error('Error clearing cart:', clearError);
             // Continue anyway - cart will be cleared on next load
