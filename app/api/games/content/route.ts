@@ -27,8 +27,9 @@ export async function GET(req: NextRequest) {
 // POST /api/games/content - Update game content (Admin only)
 export async function POST(req: NextRequest) {
   try {
-    const session = await getServerSession();
-    if (!session?.user || !(session.user as any).isAdmin) {
+    const authorization = req.headers.get('authorization');
+    
+    if (!authorization?.startsWith('Bearer ')) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -66,8 +67,9 @@ export async function POST(req: NextRequest) {
 // DELETE /api/games/content - Delete content item (Admin only)
 export async function DELETE(req: NextRequest) {
   try {
-    const session = await getServerSession();
-    if (!session?.user || !(session.user as any).isAdmin) {
+    const authorization = req.headers.get('authorization');
+    
+    if (!authorization?.startsWith('Bearer ')) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 

@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { adminAuth, adminDb } from '@/lib/firebaseAdmin';
 import { FieldValue } from 'firebase-admin/firestore';
 import { headers } from 'next/headers';
-import { FieldValue } from 'firebase-admin/firestore';
 
 // POST /api/user/unlock-tier - Purchase tier unlock with JP
 export async function POST(req: NextRequest) {
