@@ -21,6 +21,8 @@ const nextConfig: NextConfig = {
         hostname: 'api.dicebear.com',
       },
     ],
+    dangerouslyAllowSVG: true,
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
   async redirects() {
     return [

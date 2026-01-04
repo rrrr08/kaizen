@@ -44,6 +44,7 @@ const WordSearchGame: React.FC = () => {
   const [showScratcher, setShowScratcher] = useState(false);
   const [scratcherDrops, setScratcherDrops] = useState<{ prob: number, points: number }[] | null>(null);
   const [attempts, setAttempts] = useState(0);
+  const [showRules, setShowRules] = useState(false);
 
   const initGameWithWords = (wordLists: string[][]) => {
     const size = 10;
@@ -187,6 +188,61 @@ const WordSearchGame: React.FC = () => {
 
   return (
     <div className="max-w-3xl mx-auto">
+      {/* Rules Modal */}
+      {showRules && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowRules(false)}>
+          <div className="bg-white border-4 border-black rounded-[20px] p-6 sm:p-8 max-w-2xl max-h-[80vh] overflow-y-auto neo-shadow" onClick={e => e.stopPropagation()}>
+            <h2 className="text-2xl sm:text-3xl font-black mb-6 uppercase">🔍 How to Play Word Search</h2>
+            
+            <div className="space-y-4 text-left">
+              <div>
+                <h3 className="font-black text-lg mb-2 text-[#6C5CE7]">🎯 Objective</h3>
+                <p className="text-black/80">Find all hidden words in the 10×10 letter grid!</p>
+              </div>
+
+              <div>
+                <h3 className="font-black text-lg mb-2 text-[#6C5CE7]">🎮 How to Play</h3>
+                <ul className="space-y-2 text-black/80">
+                  <li>• Look for words from the word list on the right</li>
+                  <li>• Click on the first letter of a word</li>
+                  <li>• Click on the last letter to complete the selection</li>
+                  <li>• Words can be horizontal or vertical</li>
+                  <li>• Words can go forwards or backwards</li>
+                  <li>• Found words turn <strong className="text-[#00B894]">green</strong></li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="font-black text-lg mb-2 text-[#00B894]">🏆 Scoring</h3>
+                <ul className="space-y-1 text-black/80">
+                  <li>• Find all words to win</li>
+                  <li>• Fewer wrong attempts = More points</li>
+                  <li>• Game of the Day: 2x points!</li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="font-black text-lg mb-2 text-[#FFD93D]">💡 Tips</h3>
+                <ul className="space-y-1 text-black/80">
+                  <li>• Start with shorter words first</li>
+                  <li>• Look for uncommon letters (Q, X, Z)</li>
+                  <li>• Check both horizontal and vertical directions</li>
+                  <li>• Remember words can go backwards</li>
+                  <li>• Use "New Game" button for a fresh puzzle</li>
+                </ul>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setShowRules(false)}
+              className="mt-6 w-full px-6 py-3 bg-[#6C5CE7] text-white rounded-xl border-2 border-black font-black uppercase hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_#000] transition-all"
+            >
+              Got It!
+            </button>
+          </div>
+        </div>
+      )}
+
       {isGameOfDay && (
         <div className="mb-6 flex justify-center">
           <div className="inline-flex items-center gap-2 px-6 py-3 bg-[#FFD93D] text-black rounded-full font-black tracking-widest text-sm border-2 border-black shadow-[4px_4px_0px_#000]">
@@ -197,7 +253,15 @@ const WordSearchGame: React.FC = () => {
 
       <div className="bg-white border-2 border-black p-8 rounded-[25px] neo-shadow">
         <div className="flex justify-between items-center mb-8">
-          <h2 className="text-4xl font-black text-black uppercase tracking-tighter">WORD SEARCH</h2>
+          <div>
+            <button
+              onClick={() => setShowRules(true)}
+              className="mb-3 px-4 py-2 bg-[#FFD93D] text-black rounded-xl border-2 border-black font-black uppercase text-xs hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_#000] transition-all"
+            >
+              🔍 How to Play
+            </button>
+            <h2 className="text-4xl font-black text-black uppercase tracking-tighter">WORD SEARCH</h2>
+          </div>
           <button
             onClick={async () => {
               const wordLists = await fetchWordLists();

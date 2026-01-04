@@ -48,6 +48,7 @@ const RiddleGame: React.FC = () => {
     const [message, setMessage] = useState('');
     const [isGameOfDay, setIsGameOfDay] = useState(false);
     const [alreadyPlayed, setAlreadyPlayed] = useState(false);
+    const [showRules, setShowRules] = useState(false);
 
     const checkGameOfTheDay = async () => {
         try {
@@ -128,6 +129,64 @@ const RiddleGame: React.FC = () => {
 
     return (
         <div className="max-w-2xl mx-auto">
+            {/* Rules Modal */}
+            {showRules && (
+                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowRules(false)}>
+                    <div className="bg-white border-4 border-black rounded-[20px] p-6 sm:p-8 max-w-2xl max-h-[80vh] overflow-y-auto neo-shadow" onClick={e => e.stopPropagation()}>
+                        <h2 className="text-2xl sm:text-3xl font-black mb-6 uppercase">🤔 How to Play Riddles</h2>
+                        
+                        <div className="space-y-4 text-left">
+                            <div>
+                                <h3 className="font-black text-lg mb-2 text-[#6C5CE7]">🎯 Objective</h3>
+                                <p className="text-black/80">Read the riddle carefully and type the correct answer to solve it!</p>
+                            </div>
+
+                            <div>
+                                <h3 className="font-black text-lg mb-2 text-[#6C5CE7]">🎮 How to Play</h3>
+                                <ul className="space-y-2 text-black/80">
+                                    <li>• Read the riddle question</li>
+                                    <li>• Think about the answer</li>
+                                    <li>• Type your answer in the text box</li>
+                                    <li>• Click "Submit Answer" to check</li>
+                                    <li>• Use the hint if you're stuck (no penalty)</li>
+                                </ul>
+                            </div>
+
+                            <div>
+                                <h3 className="font-black text-lg mb-2 text-[#FFD93D]">💡 Hints</h3>
+                                <p className="text-black/80">Click the "Need a Hint?" button to reveal a helpful clue. There's no penalty for using hints!</p>
+                            </div>
+
+                            <div>
+                                <h3 className="font-black text-lg mb-2 text-[#00B894]">🏆 Scoring</h3>
+                                <ul className="space-y-1 text-black/80">
+                                    <li>• Solve in first try: Maximum points</li>
+                                    <li>• Multiple attempts: Slightly fewer points</li>
+                                    <li>• Game of the Day: 2x points!</li>
+                                </ul>
+                            </div>
+
+                            <div>
+                                <h3 className="font-black text-lg mb-2 text-[#FFD93D]">💡 Tips</h3>
+                                <ul className="space-y-1 text-black/80">
+                                    <li>• Read the riddle multiple times</li>
+                                    <li>• Think about wordplay and double meanings</li>
+                                    <li>• Don't overthink - answers are often simple</li>
+                                    <li>• Use hints to get unstuck</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <button
+                            onClick={() => setShowRules(false)}
+                            className="mt-6 w-full px-6 py-3 bg-[#6C5CE7] text-white rounded-xl border-2 border-black font-black uppercase hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_#000] transition-all"
+                        >
+                            Got It!
+                        </button>
+                    </div>
+                </div>
+            )}
+
             {/* Game of the Day Badge */}
             {isGameOfDay && (
                 <div className="mb-6 flex justify-center">
@@ -142,6 +201,14 @@ const RiddleGame: React.FC = () => {
                 <div className="absolute top-0 right-0 w-32 h-32 bg-[#FFD93D] rounded-full blur-3xl opacity-20 -mr-16 -mt-16 pointer-events-none"></div>
 
                 <div className="text-center mb-8 relative z-10">
+                    {/* How to Play Button */}
+                    <button
+                        onClick={() => setShowRules(true)}
+                        className="mb-4 px-6 py-3 bg-[#FFD93D] text-black rounded-xl border-2 border-black font-black uppercase text-sm hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_#000] transition-all"
+                    >
+                        🤔 How to Play
+                    </button>
+
                     <div className="inline-flex items-center justify-center w-20 h-20 bg-[#FFFDF5] border-2 border-black rounded-full mb-6 shadow-[4px_4px_0px_#000]">
                         <HelpCircle className="w-10 h-10 text-black" />
                     </div>
