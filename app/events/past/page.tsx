@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { GameEvent } from '@/lib/types';
 import { splitDateTime } from '@/lib/utils';
 import Link from 'next/link';
-import Image from 'next/image';
 
 export default function PastEvents() {
   const [events, setEvents] = useState<GameEvent[]>([]);
@@ -33,8 +32,8 @@ export default function PastEvents() {
       } else {
         setError(data.error || 'Failed to load past events');
       }
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to load past events');
+    } catch (err: any) {
+      setError(err.message || 'Failed to load past events');
       console.error('Error:', err);
     } finally {
       setLoading(false);
@@ -98,12 +97,11 @@ export default function PastEvents() {
               <div key={event.id} className="group cursor-pointer">
 
                 {/* Event Image */}
-                <div className="aspect-video overflow-hidden rounded-[30px] mb-6 border-2 border-black neo-shadow bg-white grayscale group-hover:grayscale-0 transition-all duration-500 relative">
-                  {event.image !== "" && <Image
-                    src={event.image || "/placeholder.png"}
+                <div className="aspect-video overflow-hidden rounded-[30px] mb-6 border-2 border-black neo-shadow bg-white grayscale group-hover:grayscale-0 transition-all duration-500">
+                  {event.image !== "" && <img
+                    src={event.image}
                     alt={event.title}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />}
                 </div>
 

@@ -5,7 +5,6 @@ import { GameEvent } from '@/lib/types';
 import { splitDateTime } from '@/lib/utils';
 import Link from 'next/link';
 import EventRegistrationForm from '@/components/EventRegistrationForm';
-import Image from 'next/image';
 
 export const dynamic = 'force-dynamic';
 
@@ -51,8 +50,8 @@ export default function UpcomingEvents() {
       } else {
         setError(data.error || 'Failed to load events');
       }
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to load upcoming events');
+    } catch (err: any) {
+      setError(err.message || 'Failed to load upcoming events');
       console.error('Error:', err);
     } finally {
       setLoading(false);
@@ -120,11 +119,10 @@ export default function UpcomingEvents() {
             <Link key={event.id} href={`/events/upcoming/${event.id}`}>
               <div key={event.id} className="group cursor-pointer">
                 {/* Event Image */}
-                <div className="aspect-video overflow-hidden rounded-[30px] mb-6 border-3 border-black neo-shadow bg-white group-hover:scale-[1.02] transition-transform transform-gpu isolation-isolate relative">
-                  {event.image !== "" && <Image
-                    src={event.image || "/placeholder.png"}
+                <div className="aspect-video overflow-hidden rounded-[30px] mb-6 border-3 border-black neo-shadow bg-white group-hover:scale-[1.02] transition-transform transform-gpu isolation-isolate">
+                  {event.image !== "" && <img
+                    src={event.image}
                     alt={event.title}
-                    fill
                     className="w-full h-full object-cover object-top grayscale group-hover:grayscale-0 transition-all duration-500"
                   />}
                 </div>

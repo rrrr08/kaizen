@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getEventById, updateEventById, deleteEventById } from '@/lib/db/events';
-
+import { auth, db } from '@/lib/firebase-admin'
 export async function GET(
     request: NextRequest,
     context: { params: Promise<{ id: string }> }
@@ -29,41 +29,61 @@ export async function GET(
 
 
 export async function PATCH(
-    request: NextRequest,
-    context: { params: Promise<{ id: string }> }
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
 ) {
-    try {
-        const { id } = await context.params;
+  try {
+    const { id } = await context.params;
 
-        const updates = await request.json(); // partial fields
-
-        if (!updates || Object.keys(updates).length === 0) {
-            return NextResponse.json(
-                { success: false, error: 'No update data provided' },
-                { status: 400 }
-            );
-        }
-
-        const updatedEvent = await updateEventById(id, updates);
-
-        if (!updatedEvent) {
-            return NextResponse.json(
-                { success: false, error: 'Event not found' },
-                { status: 404 }
-            );
-        }
-
-        return NextResponse.json({
-            success: true,
-            event: updatedEvent,
-        });
-    } catch (error) {
-        console.error('Error updating event:', error);
-        return NextResponse.json(
-            { success: false, error: 'Internal server error' },
-            { status: 500 }
-        );
+    /* ---------------- AUTH ---------------- */
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    const token = authHeader.replace('Bearer ', '');
+    const decoded = await auth.verifyIdToken(token);
+
+    /* ---------------- ROLE CHECK (DB) ---------------- */
+    const userSnap = await db
+      .collection('users')
+      .doc(decoded.uid)
+      .get();
+
+    if (!userSnap.exists || userSnap.data()?.role !== 'admin') {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
+    /* ---------------- UPDATE ---------------- */
+    const updates = await request.json();
+
+    if (!updates || Object.keys(updates).length === 0) {
+      return NextResponse.json(
+        { success: false, error: 'No update data provided' },
+        { status: 400 }
+      );
+    }
+
+    const updatedEvent = await updateEventById(id, updates);
+
+    if (!updatedEvent) {
+      return NextResponse.json(
+        { success: false, error: 'Event not found' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      event: updatedEvent,
+    });
+  } catch (error) {
+    console.error('Error updating event:', error);
+    return NextResponse.json(
+      { success: false, error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
 }
 
 export async function DELETE(
@@ -73,6 +93,26 @@ export async function DELETE(
   try {
     const { id } = await context.params;
 
+    /* ---------------- AUTH ---------------- */
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+    const decoded = await auth.verifyIdToken(token);
+
+    /* ---------------- ROLE CHECK (DB) ---------------- */
+    const userSnap = await db
+      .collection('users')
+      .doc(decoded.uid)
+      .get();
+
+    if (!userSnap.exists || userSnap.data()?.role !== 'admin') {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
+    /* ---------------- DELETE ---------------- */
     const success = await deleteEventById(id);
 
     if (!success) {
