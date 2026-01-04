@@ -2,13 +2,19 @@
 
 import { useEffect, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { usePushNotifications } from '@/hooks/use-push-notifications';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-import { Bell, Settings, Smartphone } from 'lucide-react';
+import { Bell, Settings, Smartphone, MessageSquare } from 'lucide-react';
 import Link from 'next/link';
+import PhoneVerification from '@/components/PhoneVerification';
+import { auth, db } from '@/lib/firebase';
+import { doc, onSnapshot } from 'firebase/firestore';
 
 interface Preferences {
   pushEnabled: boolean;
+  inAppEnabled: boolean;
+  smsEnabled: boolean;
   categories: {
     promotional: boolean;
     offers: boolean;
@@ -34,8 +40,12 @@ interface Device {
 
 export default function NotificationPreferencesPage() {
   const { addToast } = useToast();
+  const { requestPermission, permission, isSupported } = usePushNotifications();
+  
   const [preferences, setPreferences] = useState<Preferences>({
-    pushEnabled: false,
+    pushEnabled: true,
+    inAppEnabled: true,
+    smsEnabled: true,
     categories: {
       promotional: true,
       offers: true,
@@ -55,24 +65,68 @@ export default function NotificationPreferencesPage() {
   const [devices, setDevices] = useState<Device[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [phoneNumber, setPhoneNumber] = useState<string>('');
+  const [phoneVerified, setPhoneVerified] = useState(false);
 
   useEffect(() => {
     loadPreferencesAndDevices();
+    
+    // Subscribe to real-time phone number updates
+    const currentUser = auth.currentUser;
+    if (currentUser) {
+      const userRef = doc(db, 'users', currentUser.uid);
+      const unsubscribe = onSnapshot(userRef, (snapshot) => {
+        if (snapshot.exists()) {
+          const userData = snapshot.data();
+          setPhoneNumber(userData.phoneNumber || '');
+          setPhoneVerified(userData.phoneVerified || false);
+        }
+      });
+
+      return () => unsubscribe();
+    }
   }, []);
+
+  // Auto-register device if push is enabled and permission granted
+  useEffect(() => {
+    if (preferences.pushEnabled && permission === 'granted' && isSupported) {
+      console.log('Push enabled with granted permission - ensuring device is registered');
+      // Trigger registration by calling requestPermission (it will handle already-granted case)
+      requestPermission().then(() => {
+        loadPreferencesAndDevices(); // Reload to show newly registered device
+      });
+    }
+  }, [preferences.pushEnabled, permission, isSupported]);
 
   async function loadPreferencesAndDevices() {
     try {
       setLoading(true);
 
+      const currentUser = auth.currentUser;
+      if (!currentUser) {
+        console.log('No user logged in');
+        return;
+      }
+
+      const token = await currentUser.getIdToken();
+
       // Load preferences
-      const prefsResponse = await fetch('/api/user/notification-preferences');
+      const prefsResponse = await fetch('/api/user/notification-preferences', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       if (prefsResponse.ok) {
         const data = await prefsResponse.json();
         setPreferences(data.preferences);
       }
 
       // Load devices
-      const devicesResponse = await fetch('/api/push/my-devices');
+      const devicesResponse = await fetch('/api/push/my-devices', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       if (devicesResponse.ok) {
         const data = await devicesResponse.json();
         setDevices(data.devices || []);
@@ -92,14 +146,30 @@ export default function NotificationPreferencesPage() {
     try {
       setSaving(true);
 
+      const currentUser = auth.currentUser;
+      if (!currentUser) {
+        addToast({
+          title: 'Error',
+          description: 'Please log in again',
+        });
+        return;
+      }
+
+      // Force token refresh to ensure it's valid
+      const token = await currentUser.getIdToken(true);
+
       const response = await fetch('/api/user/notification-preferences', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify(preferences),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to save preferences');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to save preferences');
       }
 
       addToast({
@@ -119,9 +189,23 @@ export default function NotificationPreferencesPage() {
 
   async function unregisterDevice(deviceId: string) {
     try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) {
+        addToast({
+          title: 'Error',
+          description: 'Please log in again',
+        });
+        return;
+      }
+
+      const token = await currentUser.getIdToken(true);
+
       const response = await fetch('/api/push/unregister-device', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({ deviceId }),
       });
 
@@ -178,28 +262,141 @@ export default function NotificationPreferencesPage() {
 
           <h2 className="font-header text-2xl font-black uppercase text-black mb-6 flex items-center gap-3">
             <span className="w-8 h-8 bg-[#6C5CE7] rounded-lg border-2 border-black text-white flex items-center justify-center text-sm shadow-[2px_2px_0px_#000]">1</span>
-            Push Notifications
+            Notification Channels
           </h2>
 
-          {/* Enable/Disable */}
-          <div className="flex items-center justify-between p-6 bg-[#FFFDF5] border-2 border-black rounded-xl mb-8 shadow-[4px_4px_0px_#000] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_#000] transition-all">
-            <div>
-              <p className="font-black text-lg uppercase">Enable Push</p>
-              <p className="text-xs font-bold text-black/50 uppercase tracking-wider mt-1">
-                Receive real-time alerts
-              </p>
+          {/* Push Notifications Toggle */}
+          <div className="flex items-center justify-between p-6 bg-[#FFFDF5] border-2 border-black rounded-xl mb-4 shadow-[4px_4px_0px_#000] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_#000] transition-all">
+            <div className="flex items-center gap-3">
+              <Smartphone className="w-5 h-5 text-[#6C5CE7]" />
+              <div>
+                <p className="font-black text-lg uppercase">Push Notifications</p>
+                <p className="text-xs font-bold text-black/50 uppercase tracking-wider mt-1">
+                  {!isSupported && '⚠️ Not supported on this browser'}
+                  {isSupported && permission === 'denied' && '⚠️ Notifications blocked - Click the 🔒 icon in address bar to allow'}
+                  {isSupported && permission === 'default' && 'Real-time alerts to your device'}
+                  {isSupported && permission === 'granted' && '✅ Notifications enabled'}
+                </p>
+              </div>
             </div>
             <Switch
               checked={preferences.pushEnabled}
-              onCheckedChange={(checked) =>
+              disabled={!isSupported || permission === 'denied'}
+              onCheckedChange={async (checked) => {
+                if (checked && permission === 'default') {
+                  // Request permission when enabling for the first time
+                  const granted = await requestPermission();
+                  if (!granted) {
+                    addToast({
+                      title: 'Permission Required',
+                      description: 'Please click "Allow" when your browser asks for notification permission',
+                      variant: 'destructive',
+                    });
+                    return;
+                  }
+                  addToast({
+                    title: 'Device Registered!',
+                    description: 'This device is now registered for push notifications',
+                  });
+                  loadPreferencesAndDevices(); // Refresh to show device
+                }
                 setPreferences((prev) => ({
                   ...prev,
                   pushEnabled: checked,
+                }));
+              }}
+              className="data-[state=checked]:bg-[#00B894] data-[state=unchecked]:bg-gray-200 border-2 border-black"
+            />
+          </div>
+
+          {/* Warning banner for denied permission */}
+          {permission === 'denied' && (
+            <div className="p-4 bg-[#FFE5E5] border-2 border-[#FF7675] rounded-xl mb-4">
+              <p className="font-bold text-sm text-[#FF0000] uppercase mb-2">🚫 Notifications Blocked</p>
+              <p className="text-xs font-medium text-black/70 mb-3">
+                Push notifications are blocked by your browser. To enable them:
+              </p>
+              <ol className="text-xs font-medium text-black/70 space-y-1 ml-4 list-decimal">
+                <li>Click the 🔒 lock icon in your browser's address bar</li>
+                <li>Find "Notifications" in the permissions list</li>
+                <li>Change it from "Block" to "Allow"</li>
+                <li>Refresh this page</li>
+              </ol>
+            </div>
+          )}
+
+          {/* In-App Notifications Toggle */}
+          <div className="flex items-center justify-between p-6 bg-[#FFFDF5] border-2 border-black rounded-xl mb-4 shadow-[4px_4px_0px_#000] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_#000] transition-all">
+            <div className="flex items-center gap-3">
+              <Bell className="w-5 h-5 text-[#FF7675]" />
+              <div>
+                <p className="font-black text-lg uppercase">In-App Notifications</p>
+                <p className="text-xs font-bold text-black/50 uppercase tracking-wider mt-1">
+                  Notification bell icon updates
+                </p>
+              </div>
+            </div>
+            <Switch
+              checked={preferences.inAppEnabled}
+              onCheckedChange={(checked) =>
+                setPreferences((prev) => ({
+                  ...prev,
+                  inAppEnabled: checked,
                 }))
               }
               className="data-[state=checked]:bg-[#00B894] data-[state=unchecked]:bg-gray-200 border-2 border-black"
             />
           </div>
+
+          {/* SMS Notifications Toggle */}
+          <div className="flex items-center justify-between p-6 bg-[#FFFDF5] border-2 border-black rounded-xl mb-8 shadow-[4px_4px_0px_#000] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_#000] transition-all">
+            <div className="flex items-center gap-3">
+              <MessageSquare className="w-5 h-5 text-[#00B894]" />
+              <div>
+                <p className="font-black text-lg uppercase">SMS Notifications</p>
+                <p className="text-xs font-bold text-black/50 uppercase tracking-wider mt-1">
+                  Text message alerts
+                </p>
+              </div>
+            </div>
+            <Switch
+              checked={preferences.smsEnabled}
+              onCheckedChange={(checked) =>
+                setPreferences((prev) => ({
+                  ...prev,
+                  smsEnabled: checked,
+                }))
+              }
+              className="data-[state=checked]:bg-[#00B894] data-[state=unchecked]:bg-gray-200 border-2 border-black"
+            />
+          </div>
+
+          {/* Phone Verification Section for SMS */}
+          {preferences.smsEnabled && (
+            <div className="mt-8 mb-10 pt-8 border-t-2 border-black/10">
+              <h3 className="font-black text-xl uppercase text-black mb-4 flex items-center gap-2">
+                <MessageSquare className="w-5 h-5 text-[#00B894]" />
+                Phone Verification
+              </h3>
+              <p className="text-sm font-bold text-black/60 mb-6">
+                Verify your phone number to receive SMS notifications
+              </p>
+              <PhoneVerification
+                currentPhone={phoneNumber}
+                isVerified={phoneVerified}
+                onVerified={(verifiedPhone) => {
+                  // Immediately update local state
+                  setPhoneNumber(verifiedPhone);
+                  setPhoneVerified(true);
+                  
+                  addToast({
+                    title: 'Success!',
+                    description: 'Phone number verified. You can now receive SMS notifications.',
+                  });
+                }}
+              />
+            </div>
+          )}
 
           {/* Notification Categories */}
           <div className="space-y-4 mb-10">
@@ -408,9 +605,39 @@ export default function NotificationPreferencesPage() {
                 <Smartphone className="w-8 h-8 text-black" strokeWidth={2} />
               </div>
               <p className="font-bold text-black uppercase mb-1">No devices found</p>
-              <p className="text-xs text-black/60 font-medium">
-                Log in on a mobile device to enable push notifications
+              <p className="text-xs text-black/60 font-medium mb-4">
+                {!isSupported && 'Push notifications not supported on this browser'}
+                {isSupported && permission === 'denied' && 'Allow notifications in browser settings first'}
+                {isSupported && permission === 'default' && 'Click the button below to register this device'}
+                {isSupported && permission === 'granted' && 'Click below to register or toggle push notifications ON above'}
               </p>
+              {isSupported && permission !== 'denied' && (
+                <Button
+                  onClick={async () => {
+                    const granted = await requestPermission();
+                    
+                    if (granted) {
+                      addToast({
+                        title: 'Device Registered!',
+                        description: 'Reloading devices...',
+                      });
+                      setTimeout(() => loadPreferencesAndDevices(), 2000);
+                    } else {
+                      const currentPermission = Notification.permission;
+                      addToast({
+                        title: 'Registration Failed',
+                        description: currentPermission === 'denied' 
+                          ? 'Notifications are blocked. Check browser settings.' 
+                          : 'Please allow notifications when prompted',
+                        variant: 'destructive',
+                      });
+                    }
+                  }}
+                  className="bg-[#6C5CE7] hover:bg-[#5F4FD1] text-white font-black uppercase border-2 border-black shadow-[4px_4px_0px_#000] hover:shadow-[2px_2px_0px_#000] hover:translate-y-[2px]"
+                >
+                  Register This Device
+                </Button>
+              )}
             </div>
           ) : (
             <div className="space-y-4">

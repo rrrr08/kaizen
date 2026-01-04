@@ -138,7 +138,7 @@ export default function AdminVouchersPage() {
   const handleAddNew = () => {
     const newVoucher: VoucherTemplate = {
       ...formData as VoucherTemplate,
-      id: `voucher_${Date.now()}`
+      id: `voucher_${Date.now()}`,
     };
     handleSave(newVoucher);
   };

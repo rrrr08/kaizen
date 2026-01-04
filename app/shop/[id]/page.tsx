@@ -7,7 +7,6 @@ import { useCart } from '@/app/context/CartContext';
 import { useToast } from '@/hooks/use-toast';
 import { Star, ArrowLeft, Check, Minus, Plus } from 'lucide-react';
 import { Product } from '@/lib/types';
-import ReactImageMagnify from 'easy-magnify-waft';
 import Image from 'next/image';
 
 export const dynamic = 'force-dynamic';
@@ -113,35 +112,15 @@ export default function ProductDetail() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 mb-20 relative text-left">
           {/* Gallery Section */}
           <div className="flex flex-col gap-6 relative">
-            <div className="w-full max-w-md overflow-hidden rounded-[30px] border-4 border-black neo-shadow bg-white relative cursor-crosshair">
-              {/* easy-magnify-waft implementation */}
-              <div className="w-full relative z-10 magnifier-wrapper">
-                <ReactImageMagnify
-                  {...{
-                    smallImage: {
-                      alt: product.name,
-                      isFluidWidth: true,
-                      src: currentImage
-                    },
-                    largeImage: {
-                      src: currentImage,
-                      width: 1800,
-                      height: 2400
-                    },
-                    enlargedImagePosition: 'beside',
-                    enlargedImageContainerClassName: 'custom-enlarged-container',
-                    enlargedImageContainerDimensions: {
-                      width: '100%',
-                      height: '100%'
-                    },
-                    enlargedImagePortalId: 'zoom-portal',
-                    shouldUsePositiveSpaceLens: true,
-                    lensStyle: {
-                      background: 'rgba(255, 255, 255, 0.4)',
-                      border: '2px solid black'
-                    }
-                  }}
-                  className="w-full"
+            <div className="w-full max-w-md overflow-hidden rounded-[30px] border-4 border-black neo-shadow bg-white relative">
+              {/* Product Image */}
+              <div className="w-full relative aspect-[3/4]">
+                <Image
+                  src={currentImage}
+                  alt={product.name}
+                  fill
+                  className="object-cover"
+                  priority
                 />
               </div>
 
@@ -175,9 +154,6 @@ export default function ProductDetail() {
 
           {/* Product Info */}
           <div className="flex flex-col justify-center relative">
-            {/* Dedicated Zoom Portal - matches aspect by being fluid over the content */}
-            <div id="zoom-portal" className="absolute top-0 left-0 w-full h-[600px] z-[50] pointer-events-none" />
-
             <div className="mb-8 relative z-10">
               <div className="flex items-center gap-3 mb-4">
                 {product.subtitle && (

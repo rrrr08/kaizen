@@ -19,8 +19,8 @@ export async function GET() {
     
     // Auto-select a random game for today
     const settingsSnap = await adminDb.doc('settings/gamePoints').get();
-    const settings = settingsSnap.exists ? settingsSnap.data() ?? {} : {};
-    const gameIds = Object.keys(settings);
+    const settings = settingsSnap.exists ? settingsSnap.data() : undefined;
+    const gameIds = settings ? Object.keys(settings) : [];
     
     if (!gameIds.length) {
       // No games configured, use defaults
@@ -36,7 +36,7 @@ export async function GET() {
     }
     
     const randomGameId = gameIds[Math.floor(Math.random() * gameIds.length)];
-    const gameName = settings[randomGameId]?.name || randomGameId;
+    const gameName = settings?.[randomGameId]?.name || randomGameId;
     
     await adminDb.doc('settings/gameOfTheDay').set({ 
       gameId: randomGameId, 
