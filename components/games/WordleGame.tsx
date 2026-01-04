@@ -39,6 +39,7 @@ const WordleGame: React.FC = () => {
   const [points, setPoints] = useState<number | null>(null);
   const [showScratcher, setShowScratcher] = useState(false);
   const [scratcherDrops, setScratcherDrops] = useState<{ prob: number, points: number }[] | null>(null);
+  const [showRules, setShowRules] = useState(false);
 
   useEffect(() => {
     // Fetch and select random word from Firebase
@@ -120,6 +121,71 @@ const WordleGame: React.FC = () => {
 
   return (
     <div className="max-w-2xl mx-auto">
+      {/* Rules Modal */}
+      {showRules && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowRules(false)}>
+          <div className="bg-white border-4 border-black rounded-[20px] p-6 sm:p-8 max-w-2xl max-h-[80vh] overflow-y-auto neo-shadow" onClick={e => e.stopPropagation()}>
+            <h2 className="text-2xl sm:text-3xl font-black mb-6 uppercase">📝 How to Play Wordle</h2>
+            
+            <div className="space-y-4 text-left">
+              <div>
+                <h3 className="font-black text-lg mb-2 text-[#6C5CE7]">🎯 Objective</h3>
+                <p className="text-black/80">Guess the 5-letter word in 6 attempts or less!</p>
+              </div>
+
+              <div>
+                <h3 className="font-black text-lg mb-2 text-[#6C5CE7]">🎮 How to Play</h3>
+                <ul className="space-y-2 text-black/80">
+                  <li>• Type a 5-letter word and press Enter</li>
+                  <li>• After each guess, tiles change color to give you clues:</li>
+                </ul>
+                <div className="mt-3 space-y-2 pl-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-[#00B894] border-2 border-black rounded-lg flex items-center justify-center text-white font-black">A</div>
+                    <span className="text-sm"><strong>Green</strong> = Letter is correct and in the right position</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-[#FFD93D] border-2 border-black rounded-lg flex items-center justify-center text-black font-black">B</div>
+                    <span className="text-sm"><strong>Yellow</strong> = Letter is in the word but wrong position</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-[#B2BEC3] border-2 border-black rounded-lg flex items-center justify-center text-black/50 font-black">C</div>
+                    <span className="text-sm"><strong>Gray</strong> = Letter is not in the word</span>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="font-black text-lg mb-2 text-[#00B894]">🏆 Scoring</h3>
+                <ul className="space-y-1 text-black/80">
+                  <li>• Guess in 1-2 tries: Maximum points</li>
+                  <li>• Guess in 3-4 tries: Good points</li>
+                  <li>• Guess in 5-6 tries: Base points</li>
+                  <li>• Game of the Day: 2x points!</li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="font-black text-lg mb-2 text-[#FFD93D]">💡 Tips</h3>
+                <ul className="space-y-1 text-black/80">
+                  <li>• Start with words that have common vowels (A, E, I, O, U)</li>
+                  <li>• Use letters like R, S, T, N in your first guesses</li>
+                  <li>• Pay attention to yellow letters - they're in the word!</li>
+                  <li>• Don't repeat gray letters</li>
+                </ul>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setShowRules(false)}
+              className="mt-6 w-full px-6 py-3 bg-[#6C5CE7] text-white rounded-xl border-2 border-black font-black uppercase hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_#000] transition-all"
+            >
+              Got It!
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Game of the Day Badge */}
       {isGameOfDay && (
         <div className="mb-6 flex justify-center">
@@ -132,6 +198,12 @@ const WordleGame: React.FC = () => {
       <div className="bg-white border-2 border-black p-8 rounded-[25px] neo-shadow">
 
         <div className="text-center mb-8">
+          <button
+            onClick={() => setShowRules(true)}
+            className="mb-4 px-6 py-3 bg-[#FFD93D] text-black rounded-xl border-2 border-black font-black uppercase text-sm hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_#000] transition-all"
+          >
+            📝 How to Play
+          </button>
           <h2 className="text-3xl font-black text-black uppercase tracking-tighter">Enter Guess</h2>
           <p className="text-black/60 font-medium text-sm">Attempt {guesses.length + 1} of 6</p>
         </div>

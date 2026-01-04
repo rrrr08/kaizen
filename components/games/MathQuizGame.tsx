@@ -27,6 +27,7 @@ const MathQuizGame: React.FC = () => {
   const [message, setMessage] = useState('');
   const [showScratcher, setShowScratcher] = useState(false);
   const [scratcherDrops, setScratcherDrops] = useState<{ prob: number, points: number }[] | null>(null);
+  const [showRules, setShowRules] = useState(false);
 
   const generateQuestions = () => {
     const qs: Question[] = [];
@@ -148,6 +149,65 @@ const MathQuizGame: React.FC = () => {
 
   return (
     <div className="max-w-2xl mx-auto">
+      {/* Rules Modal */}
+      {showRules && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowRules(false)}>
+          <div className="bg-white border-4 border-black rounded-[20px] p-6 sm:p-8 max-w-2xl max-h-[80vh] overflow-y-auto neo-shadow" onClick={e => e.stopPropagation()}>
+            <h2 className="text-2xl sm:text-3xl font-black mb-6 uppercase">🔢 How to Play Math Quiz</h2>
+            
+            <div className="space-y-4 text-left">
+              <div>
+                <h3 className="font-black text-lg mb-2 text-[#6C5CE7]">🎯 Objective</h3>
+                <p className="text-black/80">Solve 10 math problems correctly! Score at least 7 out of 10 to win.</p>
+              </div>
+
+              <div>
+                <h3 className="font-black text-lg mb-2 text-[#6C5CE7]">🎮 How to Play</h3>
+                <ul className="space-y-2 text-black/80">
+                  <li>• Solve addition (+), subtraction (−), or multiplication (×) problems</li>
+                  <li>• Type your answer in the input box</li>
+                  <li>• Press Enter or click "Submit" to check</li>
+                  <li>• You have <strong>20 seconds</strong> per question</li>
+                  <li>• Timer resets for each new question</li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="font-black text-lg mb-2 text-[#FF7675]">⏱️ Time Limit</h3>
+                <p className="text-black/80">If time runs out, the question auto-submits and moves to the next one!</p>
+              </div>
+
+              <div>
+                <h3 className="font-black text-lg mb-2 text-[#00B894]">🏆 Scoring</h3>
+                <ul className="space-y-1 text-black/80">
+                  <li>• Need <strong>7+</strong> correct answers to win</li>
+                  <li>• Each correct answer: +1 to score</li>
+                  <li>• Perfect score (10/10): Maximum points!</li>
+                  <li>• Game of the Day: 2x points!</li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="font-black text-lg mb-2 text-[#FFD93D]">💡 Tips</h3>
+                <ul className="space-y-1 text-black/80">
+                  <li>• Double-check your answer before submitting</li>
+                  <li>• Watch out for negative numbers in subtraction</li>
+                  <li>• Use mental math tricks for faster solving</li>
+                  <li>• Don't rush - you have 20 seconds per question</li>
+                </ul>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setShowRules(false)}
+              className="mt-6 w-full px-6 py-3 bg-[#6C5CE7] text-white rounded-xl border-2 border-black font-black uppercase hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_#000] transition-all"
+            >
+              Got It!
+            </button>
+          </div>
+        </div>
+      )}
+
       {isGameOfDay && (
         <div className="mb-6 flex justify-center">
           <div className="inline-flex items-center gap-2 px-6 py-3 bg-[#FFD93D] text-black rounded-full font-black tracking-widest text-sm border-2 border-black shadow-[4px_4px_0px_#000]">
@@ -160,6 +220,16 @@ const MathQuizGame: React.FC = () => {
 
         {!isComplete ? (
           <>
+            {/* How to Play Button */}
+            <div className="text-center mb-6">
+              <button
+                onClick={() => setShowRules(true)}
+                className="px-6 py-3 bg-[#FFD93D] text-black rounded-xl border-2 border-black font-black uppercase text-sm hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_#000] transition-all"
+              >
+                🔢 How to Play
+              </button>
+            </div>
+
             <div className="flex justify-between items-center mb-8">
               <div className="text-black font-black uppercase text-sm tracking-widest">
                 Question {currentQ + 1} / {questions.length}

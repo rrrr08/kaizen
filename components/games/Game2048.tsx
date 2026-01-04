@@ -20,6 +20,7 @@ const Game2048: React.FC = () => {
   const [message, setMessage] = useState('');
   const [showScratcher, setShowScratcher] = useState(false);
   const [scratcherDrops, setScratcherDrops] = useState<{ prob: number, points: number }[] | null>(null);
+  const [showRules, setShowRules] = useState(false);
 
   const addRandomTile = (grid: number[][]) => {
     const emptyCells: [number, number][] = [];
@@ -201,6 +202,63 @@ const Game2048: React.FC = () => {
 
   return (
     <div className="max-w-2xl mx-auto">
+      {/* Rules Modal */}
+      {showRules && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowRules(false)}>
+          <div className="bg-white border-4 border-black rounded-[20px] p-6 sm:p-8 max-w-2xl max-h-[80vh] overflow-y-auto neo-shadow" onClick={e => e.stopPropagation()}>
+            <h2 className="text-2xl sm:text-3xl font-black mb-6 uppercase">🎮 How to Play 2048</h2>
+            
+            <div className="space-y-4 text-left">
+              <div>
+                <h3 className="font-black text-lg mb-2 text-[#6C5CE7]">🎯 Objective</h3>
+                <p className="text-black/80">Combine tiles with the same number to create bigger tiles and reach 2048!</p>
+              </div>
+
+              <div>
+                <h3 className="font-black text-lg mb-2 text-[#6C5CE7]">🎮 Controls</h3>
+                <ul className="space-y-2 text-black/80">
+                  <li>• <strong>Arrow Keys</strong>: Move tiles in any direction (↑ ↓ ← →)</li>
+                  <li>• <strong>On-screen buttons</strong>: Tap direction arrows on mobile</li>
+                  <li>• When tiles with the same number touch, they merge into one!</li>
+                  <li>• A new tile (2 or 4) appears after each move</li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="font-black text-lg mb-2 text-[#FF7675]">✖ Game Over</h3>
+                <p className="text-black/80">Game ends when the board is full and no more moves are possible.</p>
+              </div>
+
+              <div>
+                <h3 className="font-black text-lg mb-2 text-[#00B894]">🏆 Scoring</h3>
+                <ul className="space-y-1 text-black/80">
+                  <li>• Points = Your final score</li>
+                  <li>• Bonus for reaching 2048 tile</li>
+                  <li>• Fewer moves = Better efficiency</li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="font-black text-lg mb-2 text-[#FFD93D]">💡 Tips</h3>
+                <ul className="space-y-1 text-black/80">
+                  <li>• Keep your highest tile in a corner</li>
+                  <li>• Build tiles in one direction (don't scatter)</li>
+                  <li>• Don't rush - plan your moves</li>
+                  <li>• Focus on merging smaller tiles first</li>
+                </ul>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setShowRules(false)}
+              className="mt-6 w-full px-6 py-3 bg-[#6C5CE7] text-white rounded-xl border-2 border-black font-black uppercase hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_#000] transition-all"
+            >
+              Got It!
+            </button>
+          </div>
+        </div>
+      )}
+
       {isGameOfDay && (
         <div className="mb-6 flex justify-center">
           <div className="inline-flex items-center gap-2 px-6 py-3 bg-[#FFD93D] text-black rounded-full font-black tracking-widest text-sm border-2 border-black shadow-[4px_4px_0px_#000]">
@@ -212,6 +270,12 @@ const Game2048: React.FC = () => {
       <div className="bg-white border-2 border-black p-8 rounded-[25px] neo-shadow">
         <div className="flex justify-between items-center mb-8">
           <div>
+            <button
+              onClick={() => setShowRules(true)}
+              className="mb-3 px-4 py-2 bg-[#FFD93D] text-black rounded-xl border-2 border-black font-black uppercase text-xs hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_#000] transition-all"
+            >
+              🎮 How to Play
+            </button>
             <h2 className="text-4xl font-black text-black uppercase tracking-tighter">2048</h2>
             <div className="bg-[#FFFDF5] px-3 py-1 rounded-lg border-2 border-black mt-2 inline-block">
               <p className="text-black font-bold text-sm">SCORE: {score}</p>

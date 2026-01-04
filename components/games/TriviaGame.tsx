@@ -88,6 +88,7 @@ const TriviaGame: React.FC = () => {
   const [showScratcher, setShowScratcher] = useState(false);
   const [scratcherDrops, setScratcherDrops] = useState<{ prob: number, points: number }[] | null>(null);
   const [wrongAnswers, setWrongAnswers] = useState(0);
+  const [showRules, setShowRules] = useState(false);
 
   useEffect(() => {
     // Fetch questions from Firebase
@@ -213,6 +214,65 @@ const TriviaGame: React.FC = () => {
 
   return (
     <div className="max-w-3xl mx-auto">
+      {/* Rules Modal */}
+      {showRules && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowRules(false)}>
+          <div className="bg-white border-4 border-black rounded-[20px] p-6 sm:p-8 max-w-2xl max-h-[80vh] overflow-y-auto neo-shadow" onClick={e => e.stopPropagation()}>
+            <h2 className="text-2xl sm:text-3xl font-black mb-6 uppercase">🧠 How to Play Trivia</h2>
+            
+            <div className="space-y-4 text-left">
+              <div>
+                <h3 className="font-black text-lg mb-2 text-[#6C5CE7]">🎯 Objective</h3>
+                <p className="text-black/80">Answer 5 trivia questions correctly to earn maximum points!</p>
+              </div>
+
+              <div>
+                <h3 className="font-black text-lg mb-2 text-[#6C5CE7]">🎮 How to Play</h3>
+                <ul className="space-y-2 text-black/80">
+                  <li>• Read each question carefully</li>
+                  <li>• Choose one of the 4 answer options</li>
+                  <li>• You have <strong>30 seconds</strong> per question</li>
+                  <li>• Answer turns <strong className="text-[#00B894]">green</strong> if correct, <strong className="text-[#FF7675]">red</strong> if wrong</li>
+                  <li>• Auto-advances to next question after 2 seconds</li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="font-black text-lg mb-2 text-[#FF7675]">⏱️ Time Limit</h3>
+                <p className="text-black/80">Timer turns red at 5 seconds remaining. If time runs out, it counts as a wrong answer!</p>
+              </div>
+
+              <div>
+                <h3 className="font-black text-lg mb-2 text-[#00B894]">🏆 Scoring</h3>
+                <ul className="space-y-1 text-black/80">
+                  <li>• Each correct answer: +1 to score</li>
+                  <li>• Final points based on total correct answers</li>
+                  <li>• Perfect score (5/5): Maximum points!</li>
+                  <li>• Game of the Day: 2x points!</li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="font-black text-lg mb-2 text-[#FFD93D]">💡 Tips</h3>
+                <ul className="space-y-1 text-black/80">
+                  <li>• Read all options before choosing</li>
+                  <li>• Don't rush - you have 30 seconds</li>
+                  <li>• Eliminate obviously wrong answers first</li>
+                  <li>• Trust your first instinct</li>
+                </ul>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setShowRules(false)}
+              className="mt-6 w-full px-6 py-3 bg-[#6C5CE7] text-white rounded-xl border-2 border-black font-black uppercase hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_#000] transition-all"
+            >
+              Got It!
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Game of the Day Badge */}
       {isGameOfDay && (
         <div className="mb-6 flex justify-center">
@@ -225,6 +285,16 @@ const TriviaGame: React.FC = () => {
       <div className="bg-white border-2 border-black p-8 rounded-[25px] neo-shadow">
         {!isGameOver ? (
           <>
+            {/* How to Play Button */}
+            <div className="text-center mb-4">
+              <button
+                onClick={() => setShowRules(true)}
+                className="px-6 py-3 bg-[#FFD93D] text-black rounded-xl border-2 border-black font-black uppercase text-sm hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_#000] transition-all"
+              >
+                🧠 How to Play
+              </button>
+            </div>
+
             {/* Header */}
             <div className="flex justify-between items-center mb-8 bg-[#FFFDF5] p-4 rounded-xl border-2 border-black shadow-sm">
               <div className="text-black font-black uppercase text-xs tracking-widest">

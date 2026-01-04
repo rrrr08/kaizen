@@ -58,6 +58,7 @@ const SudokuGame: React.FC = () => {
     const [conflicts, setConflicts] = useState<Set<string>>(new Set());
     const [highlightNumber, setHighlightNumber] = useState<number | null>(null);
     const [showSolution, setShowSolution] = useState(false);
+    const [showRules, setShowRules] = useState(false);
 
     // Initialize notes grid
     useEffect(() => {
@@ -432,8 +433,76 @@ const SudokuGame: React.FC = () => {
 
             <div className="w-full max-w-[1600px] grid grid-cols-1 xl:grid-cols-[300px_1fr_300px] gap-6 xl:gap-10 px-4 sm:px-6 lg:px-8">
 
+                {/* Rules Modal */}
+                {showRules && (
+                    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowRules(false)}>
+                        <div className="bg-white border-4 border-black rounded-[20px] p-6 sm:p-8 max-w-2xl max-h-[80vh] overflow-y-auto neo-shadow" onClick={e => e.stopPropagation()}>
+                            <h2 className="text-2xl sm:text-3xl font-black mb-6 uppercase">📋 How to Play Sudoku</h2>
+                            
+                            <div className="space-y-4 text-left">
+                                <div>
+                                    <h3 className="font-black text-lg mb-2 text-[#6C5CE7]">🎯 Objective</h3>
+                                    <p className="text-black/80">Fill the 9×9 grid so that each row, column, and 3×3 box contains digits 1-9 without repetition.</p>
+                                </div>
+
+                                <div>
+                                    <h3 className="font-black text-lg mb-2 text-[#6C5CE7]">🎮 Controls</h3>
+                                    <ul className="space-y-2 text-black/80">
+                                        <li>• <strong>Click a cell</strong> to select it (yellow highlight)</li>
+                                        <li>• <strong>Click a number</strong> (1-9) to place it in the selected cell</li>
+                                        <li>• <strong>Notes Mode</strong>: Toggle to add pencil marks for tracking possibilities</li>
+                                        <li>• <strong>Eraser</strong>: Clear the selected cell</li>
+                                        <li>• <strong>Undo/Redo</strong>: Revert or restore your moves</li>
+                                        <li>• <strong>Hints</strong>: Get help (3 hints per game, costs 50 JP each after that)</li>
+                                    </ul>
+                                </div>
+
+                                <div>
+                                    <h3 className="font-black text-lg mb-2 text-[#FF7675]">❌ Mistakes</h3>
+                                    <p className="text-black/80">You have <strong>3 lives</strong>. Wrong numbers count as mistakes. After 3 mistakes, it's game over!</p>
+                                </div>
+
+                                <div>
+                                    <h3 className="font-black text-lg mb-2 text-[#00B894]">🏆 Scoring</h3>
+                                    <ul className="space-y-1 text-black/80">
+                                        <li>• Base points vary by difficulty</li>
+                                        <li>• -10 points per mistake</li>
+                                        <li>• -5 points per minute spent</li>
+                                        <li>• Minimum 10 points guaranteed</li>
+                                    </ul>
+                                </div>
+
+                                <div>
+                                    <h3 className="font-black text-lg mb-2 text-[#FFD93D]">💡 Tips</h3>
+                                    <ul className="space-y-1 text-black/80">
+                                        <li>• Use notes to track possibilities</li>
+                                        <li>• Start with rows/columns that have many numbers</li>
+                                        <li>• Look for "naked singles" (only one possible number)</li>
+                                        <li>• Red highlighting shows conflicts</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <button
+                                onClick={() => setShowRules(false)}
+                                className="mt-6 w-full px-6 py-3 bg-[#6C5CE7] text-white rounded-xl border-2 border-black font-black uppercase hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_#000] transition-all"
+                            >
+                                Got It!
+                            </button>
+                        </div>
+                    </div>
+                )}
+
                 {/* LEFT COLUMN: Controls */}
                 <div className="space-y-6">
+                    {/* Rules Button */}
+                    <button
+                        onClick={() => setShowRules(true)}
+                        className="w-full px-6 py-4 bg-[#FFD93D] text-black rounded-xl border-2 border-black font-black uppercase text-sm hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_#000] transition-all"
+                    >
+                        📋 How to Play
+                    </button>
+
                     {/* Difficulty */}
                     <div className="bg-white border-2 border-black p-6 rounded-[20px] neo-shadow">
                         <label className="font-black text-black text-xs uppercase tracking-widest block mb-3">Difficulty</label>
@@ -649,33 +718,8 @@ const SudokuGame: React.FC = () => {
                     )}
                 </div>
 
-                {/* RIGHT COLUMN: Leaderboard & History */}
+                {/* RIGHT COLUMN: History */}
                 <div className="space-y-6">
-                    {leaderboard.length > 0 && (
-                        <div className="bg-white border-2 border-black p-6 rounded-[20px] neo-shadow">
-                            <h3 className="font-black text-xs uppercase tracking-widest mb-4">Leaderboard</h3>
-                            <div className="space-y-2">
-                                {leaderboard.slice(0, 5).map((row, i) => (
-                                    <div key={i} className="flex items-center gap-3 p-3 bg-[#FFFDF5] rounded-lg border border-black/10">
-                                        <div className={`
-                                            w-8 h-8 rounded-full flex items-center justify-center font-black text-sm border-2 border-black
-                                            ${i === 0 ? 'bg-[#FFD93D]' : i === 1 ? 'bg-gray-300' : i === 2 ? 'bg-[#CD7F32]' : 'bg-white'}
-                                        `}>
-                                            {i + 1}
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-sm font-bold truncate">{row.userId.slice(0, 12)}...</p>
-                                            <p className="text-xs text-black/50 font-bold">{row.gamesPlayed} games</p>
-                                        </div>
-                                        <div className="text-right">
-                                            <p className="text-lg font-black text-[#00B894]">{row.totalPoints}</p>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-
                     {history.length > 0 && (
                         <div className="bg-white border-2 border-black p-6 rounded-[20px] neo-shadow">
                             <h3 className="font-black text-xs uppercase tracking-widest mb-4">Your History</h3>

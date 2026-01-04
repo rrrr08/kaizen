@@ -41,6 +41,7 @@ const PUZZLES: ChessPuzzle[] = [
 ];
 
 const ChessGame: React.FC = () => {
+  const [showRules, setShowRules] = useState(false);
   const [puzzle] = useState<ChessPuzzle | null>(() =>
     PUZZLES[Math.floor(Math.random() * PUZZLES.length)]
   );
@@ -136,6 +137,92 @@ const ChessGame: React.FC = () => {
 
   return (
     <div className="max-w-3xl mx-auto">
+      {/* Rules Modal */}
+      {showRules && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+          onClick={() => setShowRules(false)}
+        >
+          <div 
+            className="bg-white border-4 border-black rounded-[20px] p-6 sm:p-8 max-w-2xl max-h-[80vh] overflow-y-auto neo-shadow"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="text-3xl font-black text-black uppercase tracking-tighter mb-6">
+              ♟️ How to Play Chess Puzzle
+            </h2>
+            
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-xl font-black text-black mb-2 flex items-center gap-2">
+                  <span>🎯</span> Objective
+                </h3>
+                <p className="text-black/70 font-medium">
+                  Solve chess puzzles by finding the winning sequence of moves that lead to checkmate. Each puzzle has a specific solution.
+                </p>
+              </div>
+
+              <div>
+                <h3 className="text-xl font-black text-black mb-2 flex items-center gap-2">
+                  <span>🎮</span> How to Play
+                </h3>
+                <ul className="list-disc list-inside space-y-2 text-black/70 font-medium">
+                  <li>Study the chess position shown (FEN notation)</li>
+                  <li>Enter moves in standard chess notation (e.g., Qh5, Nf6, Bxf7+)</li>
+                  <li>Submit each move in sequence to solve the puzzle</li>
+                  <li>Use hints if you're stuck (reduces final points)</li>
+                  <li>Complete all moves in the correct order to win</li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="text-xl font-black text-black mb-2 flex items-center gap-2">
+                  <span>♟️</span> Chess Notation Guide
+                </h3>
+                <ul className="list-disc list-inside space-y-2 text-black/70 font-medium">
+                  <li><strong>K</strong> = King, <strong>Q</strong> = Queen, <strong>R</strong> = Rook</li>
+                  <li><strong>B</strong> = Bishop, <strong>N</strong> = Knight</li>
+                  <li>Pawns have no letter (e.g., e4)</li>
+                  <li><strong>+</strong> = Check, <strong>#</strong> = Checkmate</li>
+                  <li><strong>x</strong> = Captures (e.g., Bxf7)</li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="text-xl font-black text-black mb-2 flex items-center gap-2">
+                  <span>🏆</span> Scoring
+                </h3>
+                <ul className="list-disc list-inside space-y-2 text-black/70 font-medium">
+                  <li>Complete the puzzle correctly: +300 points</li>
+                  <li>Game of the Day: 2X points (600 points)</li>
+                  <li>Each hint used: -50 points</li>
+                  <li>Wrong attempts: -20 points each</li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="text-xl font-black text-black mb-2 flex items-center gap-2">
+                  <span>💡</span> Tips
+                </h3>
+                <ul className="list-disc list-inside space-y-2 text-black/70 font-medium">
+                  <li>Look for checks, captures, and threats first</li>
+                  <li>Easy puzzles are usually 1-2 move mates</li>
+                  <li>Medium puzzles require 3-4 move combinations</li>
+                  <li>Pay attention to piece coordination</li>
+                  <li>Use hints strategically to maintain high scores</li>
+                </ul>
+              </div>
+            </div>
+
+            <button 
+              onClick={() => setShowRules(false)}
+              className="mt-8 w-full px-6 py-3 bg-[#FFD93D] text-black font-black rounded-xl border-2 border-black neo-shadow hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all"
+            >
+              Got It!
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Game of the Day Badge */}
       {isGameOfDay && (
         <div className="mb-6 flex justify-center">
@@ -146,10 +233,20 @@ const ChessGame: React.FC = () => {
       )}
 
       <div className="bg-white border-2 border-black p-8 rounded-[25px] neo-shadow">
+        <div className="flex items-center justify-between mb-8">
+          <button
+            onClick={() => setShowRules(true)}
+            className="px-6 py-3 bg-[#FFD93D] text-black font-black rounded-xl border-2 border-black neo-shadow hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all text-sm uppercase tracking-wider"
+          >
+            ♟️ How to Play
+          </button>
+          <div className="text-center flex-1">
+            <span className="inline-block px-4 py-1 bg-[#6C5CE7] text-white border-2 border-black rounded-lg text-xs font-black uppercase tracking-wider shadow-[2px_2px_0px_#000]">
+              {puzzle.difficulty}
+            </span>
+          </div>
+        </div>
         <div className="text-center mb-8">
-          <span className="inline-block px-4 py-1 bg-[#6C5CE7] text-white border-2 border-black rounded-lg text-xs font-black uppercase tracking-wider mb-2 shadow-[2px_2px_0px_#000]">
-            {puzzle.difficulty}
-          </span>
           <h2 className="text-4xl font-black text-black uppercase tracking-tighter mb-2">Chess Puzzle</h2>
           <p className="text-black/60 font-medium text-lg">{puzzle.description}</p>
         </div>

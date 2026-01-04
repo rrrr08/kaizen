@@ -12,6 +12,8 @@ export default function Play() {
   const [error, setError] = useState<string | null>(null);
   const [rotationPolicy, setRotationPolicy] = useState<any>(null);
   const [todaysGames, setTodaysGames] = useState<string[]>([]);
+  const [leaderboard, setLeaderboard] = useState<any[]>([]);
+  const [leaderboardLoading, setLeaderboardLoading] = useState(true);
 
   useEffect(() => {
     const fetchGames = async () => {
@@ -41,7 +43,23 @@ export default function Play() {
       }
     };
 
+    const fetchLeaderboard = async () => {
+      try {
+        setLeaderboardLoading(true);
+        const res = await fetch('/api/leaderboard');
+        const data = await res.json();
+        if (data.success) {
+          setLeaderboard(data.leaderboard);
+        }
+      } catch (err) {
+        console.error('Error fetching leaderboard:', err);
+      } finally {
+        setLeaderboardLoading(false);
+      }
+    };
+
     fetchGames();
+    fetchLeaderboard();
   }, []);
 
   return (
@@ -318,25 +336,49 @@ export default function Play() {
                 <tr>
                   <th className="text-left p-6 font-black text-[10px] tracking-widest text-black">RANK</th>
                   <th className="text-left p-6 font-black text-[10px] tracking-widest text-black">PLAYER</th>
-                  <th className="text-left p-6 font-black text-[10px] tracking-widest text-black">POINTS</th>
-                  <th className="text-left p-6 font-black text-[10px] tracking-widest text-black">GAMES PLAYED</th>
+                  <th className="text-left p-6 font-black text-[10px] tracking-widest text-black">XP SCORE</th>
+
                 </tr>
               </thead>
               <tbody>
-                {[
-                  { rank: 1, name: 'ShadowGamer', points: 5420, games: 34 },
-                  { rank: 2, name: 'PuzzleMaster', points: 4980, games: 29 },
-                  { rank: 3, name: 'RiddleSolver', points: 4650, games: 27 },
-                  { rank: 4, name: 'BrainTease', points: 4120, games: 24 },
-                  { rank: 5, name: 'LogicLord', points: 3890, games: 22 },
-                ].map((player, i) => (
-                  <tr key={player.rank} className={`border-b border-black/10 hover:bg-[#FFFDF5] transition-colors ${i === 4 ? 'border-b-0' : ''}`}>
-                    <td className="p-6 font-black text-xl text-[#00B894]">#{player.rank}</td>
-                    <td className="p-6 font-bold text-sm tracking-wide text-black">{player.name}</td>
-                    <td className="p-6 font-black text-xl text-black">{player.points.toLocaleString()}</td>
-                    <td className="p-6 font-bold text-black/60">{player.games}</td>
+                {leaderboardLoading ? (
+                  // Loading Skeleton
+                  [1, 2, 3, 4, 5].map((i) => (
+                    <tr key={i} className="border-b border-black/10">
+                      <td colSpan={3} className="p-6">
+                        <div className="h-4 bg-black/5 rounded animate-pulse"></div>
+                      </td>
+                    </tr>
+                  ))
+                ) : leaderboard.length > 0 ? (
+                  leaderboard.map((player, i) => (
+                    <tr key={player.id} className={`border-b border-black/10 hover:bg-[#FFFDF5] transition-colors ${i === leaderboard.length - 1 ? 'border-b-0' : ''}`}>
+                      <td className="p-6 font-black text-xl text-[#00B894]">#{i + 1}</td>
+                      <td className="p-6">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-black/10 overflow-hidden border border-black/20">
+                            {player.avatar_url ? (
+                              <img src={player.avatar_url} alt={player.name} className="w-full h-full object-cover" />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-xs font-bold text-black/30">
+                                {player.name.charAt(0)}
+                              </div>
+                            )}
+                          </div>
+                          <span className="font-bold text-sm tracking-wide text-black">{player.name}</span>
+                        </div>
+                      </td>
+                      <td className="p-6 font-black text-xl text-black">{player.xp.toLocaleString()} XP</td>
+
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={3} className="p-12 text-center text-black/40 font-bold italic">
+                      No players found yet. Be the first to verify!
+                    </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>
