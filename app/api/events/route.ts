@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
     const snap = await adminDb.doc(`users/${uid}`).get();
 
     if (snap.data()?.role !== 'admin') {
-      return 403;
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
 

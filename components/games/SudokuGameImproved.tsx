@@ -50,7 +50,7 @@ const SudokuGame: React.FC = () => {
     const [alreadyPlayed, setAlreadyPlayed] = useState(false);
     const [selectedCell, setSelectedCell] = useState<{ row: number; col: number } | null>(null);
     const [noteMode, setNoteMode] = useState(false);
-    const [notes, setNotes] = useState<Set<number>[][][]>([]);
+    const [notes, setNotes] = useState<Set<number>[][]>([]);
     const [undoStack, setUndoStack] = useState<any[]>([]);
     const [redoStack, setRedoStack] = useState<any[]>([]);
     const [hints, setHints] = useState(3);
@@ -60,7 +60,7 @@ const SudokuGame: React.FC = () => {
     // Initialize notes grid
     useEffect(() => {
         if (puzzle.length > 0) {
-            const newNotes = Array(9).fill(null).map(() => 
+            const newNotes = Array(9).fill(null).map(() =>
                 Array(9).fill(null).map(() => new Set<number>())
             );
             setNotes(newNotes);
@@ -71,12 +71,12 @@ const SudokuGame: React.FC = () => {
     useEffect(() => {
         if (board.length === 0) return;
         const newConflicts = new Set<string>();
-        
+
         for (let r = 0; r < 9; r++) {
             for (let c = 0; c < 9; c++) {
                 const val = board[r][c];
                 if (val === 0) continue;
-                
+
                 // Check row
                 for (let cc = 0; cc < 9; cc++) {
                     if (cc !== c && board[r][cc] === val) {
@@ -84,7 +84,7 @@ const SudokuGame: React.FC = () => {
                         newConflicts.add(`${r}-${cc}`);
                     }
                 }
-                
+
                 // Check column
                 for (let rr = 0; rr < 9; rr++) {
                     if (rr !== r && board[rr][c] === val) {
@@ -92,7 +92,7 @@ const SudokuGame: React.FC = () => {
                         newConflicts.add(`${rr}-${c}`);
                     }
                 }
-                
+
                 // Check 3x3 box
                 const boxR = Math.floor(r / 3) * 3;
                 const boxC = Math.floor(c / 3) * 3;
@@ -106,7 +106,7 @@ const SudokuGame: React.FC = () => {
                 }
             }
         }
-        
+
         setConflicts(newConflicts);
     }, [board]);
 
@@ -215,14 +215,14 @@ const SudokuGame: React.FC = () => {
         if (hints === 0 || !selectedCell) return;
         const { row, col } = selectedCell;
         if (puzzle[row][col] !== 0) return;
-        
+
         saveState();
         const newBoard = [...board];
         newBoard[row] = [...newBoard[row]];
         newBoard[row][col] = solution[row][col];
         setBoard(newBoard);
         setHints(h => h - 1);
-        
+
         confetti({ particleCount: 50, spread: 30, origin: { y: 0.7 } });
     };
 
@@ -230,13 +230,13 @@ const SudokuGame: React.FC = () => {
         if (!selectedCell) return;
         const { row, col } = selectedCell;
         if (puzzle[row][col] !== 0) return;
-        
+
         saveState();
         const newBoard = [...board];
         newBoard[row] = [...newBoard[row]];
         newBoard[row][col] = 0;
         setBoard(newBoard);
-        
+
         // Clear notes too
         if (notes.length > 0) {
             const newNotes = notes.map(r => r.map(c => new Set(c)));
@@ -266,14 +266,14 @@ const SudokuGame: React.FC = () => {
             newBoard[row] = [...newBoard[row]];
             newBoard[row][col] = num;
             setBoard(newBoard);
-            
+
             // Clear notes when number is placed
             if (notes.length > 0) {
                 const newNotes = notes.map(r => r.map(c => new Set(c)));
                 newNotes[row][col].clear();
                 setNotes(newNotes);
             }
-            
+
             // Auto-check on every move
             if (checkWin(newBoard)) {
                 setTimeout(() => handleWin(), 500);
@@ -328,7 +328,7 @@ const SudokuGame: React.FC = () => {
         const isHighlighted = highlightNumber !== null && cell === highlightNumber && cell !== 0;
         const isSameRow = selectedCell?.row === rIndex;
         const isSameCol = selectedCell?.col === cIndex;
-        const isSameBox = selectedCell && 
+        const isSameBox = selectedCell &&
             Math.floor(selectedCell.row / 3) === Math.floor(rIndex / 3) &&
             Math.floor(selectedCell.col / 3) === Math.floor(cIndex / 3);
         const hasConflict = conflicts.has(`${rIndex}-${cIndex}`);
@@ -491,7 +491,7 @@ const SudokuGame: React.FC = () => {
                                 const borderRight = (cIndex + 1) % 3 === 0 && cIndex !== 8 ? 'border-r-4 border-black' : 'border-r border-black/20';
                                 const borderBottom = (rIndex + 1) % 3 === 0 && rIndex !== 8 ? 'border-b-4 border-black' : 'border-b border-black/20';
                                 const cellNotes = notes[rIndex]?.[cIndex];
-                                
+
                                 return (
                                     <div
                                         key={`${rIndex}-${cIndex}`}
@@ -507,7 +507,7 @@ const SudokuGame: React.FC = () => {
                                             <span className="text-2xl md:text-3xl">{cell}</span>
                                         ) : cellNotes && cellNotes.size > 0 ? (
                                             <div className="grid grid-cols-3 gap-0 w-full h-full p-1">
-                                                {[1,2,3,4,5,6,7,8,9].map(n => (
+                                                {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => (
                                                     <span key={n} className="text-[8px] text-gray-400 flex items-center justify-center">
                                                         {cellNotes.has(n) ? n : ''}
                                                     </span>

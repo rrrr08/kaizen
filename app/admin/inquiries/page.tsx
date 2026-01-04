@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { adminAuth, auth } from '@/lib/firebase';
+import { auth } from '@/lib/firebase';
 import { Trash2, ExternalLink, Calendar, User, Mail, MessageSquare, AlertCircle } from 'lucide-react';
 import RoleProtected from '@/components/auth/RoleProtected';
 import { USER_ROLES } from '@/lib/roles';
