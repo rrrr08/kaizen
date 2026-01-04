@@ -10,7 +10,7 @@ import { auth } from '@/lib/firebase';
 interface PhoneVerificationProps {
   currentPhone?: string;
   isVerified?: boolean;
-  onVerified?: () => void;
+  onVerified?: (phoneNumber: string) => void;
 }
 
 export default function PhoneVerification({ 
@@ -144,9 +144,9 @@ export default function PhoneVerification({
         description: 'Phone number verified successfully',
       });
 
-      setStep('phone');
+      // Don't reset step - parent component will re-render with isVerified=true
       setOtp('');
-      onVerified?.();
+      onVerified?.(phoneNumber); // Pass phone number to parent
 
     } catch (error: any) {
       console.error('Error verifying OTP:', error);

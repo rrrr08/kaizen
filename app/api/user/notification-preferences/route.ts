@@ -1,16 +1,23 @@
-import { getServerSession } from 'next-auth';
-import { db } from '@/lib/firebase-admin';
+import { db, auth } from '@/lib/firebase-admin';
 import { Timestamp } from 'firebase-admin/firestore';
 
 export async function GET(request: Request) {
   try {
-    const session = await getServerSession();
-
-    if (!session?.user?.email) {
+    // Get Firebase auth token from header
+    const authHeader = request.headers.get('Authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const userPrefsRef = db.collection('userNotificationPreferences').doc(session.user.email);
+    const token = authHeader.substring(7);
+    const decodedToken = await auth.verifyIdToken(token);
+    const userEmail = decodedToken.email;
+
+    if (!userEmail) {
+      return Response.json({ error: 'User email not found' }, { status: 400 });
+    }
+
+    const userPrefsRef = db.collection('userNotificationPreferences').doc(userEmail);
     const userPrefs = await userPrefsRef.get();
 
     if (!userPrefs.exists) {
@@ -56,15 +63,23 @@ export async function GET(request: Request) {
 
 export async function PUT(request: Request) {
   try {
-    const session = await getServerSession();
-
-    if (!session?.user?.email) {
+    // Get Firebase auth token from header
+    const authHeader = request.headers.get('Authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const token = authHeader.substring(7);
+    const decodedToken = await auth.verifyIdToken(token);
+    const userEmail = decodedToken.email;
+
+    if (!userEmail) {
+      return Response.json({ error: 'User email not found' }, { status: 400 });
     }
 
     const preferences = await request.json();
 
-    await db.collection('userNotificationPreferences').doc(session.user.email).set({
+    await db.collection('userNotificationPreferences').doc(userEmail).set({
       ...preferences,
       updatedAt: Timestamp.now(),
     }, { merge: true });

@@ -1,14 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminAuth, adminDb } from '@/lib/firebaseAdmin';
 import twilio from 'twilio';
-
-// Store OTPs temporarily (in production, use Redis or Firestore with TTL)
-const otpStore = new Map<string, { otp: string; expiresAt: number; attempts: number }>();
-
-// Generate 6-digit OTP
-function generateOTP(): string {
-  return Math.floor(100000 + Math.random() * 900000).toString();
-}
+import { otpStore, generateOTP, OTP_EXPIRY_MS } from '@/lib/otpStore';
 
 export async function POST(req: NextRequest) {
   try {
@@ -65,7 +58,7 @@ export async function POST(req: NextRequest) {
 
     // Generate OTP
     const otp = generateOTP();
-    const expiresAt = Date.now() + 10 * 60 * 1000; // 10 minutes
+    const expiresAt = Date.now() + OTP_EXPIRY_MS;
 
     // Store OTP
     otpStore.set(phoneNumber, { otp, expiresAt, attempts: 0 });

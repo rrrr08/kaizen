@@ -1,11 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminAuth, adminDb } from '@/lib/firebaseAdmin';
-
-// Access the same OTP store (in production, use Redis or Firestore)
-// Note: This is a simple in-memory store. For production, use a persistent store.
-const otpStore = new Map<string, { otp: string; expiresAt: number; attempts: number }>();
-
-const MAX_ATTEMPTS = 5;
+import { otpStore, MAX_ATTEMPTS } from '@/lib/otpStore';
 
 export async function POST(req: NextRequest) {
   try {

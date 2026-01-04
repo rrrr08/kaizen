@@ -2,40 +2,45 @@
 importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js');
 
-// Firebase config is injected via environment variables from the main app
-// These values are read from NEXT_PUBLIC_* env variables in the client
+// Firebase config - Note: Service workers can't access environment variables directly
+// The config is passed from the main app during service worker registration
+// For local development, you can temporarily hardcode values, but remember to:
+// 1. Never commit real Firebase credentials
+// 2. Use a build script to inject these values in production
 const firebaseConfig = {
-  apiKey: self.firebaseConfig?.apiKey || 'SET_IN_ENV',
-  authDomain: self.firebaseConfig?.authDomain || 'SET_IN_ENV',
-  projectId: self.firebaseConfig?.projectId || 'SET_IN_ENV',
-  storageBucket: self.firebaseConfig?.storageBucket || 'SET_IN_ENV',
-  messagingSenderId: self.firebaseConfig?.messagingSenderId || 'SET_IN_ENV',
-  appId: self.firebaseConfig?.appId || 'SET_IN_ENV',
+  apiKey: "",
+  authDomain: "",
+  projectId: "",
+  storageBucket: "",
+  messagingSenderId: "",
+  appId: ""
 };
 
-firebase.initializeApp(firebaseConfig);
+try {
+  firebase.initializeApp(firebaseConfig);
+  const messaging = firebase.messaging();
 
+  // Handle background messages
+  messaging.onBackgroundMessage((payload) => {
+    console.log('Background message received:', payload);
 
-const messaging = firebase.messaging();
+    const notificationTitle = payload.notification?.title || 'Joy Juncture';
+    const notificationOptions = {
+      body: payload.notification?.body || 'You have a new notification',
+      icon: payload.notification?.icon || '/icons/logo-192x192.png',
+      image: payload.notification?.image,
+      badge: '/icons/badge-96x96.png',
+      tag: payload.data?.campaignId || 'notification',
+      requireInteraction: true,
+      vibrate: [200, 100, 200],
+      data: payload.data || {},
+    };
 
-// Handle background messages
-messaging.onBackgroundMessage((payload) => {
-  console.log('Background message received:', payload);
-
-  const notificationTitle = payload.notification?.title || 'Joy Juncture';
-  const notificationOptions = {
-    body: payload.notification?.body || 'You have a new notification',
-    icon: payload.notification?.icon || '/icons/logo-192x192.png',
-    image: payload.notification?.image,
-    badge: '/icons/badge-96x96.png',
-    tag: payload.data?.campaignId || 'notification',
-    requireInteraction: true,
-    vibrate: [200, 100, 200],
-    data: payload.data || {},
-  };
-
-  self.registration.showNotification(notificationTitle, notificationOptions);
-});
+    self.registration.showNotification(notificationTitle, notificationOptions);
+  });
+} catch (error) {
+  console.error('Error initializing Firebase in service worker:', error);
+}
 
 // Handle notification click
 self.addEventListener('notificationclick', (event) => {

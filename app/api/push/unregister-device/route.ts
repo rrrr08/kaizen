@@ -1,13 +1,20 @@
-import { getServerSession } from 'next-auth';
-import { db } from '@/lib/firebase-admin';
+import { db, auth } from '@/lib/firebase-admin';
 import { Timestamp } from 'firebase-admin/firestore';
 
 export async function POST(request: Request) {
   try {
-    const session = await getServerSession();
-
-    if (!session?.user?.email) {
+    // Get Firebase auth token from header
+    const authHeader = request.headers.get('Authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const token = authHeader.substring(7);
+    const decodedToken = await auth.verifyIdToken(token);
+    const userEmail = decodedToken.email;
+
+    if (!userEmail) {
+      return Response.json({ error: 'User email not found' }, { status: 400 });
     }
 
     const { deviceId } = await request.json();
@@ -20,7 +27,7 @@ export async function POST(request: Request) {
     const deviceRef = db.collection('userDeviceTokens').doc(deviceId);
     const device = await deviceRef.get();
 
-    if (!device.exists || device.data()?.userEmail !== session.user.email) {
+    if (!device.exists || device.data()?.userEmail !== userEmail) {
       return Response.json({ error: 'Device not found' }, { status: 404 });
     }
 

@@ -102,17 +102,28 @@ export function usePushNotifications() {
     }
 
     try {
+      console.log('Requesting notification permission...');
       const permission = await Notification.requestPermission();
+      console.log('Permission result:', permission);
       setPermission(permission);
 
       if (permission === 'granted') {
+        console.log('Permission granted! Getting FCM token...');
         const fcmToken = await getFCMToken();
+        console.log('FCM Token:', fcmToken ? 'Generated' : 'Failed');
+        
         if (fcmToken) {
           setToken(fcmToken);
           // Save token to backend
+          console.log('Saving device token to backend...');
           await saveDeviceToken(fcmToken);
+          console.log('Device token saved successfully');
           return true;
+        } else {
+          console.error('Failed to get FCM token');
         }
+      } else {
+        console.warn('Permission not granted:', permission);
       }
       return false;
     } catch (error) {
