@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import Hero from '@/components/ui/Hero';
-import BentoGrid from '@/components/ui/BentoGrid';
+import GameDiscoveryCarousel from '@/components/ui/GameDiscoveryCarousel';
 import ProductCard from '@/components/ui/ProductCard';
 import { Product } from '@/lib/types';
 import { GameEvent } from '@/lib/types';
@@ -96,7 +96,7 @@ export default function Home() {
       <Hero
         backgroundImage={content?.hero.backgroundImage}
       />
-      <BentoGrid items={content?.bentoGrid} />
+      <GameDiscoveryCarousel />
 
       <section className="px-6 py-20 bg-white">
         <div className="container mx-auto">
