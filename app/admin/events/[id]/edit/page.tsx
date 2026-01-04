@@ -5,11 +5,15 @@ import { useRouter, useParams } from 'next/navigation';
 import ImageUpload from '@/components/ui/ImageUpload';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+
 
 export default function EditEventPage() {
   const router = useRouter();
   const { id } = useParams<{ id: string }>();
-
+  const [checkingAdmin, setCheckingAdmin] = useState(true);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -30,9 +34,36 @@ export default function EditEventPage() {
     form.datetime &&
     new Date(form.datetime).getTime() < Date.now();
 
+  useEffect(() => {
+    const auth = getAuth();
+
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        router.replace('/');
+        return;
+      }
+
+      try {
+        const snap = await getDoc(doc(db, 'users', user.uid));
+
+        if (!snap.exists() || snap.data()?.role !== 'admin') {
+          router.replace('/');
+          return;
+        }
+
+        setCheckingAdmin(false); // ✅ admin confirmed
+      } catch (err) {
+        console.error('Admin check failed', err);
+        router.replace('/');
+      }
+    });
+
+    return () => unsubscribe();
+  }, [router]);
+
 
   useEffect(() => {
-    if (!id) return;
+    if (!id || checkingAdmin) return;
 
     (async () => {
       try {
@@ -57,8 +88,7 @@ export default function EditEventPage() {
           capacity: e.capacity?.toString() ?? '',
           highlights: e.highlights?.map((h: any) => h.text).join('\n') ?? '',
           gallery: e.gallery?.join('\n') ?? '',
-          testimonials:
-            e.testimonials?.map((t: any) => t.text).join('\n') ?? '',
+          testimonials: e.testimonials?.map((t: any) => t.text).join('\n') ?? '',
         });
       } catch (err) {
         console.error(err);
@@ -68,7 +98,8 @@ export default function EditEventPage() {
         setLoading(false);
       }
     })();
-  }, [id, router]);
+  }, [id, checkingAdmin, router]);
+
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -99,9 +130,7 @@ export default function EditEventPage() {
         .filter(nonEmpty)
         .map(text => ({ text }));
 
-      payload.gallery = form.gallery
-        .split('\n')
-        .filter(nonEmpty);
+      payload.gallery = form.gallery.split('\n').filter(nonEmpty);
 
       payload.testimonials = form.testimonials
         .split('\n')
@@ -109,17 +138,48 @@ export default function EditEventPage() {
         .map(text => ({ text }));
     }
 
-    const res = await fetch(`/api/events/${id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
+    try {
+      const auth = getAuth();
+      const user = auth.currentUser;
 
-    setSaving(false);
+      if (!user) {
+        alert('Not authenticated');
+        return;
+      }
 
-    if (res.ok) router.push('/admin/events');
-    else alert('Failed to update event');
+      const token = await user.getIdToken();
+
+      const res = await fetch(`/api/events/${id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to update event');
+      }
+
+      router.push('/admin/events');
+    } catch (err) {
+      console.error(err);
+      alert('Failed to update event');
+    } finally {
+      setSaving(false);
+    }
   };
+
+  if (checkingAdmin) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#FFFDF5]">
+        <p className="font-black text-xs tracking-widest text-black/60">
+          CHECKING ACCESS…
+        </p>
+      </div>
+    );
+  }
 
   if (loading) {
     return (

@@ -3,23 +3,54 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Calendar, Plus, Edit2, Trash2, Search, MapPin, Users } from 'lucide-react';
-import { deleteDoc, doc } from 'firebase/firestore';
 import { GameEvent } from '@/lib/types';
 import { splitDateTime } from '@/lib/utils';
-import { getFirebaseDb } from '@/lib/firebase';
-import Image from 'next/image';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+
 
 export default function EventsPage() {
   const router = useRouter();
   const [events, setEvents] = useState<GameEvent[]>([]);
+  const [checkingAdmin, setCheckingAdmin] = useState(true);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'upcoming' | 'past'>('upcoming');
 
   useEffect(() => {
-    loadEvents();
-  }, [statusFilter]);
+    const auth = getAuth();
+
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        router.replace('/');
+        return;
+      }
+
+      try {
+        const snap = await getDoc(doc(db, 'users', user.uid));
+
+        if (!snap.exists() || snap.data()?.role !== 'admin') {
+          router.replace('/');
+          return;
+        }
+
+        // ✅ admin confirmed
+        setCheckingAdmin(false);
+      } catch (err) {
+        console.error('Admin check failed', err);
+        router.replace('/');
+      }
+    });
+
+    return () => unsubscribe();
+  }, [router]);
+
+  useEffect(() => {
+    if (!checkingAdmin)
+      loadEvents();
+  }, [checkingAdmin, statusFilter]);
 
   const loadEvents = async () => {
     try {
@@ -36,8 +67,8 @@ export default function EventsPage() {
       } else {
         setError(eventData.error || 'Failed to load events');
       }
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to load upcoming events');
+    } catch (err: any) {
+      setError(err.message || 'Failed to load upcoming events');
       console.error('Error:', err);
     } finally {
       setLoading(false);
@@ -64,13 +95,24 @@ export default function EventsPage() {
   };
 
   const handleDeleteEvent = async (eventId: string) => {
-    if (!window.confirm('Are you sure you want to cancel this event?')) {
-      return;
-    }
+    if (!window.confirm('Are you sure you want to cancel this event?')) return;
 
     try {
+      const auth = getAuth();
+      const user = auth.currentUser;
+
+      if (!user) {
+        alert('Not authenticated');
+        return;
+      }
+
+      const token = await user.getIdToken();
+
       const res = await fetch(`/api/events/${eventId}`, {
         method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       const data = await res.json();
@@ -85,6 +127,17 @@ export default function EventsPage() {
       alert('Failed to delete event');
     }
   };
+
+  
+  if (checkingAdmin) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#FFFDF5]">
+        <p className="font-black text-xs tracking-widest text-black/60">
+          CHECKING ACCESS…
+        </p>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -197,10 +250,9 @@ export default function EventsPage() {
             {/* Image */}
             <div className="w-full md:w-80 h-64 md:h-auto bg-gray-100 flex-shrink-0 overflow-hidden border-b-2 md:border-b-0 md:border-r-2 border-black relative">
               {event.image !== "" ? (
-                <Image
-                  src={event.image || "/placeholder.png"}
+                <img
+                  src={event.image}
                   alt={event.title}
-                  fill
                   className="w-full h-full object-cover group-hover:scale-110 transition duration-500"
                 />
               ) : (

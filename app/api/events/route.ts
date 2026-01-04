@@ -1,37 +1,42 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { adminDb } from '@/lib/firebaseAdmin';
+import { auth } from '@/lib/firebase-admin';
+import { adminDb } from '@/lib/firebaseAdmin'
 import { Timestamp, FieldValue } from 'firebase-admin/firestore';
+
+export const runtime = 'nodejs';
+
 
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const status = searchParams.get('status') as 'past' | 'upcoming' | null;
 
-    const eventsCollection = adminDb.collection('events');
-    const now = new Date();
+    const now = Timestamp.fromDate(new Date());
 
-    let query;
+    let queryRef: FirebaseFirestore.Query;
 
     if (status === 'upcoming' || !status) {
-      query = eventsCollection
+      queryRef = adminDb
+        .collection('events')
         .where('datetime', '>', now)
         .orderBy('datetime', 'asc');
     } else {
-      query = eventsCollection
+      queryRef = adminDb
+        .collection('events')
         .where('datetime', '<=', now)
         .orderBy('datetime', 'desc');
     }
 
-    const snapshot = await query.get();
+    const snapshot = await queryRef.get();
 
     const events = snapshot.docs.map(doc => {
       const data = doc.data();
       return {
         id: doc.id,
         ...data,
-        datetime: data.datetime?.toDate?.() || data.datetime,
-        createdAt: data.createdAt?.toDate?.() || data.createdAt,
-        updatedAt: data.updatedAt?.toDate?.() || data.updatedAt,
+        datetime: data.datetime?.toDate(),
+        createdAt: data.createdAt?.toDate(),
+        updatedAt: data.updatedAt?.toDate(),
       };
     });
 
@@ -53,10 +58,32 @@ export async function GET(req: NextRequest) {
   }
 }
 
+
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
 
+
+    // 1️⃣ AUTH CHECK
+    const token = req.headers
+      .get('authorization')
+      ?.replace('Bearer ', '');
+
+    if (!token) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const decoded = await auth.verifyIdToken(token);
+    const uid = decoded.uid;
+
+    const snap = await adminDb.doc(`users/${uid}`).get();
+
+    if (snap.data()?.role !== 'admin') {
+      return 403;
+    }
+
+
+    // 3️⃣ PAYLOAD
+    const body = await req.json();
     const {
       title,
       description,
@@ -72,7 +99,6 @@ export async function POST(req: NextRequest) {
       gallery,
     } = body;
 
-    // Required for ALL events
     if (!title || !description || !datetime || !location || capacity === undefined) {
       return NextResponse.json(
         { success: false, error: 'Missing required fields' },
@@ -80,7 +106,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Base payload
     const payload: any = {
       title,
       description,
@@ -96,13 +121,13 @@ export async function POST(req: NextRequest) {
     if (price !== undefined) payload.price = Number(price);
     if (image !== undefined) payload.image = image;
 
-    // Optional: only meaningful for past events
     if (status === 'past') {
-      if (highlights !== undefined) payload.highlights = highlights;
-      if (testimonials !== undefined) payload.testimonials = testimonials;
-      if (gallery !== undefined) payload.gallery = gallery;
+      if (highlights) payload.highlights = highlights;
+      if (testimonials) payload.testimonials = testimonials;
+      if (gallery) payload.gallery = gallery;
     }
 
+    // 4️⃣ ADMIN DB WRITE
     const docRef = await adminDb.collection('events').add(payload);
 
     return NextResponse.json(
@@ -112,11 +137,7 @@ export async function POST(req: NextRequest) {
   } catch (error: any) {
     console.error('[POST /api/events]', error);
     return NextResponse.json(
-      {
-        success: false,
-        error: 'Failed to create event',
-        message: error.message,
-      },
+      { success: false, error: 'Failed to create event' },
       { status: 500 }
     );
   }

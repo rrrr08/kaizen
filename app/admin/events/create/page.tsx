@@ -1,15 +1,18 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import ImageUpload from '@/components/ui/ImageUpload';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
+import { getAuth } from 'firebase/auth';
+
+export const dynamic = 'force-dynamic';
 
 export default function CreateEventPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-
+  const [user, setUser] = useState<any>(null);
   const [form, setForm] = useState({
     title: '',
     datetime: '',
@@ -21,13 +24,25 @@ export default function CreateEventPage() {
     highlights: '',
     gallery: '',
     testimonials: '',
+    registered: ''
   });
 
-  const [now] = useState(() => Date.now());
+  useEffect(() => {
+    (async () => {
+      const { auth } = await import('@/lib/firebase');
+      const { onAuthStateChanged } = await import('firebase/auth');
+
+      const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+        setUser(currentUser);
+      });
+
+      return () => unsubscribe();
+    })();
+  }, []);
 
   const isPast =
     form.datetime &&
-    new Date(form.datetime).getTime() < now;
+    new Date(form.datetime).getTime() < Date.now();
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -43,11 +58,12 @@ export default function CreateEventPage() {
 
     const payload: any = {
       title: form.title,
-      datetime: new Date(form.datetime),
+      datetime: form.datetime,
       location: form.location,
       description: form.description,
       capacity: Number(form.capacity),
-      registered: 0,
+      registered: Number(form.registered) || 0,
+      status: isPast ? 'past' : 'upcoming'
     };
 
     if (form.price) payload.price = Number(form.price);
@@ -69,9 +85,22 @@ export default function CreateEventPage() {
         .map(text => ({ text }));
     }
 
+    const auth = getAuth();
+    const user = auth.currentUser;
+
+    if (!user) {
+      alert('Not authenticated');
+      return;
+    }
+
+    const token = await user.getIdToken();
+
     const res = await fetch('/api/events', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
       body: JSON.stringify(payload),
     });
 
@@ -158,6 +187,13 @@ export default function CreateEventPage() {
                 name="capacity"
                 type="number"
                 value={form.capacity}
+                onChange={handleChange}
+              />
+              <Field
+                label="Registered"
+                name="registered"
+                type="number"
+                value={form.registered}
                 onChange={handleChange}
               />
             </div>

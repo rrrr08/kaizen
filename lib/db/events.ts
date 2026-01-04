@@ -3,19 +3,18 @@ import {
   query,
   where,
   Query,
-  addDoc,
   updateDoc,
   DocumentData,
   orderBy,
   getDocs,
   serverTimestamp,
-  Timestamp,
   getDoc,
-  deleteDoc,
   doc,
 } from "firebase/firestore";
 import { getFirebaseDb } from "@/lib/firebase";
 import { GameEvent } from "../types";
+import { db } from '@/lib/firebase-admin';
+import { FieldValue, Timestamp } from "firebase-admin/firestore";
 
 export type CreateEventInput = {
   title: string;
@@ -104,33 +103,30 @@ export async function getEventById(eventId: string) {
   }
 }
 
-export async function createEvent(input: CreateEventInput) {
+export async function createEvent(input: CreateEventInput): Promise<string> {
   try {
-    const database = await getFirebaseDb();
-    const eventsCollection = collection(database, "events");
-
-    const doc: any = {
+    const payload: any = {
       title: input.title,
       description: input.description,
       datetime: Timestamp.fromDate(input.datetime),
       location: input.location,
       capacity: input.capacity,
       registered: input.registered,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
+      createdAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
     };
 
-    if (input.image !== undefined) doc.image = input.image;
-    if (input.price !== undefined) doc.price = input.price;
+    if (input.image !== undefined) payload.image = input.image;
+    if (input.price !== undefined) payload.price = input.price;
 
-    if (input.highlights !== undefined) doc.highlights = input.highlights;
-    if (input.testimonials !== undefined) doc.testimonials = input.testimonials;
-    if (input.gallery !== undefined) doc.gallery = input.gallery;
+    if (input.highlights !== undefined) payload.highlights = input.highlights;
+    if (input.testimonials !== undefined) payload.testimonials = input.testimonials;
+    if (input.gallery !== undefined) payload.gallery = input.gallery;
 
-    const docRef = await addDoc(eventsCollection, doc);
+    const docRef = await db.collection('events').add(payload);
     return docRef.id;
   } catch (error) {
-    console.error("Error creating event", error);
+    console.error('Error creating event', error);
     throw error;
   }
 }
@@ -139,11 +135,10 @@ export async function updateEventById(
   id: string,
   updates: Partial<GameEvent>
 ): Promise<GameEvent | null> {
-  const db = await getFirebaseDb();
-  const ref = doc(db, 'events', id);
 
-  const snap = await getDoc(ref);
-  if (!snap.exists()) return null;
+  const ref = db.collection('events').doc(id);
+  const snap = await ref.get();
+  if (!snap.exists) return null;
 
   const payload: Record<string, any> = {};
 
@@ -156,40 +151,36 @@ export async function updateEventById(
   if (typeof updates.capacity === 'number') payload.capacity = updates.capacity;
   if (typeof updates.price === 'number') payload.price = updates.price;
 
-  // Datetime (must be Timestamp)
+  // Datetime → Admin Timestamp
   if (updates.datetime) {
-    payload.datetime = Timestamp.fromDate(
-      new Date(updates.datetime as any)
-    );
+    payload.datetime = Timestamp.fromDate(new Date(updates.datetime as any));
   }
 
-  // Arrays — ONLY if valid arrays
+  // Arrays
   if (Array.isArray(updates.highlights)) payload.highlights = updates.highlights;
   if (Array.isArray(updates.gallery)) payload.gallery = updates.gallery;
   if (Array.isArray(updates.testimonials)) payload.testimonials = updates.testimonials;
 
   if (Object.keys(payload).length === 0) return null;
 
-  payload.updatedAt = serverTimestamp();
+  payload.updatedAt = FieldValue.serverTimestamp();
 
-  await updateDoc(ref, payload);
+  await ref.update(payload);
 
-  const updatedSnap = await getDoc(ref);
+  const updatedSnap = await ref.get();
   return {
     id: updatedSnap.id,
     ...(updatedSnap.data() as Omit<GameEvent, 'id'>),
   };
 }
 
+
 export async function deleteEventById(id: string): Promise<boolean> {
-  const db = await getFirebaseDb();
-  const ref = doc(db, 'events', id);
+  const ref = db.collection('events').doc(id);
+  const snap = await ref.get();
 
-  const snap = await getDoc(ref);
-  if (!snap.exists()) {
-    return false;
-  }
+  if (!snap.exists) return false;
 
-  await deleteDoc(ref);
+  await ref.delete();
   return true;
 }

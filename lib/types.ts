@@ -66,9 +66,15 @@ export interface Testimonial {
 // Let's use the new Testimonial for the main page.
 
 export interface EventTestimonial {
+  userId: string;
   name: string;
   role?: string;
   quote: string;
+  rating?: number;
+  comment?: string;
+  edited?: boolean;     
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export interface Experience {
