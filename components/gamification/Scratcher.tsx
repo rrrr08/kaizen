@@ -18,7 +18,8 @@ const Scratcher: React.FC<ScratcherProps> = ({ drops, onScratch, className = '',
 
   const handleScratch = () => {
     if (scratched) return;
-    let total = 0, r = Math.random();
+    let total = 0;
+    const r = Math.random();
     for (const d of drops) {
       total += d.prob;
       if (r < total) {

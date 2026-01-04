@@ -1,10 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { LayoutGrid, Plus, Edit2, Trash2, Search, Filter, X } from 'lucide-react';
+import { LayoutGrid, Plus, Edit2, Trash2, Search, Filter, X, Star } from 'lucide-react';
 import { getDocs, collection, deleteDoc, doc, setDoc, updateDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import ImageUpload from '@/components/ui/ImageUpload';
+import Image from 'next/image';
 
 interface Product {
   id: string;
@@ -152,12 +153,7 @@ export default function ProductsPage() {
       alert('Product deleted successfully!');
     } catch (error: any) {
       console.error('Error deleting product:', error);
-      console.error('Error details:', {
-        code: error.code,
-        message: error.message,
-        details: error.details
-      });
-      alert(`Failed to delete product: ${error.message || 'Unknown error'} (Code: ${error.code})`);
+      alert(`Failed to delete product: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
@@ -359,24 +355,57 @@ export default function ProductsPage() {
             key={product.id}
             className="bg-white border-2 border-black rounded-[25px] overflow-hidden hover:-translate-y-2 transition-transform duration-300 neo-shadow group flex flex-col"
           >
-            {/* Image */}
-            <div className="relative h-56 bg-gray-100 overflow-hidden border-b-2 border-black">
+            {/* Image Container with Badge */}
+            <div className="relative h-64 bg-gray-50 overflow-hidden border-b-2 border-black group">
               {product.image || (product.images && product.images.length > 0) ? (
-                <img
-                  src={product.image || product.images?.[0]}
+                <Image
+                  src={product.image || product.images?.[0] || "/placeholder.png"}
                   alt={product.name}
-                  className="w-full h-full object-cover group-hover:scale-110 transition duration-500"
+                  fill
+                  className="object-cover group-hover:scale-105 transition duration-500"
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-gray-400">
-                  <span className="text-xs font-bold uppercase">No Image</span>
+                <div className="w-full h-full flex items-center justify-center text-gray-300">
+                  <span className="text-[10px] font-black uppercase tracking-widest">No Image</span>
                 </div>
               )}
-              <div className="absolute top-4 right-4 bg-white border-2 border-black px-3 py-1 rounded-full neo-shadow-sm">
+
+              {/* Photo Count Badge */}
+              <div className="absolute top-4 left-4 z-10 flex gap-2">
+                <div className="bg-black text-white px-3 py-1 rounded-lg text-[10px] font-black border-2 border-white/20 neo-shadow-sm flex items-center gap-1.5 uppercase tracking-wider">
+                  <LayoutGrid size={12} />
+                  {1 + (product.images?.length || 0)} Images
+                </div>
+              </div>
+
+              {/* Small Gallery Strip at Bottom */}
+              {product.images && product.images.length > 0 && (
+                <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/60 to-transparent translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                  <div className="flex gap-2 overflow-hidden">
+                    {product.images.slice(0, 4).map((img, i) => (
+                      <div key={i} className="w-10 h-10 rounded-md border-2 border-white overflow-hidden flex-shrink-0 shadow-lg relative">
+                        <Image
+                          src={img}
+                          alt="gallery"
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                    ))}
+                    {product.images.length > 4 && (
+                      <div className="w-10 h-10 rounded-md border-2 border-white bg-black/80 flex items-center justify-center flex-shrink-0">
+                        <span className="text-[10px] text-white font-black">+{product.images.length - 4}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              <div className="absolute top-4 right-4 bg-white border-2 border-black px-3 py-1 rounded-full neo-shadow-sm z-10">
                 <p className="text-black font-black text-sm">⭐ {product.rating}</p>
               </div>
               {product.stock === 0 && (
-                <div className="absolute inset-0 bg-black/60 flex items-center justify-center backdrop-blur-sm">
+                <div className="absolute inset-0 bg-black/60 flex items-center justify-center backdrop-blur-sm z-20">
                   <p className="text-[#FF7675] font-black text-xl border-2 border-[#FF7675] p-2 rounded-lg -rotate-12 uppercase tracking-widest">OUT OF STOCK</p>
                 </div>
               )}
@@ -643,27 +672,35 @@ export default function ProductsPage() {
                 </div>
 
 
-                {/* Image URL */}
-                <div className="md:col-span-2">
-                  <label className="block text-black font-black text-xs uppercase tracking-widest mb-2">Image (Main)</label>
+                {/* Primary Image Upload */}
+                <div className="md:col-span-2 p-6 bg-white border-2 border-black rounded-2xl neo-shadow-sm">
+                  <label className="block text-black font-black text-sm uppercase tracking-widest mb-4 flex items-center gap-2">
+                    <Star className="w-4 h-4 text-[#FFD93D]" fill="#FFD93D" />
+                    Primary Product Photo *
+                  </label>
                   <ImageUpload
                     value={formData.image ? [formData.image] : []}
                     disabled={submitting}
-                    onChange={(url) => setFormData({ ...formData, image: url })}
-                    onRemove={() => setFormData({ ...formData, image: '' })}
+                    onChange={(url) => setFormData((prev) => ({ ...prev, image: url }))}
+                    onRemove={() => setFormData((prev) => ({ ...prev, image: '' }))}
+                    maxFiles={1}
                   />
+                  <p className="mt-2 text-[10px] text-black/40 font-bold uppercase tracking-wider">This is the main image shown in shop lists.</p>
                 </div>
 
-                {/* Gallery Images */}
-                <div className="md:col-span-2">
-                  <label className="block text-black font-black text-xs uppercase tracking-widest mb-2">Gallery Images</label>
+                {/* Gallery Images Upload */}
+                <div className="md:col-span-2 p-6 bg-white border-2 border-dashed border-black/20 rounded-2xl">
+                  <label className="block text-black font-black text-sm uppercase tracking-widest mb-4 flex items-center gap-2">
+                    <LayoutGrid size={16} />
+                    Additional Gallery Images
+                  </label>
                   <ImageUpload
                     value={formData.images}
                     disabled={submitting}
-                    onChange={(url) => setFormData({ ...formData, images: [...formData.images, url] })}
-                    onRemove={(url) => setFormData({ ...formData, images: formData.images.filter((current) => current !== url) })}
-                    maxFiles={5}
+                    onChange={(url) => setFormData((prev) => ({ ...prev, images: [...prev.images, url] }))}
+                    onRemove={(url) => setFormData((prev) => ({ ...prev, images: prev.images.filter((current) => current !== url) }))}
                   />
+                  <p className="mt-2 text-[10px] text-black/40 font-bold uppercase tracking-wider">Upload any number of images for the product gallery.</p>
                 </div>
 
                 {/* Features Dynamic List */}

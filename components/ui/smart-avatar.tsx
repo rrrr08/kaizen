@@ -26,12 +26,6 @@ export default function SmartAvatar({
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    if (user) {
-      generateAvatar();
-    }
-  }, [user]);
-
   const generateAvatar = () => {
     setIsLoading(true);
 
@@ -57,6 +51,12 @@ export default function SmartAvatar({
     setAvatarUrl(dataUrl);
     setIsLoading(false);
   };
+
+  useEffect(() => {
+    if (user) {
+      generateAvatar();
+    }
+  }, [user]);
 
   // Fallback to initials if everything fails
   const getFallbackInitials = () => {

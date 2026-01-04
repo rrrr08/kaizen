@@ -26,9 +26,9 @@ export default function EventRegistrationSuccessPage() {
     try {
       // Get details from URL search params
       const registrationId = params.id as string;
-      
+
       // Try to parse from localStorage or URL params
-      const stored = typeof window !== 'undefined' 
+      const stored = typeof window !== 'undefined'
         ? localStorage.getItem(`registration_${registrationId}`)
         : null;
 
@@ -48,7 +48,7 @@ export default function EventRegistrationSuccessPage() {
           userEmail: '',
         });
       }
-      
+
       setLoading(false);
     } catch (error) {
       console.error('Error loading registration details:', error);
@@ -91,11 +91,11 @@ export default function EventRegistrationSuccessPage() {
               </div>
             </div>
           </div>
-          
+
           <h1 className="font-display text-5xl md:text-6xl font-bold mb-4 tracking-tight">
             REGISTRATION SUCCESSFUL!
           </h1>
-          
+
           <p className="text-xl text-white/60 font-body mb-2">
             You have been registered for
           </p>
@@ -186,9 +186,9 @@ export default function EventRegistrationSuccessPage() {
           </div>
         </div>
 
-        {/* What's Next Section */}
+        {/* What&apos;s Next Section */}
         <div className="bg-white/5 border border-white/10 rounded-lg p-8 mb-12">
-          <h2 className="font-header text-xl font-bold tracking-widest mb-6 uppercase">What's Next?</h2>
+          <h2 className="font-header text-xl font-bold tracking-widest mb-6 uppercase">What&apos;s Next?</h2>
           <ul className="space-y-4">
             <li className="flex items-start gap-4">
               <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-amber-500/20 border border-amber-500/30 text-amber-400 text-xs font-bold flex-shrink-0">
@@ -208,7 +208,7 @@ export default function EventRegistrationSuccessPage() {
               <div>
                 <p className="font-header font-semibold mb-1">Save Your Registration ID</p>
                 <p className="text-sm text-white/60">
-                  You'll need your Registration ID to check in at the event.
+                  You&apos;ll need your Registration ID to check in at the event.
                 </p>
               </div>
             </li>
@@ -249,7 +249,7 @@ export default function EventRegistrationSuccessPage() {
           <p className="text-sm text-white/50 font-body mb-3">
             Need help? Contact our support team
           </p>
-          <a 
+          <a
             href="mailto:support@joyjuncture.com"
             className="text-amber-400 hover:text-amber-300 font-header text-xs tracking-widest"
           >

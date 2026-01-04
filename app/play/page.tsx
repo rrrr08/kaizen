@@ -59,7 +59,7 @@ export default function Play() {
 
           {rotationPolicy?.enabled && (
             <div className="mt-6 inline-flex items-center gap-2 px-6 py-3 bg-[#6C5CE7] text-white rounded-full font-bold text-sm border-2 border-black shadow-[4px_4px_0px_#000]">
-              <div className="flex items-center gap-2"><RotateCw size={16} /> Today's {rotationPolicy.gamesPerDay} Featured Games</div>
+              <div className="flex items-center gap-2"><RotateCw size={16} /> Today&apos;s {rotationPolicy.gamesPerDay} Featured Games</div>
             </div>
           )}
         </div>

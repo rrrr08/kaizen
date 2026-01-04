@@ -24,7 +24,7 @@ const fetchWordLists = async (): Promise<string[][]> => {
       ];
     }
 
-    return items.map((item: any) => item.words);
+    return items.map((item: { words: string[] }) => item.words);
   } catch (error) {
     console.error('Error fetching word lists:', error);
     return [['REACT', 'NEXT', 'CODE', 'DEBUG', 'ARRAY']];
@@ -45,26 +45,6 @@ const WordSearchGame: React.FC = () => {
   const [scratcherDrops, setScratcherDrops] = useState<{ prob: number, points: number }[] | null>(null);
   const [attempts, setAttempts] = useState(0);
 
-  useEffect(() => {
-    const loadGame = async () => {
-      const wordLists = await fetchWordLists();
-      initGameWithWords(wordLists);
-    };
-
-    loadGame();
-
-    fetch('/api/games/game-of-the-day')
-      .then(r => r.json())
-      .then(d => { if (d.gameId === WORD_SEARCH_ID) setIsGameOfDay(true); });
-
-    fetch('/api/games/settings')
-      .then(r => r.json())
-      .then(d => {
-        const cfg = d.settings?.[WORD_SEARCH_ID];
-        if (cfg?.scratcher?.enabled) setScratcherDrops(cfg.scratcher.drops || null);
-      });
-  }, []);
-
   const initGameWithWords = (wordLists: string[][]) => {
     const size = 10;
     const newGrid: string[][] = Array(size).fill(0).map(() => Array(size).fill(''));
@@ -73,8 +53,8 @@ const WordSearchGame: React.FC = () => {
     // Place words
     wordList.forEach(word => {
       let placed = false;
-      let attempts = 0;
-      while (!placed && attempts < 100) {
+      let placeAttempts = 0;
+      while (!placed && placeAttempts < 100) {
         const dir = Math.random() < 0.5 ? 'h' : 'v';
         const row = Math.floor(Math.random() * size);
         const col = Math.floor(Math.random() * size);
@@ -108,7 +88,7 @@ const WordSearchGame: React.FC = () => {
             placed = true;
           }
         }
-        attempts++;
+        placeAttempts++;
       }
     });
 
@@ -128,6 +108,26 @@ const WordSearchGame: React.FC = () => {
     setIsWon(false);
     setAttempts(0);
   };
+
+  useEffect(() => {
+    const loadGame = async () => {
+      const wordLists = await fetchWordLists();
+      initGameWithWords(wordLists);
+    };
+
+    loadGame();
+
+    fetch('/api/games/game-of-the-day')
+      .then(r => r.json())
+      .then(d => { if (d.gameId === WORD_SEARCH_ID) setIsGameOfDay(true); });
+
+    fetch('/api/games/settings')
+      .then(r => r.json())
+      .then(d => {
+        const cfg = d.settings?.[WORD_SEARCH_ID];
+        if (cfg?.scratcher?.enabled) setScratcherDrops(cfg.scratcher.drops || null);
+      });
+  }, []);
 
   const handleCellClick = (row: number, col: number) => {
     if (isWon || alreadyPlayed) return;
@@ -247,7 +247,7 @@ const WordSearchGame: React.FC = () => {
                     <button
                       key={`${i}-${j}`}
                       onClick={() => handleCellClick(i, j)}
-                      className={`w-8 h-8 text-xs font-bold rounded transition-colors ${isSelected ? 'bg-blue-500 text-white' : 'bg-white/10 text-white hover:bg-white/20'
+                      className={`w-8 h-8 text-xs font-bold rounded transition-colors ${isSelected ? 'bg-[#6C5CE7] text-white shadow-[2px_2px_0px_#000]' : 'bg-black/5 text-black hover:bg-black/10'
                         }`}
                     >
                       {cell}
@@ -265,7 +265,7 @@ const WordSearchGame: React.FC = () => {
               {words.map(word => (
                 <span
                   key={word}
-                  className={`text-sm font-bold ${found.includes(word) ? 'text-green-400 line-through' : 'text-white'
+                  className={`text-sm font-bold ${found.includes(word) ? 'text-[#00B894] line-through' : 'text-black'
                     }`}
                 >
                   {word}

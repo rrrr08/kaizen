@@ -23,9 +23,11 @@ export default function CreateEventPage() {
     testimonials: '',
   });
 
+  const [now] = useState(() => Date.now());
+
   const isPast =
     form.datetime &&
-    new Date(form.datetime).getTime() < Date.now();
+    new Date(form.datetime).getTime() < now;
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>

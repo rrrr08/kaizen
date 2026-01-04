@@ -5,19 +5,9 @@ import { motion } from 'framer-motion';
 import {
   BarChart3,
   Users,
-  ShoppingCart,
-  TrendingUp,
-  Calendar,
-  Eye,
-  Heart,
-  MessageCircle,
-  Package,
-  DollarSign,
-  Activity,
-  Globe,
   LucideIcon
 } from 'lucide-react';
-import { getDocs, collection, query, where, orderBy, limit, Timestamp } from 'firebase/firestore';
+import { getDocs, collection, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { USER_ROLES, ROLE_LABELS } from '@/lib/roles';
 import RoleProtected from '@/components/auth/RoleProtected';
@@ -95,7 +85,7 @@ const AdminAnalyticsPage: React.FC = () => {
         .filter((user: UserData) => user.created_at)
         .map((user: UserData) => {
           const createdAt = user.created_at as Timestamp | Date | string;
-          const date = (createdAt as any).toDate ? (createdAt as Timestamp).toDate() : new Date(createdAt as Date | string);
+          const date = (createdAt as Timestamp).toDate ? (createdAt as Timestamp).toDate() : new Date(createdAt as Date | string);
           return {
             date,
             role: user.role || 'member'
@@ -124,7 +114,6 @@ const AdminAnalyticsPage: React.FC = () => {
   };
 
   const recentGrowth: number = getRecentGrowth();
-  const growthPercentage: string = analytics.totalUsers > 0 ? ((recentGrowth / analytics.totalUsers) * 100).toFixed(1) : '0';
 
   const statsCards: StatsCard[] = [
     {

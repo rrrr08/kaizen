@@ -26,7 +26,7 @@ export default function CartError({ error, reset }: CartErrorProps) {
         <div className="text-center mb-8">
           <h1 className="font-display text-4xl font-bold mb-4">Cart Error</h1>
           <p className="text-muted-foreground font-body text-lg mb-4">
-            We couldn't load your cart. Please try again.
+            We couldn&apos;t load your cart. Please try again.
           </p>
 
           {/* Error Details (Development Only) */}

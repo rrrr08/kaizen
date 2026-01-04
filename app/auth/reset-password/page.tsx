@@ -91,7 +91,7 @@ function ResetPasswordPageContent() {
 
                             <div className="space-y-4">
                                 <p className="font-bold text-black/70 text-sm">
-                                    We've sent a password reset link to <span className="text-black">{email}</span>. Please check your inbox (and spam folder).
+                                    We&apos;ve sent a password reset link to <span className="text-black">{email}</span>. Please check your inbox (and spam folder).
                                 </p>
 
                                 <button
@@ -156,7 +156,7 @@ function ResetPasswordPageContent() {
                     {/* Sign Up Link */}
                     <div className="mt-8 text-center bg-[#FFD93D]/10 rounded-xl p-4 border-2 border-black/5">
                         <p className="font-bold text-black/60 text-xs mb-2">
-                            Don't have an account?
+                            Don&apos;t have an account?
                         </p>
                         <Link
                             href="/auth/signup"

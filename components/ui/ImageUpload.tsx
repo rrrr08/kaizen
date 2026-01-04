@@ -20,7 +20,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
     onChange,
     onRemove,
     value,
-    maxFiles = 1,
+    maxFiles,
     uploadId
 }) => {
     const [isMounted, setIsMounted] = useState(false);
@@ -31,7 +31,11 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const onUpload = (result: any) => {
-        onChange(result.info.secure_url);
+        if (result.event !== 'success') return;
+
+        if (result.info && result.info.secure_url) {
+            onChange(result.info.secure_url);
+        }
     };
 
     if (!isMounted) {
@@ -68,7 +72,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
                 onSuccess={onUpload}
                 uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "kaizen_uploads"}
                 options={{
-                    maxFiles: maxFiles,
+                    ...(maxFiles ? { maxFiles } : {}),
                     publicId: uploadId // Use unique ID to prevent widget conflicts
                 }}
             >

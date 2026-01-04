@@ -89,7 +89,7 @@ export default function OrderConfirmationPage() {
             ORDER<br /><span className="text-[#00B894] drop-shadow-[3px_3px_0px_#000]">CONFIRMED!</span>
           </h1>
           <p className="text-xl text-black/70 font-bold max-w-lg mx-auto">
-            High five! Your loot is secured. We've sent a receipt to your inbox.
+            High five! Your loot is secured. We&apos;ve sent a receipt to your inbox.
           </p>
         </div>
 

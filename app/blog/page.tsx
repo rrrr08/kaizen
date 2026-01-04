@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { FileText, ArrowRight } from 'lucide-react';
+import Image from 'next/image';
 
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
@@ -50,8 +51,8 @@ export default function Blog() {
                 }
                 if (data.communityGallery && Array.isArray(data.communityGallery)) setCommunityGallery(data.communityGallery);
             }
-        } catch (err) {
-            console.error("Error fetching blog content:", err);
+        } catch (_err) {
+            console.error("Error fetching blog content:", _err);
         }
     };
 
@@ -131,10 +132,12 @@ export default function Blog() {
                     <div className="relative group cursor-pointer border-3 border-black rounded-[30px] overflow-hidden neo-shadow hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all">
                         <div className="aspect-[21/9] w-full bg-white relative">
                             <div className="absolute inset-0 bg-[#FFD93D] mix-blend-multiply opacity-20 z-10"></div>
-                            <img
+                            <Image
                                 src={featuredStory.image}
                                 alt="Featured Story"
-                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                                fill
+                                priority
+                                className="object-cover transition-transform duration-700 group-hover:scale-105"
                             />
                         </div>
                         <div className="absolute bottom-0 left-0 w-full p-8 md:p-12 bg-gradient-to-t from-white via-white/90 to-transparent text-black flex flex-col items-start justify-end h-full z-20">
@@ -178,10 +181,11 @@ export default function Blog() {
                         <article key={post.id} className="group cursor-pointer flex flex-col h-full bg-white border-2 border-black p-4 rounded-[20px] neo-shadow hover:scale-[1.02] transition-transform">
                             <div className="aspect-[4/3] overflow-hidden rounded-[15px] mb-6 border-2 border-black relative">
                                 {post.image ? (
-                                    <img
+                                    <Image
                                         src={post.image}
                                         alt={post.title}
-                                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                        fill
+                                        className="object-cover transition-transform duration-700 group-hover:scale-110"
                                     />
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center bg-gray-100">
@@ -246,7 +250,12 @@ export default function Blog() {
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         {communityGallery.map((img, idx) => (
                             <div key={idx} className={`rounded-[20px] overflow-hidden group relative border-2 border-black neo-shadow ${idx === 0 || idx === 3 ? 'md:col-span-2 aspect-[16/9]' : 'aspect-square'}`}>
-                                <img src={img} alt="Community" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 grayscale group-hover:grayscale-0" />
+                                <Image
+                                    src={img}
+                                    alt="Community"
+                                    fill
+                                    className="object-cover transition-transform duration-700 group-hover:scale-110 grayscale group-hover:grayscale-0"
+                                />
                                 <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                     <span className="text-white font-black text-xs tracking-[0.2em] bg-black px-3 py-1 rounded-full border border-white">@JOY_JUNCTURE</span>
                                 </div>
@@ -261,7 +270,7 @@ export default function Blog() {
                     <div className="relative z-10 max-w-3xl mx-auto">
                         <span className="text-[#6C5CE7] font-black text-xs tracking-[0.4em] mb-4 block animate-pulse uppercase">Earn while you learn</span>
                         <h2 className="font-header text-3xl md:text-5xl mb-8 leading-tight">
-                            "Reading, learning, and playing <br /> earns you points."
+                            &quot;Reading, learning, and playing <br /> earns you points.&quot;
                         </h2>
                         <div className="flex justify-center gap-8 mb-12 flex-wrap">
                             {[
@@ -296,7 +305,7 @@ export default function Blog() {
                 <div className="text-center py-16 border-t-2 border-black/10">
                     <h2 className="font-header text-4xl md:text-5xl mb-6 text-black">Still curious?</h2>
                     <p className="text-black/60 font-bold italic text-xl mb-10 max-w-2xl mx-auto">
-                        "There's always another game, story, or moment waiting."
+                        &quot;There&apos;s always another game, story, or moment waiting.&quot;
                     </p>
                     <div className="flex flex-col sm:flex-row gap-6 justify-center">
                         <Link
