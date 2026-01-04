@@ -1,17 +1,28 @@
 export interface Product {
   id: string;
   name: string;
-  price: number;
-  stock?: number;
+  subtitle?: string;
   description: string;
-  story: string;
-  howToPlay: string;
-  players: string;
-  occasion: string[];
-  mood: string;
+  story?: string;
+  price: number;
+  cost?: number;
+  stock?: number;
+  category?: string;
   image: string;
-  badges: string[];
+  images?: string[];
+  rating?: number;
+  sales?: number;
+  minPlayers?: number;
+  maxPlayers?: number;
+  players?: string;
+  ageGroup?: string;
+  occasion?: string[];
+  mood?: string;
+  badges?: string[];
   time?: string;
+  features?: { title: string; description: string }[];
+  howToPlay?: { title: string; description: string }[] | string;
+  boxContent?: string;
 }
 
 export interface GameEvent {

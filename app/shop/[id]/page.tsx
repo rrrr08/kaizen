@@ -5,20 +5,23 @@ import { useParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { useCart } from '@/app/context/CartContext';
 import { useToast } from '@/hooks/use-toast';
-import { Users, Clock, Zap, Star, ArrowLeft, Check, Minus, Plus } from 'lucide-react';
+import { Star, ArrowLeft, Check, Minus, Plus } from 'lucide-react';
+import { Product } from '@/lib/types';
+import ReactImageMagnify from 'easy-magnify-waft';
 
 export const dynamic = 'force-dynamic';
 
 export default function ProductDetail() {
-
   const params = useParams();
-  const [product, setProduct] = useState<any>(null);
-  const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
+  const [product, setProduct] = useState<Product | null>(null);
+  const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const { addToCart } = useCart();
   const { addToast } = useToast();
+
+  const [selectedImage, setSelectedImage] = useState<string>('');
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -32,17 +35,17 @@ export default function ProductDetail() {
           setLoading(false);
           return;
         }
-        const productData = await getProductById(productId);
+        const productData = await getProductById(productId) as Product;
 
         if (productData) {
           setProduct(productData);
+          setSelectedImage(productData.image);
 
-          // Fetch related products
-          const allProducts = await getProducts();
+          const allProducts = await getProducts() as Product[];
           const related = allProducts
-            .filter((p: any) =>
+            .filter((p: Product) =>
               p.id !== productData.id &&
-              (productData as any).category === p.category
+              productData.category === p.category
             )
             .slice(0, 4);
           setRelatedProducts(related);
@@ -59,6 +62,10 @@ export default function ProductDetail() {
 
     fetchProduct();
   }, [params.id]);
+
+  const images = product?.images && product.images.length > 0
+    ? Array.from(new Set([product.image, ...product.images]))
+    : product ? [product.image] : [];
 
   if (loading) {
     return (
@@ -85,40 +92,87 @@ export default function ProductDetail() {
   }
 
   const handleAddToCart = () => {
-    console.log("Adding to cart:", product.name, quantity);
     addToCart(product, quantity);
     setQuantity(1);
-    alert("Added to cart!");
+    addToast({
+      title: "Success!",
+      description: `${product.name} added to cart.`,
+    });
   };
+
+  const currentImage = selectedImage || product.image;
 
   return (
     <div className="min-h-screen pt-28 pb-16 bg-[#FFFDF5] text-[#2D3436]">
       <div className="max-w-7xl mx-auto px-6 md:px-12">
-        {/* Back Button */}
         <Link href="/shop" className="font-black text-xs tracking-widest text-[#2D3436]/50 hover:text-[#FFD93D] mb-12 inline-flex items-center gap-2 transition-colors uppercase">
           <ArrowLeft size={16} /> Back to Repository
         </Link>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 mb-20">
-          {/* Product Image */}
-          <div className="flex items-center justify-center">
-            <div className="aspect-[3/4] w-full max-w-md overflow-hidden rounded-[30px] border-3 border-black neo-shadow bg-white relative">
-              <img
-                src={product.image}
-                alt={product.name}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute top-6 right-6">
-                <button className="bg-white p-3 rounded-full neo-border neo-shadow hover:scale-110 transition-transform">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 mb-20 relative text-left">
+          {/* Gallery Section */}
+          <div className="flex flex-col gap-6 relative">
+            <div className="w-full max-w-md overflow-hidden rounded-[30px] border-4 border-black neo-shadow bg-white relative cursor-crosshair">
+              {/* easy-magnify-waft implementation */}
+              <div className="w-full relative z-10 magnifier-wrapper">
+                <ReactImageMagnify
+                  {...{
+                    smallImage: {
+                      alt: product.name,
+                      isFluidWidth: true,
+                      src: currentImage
+                    },
+                    largeImage: {
+                      src: currentImage,
+                      width: 1800,
+                      height: 2400
+                    },
+                    enlargedImagePosition: 'beside',
+                    enlargedImageContainerClassName: 'custom-enlarged-container',
+                    enlargedImageContainerDimensions: {
+                      width: '100%',
+                      height: '100%'
+                    },
+                    enlargedImagePortalId: 'zoom-portal',
+                    shouldUsePositiveSpaceLens: true,
+                    lensStyle: {
+                      background: 'rgba(255, 255, 255, 0.4)',
+                      border: '2px solid black'
+                    }
+                  }}
+                  className="w-full"
+                />
+              </div>
+
+              <div className="absolute top-6 right-6 z-20 pointer-events-none">
+                <div className="bg-white p-3 rounded-full neo-border neo-shadow">
                   <Star className="text-[#FFD93D]" fill="#FFD93D" size={24} />
-                </button>
+                </div>
               </div>
             </div>
+
+            {/* Thumbnails */}
+            {images.length > 1 && (
+              <div className="flex gap-4 overflow-x-auto py-4 max-w-md">
+                {images.map((img, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setSelectedImage(img)}
+                    className={`relative w-24 h-24 flex-shrink-0 rounded-2xl border-4 transition-all ${selectedImage === img ? 'border-[#6C5CE7] neo-shadow scale-105 z-10' : 'border-black opacity-60 hover:opacity-100 hover:scale-105'}`}
+                  >
+                    <img src={img} alt={`${product.name} ${index + 1}`} className="w-full h-full object-cover" />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Product Info */}
-          <div className="flex flex-col justify-center">
-            <div className="mb-8">
+          <div className="flex flex-col justify-center relative">
+            {/* Dedicated Zoom Portal - matches aspect by being fluid over the content */}
+            <div id="zoom-portal" className="absolute top-0 left-0 w-full h-[600px] z-[50] pointer-events-none" />
+
+            <div className="mb-8 relative z-10">
               <div className="flex items-center gap-3 mb-4">
                 {product.subtitle && (
                   <span className="bg-[#6C5CE7] text-white px-3 py-1 rounded-lg text-xs font-black uppercase tracking-wider neo-border shadow-[2px_2px_0px_#000]">
@@ -149,7 +203,6 @@ export default function ProductDetail() {
               </p>
             </div>
 
-            {/* Badges */}
             <div className="flex flex-wrap gap-3 mb-8">
               {product.category && (
                 <span className="px-4 py-1.5 bg-[#FFF] border-2 border-black text-black font-black text-[10px] tracking-widest rounded-full uppercase">
@@ -158,7 +211,6 @@ export default function ProductDetail() {
               )}
             </div>
 
-            {/* Box Content (if available) */}
             {product.boxContent && (
               <div className="mb-8 p-4 bg-white/50 border-2 border-black/10 rounded-xl">
                 <p className="font-black text-xs uppercase tracking-widest mb-1 text-black/60">What's Inside:</p>
@@ -166,11 +218,9 @@ export default function ProductDetail() {
               </div>
             )}
 
-
-            {/* Price & Action */}
             <div className="mt-auto bg-[#FFD93D] p-6 rounded-2xl border-3 border-black neo-shadow">
               <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
-                <div>
+                <div className="text-left w-full sm:w-auto">
                   <p className="font-black text-[10px] tracking-[0.2em] text-black/60 mb-1">TOTAL PRICE</p>
                   <p className="font-black text-4xl text-black">₹{product.price}</p>
                 </div>
@@ -179,14 +229,14 @@ export default function ProductDetail() {
                   <div className="flex items-center justify-center bg-white border-2 border-black rounded-xl overflow-hidden shadow-[2px_2px_0px_rgba(0,0,0,1)]">
                     <button
                       onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                      className="px-4 py-2 hover:bg-gray-100 font-black text-lg flex items-center justify-center"
+                      className="px-4 py-2 hover:bg-gray-100 font-black text-lg flex items-center justify-center transition-colors"
                     >
                       <Minus size={16} />
                     </button>
                     <span className="px-4 py-2 font-black text-lg border-x-2 border-black min-w-[3rem] text-center">{quantity}</span>
                     <button
                       onClick={() => setQuantity(quantity + 1)}
-                      className="px-4 py-2 hover:bg-gray-100 font-black text-lg flex items-center justify-center"
+                      className="px-4 py-2 hover:bg-gray-100 font-black text-lg flex items-center justify-center transition-colors"
                     >
                       <Plus size={16} />
                     </button>
@@ -201,8 +251,6 @@ export default function ProductDetail() {
                 </div>
               </div>
             </div>
-
-            {/* Info Note */}
             <p className="mt-6 text-black/40 font-bold text-xs text-center sm:text-left">
               *Free shipping on orders over ₹999.
             </p>
@@ -210,18 +258,17 @@ export default function ProductDetail() {
         </div>
 
         {/* How to Play Section */}
-        {product.howToPlay && product.howToPlay.length > 0 && (
+        {product.howToPlay && (Array.isArray(product.howToPlay) ? product.howToPlay.length > 0 : false) && (
           <div className="mb-24">
             <div className="text-center mb-12">
               <div className="inline-block bg-black text-white px-6 py-2 rounded-full mb-4">
                 <h2 className="font-header text-3xl font-black uppercase tracking-widest">How to Play</h2>
               </div>
-              <p className="text-black/60 font-bold max-w-2xl mx-auto">Master the game in {product.howToPlay.length} simple steps.</p>
+              <p className="text-black/60 font-bold max-w-2xl mx-auto">Master the game in {Array.isArray(product.howToPlay) ? product.howToPlay.length : 0} simple steps.</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {product.howToPlay.map((step: any, index: number) => {
-                // Rotate colors: Purple, Green, Blue, Red
+              {Array.isArray(product.howToPlay) && product.howToPlay.map((step: any, index: number) => {
                 const colors = ['bg-[#6C5CE7]', 'bg-[#00B894]', 'bg-[#74B9FF]', 'bg-[#FF7675]'];
                 const color = colors[index % colors.length];
 
@@ -230,8 +277,8 @@ export default function ProductDetail() {
                     <div className="bg-white w-12 h-12 rounded-full border-2 border-black flex items-center justify-center mb-4 neo-shadow-sm">
                       <span className="font-black text-lg text-black">{index + 1}</span>
                     </div>
-                    <h3 className="font-black text-xl text-white mb-3 uppercase tracking-wide leading-tight">{step.title}</h3>
-                    <p className="font-bold text-sm text-white/90 leading-relaxed">{step.description}</p>
+                    <h3 className="font-black text-xl text-white mb-3 uppercase tracking-wide leading-tight text-left">{step.title}</h3>
+                    <p className="font-bold text-sm text-white/90 leading-relaxed text-left">{step.description}</p>
                   </div>
                 );
               })}
@@ -239,14 +286,13 @@ export default function ProductDetail() {
           </div>
         )}
 
-        {/* Key Features Section */}
+        {/* Features Section */}
         {product.features && product.features.length > 0 && (
           <div className="mb-24 bg-white border-3 border-black rounded-[30px] p-8 md:p-12 neo-shadow relative overflow-hidden">
-            {/* Decorative background element */}
             <div className="absolute top-0 right-0 w-64 h-64 bg-[#FFD93D] rounded-full blur-[100px] opacity-20 -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
 
             <div className="flex flex-col md:flex-row gap-12 items-start relative z-10">
-              <div className="flex-1">
+              <div className="flex-1 text-left">
                 <h2 className="font-header text-4xl md:text-5xl font-black mb-6 text-black uppercase tracking-tighter">Key Features</h2>
                 <p className="font-bold text-xl text-black/60 leading-relaxed">Everything that makes this game a must-have for your collection.</p>
               </div>
@@ -258,7 +304,7 @@ export default function ProductDetail() {
                       <div className="mt-1 w-6 h-6 rounded-full bg-[#00B894] border-2 border-black flex-shrink-0 flex items-center justify-center group-hover:scale-110 transition-transform">
                         <Check size={12} className="text-white" strokeWidth={3} />
                       </div>
-                      <div>
+                      <div className="text-left">
                         <h3 className="font-black text-lg text-black mb-1">{feature.title}</h3>
                         <p className="font-medium text-sm text-black/60">{feature.description}</p>
                       </div>
@@ -272,7 +318,7 @@ export default function ProductDetail() {
 
         {/* Related Products */}
         {relatedProducts.length > 0 && (
-          <div className="pt-12 border-t-2 border-black/10">
+          <div className="pt-12 border-t-2 border-black/10 text-left">
             <h2 className="font-display text-4xl font-black mb-12 text-black">YOU MIGHT ALSO LIKE</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
               {relatedProducts.map(relProduct => (
