@@ -87,12 +87,46 @@ export async function POST(req: NextRequest) {
     }
     
     const today = new Date().toISOString().slice(0, 10);
-    await adminDb.doc('settings/gameOfTheDay').set({ 
+    const updates: any = { 
       gameId, 
       date: today,
       gameName: gameName || gameId,
       autoSelected: false
-    });
+    };
+
+    // 1. Update Legacy/Direct GOTD Doc
+    await adminDb.doc('settings/gameOfTheDay').set(updates);
+
+    // 2. Sync with Rotation Policy (Primary Source of Truth for Frontend)
+    const policyRef = adminDb.doc('settings/rotationPolicy');
+    const policySnap = await policyRef.get();
+    
+    if (policySnap.exists) {
+        const policy = policySnap.data();
+        let currentSchedule = policy?.rotationSchedule?.[today] || [];
+        
+        // Ensure new GOTD is in today's rotation
+        // Strategy: If it's not in the list, replace the first one (since first is usually GOTD). 
+        // If the list is empty, just make it the list.
+        if (!currentSchedule.includes(gameId)) {
+            if (currentSchedule.length > 0) {
+                currentSchedule[0] = gameId; // Replace first
+            } else {
+                currentSchedule = [gameId];
+            }
+        } else {
+            // If it IS in the list, move it to the front to be "Game of the Day" highlighted
+            currentSchedule = [gameId, ...currentSchedule.filter((g: string) => g !== gameId)];
+        }
+
+        await policyRef.set({
+            gameOfTheDay: gameId,
+            rotationSchedule: {
+                ...policy?.rotationSchedule,
+                [today]: currentSchedule
+            }
+        }, { merge: true });
+    }
     
     return NextResponse.json({ success: true, gameId, date: today });
   } catch (error: any) {

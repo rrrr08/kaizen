@@ -1,23 +1,97 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebaseAdmin';
 
+const FALLBACK_GAMES = [
+  'sudoku', 'riddle', 'puzzles', 'wordle', 'chess', 
+  'trivia', '2048', 'hangman', 'wordsearch', 'mathquiz'
+];
+
 // GET /api/games/rotation-policy - Get current rotation policy
 export async function GET() {
   try {
-    const policySnap = await adminDb.doc('settings/rotationPolicy').get();
+    const policyRef = adminDb.doc('settings/rotationPolicy');
+    const policySnap = await policyRef.get();
     
-    if (!policySnap.exists) {
-      // Return default policy
-      return NextResponse.json({
-        enabled: false,
-        gamesPerDay: 5,
-        selectedGames: [],
-        rotationSchedule: {},
-        lastRotation: null
-      });
+    // Default policy structural skeleton 
+    let policy: any = policySnap.exists ? policySnap.data() : {
+      enabled: true,
+      gamesPerDay: 3,
+      selectedGames: [], // If empty, will use all available
+      rotationSchedule: {},
+      gameOfTheDay: null,
+      lastRotation: null
+    };
+
+    // Date check
+    const today = new Date().toISOString().slice(0, 10);
+    const schedule = policy.rotationSchedule || {};
+    
+    // Check if we need to generate a rotation for today
+    // We explicitly check if it's missing OR if the list is empty for some reason
+    if (policy.enabled && (!schedule[today] || schedule[today].length === 0)) {
+       // Need to generate rotation for today via Lazy Loading
+       
+       // 1. Get available games
+       const settingsSnap = await adminDb.doc('settings/gamePoints').get();
+       let allGames = settingsSnap.exists ? Object.keys(settingsSnap.data() || {}) : [];
+       
+       // Use fallback if DB is empty to ensure we have content
+       if (allGames.length === 0) {
+         allGames = FALLBACK_GAMES;
+       }
+
+       // 2. Determine pool to rotate
+       // If policy has specific selectedGames, use them, otherwise use all
+       const gamesToRotate = (policy.selectedGames && policy.selectedGames.length > 0) 
+          ? policy.selectedGames 
+          : allGames;
+          
+       // 3. Shuffle and Pick 3
+       const validGamesPerDay = 3;
+       const shuffled = [...gamesToRotate].sort(() => Math.random() - 0.5);
+       const todaysGames = shuffled.slice(0, Math.min(validGamesPerDay, shuffled.length));
+       
+       // Select Game of the Day (randomly from today's games)
+      const gameOfTheDay = todaysGames.length > 0 ? todaysGames[0] : null;
+
+      // Update policy in DB
+      await policyRef.set({
+        gamesPerDay: validGamesPerDay, // Ensure this is set correctly
+        rotationSchedule: {
+          ...schedule,
+          [today]: todaysGames
+        },
+        gameOfTheDay,
+        lastRotation: today, // Use `today` for consistency with other parts of the code
+        updatedAt: new Date().toISOString()
+      }, { merge: true });
+
+      // SYNC: Also update the standalone gameOfTheDay setting for API consistency
+      if (gameOfTheDay) {
+          const gameSettingsSnap = await adminDb.doc('settings/gamePoints').get();
+          const gameSettings = gameSettingsSnap.data();
+          const gameName = gameSettings?.[gameOfTheDay]?.name || gameOfTheDay;
+          
+          await adminDb.doc('settings/gameOfTheDay').set({
+              gameId: gameOfTheDay,
+              date: today,
+              gameName: gameName,
+              autoSelected: true
+          });
+      }
+
+      // Update local object to return
+      policy = {
+        ...policy,
+        gamesPerDay: validGamesPerDay,
+        rotationSchedule: { ...schedule, [today]: todaysGames },
+        gameOfTheDay,
+        lastRotation: today,
+        updatedAt: new Date().toISOString()
+      };
     }
     
-    return NextResponse.json(policySnap.data());
+    return NextResponse.json(policy);
   } catch (error: any) {
     console.error('Error fetching rotation policy:', error);
     return NextResponse.json({ error: 'Internal server error', details: error.message }, { status: 500 });
@@ -70,22 +144,43 @@ export async function POST(req: NextRequest) {
     // If no specific games selected, use all games
     const gamesToRotate = selectedGames && selectedGames.length > 0 ? selectedGames : allGames;
     
+    // Enforce 3 games if not specified or invalid. User wanted strict 3.
+    const validGamesPerDay = 3; 
+
     // Generate today's rotation
     const shuffled = [...gamesToRotate].sort(() => Math.random() - 0.5);
-    const todaysGames = shuffled.slice(0, Math.min(gamesPerDay, shuffled.length));
+    const todaysGames = shuffled.slice(0, Math.min(validGamesPerDay, shuffled.length));
     
+    // First game is "Game of the Day"
+    const gameOfTheDay = todaysGames.length > 0 ? todaysGames[0] : null;
+
     const policy = {
       enabled,
-      gamesPerDay,
+      gamesPerDay: validGamesPerDay, // Force logic to 3
       selectedGames: gamesToRotate,
       rotationSchedule: {
         [today]: todaysGames
       },
+      gameOfTheDay, // Store explicitly
       lastRotation: today,
       updatedAt: new Date().toISOString()
     };
     
     await adminDb.doc('settings/rotationPolicy').set(policy);
+    
+    // SYNC: Also update the standalone gameOfTheDay setting for API consistency
+    if (gameOfTheDay) {
+        const gameSettingsSnap = await adminDb.doc('settings/gamePoints').get();
+        const gameSettings = gameSettingsSnap.data();
+        const gameName = gameSettings?.[gameOfTheDay]?.name || gameOfTheDay;
+        
+        await adminDb.doc('settings/gameOfTheDay').set({
+            gameId: gameOfTheDay,
+            date: today,
+            gameName: gameName,
+            autoSelected: true
+        });
+    }
     
     return NextResponse.json({ success: true, policy });
   } catch (error: any) {
@@ -139,19 +234,38 @@ export async function PUT(req: NextRequest) {
     
     // Generate new rotation
     const shuffled = [...policy.selectedGames].sort(() => Math.random() - 0.5);
-    const todaysGames = shuffled.slice(0, Math.min(policy.gamesPerDay, shuffled.length));
+    // Enforce 3 games logic here too, or trust policy. Let's enforce 3 to be safe as per user req.
+    const targetCount = 3;
+    const todaysGames = shuffled.slice(0, Math.min(targetCount, shuffled.length));
+    const gameOfTheDay = todaysGames.length > 0 ? todaysGames[0] : null;
     
     const updatedPolicy = {
       ...policy,
+      gamesPerDay: targetCount, // Update policy to reflect 3
       rotationSchedule: {
         ...policy.rotationSchedule,
         [today]: todaysGames
       },
+      gameOfTheDay,
       lastRotation: today,
       updatedAt: new Date().toISOString()
     };
     
     await adminDb.doc('settings/rotationPolicy').set(updatedPolicy);
+
+    // SYNC: Also update the standalone gameOfTheDay setting for API consistency
+    if (gameOfTheDay) {
+        const gameSettingsSnap = await adminDb.doc('settings/gamePoints').get();
+        const gameSettings = gameSettingsSnap.data();
+        const gameName = gameSettings?.[gameOfTheDay]?.name || gameOfTheDay;
+        
+        await adminDb.doc('settings/gameOfTheDay').set({
+            gameId: gameOfTheDay,
+            date: today,
+            gameName: gameName,
+            autoSelected: true
+        });
+    }
     
     return NextResponse.json({ success: true, todaysGames });
   } catch (error: any) {

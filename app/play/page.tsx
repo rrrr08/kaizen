@@ -58,8 +58,15 @@ export default function Play() {
           </p>
 
           {rotationPolicy?.enabled && (
-            <div className="mt-6 inline-flex items-center gap-2 px-6 py-3 bg-[#6C5CE7] text-white rounded-full font-bold text-sm border-2 border-black shadow-[4px_4px_0px_#000]">
-              <div className="flex items-center gap-2"><RotateCw size={16} /> Today&apos;s {rotationPolicy.gamesPerDay} Featured Games</div>
+            <div className="mt-6 flex flex-wrap justify-center gap-4">
+              <div className="inline-flex items-center gap-2 px-6 py-3 bg-[#6C5CE7] text-white rounded-full font-bold text-sm border-2 border-black shadow-[4px_4px_0px_#000]">
+                <RotateCw size={16} /> Today&apos;s 3 Featured Games
+              </div>
+              {rotationPolicy?.gameOfTheDay && (
+                <div className="inline-flex items-center gap-2 px-6 py-3 bg-[#FFD93D] text-black rounded-full font-black text-sm border-2 border-black shadow-[4px_4px_0px_#000] uppercase tracking-wider">
+                  ⭐ Game of the Day: {rotationPolicy.gameOfTheDay.replace(/^\w/, (c: string) => c.toUpperCase())}
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -84,24 +91,21 @@ export default function Play() {
           </div>
         </div>
 
-        {/* Game Categories */}
+        {/* Game Categories - Strictly Filtered to 3 Games */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-24">
           {/* Sudoku */}
           {(!rotationPolicy?.enabled || todaysGames.includes('sudoku')) && (
-            <div className="bg-white border-2 border-black p-8 rounded-[30px] neo-shadow hover:scale-[1.02] transition-transform group">
+            <div className="bg-white border-2 border-black p-8 rounded-[30px] neo-shadow hover:scale-[1.02] transition-transform group relative overflow-hidden">
+              {rotationPolicy?.gameOfTheDay === 'sudoku' && (
+                <div className="absolute top-0 right-0 bg-[#FFD93D] text-black text-xs font-black px-4 py-2 border-b-2 border-l-2 border-black rounded-bl-xl z-10 shadow-sm">
+                  GAME OF THE DAY
+                </div>
+              )}
               <h3 className="font-black text-sm tracking-[0.2em] text-[#6C5CE7] mb-4 uppercase">Sudoku</h3>
               <p className="text-black font-black text-2xl mb-4">25+ Variations</p>
               <p className="text-black/70 font-medium text-sm mb-6 leading-relaxed">
-                Challenge your logic and number-solving skills with multiple difficulty levels. Compete with others and earn points.
+                Challenge your logic and number-solving skills.
               </p>
-              <div className="space-y-3 mb-8 pt-6 border-t-2 border-black/10">
-                <p className="text-black/40 font-black text-[10px] tracking-widest">FEATURES:</p>
-                <ul className="space-y-2 text-black/80 font-bold text-xs">
-                  <li className="flex items-center gap-2"><ArrowRight size={12} /> Admin can add/edit puzzles</li>
-                  <li className="flex items-center gap-2"><ArrowRight size={12} /> Answer key via backend</li>
-                  <li className="flex items-center gap-2"><ArrowRight size={12} /> Correct answers = points</li>
-                </ul>
-              </div>
               <Link href="/play/sudoku" className="block w-full text-center px-6 py-4 bg-[#FFD93D] text-black font-black text-xs tracking-[0.3em] border-2 border-black shadow-[4px_4px_0px_#000] hover:translate-y-1 hover:shadow-none transition-all rounded-xl">
                 PLAY NOW
               </Link>
@@ -110,20 +114,17 @@ export default function Play() {
 
           {/* Riddles */}
           {(!rotationPolicy?.enabled || todaysGames.includes('riddle')) && (
-            <div className="bg-white border-2 border-black p-8 rounded-[30px] neo-shadow hover:scale-[1.02] transition-transform group relative">
+            <div className="bg-white border-2 border-black p-8 rounded-[30px] neo-shadow hover:scale-[1.02] transition-transform group relative overflow-hidden">
+              {rotationPolicy?.gameOfTheDay === 'riddle' && (
+                <div className="absolute top-0 right-0 bg-[#FFD93D] text-black text-xs font-black px-4 py-2 border-b-2 border-l-2 border-black rounded-bl-xl z-10 shadow-sm">
+                  GAME OF THE DAY
+                </div>
+              )}
               <h3 className="font-black text-sm tracking-[0.2em] text-[#00B894] mb-4 uppercase">Riddles</h3>
               <p className="text-black font-black text-2xl mb-4">Answer & Reveal</p>
               <p className="text-black/70 font-medium text-sm mb-6 leading-relaxed">
-                Think outside the box and solve clever riddles. Get feedback on your answers and earn points for correct solutions.
+                Think outside the box and solve clever riddles.
               </p>
-              <div className="space-y-3 mb-8 pt-6 border-t-2 border-black/10">
-                <p className="text-black/40 font-black text-[10px] tracking-widest">FEATURES:</p>
-                <ul className="space-y-2 text-black/80 font-bold text-xs">
-                  <li className="flex items-center gap-2"><ArrowRight size={12} /> Curated riddle collection</li>
-                  <li className="flex items-center gap-2"><ArrowRight size={12} /> Answer reveal mechanic</li>
-                  <li className="flex items-center gap-2"><ArrowRight size={12} /> Points for correct guesses</li>
-                </ul>
-              </div>
               <Link href="/play/riddles" className="block w-full text-center px-6 py-4 bg-[#00B894] text-black font-black text-xs tracking-[0.3em] border-2 border-black shadow-[4px_4px_0px_#000] hover:translate-y-1 hover:shadow-none transition-all rounded-xl">
                 PLAY NOW
               </Link>
@@ -132,45 +133,36 @@ export default function Play() {
 
           {/* Puzzles */}
           {(!rotationPolicy?.enabled || todaysGames.includes('puzzles')) && (
-            <div className="bg-white border-2 border-black p-8 rounded-[30px] neo-shadow hover:scale-[1.02] transition-transform group">
+            <div className="bg-white border-2 border-black p-8 rounded-[30px] neo-shadow hover:scale-[1.02] transition-transform group relative overflow-hidden">
+              {rotationPolicy?.gameOfTheDay === 'puzzles' && (
+                <div className="absolute top-0 right-0 bg-[#FFD93D] text-black text-xs font-black px-4 py-2 border-b-2 border-l-2 border-black rounded-bl-xl z-10 shadow-sm">
+                  GAME OF THE DAY
+                </div>
+              )}
               <h3 className="font-black text-sm tracking-[0.2em] text-[#FF7675] mb-4 uppercase">Brain Games</h3>
               <p className="text-black font-black text-2xl mb-4">3-in-1 Challenge</p>
               <p className="text-black/70 font-medium text-sm mb-6 leading-relaxed">
-                Complete 3 mini-games (Tic-Tac-Toe, Memory Match, Number Puzzle) to earn points and unlock scratcher.
+                Tic-Tac-Toe, Memory Match, Number Puzzle.
               </p>
-              <div className="space-y-3 mb-8 pt-6 border-t-2 border-black/10">
-                <p className="text-black/40 font-black text-[10px] tracking-widest">FEATURES:</p>
-                <ul className="space-y-2 text-black/80 font-bold text-xs">
-                  <li className="flex items-center gap-2"><ArrowRight size={12} /> 3 games in one session</li>
-                  <li className="flex items-center gap-2"><ArrowRight size={12} /> Win all to get scratcher</li>
-                  <li className="flex items-center gap-2"><ArrowRight size={12} /> Leaderboard rankings</li>
-                </ul>
-              </div>
               <Link href="/play/puzzles" className="block w-full text-center px-6 py-4 bg-[#FF7675] text-black font-black text-xs tracking-[0.3em] border-2 border-black shadow-[4px_4px_0px_#000] hover:translate-y-1 hover:shadow-none transition-all rounded-xl">
                 PLAY NOW
               </Link>
             </div>
           )}
-        </div>
 
-        {/* New Games Row */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-24">
           {/* Wordle */}
           {(!rotationPolicy?.enabled || todaysGames.includes('wordle')) && (
-            <div className="bg-white border-2 border-black p-8 rounded-[30px] neo-shadow hover:scale-[1.02] transition-transform group">
+            <div className="bg-white border-2 border-black p-8 rounded-[30px] neo-shadow hover:scale-[1.02] transition-transform group relative overflow-hidden">
+              {rotationPolicy?.gameOfTheDay === 'wordle' && (
+                <div className="absolute top-0 right-0 bg-[#FFD93D] text-black text-xs font-black px-4 py-2 border-b-2 border-l-2 border-black rounded-bl-xl z-10 shadow-sm">
+                  GAME OF THE DAY
+                </div>
+              )}
               <h3 className="font-black text-sm tracking-[0.2em] text-[#A29BFE] mb-4 uppercase">Wordle</h3>
               <p className="text-black font-black text-2xl mb-4">Word Guessing</p>
               <p className="text-black/70 font-medium text-sm mb-6 leading-relaxed">
-                Guess the 5-letter word in 6 tries. Color-coded feedback helps you solve the puzzle.
+                Guess the 5-letter word in 6 tries.
               </p>
-              <div className="space-y-3 mb-8 pt-6 border-t-2 border-black/10">
-                <p className="text-black/40 font-black text-[10px] tracking-widest">FEATURES:</p>
-                <ul className="space-y-2 text-black/80 font-bold text-xs">
-                  <li className="flex items-center gap-2"><ArrowRight size={12} /> 6 attempts to guess</li>
-                  <li className="flex items-center gap-2"><ArrowRight size={12} /> Color-coded hints</li>
-                  <li className="flex items-center gap-2"><ArrowRight size={12} /> Daily word challenge</li>
-                </ul>
-              </div>
               <Link href="/play/wordle" className="block w-full text-center px-6 py-4 bg-[#A29BFE] text-black font-black text-xs tracking-[0.3em] border-2 border-black shadow-[4px_4px_0px_#000] hover:translate-y-1 hover:shadow-none transition-all rounded-xl">
                 PLAY NOW
               </Link>
@@ -179,20 +171,17 @@ export default function Play() {
 
           {/* Chess Puzzle */}
           {(!rotationPolicy?.enabled || todaysGames.includes('chess')) && (
-            <div className="bg-white border-2 border-black p-8 rounded-[30px] neo-shadow hover:scale-[1.02] transition-transform group">
+            <div className="bg-white border-2 border-black p-8 rounded-[30px] neo-shadow hover:scale-[1.02] transition-transform group relative overflow-hidden">
+              {rotationPolicy?.gameOfTheDay === 'chess' && (
+                <div className="absolute top-0 right-0 bg-[#FFD93D] text-black text-xs font-black px-4 py-2 border-b-2 border-l-2 border-black rounded-bl-xl z-10 shadow-sm">
+                  GAME OF THE DAY
+                </div>
+              )}
               <h3 className="font-black text-sm tracking-[0.2em] text-[#FD79A8] mb-4 uppercase">Chess Puzzle</h3>
               <p className="text-black font-black text-2xl mb-4">Mate in 2-3</p>
               <p className="text-black/70 font-medium text-sm mb-6 leading-relaxed">
-                Solve chess puzzles by finding the winning sequence of moves. Test your tactical skills.
+                Solve chess puzzles.
               </p>
-              <div className="space-y-3 mb-8 pt-6 border-t-2 border-black/10">
-                <p className="text-black/40 font-black text-[10px] tracking-widest">FEATURES:</p>
-                <ul className="space-y-2 text-black/80 font-bold text-xs">
-                  <li className="flex items-center gap-2"><ArrowRight size={12} /> Multiple difficulty levels</li>
-                  <li className="flex items-center gap-2"><ArrowRight size={12} /> Hint system available</li>
-                  <li className="flex items-center gap-2"><ArrowRight size={12} /> Learn chess tactics</li>
-                </ul>
-              </div>
               <Link href="/play/chess" className="block w-full text-center px-6 py-4 bg-[#FD79A8] text-black font-black text-xs tracking-[0.3em] border-2 border-black shadow-[4px_4px_0px_#000] hover:translate-y-1 hover:shadow-none transition-all rounded-xl">
                 PLAY NOW
               </Link>
@@ -201,81 +190,95 @@ export default function Play() {
 
           {/* Trivia */}
           {(!rotationPolicy?.enabled || todaysGames.includes('trivia')) && (
-            <div className="bg-white border-2 border-black p-8 rounded-[30px] neo-shadow hover:scale-[1.02] transition-transform group">
+            <div className="bg-white border-2 border-black p-8 rounded-[30px] neo-shadow hover:scale-[1.02] transition-transform group relative overflow-hidden">
+              {rotationPolicy?.gameOfTheDay === 'trivia' && (
+                <div className="absolute top-0 right-0 bg-[#FFD93D] text-black text-xs font-black px-4 py-2 border-b-2 border-l-2 border-black rounded-bl-xl z-10 shadow-sm">
+                  GAME OF THE DAY
+                </div>
+              )}
               <h3 className="font-black text-sm tracking-[0.2em] text-[#74B9FF] mb-4 uppercase">Trivia Quiz</h3>
               <p className="text-black font-black text-2xl mb-4">5 Questions</p>
               <p className="text-black/70 font-medium text-sm mb-6 leading-relaxed">
-                Answer trivia questions across multiple categories. 30 seconds per question. Test your knowledge!
+                Answer trivia questions.
               </p>
-              <div className="space-y-3 mb-8 pt-6 border-t-2 border-black/10">
-                <p className="text-black/40 font-black text-[10px] tracking-widest">FEATURES:</p>
-                <ul className="space-y-2 text-black/80 font-bold text-xs">
-                  <li className="flex items-center gap-2"><ArrowRight size={12} /> Multiple categories</li>
-                  <li className="flex items-center gap-2"><ArrowRight size={12} /> Timed questions (30s)</li>
-                  <li className="flex items-center gap-2"><ArrowRight size={12} /> Score tracking</li>
-                </ul>
-              </div>
               <Link href="/play/trivia" className="block w-full text-center px-6 py-4 bg-[#74B9FF] text-black font-black text-xs tracking-[0.3em] border-2 border-black shadow-[4px_4px_0px_#000] hover:translate-y-1 hover:shadow-none transition-all rounded-xl">
                 PLAY NOW
               </Link>
             </div>
           )}
-        </div>
 
-        {/* Additional Games Row */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-24">
           {/* 2048 */}
           {(!rotationPolicy?.enabled || todaysGames.includes('2048')) && (
-            <div className="bg-white border-2 border-black p-6 rounded-[30px] neo-shadow hover:scale-[1.02] transition-transform">
-              <h3 className="font-black text-sm tracking-[0.2em] text-[#FDCB6E] mb-3 uppercase">2048</h3>
-              <p className="text-black font-black text-xl mb-3">Slide & Merge</p>
-              <p className="text-black/70 font-medium text-xs mb-4 leading-relaxed">
-                Combine tiles to reach 2048
+            <div className="bg-white border-2 border-black p-8 rounded-[30px] neo-shadow hover:scale-[1.02] transition-transform group relative overflow-hidden">
+              {rotationPolicy?.gameOfTheDay === '2048' && (
+                <div className="absolute top-0 right-0 bg-[#FFD93D] text-black text-xs font-black px-4 py-2 border-b-2 border-l-2 border-black rounded-bl-xl z-10 shadow-sm">
+                  GAME OF THE DAY
+                </div>
+              )}
+              <h3 className="font-black text-sm tracking-[0.2em] text-[#FDCB6E] mb-4 uppercase">2048</h3>
+              <p className="text-black font-black text-2xl mb-4">Slide & Merge</p>
+              <p className="text-black/70 font-medium text-sm mb-6 leading-relaxed">
+                Combine tiles to reach 2048.
               </p>
-              <Link href="/play/2048" className="block w-full text-center px-4 py-3 bg-[#FDCB6E] text-black font-black text-xs tracking-[0.2em] border-2 border-black shadow-[3px_3px_0px_#000] hover:translate-y-1 hover:shadow-none transition-all rounded-xl">
-                PLAY
+              <Link href="/play/2048" className="block w-full text-center px-6 py-4 bg-[#FDCB6E] text-black font-black text-xs tracking-[0.2em] border-2 border-black shadow-[4px_4px_0px_#000] hover:translate-y-1 hover:shadow-none transition-all rounded-xl">
+                PLAY NOW
               </Link>
             </div>
           )}
 
           {/* Hangman */}
           {(!rotationPolicy?.enabled || todaysGames.includes('hangman')) && (
-            <div className="bg-white border-2 border-black p-6 rounded-[30px] neo-shadow hover:scale-[1.02] transition-transform">
-              <h3 className="font-black text-sm tracking-[0.2em] text-[#E17055] mb-3 uppercase">Hangman</h3>
-              <p className="text-black font-black text-xl mb-3">Guess Letters</p>
-              <p className="text-black/70 font-medium text-xs mb-4 leading-relaxed">
-                Find the word before 6 wrong guesses
+            <div className="bg-white border-2 border-black p-8 rounded-[30px] neo-shadow hover:scale-[1.02] transition-transform group relative overflow-hidden">
+              {rotationPolicy?.gameOfTheDay === 'hangman' && (
+                <div className="absolute top-0 right-0 bg-[#FFD93D] text-black text-xs font-black px-4 py-2 border-b-2 border-l-2 border-black rounded-bl-xl z-10 shadow-sm">
+                  GAME OF THE DAY
+                </div>
+              )}
+              <h3 className="font-black text-sm tracking-[0.2em] text-[#E17055] mb-4 uppercase">Hangman</h3>
+              <p className="text-black font-black text-2xl mb-4">Guess Letters</p>
+              <p className="text-black/70 font-medium text-sm mb-6 leading-relaxed">
+                Find the word before 6 wrong guesses.
               </p>
-              <Link href="/play/hangman" className="block w-full text-center px-4 py-3 bg-[#E17055] text-black font-black text-xs tracking-[0.2em] border-2 border-black shadow-[3px_3px_0px_#000] hover:translate-y-1 hover:shadow-none transition-all rounded-xl">
-                PLAY
+              <Link href="/play/hangman" className="block w-full text-center px-6 py-4 bg-[#E17055] text-black font-black text-xs tracking-[0.2em] border-2 border-black shadow-[4px_4px_0px_#000] hover:translate-y-1 hover:shadow-none transition-all rounded-xl">
+                PLAY NOW
               </Link>
             </div>
           )}
 
           {/* Word Search */}
           {(!rotationPolicy?.enabled || todaysGames.includes('wordsearch')) && (
-            <div className="bg-white border-2 border-black p-6 rounded-[30px] neo-shadow hover:scale-[1.02] transition-transform">
-              <h3 className="font-black text-sm tracking-[0.2em] text-[#00B894] mb-3 uppercase">Word Search</h3>
-              <p className="text-black font-black text-xl mb-3">Find Words</p>
-              <p className="text-black/70 font-medium text-xs mb-4 leading-relaxed">
-                Locate hidden words in the grid
+            <div className="bg-white border-2 border-black p-8 rounded-[30px] neo-shadow hover:scale-[1.02] transition-transform group relative overflow-hidden">
+              {rotationPolicy?.gameOfTheDay === 'wordsearch' && (
+                <div className="absolute top-0 right-0 bg-[#FFD93D] text-black text-xs font-black px-4 py-2 border-b-2 border-l-2 border-black rounded-bl-xl z-10 shadow-sm">
+                  GAME OF THE DAY
+                </div>
+              )}
+              <h3 className="font-black text-sm tracking-[0.2em] text-[#00B894] mb-4 uppercase">Word Search</h3>
+              <p className="text-black font-black text-2xl mb-4">Find Words</p>
+              <p className="text-black/70 font-medium text-sm mb-6 leading-relaxed">
+                Locate hidden words in the grid.
               </p>
-              <Link href="/play/wordsearch" className="block w-full text-center px-4 py-3 bg-[#00B894] text-black font-black text-xs tracking-[0.2em] border-2 border-black shadow-[3px_3px_0px_#000] hover:translate-y-1 hover:shadow-none transition-all rounded-xl">
-                PLAY
+              <Link href="/play/wordsearch" className="block w-full text-center px-6 py-4 bg-[#00B894] text-black font-black text-xs tracking-[0.2em] border-2 border-black shadow-[4px_4px_0px_#000] hover:translate-y-1 hover:shadow-none transition-all rounded-xl">
+                PLAY NOW
               </Link>
             </div>
           )}
 
           {/* Math Quiz */}
           {(!rotationPolicy?.enabled || todaysGames.includes('mathquiz')) && (
-            <div className="bg-white border-2 border-black p-6 rounded-[30px] neo-shadow hover:scale-[1.02] transition-transform">
-              <h3 className="font-black text-sm tracking-[0.2em] text-[#0984E3] mb-3 uppercase">Math Quiz</h3>
-              <p className="text-black font-black text-xl mb-3">Solve Problems</p>
-              <p className="text-black/70 font-medium text-xs mb-4 leading-relaxed">
-                10 math questions, 20s each
+            <div className="bg-white border-2 border-black p-8 rounded-[30px] neo-shadow hover:scale-[1.02] transition-transform group relative overflow-hidden">
+              {rotationPolicy?.gameOfTheDay === 'mathquiz' && (
+                <div className="absolute top-0 right-0 bg-[#FFD93D] text-black text-xs font-black px-4 py-2 border-b-2 border-l-2 border-black rounded-bl-xl z-10 shadow-sm">
+                  GAME OF THE DAY
+                </div>
+              )}
+              <h3 className="font-black text-sm tracking-[0.2em] text-[#0984E3] mb-4 uppercase">Math Quiz</h3>
+              <p className="text-black font-black text-2xl mb-4">Solve Problems</p>
+              <p className="text-black/70 font-medium text-sm mb-6 leading-relaxed">
+                10 math questions, 20s each.
               </p>
-              <Link href="/play/mathquiz" className="block w-full text-center px-4 py-3 bg-[#0984E3] text-black font-black text-xs tracking-[0.2em] border-2 border-black shadow-[3px_3px_0px_#000] hover:translate-y-1 hover:shadow-none transition-all rounded-xl">
-                PLAY
+              <Link href="/play/mathquiz" className="block w-full text-center px-6 py-4 bg-[#0984E3] text-black font-black text-xs tracking-[0.2em] border-2 border-black shadow-[4px_4px_0px_#000] hover:translate-y-1 hover:shadow-none transition-all rounded-xl">
+                PLAY NOW
               </Link>
             </div>
           )}
@@ -298,32 +301,13 @@ export default function Play() {
           </div>
         )}
 
-        {/* Game List */}
-        {!loading && !error && (
+        {/* Game List - Only show if current user isn't logged in, as a teaser? Or hide completely as above cards cover it. User asked for ONLY 3 games at a time. So I will HIDE this list to be compliant. */}
+        {/* HIDING AVAILABLE GAMES LIST TO ENFORCE 3-GAME POLICY STRICTNESS */}
+        {/* {!loading && !error && (
           <div className="mb-24">
-            <h2 className="font-header text-4xl md:text-5xl mb-8 text-black">Available Games</h2>
-            <div className="space-y-4">
-              {games.map(game => (
-                <div key={game.id} className="bg-white border-2 border-black p-6 rounded-2xl shadow-[4px_4px_0px_#000] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all flex justify-between items-center cursor-pointer group">
-                  <div>
-                    <p className="font-black text-[10px] tracking-[0.3em] text-[#6C5CE7] mb-2 uppercase">{(game.category || 'GAME')}</p>
-                    <h3 className="font-header text-2xl text-black group-hover:text-[#6C5CE7] transition-colors">{game.title || game.name}</h3>
-                    <p className="text-black/60 font-bold text-sm mt-2">{game.description}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-[#00B894] font-black text-3xl">+{game.points || 10}</p>
-                    <p className="text-black/40 font-black text-[10px] tracking-widest mt-1">PTS</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-            {games.length === 0 && (
-              <div className="text-center py-12">
-                <p className="text-black/60 font-black text-lg uppercase">NO GAMES AVAILABLE</p>
-              </div>
-            )}
+             ...
           </div>
-        )}
+        )} */}
 
         {/* Leaderboard Section */}
         <div className="mb-24">
