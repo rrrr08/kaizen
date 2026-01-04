@@ -29,7 +29,7 @@ export default function CreateEventPage() {
 
 
 
-  // ✅ Derived state: past/upcoming decided by datetime
+  // Derived state: past/upcoming decided by datetime
   const isPast =
     form.datetime &&
     new Date(form.datetime).getTime() < Date.now();
