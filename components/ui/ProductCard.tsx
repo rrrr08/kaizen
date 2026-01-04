@@ -107,7 +107,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                     style={{ transform: 'rotateY(180deg)' }}
                 >
                     <div className="flex justify-between items-start mb-10">
-                        <h4 className="text-3xl font-black uppercase tracking-tighter leading-none">Game<br />Dossier</h4>
+                        <h4 className="text-4xl font-black uppercase tracking-tighter leading-none">Game<br />Dossier</h4>
                         <div className="bg-[#FFD93D] p-3 rounded-xl neo-border neo-shadow text-black">
                             <Zap size={24} />
                         </div>
@@ -119,8 +119,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                                 <Users size={28} />
                             </div>
                             <div>
-                                <p className="text-xs font-black uppercase tracking-widest opacity-60">Ideal Group</p>
-                                <p className="text-xl font-black">{product.players} Players</p>
+                                <p className="text-sm font-black uppercase tracking-widest opacity-60">Ideal Group</p>
+                                <p className="text-2xl font-black">{product.players} Players</p>
                             </div>
                         </div>
 
@@ -129,8 +129,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                                 <Clock size={28} />
                             </div>
                             <div>
-                                <p className="text-xs font-black uppercase tracking-widest opacity-60">Average Session</p>
-                                <p className="text-xl font-black">{product.time}</p>
+                                <p className="text-sm font-black uppercase tracking-widest opacity-60">Average Session</p>
+                                <p className="text-2xl font-black">{product.time}</p>
                             </div>
                         </div>
 
@@ -139,8 +139,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                                 <Zap size={28} />
                             </div>
                             <div>
-                                <p className="text-xs font-black uppercase tracking-widest opacity-60">Mood Check</p>
-                                <p className="text-xl font-black bg-[#FFD93D] text-black px-3 py-0.5 rounded-lg neo-border inline-block">{product.mood}</p>
+                                <p className="text-sm font-black uppercase tracking-widest opacity-60">Mood Check</p>
+                                <p className="text-2xl font-black bg-[#FFD93D] text-black px-3 py-0.5 rounded-lg neo-border inline-block">{product.mood}</p>
                             </div>
                         </div>
                     </div>

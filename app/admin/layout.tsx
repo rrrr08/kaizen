@@ -73,9 +73,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       {/* Mobile Header */}
       <div className="md:hidden fixed top-0 w-full bg-white border-b-2 border-black z-50 p-4 flex justify-between items-center">
-        <div className="flex items-center gap-2">
+        <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
           <h2 className="font-header text-xl font-black">JOY ADMIN</h2>
-        </div>
+        </Link>
         <button onClick={() => setIsMobileOpen(!isMobileOpen)} className="p-2 neo-border">
           {isMobileOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
@@ -108,7 +108,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
         <div className={`p-4 h-full overflow-y-auto ${isCollapsed ? 'px-2' : ''}`}>
           {/* Logo Area */}
-          <div className={`mb-8 ${isCollapsed ? 'text-center' : 'px-2'}`}>
+          <Link href="/" className={`block mb-8 ${isCollapsed ? 'text-center' : 'px-2'} hover:opacity-80 transition-opacity`}>
             {isCollapsed ? (
               <span className="font-header text-2xl font-black">J</span>
             ) : (
@@ -117,7 +117,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <p className="font-black text-[10px] text-black/40 tracking-[0.2em] uppercase">ADMIN PANEL</p>
               </>
             )}
-          </div>
+          </Link>
 
           <nav className="space-y-2">
             {adminMenuItems.map((item) => {

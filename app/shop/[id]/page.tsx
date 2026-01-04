@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Star, ArrowLeft, Check, Minus, Plus } from 'lucide-react';
 import { Product } from '@/lib/types';
 import Image from 'next/image';
+import ReactImageMagnify from 'easy-magnify-waft';
 
 export const dynamic = 'force-dynamic';
 
@@ -112,15 +113,35 @@ export default function ProductDetail() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 mb-20 relative text-left">
           {/* Gallery Section */}
           <div className="flex flex-col gap-6 relative">
-            <div className="w-full max-w-md overflow-hidden rounded-[30px] border-4 border-black neo-shadow bg-white relative">
-              {/* Product Image */}
-              <div className="w-full relative aspect-[3/4]">
-                <Image
-                  src={currentImage}
-                  alt={product.name}
-                  fill
-                  className="object-cover"
-                  priority
+            <div className="w-full max-w-md overflow-hidden rounded-[30px] border-4 border-black neo-shadow bg-white relative cursor-crosshair">
+              {/* easy-magnify-waft implementation */}
+              <div className="w-full relative z-10 magnifier-wrapper">
+                <ReactImageMagnify
+                  {...{
+                    smallImage: {
+                      alt: product.name,
+                      isFluidWidth: true,
+                      src: currentImage
+                    },
+                    largeImage: {
+                      src: currentImage,
+                      width: 1800,
+                      height: 2400
+                    },
+                    enlargedImagePosition: 'beside',
+                    enlargedImageContainerClassName: 'custom-enlarged-container',
+                    enlargedImageContainerDimensions: {
+                      width: '100%',
+                      height: '100%'
+                    },
+                    enlargedImagePortalId: 'zoom-portal',
+                    shouldUsePositiveSpaceLens: true,
+                    lensStyle: {
+                      background: 'rgba(255, 255, 255, 0.4)',
+                      border: '2px solid black'
+                    }
+                  }}
+                  className="w-full"
                 />
               </div>
 
@@ -140,12 +161,7 @@ export default function ProductDetail() {
                     onClick={() => setSelectedImage(img)}
                     className={`relative w-24 h-24 flex-shrink-0 rounded-2xl border-4 transition-all ${selectedImage === img ? 'border-[#6C5CE7] neo-shadow scale-105 z-10' : 'border-black opacity-60 hover:opacity-100 hover:scale-105'}`}
                   >
-                    <Image
-                      src={img}
-                      alt={`${product.name} ${index + 1}`}
-                      fill
-                      className="object-cover"
-                    />
+                    <img src={img} alt={`${product.name} ${index + 1}`} className="w-full h-full object-cover" />
                   </button>
                 ))}
               </div>
@@ -154,6 +170,9 @@ export default function ProductDetail() {
 
           {/* Product Info */}
           <div className="flex flex-col justify-center relative">
+            {/* Dedicated Zoom Portal - matches aspect by being fluid over the content */}
+            <div id="zoom-portal" className="absolute top-0 left-0 w-full h-[600px] z-[50] pointer-events-none" />
+
             <div className="mb-8 relative z-10">
               <div className="flex items-center gap-3 mb-4">
                 {product.subtitle && (
@@ -270,29 +289,32 @@ export default function ProductDetail() {
 
         {/* Features Section */}
         {product.features && product.features.length > 0 && (
-          <div className="mb-24 bg-white border-3 border-black rounded-[30px] p-8 md:p-12 neo-shadow relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-[#FFD93D] rounded-full blur-[100px] opacity-20 -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+          <div className="mb-24">
+            <div className="text-center mb-12">
+              <h2 className="font-header text-5xl md:text-6xl font-black mb-4 text-black uppercase tracking-tighter">Why You'll Love It</h2>
+              <p className="font-bold text-xl text-black/60">Everything that makes this game special.</p>
+            </div>
 
-            <div className="flex flex-col md:flex-row gap-12 items-start relative z-10">
-              <div className="flex-1 text-left">
-                <h2 className="font-header text-4xl md:text-5xl font-black mb-6 text-black uppercase tracking-tighter">Key Features</h2>
-                <p className="font-bold text-xl text-black/60 leading-relaxed">Everything that makes this game a must-have for your collection.</p>
-              </div>
-
-              <div className="flex-1 w-full">
-                <div className="space-y-6">
-                  {product.features.map((feature: any, index: number) => (
-                    <div key={index} className="flex gap-4 items-start group">
-                      <div className="mt-1 w-6 h-6 rounded-full bg-[#00B894] border-2 border-black flex-shrink-0 flex items-center justify-center group-hover:scale-110 transition-transform">
-                        <Check size={12} className="text-white" strokeWidth={3} />
-                      </div>
-                      <div className="text-left">
-                        <h3 className="font-black text-lg text-black mb-1">{feature.title}</h3>
-                        <p className="font-medium text-sm text-black/60">{feature.description}</p>
-                      </div>
+            <div className="bg-white border-2 border-black rounded-[30px] p-8 md:p-12 neo-shadow">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {product.features.map((feature: any, index: number) => (
+                  <div 
+                    key={index} 
+                    className="flex items-start gap-4 group"
+                  >
+                    <div className="w-12 h-12 rounded-full bg-[#FFD93D] border-2 border-black flex-shrink-0 flex items-center justify-center font-black text-xl group-hover:scale-110 transition-transform neo-shadow-sm">
+                      {index + 1}
                     </div>
-                  ))}
-                </div>
+                    <div className="text-left flex-1">
+                      <h3 className="font-black text-2xl mb-3 text-black leading-snug">
+                        {feature.title}
+                      </h3>
+                      <p className="font-semibold text-base md:text-lg text-black/70 leading-relaxed">
+                        {feature.description}
+                      </p>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
