@@ -623,9 +623,10 @@ export default function NotificationPreferencesPage() {
                       });
                       setTimeout(() => loadPreferencesAndDevices(), 2000);
                     } else {
+                      const currentPermission = Notification.permission;
                       addToast({
                         title: 'Registration Failed',
-                        description: permission === 'denied' 
+                        description: currentPermission === 'denied' 
                           ? 'Notifications are blocked. Check browser settings.' 
                           : 'Please allow notifications when prompted',
                         variant: 'destructive',

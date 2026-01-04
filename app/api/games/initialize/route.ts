@@ -6,7 +6,7 @@ import { adminDb } from '@/lib/firebaseAdmin';
 export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession();
-    if (!session?.user?.isAdmin) {
+    if (!session?.user || !(session.user as any).isAdmin) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     

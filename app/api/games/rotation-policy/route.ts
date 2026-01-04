@@ -130,6 +130,11 @@ export async function PUT(req: NextRequest) {
     }
     
     const policy = policySnap.data();
+    
+    if (!policy) {
+      return NextResponse.json({ error: 'Policy data is missing' }, { status: 500 });
+    }
+    
     const today = new Date().toISOString().slice(0, 10);
     
     // Generate new rotation

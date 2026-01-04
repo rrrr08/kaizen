@@ -15,7 +15,7 @@ interface InAppNotification {
   createdAt: string;
 }
 
-export default function NotificationCenter(): JSX.Element {
+export default function NotificationCenter() {
   const [notifications, setNotifications] = useState<InAppNotification[]>([]);
   const [open, setOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
