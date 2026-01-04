@@ -75,12 +75,12 @@ export default function ProfilePage() {
       textColor: 'text-white',
     },
     {
-      title: 'Events',
-      description: 'See your registered events',
+      title: 'Experience Enquiries',
+      description: 'Track your submitted experience enquiries',
       icon: Calendar,
-      href: '/events',
-      color: 'bg-[#74B9FF]',
-      textColor: 'text-black',
+      href: '/profile/enquiries',
+      color: 'bg-[#A29BFE]',
+      textColor: 'text-white',
     },
     {
       title: 'Settings',
