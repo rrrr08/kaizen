@@ -40,18 +40,18 @@ export default function AdminGamificationPage() {
         prizes: prizes.map(p => ({
           ...p,
           probability: Number(p.probability),
-          value: (p.type === 'JP' || p.type === 'XP' || p.type === 'JACKPOT') ? Number(p.value) : p.value
+          value: (p.type === 'JP' || p.type === 'XP' || p.type === 'JACKPOT') ? (Number(p.value) || 0) : p.value
         }))
       });
 
       // Save Rewards Config
       await setDoc(doc(db, 'settings', 'gamificationRewards'), rewards);
 
-      setMessage("✅ Settings Saved Successfully!");
+      setMessage("Settings Saved Successfully!");
       setTimeout(() => setMessage(''), 3000);
     } catch (error) {
       console.error("Error saving settings:", error);
-      setMessage("❌ Error saving settings");
+      setMessage("Error saving settings");
     } finally {
       setLoading(false);
     }
@@ -166,7 +166,7 @@ export default function AdminGamificationPage() {
                         <label className="text-[10px] font-bold text-black/40 uppercase">Value</label>
                         <input
                           type="text"
-                          value={prize.value}
+                          value={(typeof prize.value === 'number' && isNaN(prize.value)) ? '' : prize.value}
                           onChange={(e) => {
                             const newPrizes = [...prizes];
                             newPrizes[idx].value = e.target.value;

@@ -191,9 +191,8 @@ export default function EventDetail() {
                       <button
                         key={n}
                         onClick={() => setRating(n)}
-                        className={`text-2xl ${
-                          n <= rating ? 'text-amber-500' : 'text-charcoal/30'
-                        }`}
+                        className={`text-2xl ${n <= rating ? 'text-amber-500' : 'text-charcoal/30'
+                          }`}
                       >
                         ★
                       </button>

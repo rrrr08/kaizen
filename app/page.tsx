@@ -16,12 +16,13 @@ import { db, getUserWallet } from '@/lib/firebase';
 // Product interface is already imported from @/lib/types
 
 interface Testimonial {
+  image?: string;
   id: string;
   name: string;
   role: string;
-  text: string;
+  quote: string;
   rating: number;
-  approved: boolean;
+  status: 'pending' | 'approved' | 'rejected';
 }
 
 
@@ -115,8 +116,8 @@ export default function Home() {
         const testimonialsRef = collection(db, 'testimonials');
         const snapshot = await getDocs(testimonialsRef);
         const testimonialsList = snapshot.docs
-          .map(doc => ({ id: doc.id, ...doc.data() } as Testimonial))
-          .filter(t => t.approved)
+          .map(doc => ({ id: doc.id, ...doc.data() } as any))
+          .filter(t => t.status === 'approved')
           .slice(0, 6); // Get 6 testimonials: 3 with photos for gallery, 3 for testimonial cards
         setTestimonials(testimonialsList);
       } catch (err) {
@@ -440,7 +441,7 @@ export default function Home() {
                         ))}
                       </div>
                       <p className="font-bold text-black/80 mb-4">
-                        &quot;{testimonial.text}&quot;
+                        &quot;{testimonial.quote}&quot;
                       </p>
                       <div className="flex items-center gap-3">
                         <div className={`w-10 h-10 rounded-full ${colors[i % colors.length]} flex items-center justify-center ${textColors[0]} font-black`}>

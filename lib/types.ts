@@ -44,7 +44,6 @@ export interface GameEvent {
   testimonials?: EventTestimonial[];
 }
 
-
 export interface EventHighlight {
   icon?: string; // optional emoji or icon key
   text: string;
@@ -68,8 +67,6 @@ export interface Testimonial {
 export interface EventTestimonial {
   userId: string;
   name: string;
-  role?: string;
-  quote: string;
   rating?: number;
   comment?: string;
   edited?: boolean;     

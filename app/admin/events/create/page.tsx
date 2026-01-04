@@ -27,19 +27,9 @@ export default function CreateEventPage() {
     registered: ''
   });
 
-  useEffect(() => {
-    (async () => {
-      const { auth } = await import('@/lib/firebase');
-      const { onAuthStateChanged } = await import('firebase/auth');
 
-      const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-        setUser(currentUser);
-      });
 
-      return () => unsubscribe();
-    })();
-  }, []);
-
+  // ✅ Derived state: past/upcoming decided by datetime
   const isPast =
     form.datetime &&
     new Date(form.datetime).getTime() < Date.now();

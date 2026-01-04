@@ -36,7 +36,6 @@ const SudokuGame: React.FC = () => {
     const [timer, setTimer] = useState(0);
     const [isActive, setIsActive] = useState(false);
     const [isWon, setIsWon] = useState(false);
-    const [isGameOver, setIsGameOver] = useState(false);
     const [mistakes, setMistakes] = useState(0);
     const [maxMistakes] = useState(3);
     const [showScratcher, setShowScratcher] = useState(false);
@@ -51,13 +50,12 @@ const SudokuGame: React.FC = () => {
     const [alreadyPlayed, setAlreadyPlayed] = useState(false);
     const [selectedCell, setSelectedCell] = useState<{ row: number; col: number } | null>(null);
     const [noteMode, setNoteMode] = useState(false);
-    const [notes, setNotes] = useState<Set<number>[][]>([]);
+    const [notes, setNotes] = useState<Set<number>[][][]>([]);
     const [undoStack, setUndoStack] = useState<any[]>([]);
     const [redoStack, setRedoStack] = useState<any[]>([]);
     const [hints, setHints] = useState(3);
     const [conflicts, setConflicts] = useState<Set<string>>(new Set());
     const [highlightNumber, setHighlightNumber] = useState<number | null>(null);
-    const [showSolution, setShowSolution] = useState(false);
 
     // Initialize notes grid
     useEffect(() => {
@@ -121,7 +119,6 @@ const SudokuGame: React.FC = () => {
             setTimer(0);
             setIsActive(true);
             setIsWon(false);
-            setIsGameOver(false);
             setMistakes(0);
             setPoints(null);
             setMessage('');
@@ -135,7 +132,6 @@ const SudokuGame: React.FC = () => {
             setRedoStack([]);
             setHints(3);
             setHighlightNumber(null);
-            setShowSolution(false);
         });
 
         // Fetch leaderboard
@@ -157,15 +153,11 @@ const SudokuGame: React.FC = () => {
                     const response = await fetch(`/api/games/history?gameId=${SUDOKU_GAME_ID}`, {
                         headers: { 'Authorization': `Bearer ${token}` }
                     });
-                    
-                    if (response.ok) {
-                        const data = await response.json();
-                        setHistory(data.history || []);
-                    }
+                    const data = await response.json();
+                    setHistory(data.history || []);
                 }
             } catch (error) {
-                // Silently fail - user may not be authenticated
-                setHistory([]);
+                console.error('Error fetching history:', error);
             }
         })();
 
@@ -190,13 +182,13 @@ const SudokuGame: React.FC = () => {
 
     useEffect(() => {
         let interval: NodeJS.Timeout;
-        if (isActive && !isWon && !isGameOver) {
+        if (isActive && !isWon) {
             interval = setInterval(() => {
                 setTimer((prev) => prev + 1);
             }, 1000);
         }
         return () => clearInterval(interval);
-    }, [isActive, isWon, isGameOver]);
+    }, [isActive, isWon]);
 
     const saveState = () => {
         setUndoStack(prev => [...prev, board.map(row => [...row])]);
@@ -247,20 +239,20 @@ const SudokuGame: React.FC = () => {
         
         // Clear notes too
         if (notes.length > 0) {
-            const newNotes = notes.map(r => r.map(c => new Set<number>(c)));
+            const newNotes = notes.map(r => r.map(c => new Set(c)));
             newNotes[row][col].clear();
             setNotes(newNotes);
         }
     };
 
     const handleNumberInput = (num: number) => {
-        if (!selectedCell || !isActive || isWon || isGameOver || alreadyPlayed) return;
+        if (!selectedCell || !isActive || isWon || alreadyPlayed) return;
         const { row, col } = selectedCell;
         if (puzzle[row][col] !== 0) return;
 
         if (noteMode) {
             // Toggle note
-            const newNotes = notes.map(r => r.map(c => new Set<number>(c)));
+            const newNotes = notes.map(r => r.map(c => new Set(c)));
             if (newNotes[row][col].has(num)) {
                 newNotes[row][col].delete(num);
             } else {
@@ -268,22 +260,6 @@ const SudokuGame: React.FC = () => {
             }
             setNotes(newNotes);
         } else {
-            // Check if number is wrong
-            const isWrong = solution[row][col] !== num;
-            
-            if (isWrong) {
-                // Increment mistakes
-                const newMistakes = mistakes + 1;
-                setMistakes(newMistakes);
-                
-                // Check for game over
-                if (newMistakes >= maxMistakes) {
-                    setIsActive(false);
-                    setIsGameOver(true);
-                    return;
-                }
-            }
-            
             // Place number
             saveState();
             const newBoard = [...board];
@@ -293,13 +269,13 @@ const SudokuGame: React.FC = () => {
             
             // Clear notes when number is placed
             if (notes.length > 0) {
-                const newNotes = notes.map(r => r.map(c => new Set<number>(c)));
+                const newNotes = notes.map(r => r.map(c => new Set(c)));
                 newNotes[row][col].clear();
                 setNotes(newNotes);
             }
             
             // Auto-check on every move
-            if (!isWrong && checkWin(newBoard)) {
+            if (checkWin(newBoard)) {
                 setTimeout(() => handleWin(), 500);
             }
         }
@@ -340,48 +316,6 @@ const SudokuGame: React.FC = () => {
         }
     };
 
-    const handleShowSolution = async () => {
-        if (!confirm('Spend 50 JP to reveal the solution?')) {
-            return;
-        }
-
-        try {
-            const { getAuth } = await import('firebase/auth');
-            const { app } = await import('@/lib/firebase');
-            const auth = getAuth(app);
-            const user = auth.currentUser;
-
-            if (!user) {
-                alert('⚠️ Please sign in to use this feature');
-                return;
-            }
-
-            const token = await user.getIdToken();
-            const response = await fetch('/api/wallet/deduct', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ amount: 50, reason: 'Sudoku solution reveal' })
-            });
-
-            const data = await response.json();
-
-            if (response.ok && data.success) {
-                setShowSolution(true);
-                setBoard(solution.map(row => [...row]));
-                confetti({ particleCount: 100, spread: 60, origin: { y: 0.6 } });
-            } else {
-                const errorMsg = data.error || 'Failed to deduct JP';
-                alert(`❌ ${errorMsg}\n\nYou need 50 JP to reveal the solution. Play more games or complete challenges to earn JP!`);
-            }
-        } catch (error) {
-            console.error('Error revealing solution:', error);
-            alert('❌ Error revealing solution. Please check your internet connection and try again.');
-        }
-    };
-
     const formatTime = (seconds: number) => {
         const mins = Math.floor(seconds / 60);
         const secs = seconds % 60;
@@ -418,19 +352,17 @@ const SudokuGame: React.FC = () => {
     };
 
     return (
-        <div className="flex flex-col items-center gap-6 sm:gap-8 w-full min-h-screen py-8">
+        <div className="flex flex-col items-center gap-8 w-full">
             {/* Game of the Day Badge */}
             {isGameOfDay && (
                 <div className="mb-2">
-                    <div className="inline-flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-[#FFD93D] text-black rounded-full font-black tracking-widest text-xs sm:text-sm border-2 border-black shadow-[4px_4px_0px_#000]">
-                        <Star size={14} className="fill-black sm:w-4 sm:h-4" /> 
-                        <span className="hidden sm:inline">GAME OF THE DAY - 2X POINTS!</span>
-                        <span className="sm:hidden">2X POINTS!</span>
+                    <div className="inline-flex items-center gap-2 px-6 py-3 bg-[#FFD93D] text-black rounded-full font-black tracking-widest text-sm border-2 border-black shadow-[4px_4px_0px_#000]">
+                        <Star size={16} className="fill-black" /> GAME OF THE DAY - 2X POINTS!
                     </div>
                 </div>
             )}
 
-            <div className="w-full max-w-[1600px] grid grid-cols-1 xl:grid-cols-[300px_1fr_300px] gap-6 xl:gap-10 px-4 sm:px-6 lg:px-8">
+            <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-[300px_1fr_300px] gap-8">
 
                 {/* LEFT COLUMN: Controls */}
                 <div className="space-y-6">
@@ -442,10 +374,11 @@ const SudokuGame: React.FC = () => {
                                 <button
                                     key={l.value}
                                     onClick={() => setLevel(l.value)}
+                                    disabled={isActive && !isWon}
                                     className={`
                                         w-full px-4 py-3 rounded-xl border-2 border-black font-black uppercase text-sm
                                         transition-all ${l.color} ${level === l.value ? 'neo-shadow' : 'opacity-50'}
-                                        hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_#000]
+                                        ${isActive && !isWon ? 'cursor-not-allowed' : 'hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_#000]'}
                                     `}
                                 >
                                     {l.label}
@@ -529,45 +462,12 @@ const SudokuGame: React.FC = () => {
                 </div>
 
                 {/* MIDDLE COLUMN: Grid */}
-                <div className="flex flex-col items-center justify-start gap-6 lg:gap-8 w-full max-w-3xl mx-auto">
-                    {/* GAME OVER STATE */}
-                    {isGameOver && (
-                        <div className="w-full max-w-2xl mb-4 animate-in zoom-in duration-300 bg-[#FF7675] border-2 border-black shadow-[4px_4px_0px_#000] p-6 sm:p-8 rounded-[20px] text-center">
-                            <AlertCircle className="w-12 h-12 text-black mx-auto mb-4" />
-                            <h2 className="text-xl sm:text-2xl font-black text-black uppercase mb-2">GAME OVER!</h2>
-                            <p className="font-bold text-black/80 mb-4">
-                                You made {maxMistakes} mistakes. Better luck next time!
-                            </p>
-                            {showSolution && (
-                                <div className="mb-4 p-4 bg-[#00B894] rounded-xl border-2 border-black">
-                                    <p className="font-black text-white">✨ SOLUTION REVEALED! ✨</p>
-                                </div>
-                            )}
-                            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                                {!showSolution && (
-                                    <button
-                                        onClick={handleShowSolution}
-                                        className="px-6 py-3 bg-[#FFD93D] text-black rounded-xl border-2 border-black font-black uppercase text-sm hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_#000] transition-all flex items-center justify-center gap-2"
-                                    >
-                                        <Lightbulb size={16} />
-                                        Show Solution (50 JP)
-                                    </button>
-                                )}
-                                <button
-                                    onClick={() => setLevel(level)}
-                                    className="px-6 py-3 bg-black text-white rounded-xl border-2 border-black font-black uppercase text-sm hover:bg-white hover:text-black transition-all"
-                                >
-                                    Try Again
-                                </button>
-                            </div>
-                        </div>
-                    )}
-
+                <div className="flex flex-col items-center">
                     {/* WIN STATE */}
                     {isWon && (
-                        <div className="w-full max-w-2xl mb-4 animate-in zoom-in duration-300 bg-[#FFFDF5] border-2 border-black shadow-[4px_4px_0px_#000] p-6 sm:p-8 rounded-[20px] text-center">
+                        <div className="w-full mb-6 animate-in zoom-in duration-300 bg-[#FFFDF5] border-2 border-black shadow-[4px_4px_0px_#000] p-8 rounded-[20px] text-center">
                             <Trophy className="w-12 h-12 text-[#FFD93D] mx-auto mb-4 drop-shadow-[2px_2px_0px_#000]" />
-                            <h2 className="text-xl sm:text-2xl font-black text-black uppercase mb-1">PUZZLE SOLVED!</h2>
+                            <h2 className="text-2xl font-black text-black uppercase mb-1">PUZZLE SOLVED!</h2>
                             <p className={`font-bold text-sm ${alreadyPlayed ? 'text-black/50' : 'text-[#00B894]'}`}>
                                 {message}
                             </p>
@@ -585,66 +485,61 @@ const SudokuGame: React.FC = () => {
                     )}
 
                     {/* GRID */}
-                    <div className="w-full flex justify-center overflow-x-auto px-2">
-                        <div className="grid grid-cols-9 gap-0 border-4 border-black bg-black neo-shadow rounded-2xl overflow-hidden min-w-[396px] sm:min-w-[504px] md:min-w-[576px] lg:min-w-[648px]">
-                            {board.map((row, rIndex) => (
-                                row.map((cell, cIndex) => {
-                                    const borderRight = (cIndex + 1) % 3 === 0 && cIndex !== 8 ? 'border-r-4 border-black' : 'border-r border-black/20';
-                                    const borderBottom = (rIndex + 1) % 3 === 0 && rIndex !== 8 ? 'border-b-4 border-black' : 'border-b border-black/20';
-                                    const cellNotes = notes[rIndex]?.[cIndex];
-                                    
-                                    return (
-                                        <div
-                                            key={`${rIndex}-${cIndex}`}
-                                            onClick={() => setSelectedCell({ row: rIndex, col: cIndex })}
-                                            className={`
-                                                ${getCellClassName(rIndex, cIndex, cell)}
-                                                ${borderRight} ${borderBottom}
-                                                w-11 h-11 min-w-[44px] min-h-[44px] sm:w-14 sm:h-14 sm:min-w-[56px] sm:min-h-[56px] md:w-16 md:h-16 md:min-w-[64px] md:min-h-[64px] lg:w-[72px] lg:h-[72px] lg:min-w-[72px] lg:min-h-[72px]
-                                                flex items-center justify-center
-                                                select-none
-                                            `}
-                                        >
+                    <div className="grid grid-cols-9 gap-0 border-4 border-black bg-black neo-shadow rounded-xl overflow-hidden w-fit mx-auto">
+                        {board.map((row, rIndex) => (
+                            row.map((cell, cIndex) => {
+                                const borderRight = (cIndex + 1) % 3 === 0 && cIndex !== 8 ? 'border-r-4 border-black' : 'border-r border-black/20';
+                                const borderBottom = (rIndex + 1) % 3 === 0 && rIndex !== 8 ? 'border-b-4 border-black' : 'border-b border-black/20';
+                                const cellNotes = notes[rIndex]?.[cIndex];
+                                
+                                return (
+                                    <div
+                                        key={`${rIndex}-${cIndex}`}
+                                        onClick={() => setSelectedCell({ row: rIndex, col: cIndex })}
+                                        className={`
+                                            ${getCellClassName(rIndex, cIndex, cell)}
+                                            ${borderRight} ${borderBottom}
+                                            w-[52px] h-[52px] md:w-[60px] md:h-[60px]
+                                            flex items-center justify-center
+                                        `}
+                                    >
                                         {cell !== 0 ? (
-                                            <span className="text-xl sm:text-2xl md:text-3xl font-bold">{cell}</span>
+                                            <span className="text-2xl md:text-3xl">{cell}</span>
                                         ) : cellNotes && cellNotes.size > 0 ? (
-                                            <div className="grid grid-cols-3 gap-0 w-full h-full p-0.5 sm:p-1">
+                                            <div className="grid grid-cols-3 gap-0 w-full h-full p-1">
                                                 {[1,2,3,4,5,6,7,8,9].map(n => (
-                                                    <span key={n} className="text-[7px] sm:text-[8px] md:text-[9px] text-gray-400 flex items-center justify-center font-medium">
+                                                    <span key={n} className="text-[8px] text-gray-400 flex items-center justify-center">
                                                         {cellNotes.has(n) ? n : ''}
                                                     </span>
                                                 ))}
                                             </div>
                                         ) : null}
                                     </div>
-                                    );
-                                })
-                            ))}
-                        </div>
+                                );
+                            })
+                        ))}
                     </div>
 
                     {/* Number Input Pad */}
-                    {isActive && !isWon && !isGameOver && (
-                        <div className="mt-8 w-full max-w-lg mx-auto">
-                            <div className="grid grid-cols-5 gap-2 sm:gap-3">
-                                {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => (
-                                    <button
-                                        key={num}
-                                        onClick={() => handleNumberInput(num)}
-                                        onMouseEnter={() => setHighlightNumber(num)}
-                                        onMouseLeave={() => setHighlightNumber(null)}
-                                        className="aspect-square bg-white border-2 border-black rounded-xl text-xl sm:text-2xl font-black hover:bg-[#FFD93D] hover:shadow-[4px_4px_0px_#000] hover:translate-y-[-2px] active:translate-y-[2px] active:shadow-none transition-all select-none"
-                                    >
-                                        {num}
-                                    </button>
-                                ))}
+                    {isActive && !isWon && (
+                        <div className="mt-6 grid grid-cols-5 gap-3 w-full max-w-md">
+                            {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => (
                                 <button
-                                    onClick={handleClearCell}
-                                    className="col-span-1 aspect-square bg-white border-2 border-black rounded-xl font-black hover:bg-[#FF7675] hover:text-white hover:shadow-[4px_4px_0px_#000] hover:translate-y-[-2px] active:translate-y-[2px] active:shadow-none transition-all flex items-center justify-center select-none"
+                                    key={num}
+                                    onClick={() => handleNumberInput(num)}
+                                    onMouseEnter={() => setHighlightNumber(num)}
+                                    onMouseLeave={() => setHighlightNumber(null)}
+                                    className="aspect-square bg-white border-2 border-black rounded-xl text-2xl font-black hover:bg-[#FFD93D] hover:shadow-[4px_4px_0px_#000] hover:translate-y-[-2px] active:translate-y-[2px] active:shadow-none transition-all"
                                 >
-                                    <Eraser size={18} className="sm:w-5 sm:h-5" />
+                                    {num}
                                 </button>
-                            </div>
+                            ))}
+                            <button
+                                onClick={handleClearCell}
+                                className="col-span-1 aspect-square bg-white border-2 border-black rounded-xl font-black hover:bg-[#FF7675] hover:text-white hover:shadow-[4px_4px_0px_#000] hover:translate-y-[-2px] active:translate-y-[2px] active:shadow-none transition-all flex items-center justify-center text-sm uppercase"
+                            >
+                                <Eraser size={20} />
+                            </button>
                         </div>
                     )}
                 </div>

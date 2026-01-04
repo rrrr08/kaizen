@@ -34,9 +34,9 @@ service cloud.firestore {
       }
     }
     
-    // Settings collection - read by authenticated users, write by admins
+    // Settings collection - read by all (public configs), write by admins
     match /settings/{document=**} {
-      allow read: if request.auth != null;
+      allow read: if true;
       allow write: if isAdmin();
     }
     
