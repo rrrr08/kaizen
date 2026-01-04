@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Star, ArrowLeft, Check, Minus, Plus } from 'lucide-react';
 import { Product } from '@/lib/types';
 import ReactImageMagnify from 'easy-magnify-waft';
+import Image from 'next/image';
 
 export const dynamic = 'force-dynamic';
 
@@ -160,7 +161,12 @@ export default function ProductDetail() {
                     onClick={() => setSelectedImage(img)}
                     className={`relative w-24 h-24 flex-shrink-0 rounded-2xl border-4 transition-all ${selectedImage === img ? 'border-[#6C5CE7] neo-shadow scale-105 z-10' : 'border-black opacity-60 hover:opacity-100 hover:scale-105'}`}
                   >
-                    <img src={img} alt={`${product.name} ${index + 1}`} className="w-full h-full object-cover" />
+                    <Image
+                      src={img}
+                      alt={`${product.name} ${index + 1}`}
+                      fill
+                      className="object-cover"
+                    />
                   </button>
                 ))}
               </div>
@@ -213,7 +219,7 @@ export default function ProductDetail() {
 
             {product.boxContent && (
               <div className="mb-8 p-4 bg-white/50 border-2 border-black/10 rounded-xl">
-                <p className="font-black text-xs uppercase tracking-widest mb-1 text-black/60">What's Inside:</p>
+                <p className="font-black text-xs uppercase tracking-widest mb-1 text-black/60">What&apos;s Inside:</p>
                 <p className="font-bold text-sm text-black">{product.boxContent}</p>
               </div>
             )}
@@ -323,11 +329,12 @@ export default function ProductDetail() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
               {relatedProducts.map(relProduct => (
                 <Link key={relProduct.id} href={`/shop/${relProduct.id}`} className="group block">
-                  <div className="aspect-[3/4] overflow-hidden rounded-2xl border-2 border-black neo-shadow bg-white mb-4 transition-transform group-hover:translate-y-[-4px]">
-                    <img
+                  <div className="aspect-[3/4] overflow-hidden rounded-2xl border-2 border-black neo-shadow bg-white mb-4 transition-transform group-hover:translate-y-[-4px] relative">
+                    <Image
                       src={relProduct.image}
                       alt={relProduct.name}
-                      className="w-full h-full object-cover"
+                      fill
+                      className="object-cover"
                     />
                   </div>
                   <h3 className="font-black text-lg leading-tight group-hover:text-[#6C5CE7] transition-colors">{relProduct.name}</h3>

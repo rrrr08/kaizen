@@ -38,7 +38,7 @@ async function fetchRiddle() {
 const RIDDLE_GAME_ID = 'riddle';
 
 const RiddleGame: React.FC = () => {
-    const [riddle, setRiddle] = useState<any>(null);
+    const [riddle, setRiddle] = useState<{ question: string; answer: string; hint: string } | null>(null);
     const [answer, setAnswer] = useState('');
     const [hintRevealed, setHintRevealed] = useState(false);
     const [isWon, setIsWon] = useState(false);
@@ -48,11 +48,6 @@ const RiddleGame: React.FC = () => {
     const [message, setMessage] = useState('');
     const [isGameOfDay, setIsGameOfDay] = useState(false);
     const [alreadyPlayed, setAlreadyPlayed] = useState(false);
-
-    useEffect(() => {
-        fetchRiddle().then(setRiddle);
-        checkGameOfTheDay();
-    }, []);
 
     const checkGameOfTheDay = async () => {
         try {
@@ -65,6 +60,28 @@ const RiddleGame: React.FC = () => {
             console.error('Error checking game of the day:', error);
         }
     };
+
+    useEffect(() => {
+        let isMounted = true;
+        fetchRiddle().then(r => {
+            if (isMounted) setRiddle(r);
+        });
+
+        const check = async () => {
+            try {
+                const res = await fetch('/api/games/game-of-the-day');
+                const data = await res.json();
+                if (isMounted && data.gameId === RIDDLE_GAME_ID) {
+                    setIsGameOfDay(true);
+                }
+            } catch (error) {
+                console.error('Error checking game of the day:', error);
+            }
+        };
+        check();
+
+        return () => { isMounted = false; };
+    }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -129,7 +146,7 @@ const RiddleGame: React.FC = () => {
                         <HelpCircle className="w-10 h-10 text-black" />
                     </div>
                     <h2 className="font-header text-2xl md:text-3xl font-black text-black leading-relaxed italic">
-                        "{riddle.question}"
+                        &quot;{riddle.question}&quot;
                     </h2>
                 </div>
 

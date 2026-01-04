@@ -25,6 +25,7 @@ import {
   Image as ImageIcon,
 } from "lucide-react";
 import ImageUpload from "@/components/ui/ImageUpload";
+import Image from "next/image";
 
 interface BlogPost {
   id: string;
@@ -83,7 +84,7 @@ export default function AdminBlogPage() {
       const q = query(collection(db, "blog_posts"), orderBy("createdAt", "desc"));
       const snap = await getDocs(q);
       const data = snap.docs.map((d) => {
-        const raw = d.data() as any;
+        const raw = d.data() as BlogPost;
         return {
           id: d.id,
           title: raw.title || "",
@@ -274,7 +275,12 @@ export default function AdminBlogPage() {
           <div key={post.id} className="bg-white border-2 border-black rounded-[25px] overflow-hidden hover:translate-x-[2px] hover:-translate-y-[2px] transition-transform duration-300 neo-shadow">
             <div className="relative h-56 bg-gray-100 border-b-2 border-black">
               {post.image ? (
-                <img src={post.image} alt={post.title} className="w-full h-full object-cover" />
+                <Image
+                  src={post.image}
+                  alt={post.title}
+                  fill
+                  className="object-cover"
+                />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-black/20 bg-gray-50">
                   <ImageIcon className="w-16 h-16" />

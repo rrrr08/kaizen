@@ -7,6 +7,7 @@ import { deleteDoc, doc } from 'firebase/firestore';
 import { GameEvent } from '@/lib/types';
 import { splitDateTime } from '@/lib/utils';
 import { getFirebaseDb } from '@/lib/firebase';
+import Image from 'next/image';
 
 export default function EventsPage() {
   const router = useRouter();
@@ -35,8 +36,8 @@ export default function EventsPage() {
       } else {
         setError(eventData.error || 'Failed to load events');
       }
-    } catch (err: any) {
-      setError(err.message || 'Failed to load upcoming events');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to load upcoming events');
       console.error('Error:', err);
     } finally {
       setLoading(false);
@@ -196,9 +197,10 @@ export default function EventsPage() {
             {/* Image */}
             <div className="w-full md:w-80 h-64 md:h-auto bg-gray-100 flex-shrink-0 overflow-hidden border-b-2 md:border-b-0 md:border-r-2 border-black relative">
               {event.image !== "" ? (
-                <img
-                  src={event.image}
+                <Image
+                  src={event.image || "/placeholder.png"}
                   alt={event.title}
+                  fill
                   className="w-full h-full object-cover group-hover:scale-110 transition duration-500"
                 />
               ) : (

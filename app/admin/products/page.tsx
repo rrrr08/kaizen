@@ -5,6 +5,7 @@ import { LayoutGrid, Plus, Edit2, Trash2, Search, Filter, X, Star } from 'lucide
 import { getDocs, collection, deleteDoc, doc, setDoc, updateDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import ImageUpload from '@/components/ui/ImageUpload';
+import Image from 'next/image';
 
 interface Product {
   id: string;
@@ -152,12 +153,7 @@ export default function ProductsPage() {
       alert('Product deleted successfully!');
     } catch (error: any) {
       console.error('Error deleting product:', error);
-      console.error('Error details:', {
-        code: error.code,
-        message: error.message,
-        details: error.details
-      });
-      alert(`Failed to delete product: ${error.message || 'Unknown error'} (Code: ${error.code})`);
+      alert(`Failed to delete product: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
@@ -362,10 +358,11 @@ export default function ProductsPage() {
             {/* Image Container with Badge */}
             <div className="relative h-64 bg-gray-50 overflow-hidden border-b-2 border-black group">
               {product.image || (product.images && product.images.length > 0) ? (
-                <img
-                  src={product.image || product.images?.[0]}
+                <Image
+                  src={product.image || product.images?.[0] || "/placeholder.png"}
                   alt={product.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                  fill
+                  className="object-cover group-hover:scale-105 transition duration-500"
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-gray-300">
@@ -386,8 +383,13 @@ export default function ProductsPage() {
                 <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/60 to-transparent translate-y-full group-hover:translate-y-0 transition-transform duration-300">
                   <div className="flex gap-2 overflow-hidden">
                     {product.images.slice(0, 4).map((img, i) => (
-                      <div key={i} className="w-10 h-10 rounded-md border-2 border-white overflow-hidden flex-shrink-0 shadow-lg">
-                        <img src={img} alt="gallery" className="w-full h-full object-cover" />
+                      <div key={i} className="w-10 h-10 rounded-md border-2 border-white overflow-hidden flex-shrink-0 shadow-lg relative">
+                        <Image
+                          src={img}
+                          alt="gallery"
+                          fill
+                          className="object-cover"
+                        />
                       </div>
                     ))}
                     {product.images.length > 4 && (

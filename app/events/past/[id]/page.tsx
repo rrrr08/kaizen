@@ -6,6 +6,8 @@ import { useParams } from 'next/navigation';
 import { GameEvent } from '@/lib/types';
 import { splitDateTime } from '@/lib/utils';
 import { ArrowLeft } from 'lucide-react';
+import Image from 'next/image';
+import React from 'react';
 
 export default function EventDetail() {
   const { id } = useParams<{ id: string }>();
@@ -31,9 +33,9 @@ export default function EventDetail() {
       if (!data.success || !data.event) throw new Error('Event not found');
 
       setEvent(data.event);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      setError(err.message || 'Something went wrong');
+      setError(err instanceof Error ? err.message : 'Something went wrong');
     } finally {
       setLoading(false);
     }
@@ -79,8 +81,13 @@ export default function EventDetail() {
           <div className="md:col-span-2">
 
             {/* Image */}
-            <div className="aspect-video overflow-hidden rounded-sm border border-white/10 bg-white/5 mb-8">
-              <img src={event.image} alt={event.title} className="w-full h-full object-cover" />
+            <div className="aspect-video overflow-hidden rounded-sm border border-white/10 bg-white/5 mb-8 relative">
+              <Image
+                src={event.image || '/placeholder-event.jpg'}
+                alt={event.title}
+                fill
+                className="object-cover"
+              />
             </div>
 
             {/* Description */}
@@ -106,8 +113,13 @@ export default function EventDetail() {
               <Section title="Moments from the Event">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {event.gallery.map((img, i) => (
-                    <div key={i} className="aspect-video overflow-hidden rounded-sm border border-white/10 bg-white/5">
-                      <img src={img} alt={`Gallery ${i + 1}`} className="w-full h-full object-cover hover:scale-105 transition-transform" />
+                    <div key={i} className="aspect-video overflow-hidden rounded-sm border border-white/10 bg-white/5 relative">
+                      <Image
+                        src={img}
+                        alt={`Gallery ${i + 1}`}
+                        fill
+                        className="object-cover hover:scale-105 transition-transform"
+                      />
                     </div>
                   ))}
                 </div>
@@ -120,7 +132,7 @@ export default function EventDetail() {
                 <div className="space-y-6">
                   {event.testimonials.map((t, i) => (
                     <blockquote key={i} className="border-l-2 border-amber-500 pl-6 text-white/70 font-serif italic">
-                      "{t.quote}"
+                      &quot;{t.quote}&quot;
                       <footer className="mt-2 text-white/40 text-sm not-italic">
                         — {t.name}{t.role ? `, ${t.role}` : ''}
                       </footer>
@@ -178,7 +190,7 @@ export default function EventDetail() {
 
 /* -------------------- HELPERS -------------------- */
 
-function Section({ title, children }: { title: string; children: any }) {
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="mb-12">
       <h2 className="font-header text-[10px] tracking-[0.4em] text-amber-500 mb-4 uppercase">
@@ -189,7 +201,7 @@ function Section({ title, children }: { title: string; children: any }) {
   );
 }
 
-function Info({ label, children }: { label: string; children: any }) {
+function Info({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="border-b border-white/10 pb-6">
       <div className="font-header text-[8px] tracking-widest text-white/40 mb-3">{label}</div>
@@ -198,7 +210,7 @@ function Info({ label, children }: { label: string; children: any }) {
   );
 }
 
-function Stat({ label, value }: { label: string; value: any }) {
+function Stat({ label, value }: { label: string; value: string | number }) {
   return (
     <div>
       <p className="font-header text-[8px] tracking-widest text-white/40 mb-2">{label}</p>

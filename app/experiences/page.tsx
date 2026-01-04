@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { ArrowRight } from 'lucide-react';
+import Image from 'next/image';
 
 export const dynamic = 'force-dynamic';
 
@@ -67,11 +68,12 @@ export default function Experiences() {
               <div key={exp.id} className={`grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16 items-center ${idx % 2 === 1 ? 'md:grid-flow-dense' : ''}`}>
                 {/* Image */}
                 <div className={`${idx % 2 === 1 ? 'md:col-start-2' : ''}`}>
-                  <div className="aspect-square overflow-hidden rounded-[30px] border-3 border-black neo-shadow bg-white group transition-transform hover:scale-[1.02]">
-                    <img
+                  <div className="aspect-square overflow-hidden rounded-[30px] border-3 border-black neo-shadow bg-white group transition-transform hover:scale-[1.02] relative">
+                    <Image
                       src={exp.image}
                       alt={exp.title}
-                      className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110"
+                      fill
+                      className="object-cover transition-all duration-700 group-hover:scale-110"
                     />
                   </div>
                 </div>

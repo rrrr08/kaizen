@@ -41,7 +41,9 @@ const PUZZLES: ChessPuzzle[] = [
 ];
 
 const ChessGame: React.FC = () => {
-  const [puzzle, setPuzzle] = useState<ChessPuzzle | null>(null);
+  const [puzzle] = useState<ChessPuzzle | null>(() =>
+    PUZZLES[Math.floor(Math.random() * PUZZLES.length)]
+  );
   const [moveIndex, setMoveIndex] = useState(0);
   const [userMoves, setUserMoves] = useState<string[]>([]);
   const [currentMove, setCurrentMove] = useState('');
@@ -56,10 +58,6 @@ const ChessGame: React.FC = () => {
   const [wrongAttempts, setWrongAttempts] = useState(0);
 
   useEffect(() => {
-    // Select random puzzle
-    const randomPuzzle = PUZZLES[Math.floor(Math.random() * PUZZLES.length)];
-    setPuzzle(randomPuzzle);
-
     // Check Game of the Day
     fetch('/api/games/game-of-the-day')
       .then(r => r.json())

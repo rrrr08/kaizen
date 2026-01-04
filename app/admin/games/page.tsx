@@ -23,8 +23,8 @@ export default function AdminGamesPage() {
   const { user, loading: authLoading, isAdmin } = useAuth();
   const router = useRouter();
   const [settings, setSettings] = useState<AllSettings>({});
-  const [gameOfTheDay, setGameOfTheDay] = useState<any>(null);
-  const [rotationPolicy, setRotationPolicy] = useState<any>(null);
+  const [gameOfTheDay, setGameOfTheDay] = useState<Record<string, any> | null>(null);
+  const [rotationPolicy, setRotationPolicy] = useState<Record<string, any> | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
@@ -144,7 +144,7 @@ export default function AdminGamesPage() {
     await handleSetGameOfDay(randomGameId);
   };
 
-  const updateGameSetting = (gameId: string, field: string, value: any) => {
+  const updateGameSetting = (gameId: string, field: string, value: unknown) => {
     setSettings(prev => ({
       ...prev,
       [gameId]: {
@@ -331,7 +331,7 @@ export default function AdminGamesPage() {
 
             {rotationPolicy.rotationSchedule && (
               <div className="bg-white/10 border-2 border-white/20 p-4 rounded-xl mb-4">
-                <p className="text-white/80 font-bold text-xs tracking-widest mb-2">TODAY'S GAMES</p>
+                <p className="text-white/80 font-bold text-xs tracking-widest mb-2">TODAY&apos;S GAMES</p>
                 <div className="flex flex-wrap gap-2">
                   {(rotationPolicy.rotationSchedule[new Date().toISOString().slice(0, 10)] || []).map((gameId: string) => (
                     <span key={gameId} className="px-3 py-1 bg-white/20 text-white text-xs font-bold rounded-full">
@@ -454,7 +454,7 @@ export default function AdminGamesPage() {
         {Object.keys(settings).length === 0 && (
           <div className="text-center py-12">
             <p className="text-black/40 font-black text-lg">NO GAMES CONFIGURED</p>
-            <p className="text-black/60 text-sm mt-2">Click "Add New Game" to get started</p>
+            <p className="text-black/60 text-sm mt-2">Click &quot;Add New Game&quot; to get started</p>
           </div>
         )}
       </div>

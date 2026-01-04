@@ -11,9 +11,9 @@ export default function GameContentPage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [selectedGame, setSelectedGame] = useState<GameType>('riddle');
-  const [gameContent, setGameContent] = useState<any>(null);
+  const [gameContent, setGameContent] = useState<Record<string, any> | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
-  const [newItem, setNewItem] = useState<any>({});
+  const [newItem, setNewItem] = useState<Record<string, any>>({});
 
   useEffect(() => {
     if (selectedGame) {
@@ -47,7 +47,7 @@ export default function GameContentPage() {
 
     try {
       const token = await user.getIdToken();
-      
+
       const response = await fetch('/api/games/content/initialize', {
         method: 'POST',
         headers: {
@@ -73,12 +73,12 @@ export default function GameContentPage() {
 
   const handleAddItem = async () => {
     if (!user) return;
-    
+
     setLoading(true);
     try {
       const token = await user.getIdToken();
       const updatedItems = [...(gameContent?.items || []), { ...newItem, id: `${selectedGame}_${Date.now()}` }];
-      
+
       const response = await fetch('/api/games/content', {
         method: 'POST',
         headers: {
@@ -109,7 +109,7 @@ export default function GameContentPage() {
 
   const handleDeleteItem = async (itemId: string) => {
     if (!user || !confirm('Delete this item?')) return;
-    
+
     setLoading(true);
     try {
       const token = await user.getIdToken();
@@ -176,7 +176,7 @@ export default function GameContentPage() {
               type="text"
               placeholder="Options (comma separated)"
               value={newItem.options?.join(', ') || ''}
-              onChange={(e) => setNewItem({ ...newItem, options: e.target.value.split(',').map((s: string) => s.trim()) })}
+              onChange={(e) => setNewItem({ ...newItem, options: e.target.value.split(',').map((s) => s.trim()) })}
               className="w-full px-4 py-2 border-2 border-black/20 rounded-lg focus:border-[#6C5CE7] focus:outline-none"
             />
             <input
@@ -273,7 +273,7 @@ export default function GameContentPage() {
     }
   };
 
-  const renderContentItem = (item: any) => {
+  const renderContentItem = (item: Record<string, any>) => {
     switch (selectedGame) {
       case 'riddle':
         return (
@@ -332,13 +332,12 @@ export default function GameContentPage() {
         </div>
 
         {message && (
-          <div className={`mb-6 p-4 rounded-xl border-2 ${
-            message.startsWith('✅') 
-              ? 'bg-green-100 border-green-500 text-green-800' 
+          <div className={`mb-6 p-4 rounded-xl border-2 ${message.startsWith('✅')
+              ? 'bg-green-100 border-green-500 text-green-800'
               : message.startsWith('❌')
-              ? 'bg-red-100 border-red-500 text-red-800'
-              : 'bg-blue-100 border-blue-500 text-blue-800'
-          }`}>
+                ? 'bg-red-100 border-red-500 text-red-800'
+                : 'bg-blue-100 border-blue-500 text-blue-800'
+            }`}>
             <p className="font-bold">{message}</p>
           </div>
         )}
@@ -365,11 +364,10 @@ export default function GameContentPage() {
                 <button
                   key={game}
                   onClick={() => setSelectedGame(game)}
-                  className={`px-4 py-2 font-bold text-xs uppercase rounded-lg border-2 transition-all ${
-                    selectedGame === game
+                  className={`px-4 py-2 font-bold text-xs uppercase rounded-lg border-2 transition-all ${selectedGame === game
                       ? 'bg-[#6C5CE7] text-white border-black'
                       : 'bg-white text-black border-black/20 hover:border-black'
-                  }`}
+                    }`}
                 >
                   {game}
                 </button>
@@ -436,7 +434,7 @@ export default function GameContentPage() {
           ) : (
             <div className="text-center py-12">
               <p className="text-black/40 font-bold">No content found</p>
-              <p className="text-sm text-black/60 mt-2">Click "Initialize" or "Add New" to get started</p>
+              <p className="text-sm text-black/60 mt-2">Click &quot;Initialize&quot; or &quot;Add New&quot; to get started</p>
             </div>
           )}
         </div>

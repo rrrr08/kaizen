@@ -8,36 +8,35 @@ import Scratcher from '../gamification/Scratcher';
 
 const BRAIN_GAME_ID = 'puzzles';
 
+const makeAIMove = (currentBoard: any[]) => {
+  const available = currentBoard.map((val, idx) => val === null ? idx : null).filter(val => val !== null);
+  if (available.length > 0) {
+    const randomIndex = available[Math.floor(Math.random() * available.length)];
+    const newBoard = [...currentBoard];
+    newBoard[randomIndex!] = 'O';
+    return newBoard;
+  }
+  return currentBoard;
+};
+
+const checkWinner = (squares: any[]) => {
+  const lines = [
+    [0, 1, 2], [3, 4, 5], [6, 7, 8],
+    [0, 3, 6], [1, 4, 7], [2, 5, 8],
+    [0, 4, 8], [2, 4, 6]
+  ];
+  for (const [a, b, c] of lines) {
+    if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
+      return squares[a];
+    }
+  }
+  return null;
+};
 // Game 1: Tic-Tac-Toe vs AI
 const TicTacToe: React.FC<{ onWin: () => void; onLose: () => void }> = ({ onWin, onLose }) => {
   const [board, setBoard] = useState(Array(9).fill(null));
   const [isPlayerTurn, setIsPlayerTurn] = useState(true);
   const [gameOver, setGameOver] = useState(false);
-
-  const checkWinner = (squares: any[]) => {
-    const lines = [
-      [0, 1, 2], [3, 4, 5], [6, 7, 8],
-      [0, 3, 6], [1, 4, 7], [2, 5, 8],
-      [0, 4, 8], [2, 4, 6]
-    ];
-    for (const [a, b, c] of lines) {
-      if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-        return squares[a];
-      }
-    }
-    return null;
-  };
-
-  const makeAIMove = (currentBoard: any[]) => {
-    const available = currentBoard.map((val, idx) => val === null ? idx : null).filter(val => val !== null);
-    if (available.length > 0) {
-      const randomIndex = available[Math.floor(Math.random() * available.length)];
-      const newBoard = [...currentBoard];
-      newBoard[randomIndex!] = 'O';
-      return newBoard;
-    }
-    return currentBoard;
-  };
 
   const handleClick = (index: number) => {
     if (board[index] || !isPlayerTurn || gameOver) return;
@@ -102,7 +101,6 @@ const TicTacToe: React.FC<{ onWin: () => void; onLose: () => void }> = ({ onWin,
 
 // Game 2: Memory Match
 const MemoryMatch: React.FC<{ onWin: () => void }> = ({ onWin }) => {
-  const [cards, setCards] = useState<string[]>([]);
   const [flipped, setFlipped] = useState<number[]>([]);
   const [matched, setMatched] = useState<number[]>([]);
   const [moves, setMoves] = useState(0);
@@ -114,10 +112,13 @@ const MemoryMatch: React.FC<{ onWin: () => void }> = ({ onWin }) => {
     tent: <Tent size={32} />
   };
 
-  useEffect(() => {
+  const [cards] = useState<string[]>(() => {
     const symbols = ['gamepad', 'target', 'dice', 'tent'];
-    const deck = [...symbols, ...symbols].sort(() => Math.random() - 0.5);
-    setCards(deck);
+    return [...symbols, ...symbols].sort(() => Math.random() - 0.5);
+  });
+
+  useEffect(() => {
+    // No-op, just to keep the hook count if needed, or remove if safe
   }, []);
 
   const handleCardClick = (index: number) => {
@@ -163,7 +164,7 @@ const MemoryMatch: React.FC<{ onWin: () => void }> = ({ onWin }) => {
 
 // Game 3: Number Puzzle (2048 mini)
 const NumberPuzzle: React.FC<{ onWin: () => void }> = ({ onWin }) => {
-  const [target] = useState(Math.floor(Math.random() * 50) + 50);
+  const [target] = useState(() => Math.floor(Math.random() * 50) + 50);
   const [current, setCurrent] = useState(0);
   const [operations, setOperations] = useState<string[]>([]);
 

@@ -4,6 +4,7 @@ import { TESTIMONIALS, GAMES } from '@/lib/constants';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { X, ArrowRight } from 'lucide-react';
+import Image from 'next/image';
 
 export default function Community() {
   const [events, setEvents] = useState<any[]>([]);
@@ -80,8 +81,8 @@ export default function Community() {
       } else {
         setError(data.error || 'Failed to load events');
       }
-    } catch (err: any) {
-      setError(err.message || 'Failed to load events');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to load events');
       console.error('Error:', err);
     } finally {
       setLoading(false);
@@ -162,10 +163,11 @@ export default function Community() {
                   {/* Event Image */}
                   <div className="aspect-video overflow-hidden rounded-[15px] mb-6 border-2 border-black bg-gray-100 relative">
                     {event.image ? (
-                      <img
+                      <Image
                         src={event.image}
                         alt={event.title}
-                        className="w-full h-full object-cover object-top grayscale group-hover:grayscale-0 transition-all duration-500"
+                        fill
+                        className="object-cover object-top grayscale group-hover:grayscale-0 transition-all duration-500"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-black/20 font-black text-sm uppercase tracking-widest">
@@ -291,13 +293,16 @@ export default function Community() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {testimonials.map(testimonial => (
                 <div key={testimonial.id} className="border-2 border-black p-8 rounded-[20px] bg-white neo-shadow hover:scale-[1.02] transition-transform flex flex-col justify-between">
-                  <p className="text-black/80 font-medium italic mb-6 leading-relaxed">"{testimonial.quote}"</p>
+                  <p className="text-black/80 font-medium italic mb-6 leading-relaxed">&quot;{testimonial.quote}&quot;</p>
                   <div className="flex items-center gap-4 mt-auto">
-                    <img
-                      src={testimonial.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${testimonial.name}`}
-                      alt={testimonial.name}
-                      className="w-12 h-12 rounded-full border-2 border-black bg-gray-100"
-                    />
+                    <div className="relative w-12 h-12 rounded-full border-2 border-black bg-gray-100 overflow-hidden">
+                      <Image
+                        src={testimonial.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${testimonial.name}`}
+                        alt={testimonial.name}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
                     <div>
                       <p className="font-black text-sm text-black">{testimonial.name}</p>
                       <p className="text-black/50 text-xs font-bold uppercase tracking-wider">{testimonial.role}</p>

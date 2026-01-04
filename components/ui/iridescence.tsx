@@ -64,7 +64,7 @@ export default function Iridescence({
     const gl = renderer.gl
     gl.clearColor(1, 1, 1, 1)
 
-    let program: any
+    let program: Program | undefined;
 
     function resize() {
       const scale = 1
@@ -134,7 +134,6 @@ export default function Iridescence({
       ctn.removeChild(gl.canvas)
       gl.getExtension("WEBGL_lose_context")?.loseContext()
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [color, speed, amplitude, mouseReact])
 
   return (

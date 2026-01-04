@@ -32,7 +32,7 @@ export default function PaymentError() {
         <div className="text-center mb-8">
           <h1 className="font-header text-5xl font-black mb-4 text-black uppercase tracking-tight">OOF! Payment Failed</h1>
           <p className="text-black/70 font-bold text-lg">
-            We couldn't process your payment. No worries, you haven't been charged.
+            We couldn&apos;t process your payment. No worries, you haven&apos;t been charged.
           </p>
         </div>
 
@@ -63,7 +63,7 @@ export default function PaymentError() {
             <span>💳</span> Using an International Card?
           </p>
           <p className="text-sm font-bold text-black/80 mb-4">
-            We currently don't support international cards directly.
+            We currently don&apos;t support international cards directly.
           </p>
           <div className="p-3 bg-white border-2 border-black rounded-xl">
             <p className="text-sm font-black text-black">💡 Pro Tip:</p>

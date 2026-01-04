@@ -21,6 +21,19 @@ const Game2048: React.FC = () => {
   const [showScratcher, setShowScratcher] = useState(false);
   const [scratcherDrops, setScratcherDrops] = useState<{ prob: number, points: number }[] | null>(null);
 
+  const addRandomTile = (grid: number[][]) => {
+    const emptyCells: [number, number][] = [];
+    for (let i = 0; i < 4; i++) {
+      for (let j = 0; j < 4; j++) {
+        if (grid[i][j] === 0) emptyCells.push([i, j]);
+      }
+    }
+    if (emptyCells.length > 0) {
+      const [row, col] = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+      grid[row][col] = Math.random() < 0.9 ? 2 : 4;
+    }
+  };
+
   const initBoard = useCallback(() => {
     const newBoard = Array(4).fill(null).map(() => Array(4).fill(0));
     addRandomTile(newBoard);
@@ -35,19 +48,6 @@ const Game2048: React.FC = () => {
     setMessage('');
     setShowScratcher(false);
   }, []);
-
-  const addRandomTile = (grid: number[][]) => {
-    const emptyCells: [number, number][] = [];
-    for (let i = 0; i < 4; i++) {
-      for (let j = 0; j < 4; j++) {
-        if (grid[i][j] === 0) emptyCells.push([i, j]);
-      }
-    }
-    if (emptyCells.length > 0) {
-      const [row, col] = emptyCells[Math.floor(Math.random() * emptyCells.length)];
-      grid[row][col] = Math.random() < 0.9 ? 2 : 4;
-    }
-  };
 
   useEffect(() => {
     initBoard();
