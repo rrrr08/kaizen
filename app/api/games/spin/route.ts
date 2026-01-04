@@ -89,15 +89,26 @@ export async function POST(req: NextRequest) {
       let message = `You won ${selectedPrize.label}`;
       let awardedValue = 0;
 
+      // Get user's current tier for multiplier
+      const currentXP = userData.xp || 0;
+      const TIERS = xpSettingsSnap.exists && xpSettingsSnap.data()?.tiers ? xpSettingsSnap.data()!.tiers : [
+        { name: 'Newbie', minXP: 0, multiplier: 1.0 },
+        { name: 'Player', minXP: 500, multiplier: 1.1 },
+        { name: 'Strategist', minXP: 2000, multiplier: 1.25 },
+        { name: 'Grandmaster', minXP: 5000, multiplier: 1.5 }
+      ];
+      const currentTier = [...TIERS].reverse().find((tier: any) => currentXP >= tier.minXP) || TIERS[0];
+
       if (selectedPrize.type === 'JP' || selectedPrize.type === 'JACKPOT') {
-         // Apply multipliers logic if needed (commented out for now to ensure stability)
-         // const tiers = xpSettingsSnap.exists ? xpSettingsSnap.data()?.tiers : [];
-         
-         const prizeValue = Number(selectedPrize.value);
-         updates.points = FieldValue.increment(prizeValue);
-         awardedValue = prizeValue;
+         const basePrizeValue = Number(selectedPrize.value);
+         // Apply tier multiplier to JP prizes
+         const jpEarned = Math.round(basePrizeValue * currentTier.multiplier);
+         updates.points = FieldValue.increment(jpEarned);
+         awardedValue = jpEarned;
+         message = `You won ${jpEarned} JP (${basePrizeValue} × ${currentTier.multiplier}x ${currentTier.name} bonus)!`;
          
       } else if (selectedPrize.type === 'XP') {
+          // XP prizes don't get multiplier (consistent with game rewards)
           const prizeValue = Number(selectedPrize.value);
           updates.xp = FieldValue.increment(prizeValue);
           awardedValue = prizeValue;
