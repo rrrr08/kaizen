@@ -66,7 +66,7 @@ export default function AdminVouchersPage() {
 
   const handleSave = async (voucher: VoucherTemplate) => {
     if (!user) return;
-    
+
     setSaving(true);
     try {
       const token = await user.getIdToken();
@@ -110,7 +110,7 @@ export default function AdminVouchersPage() {
 
   const handleDelete = async (id: string) => {
     if (!user || !confirm('Delete this voucher?')) return;
-    
+
     setSaving(true);
     try {
       const token = await user.getIdToken();
@@ -145,7 +145,7 @@ export default function AdminVouchersPage() {
 
   const handleInitializeDefaults = async () => {
     if (!user || !confirm('Initialize default vouchers? This will add 6 pre-configured vouchers.')) return;
-    
+
     setSaving(true);
     try {
       const token = await user.getIdToken();
@@ -186,7 +186,7 @@ export default function AdminVouchersPage() {
   return (
     <div className="p-8 max-w-7xl mx-auto">
       {/* Header */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         className="mb-8"
@@ -204,14 +204,13 @@ export default function AdminVouchersPage() {
 
       {/* Message */}
       {message && (
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className={`mb-6 p-4 rounded-2xl border-4 border-black font-bold flex items-center gap-3 ${
-            message.startsWith('✅') 
-              ? 'bg-[#00B894] text-white' 
+          className={`mb-6 p-4 rounded-2xl border-4 border-black font-bold flex items-center gap-3 ${message.startsWith('✅')
+              ? 'bg-[#00B894] text-white'
               : 'bg-[#FF6B6B] text-white'
-          }`}
+            }`}
         >
           <AlertCircle className="w-5 h-5" />
           <p className="font-black">{message}</p>
@@ -219,7 +218,7 @@ export default function AdminVouchersPage() {
       )}
 
       {/* Add New Button */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
@@ -232,7 +231,7 @@ export default function AdminVouchersPage() {
           <Plus size={24} />
           ADD NEW VOUCHER
         </button>
-        
+
         <button
           onClick={handleInitializeDefaults}
           disabled={saving}
@@ -245,7 +244,7 @@ export default function AdminVouchersPage() {
 
       {/* Add Form */}
       {showAddForm && (
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="mb-8 bg-white border-4 border-black p-8 rounded-3xl neo-shadow"
@@ -257,18 +256,18 @@ export default function AdminVouchersPage() {
               <input
                 type="text"
                 value={formData.name}
-                onChange={(e) => setFormData({...formData, name: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 className="w-full px-4 py-3 bg-white border-3 border-black rounded-xl font-bold focus:outline-none focus:ring-4 focus:ring-[#FFD93D]"
                 placeholder="e.g., 20% Off Shop"
               />
             </div>
-            
+
             <div>
               <label className="block text-xs font-black uppercase tracking-wider text-black/60 mb-2">Icon (Emoji)</label>
               <input
                 type="text"
                 value={formData.icon}
-                onChange={(e) => setFormData({...formData, icon: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
                 className="w-full px-4 py-3 bg-white border-3 border-black rounded-xl font-bold text-2xl text-center focus:outline-none focus:ring-4 focus:ring-[#FFD93D]"
               />
             </div>
@@ -277,7 +276,7 @@ export default function AdminVouchersPage() {
               <label className="block text-xs font-black uppercase tracking-wider text-black/60 mb-2">Description</label>
               <textarea
                 value={formData.description}
-                onChange={(e) => setFormData({...formData, description: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 className="w-full px-4 py-3 bg-white border-3 border-black rounded-xl font-bold focus:outline-none focus:ring-4 focus:ring-[#FFD93D]"
                 rows={2}
                 placeholder="Describe the voucher benefits"
@@ -289,7 +288,7 @@ export default function AdminVouchersPage() {
               <input
                 type="number"
                 value={formData.pointsCost}
-                onChange={(e) => setFormData({...formData, pointsCost: parseInt(e.target.value)})}
+                onChange={(e) => setFormData({ ...formData, pointsCost: parseInt(e.target.value) })}
                 className="w-full px-4 py-3 bg-white border-3 border-black rounded-xl font-bold focus:outline-none focus:ring-4 focus:ring-[#FFD93D]"
               />
             </div>
@@ -298,7 +297,7 @@ export default function AdminVouchersPage() {
               <label className="block text-xs font-black uppercase tracking-wider text-black/60 mb-2">Discount Type</label>
               <select
                 value={formData.discountType}
-                onChange={(e) => setFormData({...formData, discountType: e.target.value as 'percentage' | 'fixed'})}
+                onChange={(e) => setFormData({ ...formData, discountType: e.target.value as 'percentage' | 'fixed' })}
                 className="w-full px-4 py-3 bg-white border-3 border-black rounded-xl font-bold focus:outline-none focus:ring-4 focus:ring-[#FFD93D]"
               >
                 <option value="percentage">Percentage (%)</option>
@@ -313,7 +312,7 @@ export default function AdminVouchersPage() {
               <input
                 type="number"
                 value={formData.discountValue}
-                onChange={(e) => setFormData({...formData, discountValue: parseInt(e.target.value)})}
+                onChange={(e) => setFormData({ ...formData, discountValue: parseInt(e.target.value) })}
                 className="w-full px-4 py-3 bg-white border-3 border-black rounded-xl font-bold focus:outline-none focus:ring-4 focus:ring-[#FFD93D]"
               />
             </div>
@@ -322,7 +321,7 @@ export default function AdminVouchersPage() {
               <label className="block text-xs font-black uppercase tracking-wider text-black/60 mb-2">Category</label>
               <select
                 value={formData.category}
-                onChange={(e) => setFormData({...formData, category: e.target.value as any})}
+                onChange={(e) => setFormData({ ...formData, category: e.target.value as 'shop' | 'events' | 'experiences' })}
                 className="w-full px-4 py-3 bg-white border-3 border-black rounded-xl font-bold focus:outline-none focus:ring-4 focus:ring-[#FFD93D]"
               >
                 <option value="shop">🛍️ Shop</option>
@@ -336,7 +335,7 @@ export default function AdminVouchersPage() {
               <input
                 type="number"
                 value={formData.minPurchase}
-                onChange={(e) => setFormData({...formData, minPurchase: parseInt(e.target.value)})}
+                onChange={(e) => setFormData({ ...formData, minPurchase: parseInt(e.target.value) })}
                 className="w-full px-4 py-3 bg-white border-3 border-black rounded-xl font-bold focus:outline-none focus:ring-4 focus:ring-[#FFD93D]"
                 placeholder="0 = No minimum"
               />
@@ -347,7 +346,7 @@ export default function AdminVouchersPage() {
               <input
                 type="number"
                 value={formData.maxDiscount || ''}
-                onChange={(e) => setFormData({...formData, maxDiscount: e.target.value ? parseInt(e.target.value) : undefined})}
+                onChange={(e) => setFormData({ ...formData, maxDiscount: e.target.value ? parseInt(e.target.value) : undefined })}
                 className="w-full px-4 py-3 bg-white border-3 border-black rounded-xl font-bold focus:outline-none focus:ring-4 focus:ring-[#FFD93D]"
                 placeholder="Optional"
               />
@@ -358,7 +357,7 @@ export default function AdminVouchersPage() {
               <input
                 type="number"
                 value={formData.expiryDays}
-                onChange={(e) => setFormData({...formData, expiryDays: parseInt(e.target.value)})}
+                onChange={(e) => setFormData({ ...formData, expiryDays: parseInt(e.target.value) })}
                 className="w-full px-4 py-3 bg-white border-3 border-black rounded-xl font-bold focus:outline-none focus:ring-4 focus:ring-[#FFD93D]"
               />
             </div>
@@ -369,7 +368,7 @@ export default function AdminVouchersPage() {
                 <input
                   type="checkbox"
                   checked={formData.enabled}
-                  onChange={(e) => setFormData({...formData, enabled: e.target.checked})}
+                  onChange={(e) => setFormData({ ...formData, enabled: e.target.checked })}
                   className="sr-only peer"
                 />
                 <div className="w-14 h-8 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#FFD93D] rounded-full peer border-3 border-black peer-checked:after:translate-x-6 peer-checked:after:border-black after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-black after:border-3 after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-[#00B894]"></div>
@@ -398,7 +397,7 @@ export default function AdminVouchersPage() {
       {/* Vouchers List */}
       <div className="space-y-6">
         {vouchers.map((voucher, index) => (
-          <motion.div 
+          <motion.div
             key={voucher.id}
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -455,7 +454,7 @@ export default function AdminVouchersPage() {
       {vouchers.length === 0 && !showAddForm && (
         <div className="text-center py-16 bg-white border-4 border-black rounded-3xl neo-shadow">
           <p className="text-black/40 font-black text-2xl mb-2">NO VOUCHERS YET</p>
-          <p className="text-black/60 font-bold text-sm">Click "Add New Voucher" to create your first reward</p>
+          <p className="text-black/60 font-bold text-sm">Click &quot;Add New Voucher&quot; to create your first reward</p>
         </div>
       )}
     </div>

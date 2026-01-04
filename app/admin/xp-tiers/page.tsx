@@ -40,7 +40,7 @@ export default function XPTiersAdmin() {
     try {
       const settingsRef = doc(db, 'settings', 'xpSystem');
       const snap = await getDoc(settingsRef);
-      
+
       if (snap.exists()) {
         const data = snap.data();
         setTiers(data.tiers || getDefaultTiers());
@@ -91,13 +91,13 @@ export default function XPTiersAdmin() {
     }
   };
 
-  const updateTier = (index: number, field: keyof Tier, value: any) => {
+  const updateTier = (index: number, field: keyof Tier, value: string | number | undefined) => {
     const updated = [...tiers];
     updated[index] = { ...updated[index], [field]: value };
     setTiers(updated);
   };
 
-  const updateXPSource = (index: number, field: keyof XPSource, value: any) => {
+  const updateXPSource = (index: number, field: keyof XPSource, value: string | number | boolean) => {
     const updated = [...xpSources];
     updated[index] = { ...updated[index], [field]: value };
     setXPSources(updated);
@@ -117,7 +117,7 @@ export default function XPTiersAdmin() {
   return (
     <div className="p-8 max-w-7xl mx-auto">
       {/* Header */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         className="mb-8"
@@ -131,9 +131,9 @@ export default function XPTiersAdmin() {
             <p className="text-black/60 font-bold uppercase tracking-wider text-sm">Customize Experience Points & Progression</p>
           </div>
         </div>
-        
+
         {!isInitialized && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             className="mt-4 p-4 bg-[#FFD93D] border-4 border-black rounded-2xl neo-shadow flex items-start gap-3"
@@ -142,7 +142,7 @@ export default function XPTiersAdmin() {
             <div>
               <p className="text-black font-black mb-1">⚠️ NOT INITIALIZED</p>
               <p className="text-black/70 font-bold text-sm">
-                XP System not found in Firebase. Click "SAVE CHANGES" below to initialize with these default settings.
+                XP System not found in Firebase. Click &quot;SAVE CHANGES&quot; below to initialize with these default settings.
               </p>
             </div>
           </motion.div>
@@ -150,7 +150,7 @@ export default function XPTiersAdmin() {
       </motion.div>
 
       {/* Tiers Configuration */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
@@ -160,10 +160,10 @@ export default function XPTiersAdmin() {
           <Settings className="w-7 h-7 text-[#6C5CE7]" />
           <h2 className="font-header text-3xl font-black text-black">TIER CONFIGURATION</h2>
         </div>
-        
+
         <div className="space-y-6">
           {tiers.map((tier, index) => (
-            <motion.div 
+            <motion.div
               key={index}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -177,7 +177,7 @@ export default function XPTiersAdmin() {
                   <p className="text-sm font-bold text-black/60">{tier.badge}</p>
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div>
                   <label className="block text-xs font-black uppercase tracking-wider text-black/60 mb-2">Tier Name</label>
@@ -269,7 +269,7 @@ export default function XPTiersAdmin() {
       </motion.div>
 
       {/* XP Sources Configuration */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
@@ -279,10 +279,10 @@ export default function XPTiersAdmin() {
           <Zap className="w-7 h-7 text-[#FFD93D]" />
           <h2 className="font-header text-3xl font-black text-black">XP SOURCES</h2>
         </div>
-        
+
         <div className="space-y-3">
           {xpSources.map((source, index) => (
-            <motion.div 
+            <motion.div
               key={index}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -298,7 +298,7 @@ export default function XPTiersAdmin() {
                 />
                 <div className="w-14 h-8 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#FFD93D] rounded-full peer border-3 border-black peer-checked:after:translate-x-6 peer-checked:after:border-black after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-black after:border-3 after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-[#00B894]"></div>
               </label>
-              
+
               <div className="flex-1">
                 <input
                   type="text"
@@ -307,7 +307,7 @@ export default function XPTiersAdmin() {
                   className="w-full px-4 py-3 bg-white border-3 border-black rounded-xl font-bold focus:outline-none focus:ring-4 focus:ring-[#FFD93D]"
                 />
               </div>
-              
+
               <div className="w-32">
                 <input
                   type="number"
@@ -318,7 +318,7 @@ export default function XPTiersAdmin() {
                 />
               </div>
               <span className="text-sm font-black text-black/60 uppercase">XP</span>
-              
+
               <div className="w-32">
                 <input
                   type="number"
@@ -335,7 +335,7 @@ export default function XPTiersAdmin() {
       </motion.div>
 
       {/* Save Button */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5 }}

@@ -4,6 +4,7 @@ import { useCart } from '@/app/context/CartContext';
 import Link from 'next/link';
 import { ShoppingCart, Trash2, Plus, Minus, ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 
 export default function CartPage() {
   const { items, removeFromCart, updateQuantity, getTotalPrice, getTotalItems, isLoading } = useCart();
@@ -78,11 +79,12 @@ export default function CartPage() {
                 <div className="flex gap-6">
                   {/* Product Image */}
                   <div className="flex-shrink-0 relative">
-                    <div className="w-24 h-32 rounded-xl overflow-hidden border-2 border-black shadow-[2px_2px_0px_#000]">
-                      <img
+                    <div className="w-24 h-32 rounded-xl overflow-hidden border-2 border-black shadow-[2px_2px_0px_#000] relative">
+                      <Image
                         src={item.product?.image || '/placeholder-product.png'}
                         alt={item.product?.name || 'Product'}
-                        className="w-full h-full object-cover"
+                        fill
+                        className="object-cover"
                       />
                     </div>
                   </div>

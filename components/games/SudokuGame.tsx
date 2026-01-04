@@ -273,7 +273,7 @@ const SudokuGame: React.FC = () => {
                     )}
 
                     {/* GRID */}
-                    <div className="grid grid-cols-9 border-2 border-black bg-black neo-shadow rounded-lg overflow-hidden">
+                    <div className="grid grid-cols-9 gap-0 border-2 border-black bg-black neo-shadow rounded-lg overflow-hidden w-fit mx-auto">
                         {board.map((row, rIndex) => (
                             row.map((cell, cIndex) => {
                                 const isInitial = puzzle[rIndex][cIndex] !== 0;
@@ -287,8 +287,9 @@ const SudokuGame: React.FC = () => {
                                         value={cell === 0 ? '' : cell}
                                         onChange={(e) => handleCellChange(rIndex, cIndex, e.target.value)}
                                         disabled={isInitial || isWon || !isActive || alreadyPlayed}
+                                        style={{ width: '48px', height: '48px' }}
                                         className={`
-                                            w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-center text-lg md:text-xl font-bold focus:outline-none
+                                            text-center text-xl font-bold focus:outline-none
                                             ${isInitial ? 'bg-[#FFFDF5] text-black font-black' : 'bg-white text-[#6C5CE7] font-bold'}
                                             ${!isInitial && !isWon && isActive ? 'hover:bg-[#F0F0F0] focus:bg-[#FFD93D]' : ''}
                                             ${borderRight} ${borderBottom}

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useCart } from '@/app/context/CartContext';
 import Link from 'next/link';
 import { ShoppingCart, X } from 'lucide-react';
+import Image from 'next/image';
 
 export default function CartSidebar() {
   const { items, getTotalPrice, removeFromCart, updateQuantity, getTotalItems } = useCart();
@@ -66,11 +67,14 @@ export default function CartSidebar() {
                       className="bg-white/5 border border-white/10 rounded-lg p-4 hover:border-amber-500/20 transition"
                     >
                       <div className="flex gap-4 mb-3">
-                        <img
-                          src={item.product.image}
-                          alt={item.product.name}
-                          className="w-16 h-20 object-cover rounded grayscale"
-                        />
+                        <div className="w-16 h-20 relative rounded grayscale overflow-hidden">
+                          <Image
+                            src={item.product.image}
+                            alt={item.product.name}
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
                         <div className="flex-1">
                           <h3 className="font-header text-sm tracking-wider line-clamp-2">
                             {item.product.name}

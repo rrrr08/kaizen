@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { adminDb } from '@/lib/firebaseAdmin';
+import { adminAuth, adminDb } from '@/lib/firebaseAdmin';
 
 // GET /api/games/content?gameId={id} - Get game content
 export async function GET(req: NextRequest) {
@@ -32,6 +31,17 @@ export async function POST(req: NextRequest) {
     if (!session?.user || !(session.user as any).isAdmin) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    const token = authorization.split('Bearer ')[1];
+    const decodedToken = await adminAuth.verifyIdToken(token);
+    
+    // Check if user is admin
+    const userDoc = await adminDb.collection('users').doc(decodedToken.uid).get();
+    const userData = userDoc.data();
+    
+    if (!userData?.isAdmin && userData?.role !== 'admin') {
+      return NextResponse.json({ error: 'Forbidden - Admin access required' }, { status: 403 });
+    }
     
     const body = await req.json();
     const { gameId, content } = body;
@@ -43,7 +53,7 @@ export async function POST(req: NextRequest) {
     await adminDb.doc(`gameContent/${gameId}`).set({
       ...content,
       updatedAt: new Date().toISOString(),
-      updatedBy: session.user.email
+      updatedBy: decodedToken.email || userData?.email || decodedToken.uid
     }, { merge: true });
     
     return NextResponse.json({ success: true });
@@ -59,6 +69,17 @@ export async function DELETE(req: NextRequest) {
     const session = await getServerSession();
     if (!session?.user || !(session.user as any).isAdmin) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const token = authorization.split('Bearer ')[1];
+    const decodedToken = await adminAuth.verifyIdToken(token);
+    
+    // Check if user is admin
+    const userDoc = await adminDb.collection('users').doc(decodedToken.uid).get();
+    const userData = userDoc.data();
+    
+    if (!userData?.isAdmin && userData?.role !== 'admin') {
+      return NextResponse.json({ error: 'Forbidden - Admin access required' }, { status: 403 });
     }
     
     const { searchParams } = new URL(req.url);

@@ -10,7 +10,7 @@ interface TestResult {
   url: string;
   status: 'pending' | 'success' | 'error';
   statusCode?: number;
-  response?: any;
+  response?: Record<string, unknown>;
   error?: string;
 }
 
@@ -70,18 +70,17 @@ export default function APITestPage() {
         const response = await fetch(endpoint.url, options);
         const data = await response.json();
 
-        result.statusCode = response.status;
         result.response = data;
         result.status = response.ok ? 'success' : 'error';
         result.error = response.ok ? undefined : data.error || 'Request failed';
-      } catch (error: any) {
+      } catch (error: unknown) {
         result.status = 'error';
-        result.error = error.message;
+        result.error = error instanceof Error ? error.message : 'An unknown error occurred';
       }
 
       testResults.push(result);
       setResults([...testResults]);
-      
+
       // Small delay between requests
       await new Promise(resolve => setTimeout(resolve, 200));
     }
@@ -165,13 +164,12 @@ export default function APITestPage() {
               {results.map((result, index) => (
                 <div
                   key={index}
-                  className={`p-4 border-2 rounded-xl transition-all ${
-                    result.status === 'success'
+                  className={`p-4 border-2 rounded-xl transition-all ${result.status === 'success'
                       ? 'bg-green-50 border-green-500'
                       : result.status === 'error'
-                      ? 'bg-red-50 border-red-500'
-                      : 'bg-gray-50 border-gray-300'
-                  }`}
+                        ? 'bg-red-50 border-red-500'
+                        : 'bg-gray-50 border-gray-300'
+                    }`}
                 >
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex items-center gap-3">
@@ -193,11 +191,10 @@ export default function APITestPage() {
                     </div>
                     {result.statusCode && (
                       <span
-                        className={`px-3 py-1 rounded-lg text-xs font-black ${
-                          result.status === 'success'
+                        className={`px-3 py-1 rounded-lg text-xs font-black ${result.status === 'success'
                             ? 'bg-green-600 text-white'
                             : 'bg-red-600 text-white'
-                        }`}
+                          }`}
                       >
                         {result.statusCode}
                       </span>
@@ -228,10 +225,10 @@ export default function APITestPage() {
         {results.length === 0 && !testing && (
           <div className="bg-white border-2 border-black p-8 rounded-[30px] neo-shadow text-center">
             <p className="text-black/60 font-bold mb-4">
-              Click "RUN TESTS" to test all API endpoints
+              Click &quot;RUN TESTS&quot; to test all API endpoints
             </p>
             <p className="text-black/40 text-sm">
-              Make sure you're logged in as an admin
+              Make sure you&apos;re logged in as an admin
             </p>
           </div>
         )}

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Star, Trophy, Clock, CheckCircle, XCircle, Brain } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { awardGamePoints } from '@/lib/gameApi';
@@ -118,58 +118,7 @@ const TriviaGame: React.FC = () => {
       .catch(console.error);
   }, []);
 
-  useEffect(() => {
-    if (timer > 0 && !showResult && !isGameOver && questions.length > 0) {
-      const interval = setInterval(() => {
-        setTimer(t => t - 1);
-      }, 1000);
-      return () => clearInterval(interval);
-    } else if (timer === 0 && !showResult) {
-      handleTimeout();
-    }
-  }, [timer, showResult, isGameOver, questions]);
-
-  const handleTimeout = () => {
-    setWrongAnswers(w => w + 1);
-    setShowResult(true);
-    setTimeout(() => {
-      if (currentIndex < questions.length - 1) {
-        setCurrentIndex(currentIndex + 1);
-        setSelectedAnswer(null);
-        setShowResult(false);
-        setTimer(30);
-      } else {
-        finishGame();
-      }
-    }, 2000);
-  };
-
-  const handleAnswer = (index: number) => {
-    if (showResult || isGameOver) return;
-
-    setSelectedAnswer(index);
-    setShowResult(true);
-
-    const isCorrect = index === questions[currentIndex].correct;
-    if (isCorrect) {
-      setScore(score + 1);
-    } else {
-      setWrongAnswers(w => w + 1);
-    }
-
-    setTimeout(() => {
-      if (currentIndex < questions.length - 1) {
-        setCurrentIndex(currentIndex + 1);
-        setSelectedAnswer(null);
-        setShowResult(false);
-        setTimer(30);
-      } else {
-        finishGame();
-      }
-    }, 2000);
-  };
-
-  const finishGame = async () => {
+  const finishGame = useCallback(async () => {
     setIsGameOver(true);
     if (score > 0) {
       confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
@@ -196,7 +145,58 @@ const TriviaGame: React.FC = () => {
     } catch (e) {
       setMessage('Error awarding points');
     }
-  };
+  }, [score, questions.length, wrongAnswers, scratcherDrops]);
+
+  const handleAnswer = useCallback((index: number) => {
+    if (showResult || isGameOver) return;
+
+    setSelectedAnswer(index);
+    setShowResult(true);
+
+    const isCorrect = index === questions[currentIndex].correct;
+    if (isCorrect) {
+      setScore(s => s + 1);
+    } else {
+      setWrongAnswers(w => w + 1);
+    }
+
+    setTimeout(() => {
+      if (currentIndex < questions.length - 1) {
+        setCurrentIndex(c => c + 1);
+        setSelectedAnswer(null);
+        setShowResult(false);
+        setTimer(30);
+      } else {
+        finishGame();
+      }
+    }, 2000);
+  }, [showResult, isGameOver, questions, currentIndex, finishGame]);
+
+  const handleTimeout = useCallback(() => {
+    setWrongAnswers(w => w + 1);
+    setShowResult(true);
+    setTimeout(() => {
+      if (currentIndex < questions.length - 1) {
+        setCurrentIndex(c => c + 1);
+        setSelectedAnswer(null);
+        setShowResult(false);
+        setTimer(30);
+      } else {
+        finishGame();
+      }
+    }, 2000);
+  }, [currentIndex, questions.length, finishGame]);
+
+  useEffect(() => {
+    if (timer > 0 && !showResult && !isGameOver && questions.length > 0) {
+      const interval = setInterval(() => {
+        setTimer(t => t - 1);
+      }, 1000);
+      return () => clearInterval(interval);
+    } else if (timer === 0 && !showResult) {
+      handleTimeout();
+    }
+  }, [timer, showResult, isGameOver, questions, handleTimeout]);
 
   if (questions.length === 0) {
     return (
@@ -248,14 +248,14 @@ const TriviaGame: React.FC = () => {
 
             {/* Question */}
             <h2 className="text-3xl font-black text-black text-center mb-10 leading-tight">
-              "{currentQuestion.question}"
+              &quot;{currentQuestion.question}&quot;
             </h2>
 
             {/* Options */}
             <div className="grid grid-cols-1 gap-4">
               {currentQuestion.options.map((option, index) => {
                 let bgColor = 'bg-white hover:bg-[#FFFDF5] hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_#000]';
-                let borderColor = 'border-black';
+                const borderColor = 'border-black';
                 let textColor = 'text-black';
                 let shadow = 'shadow-[2px_2px_0px_#000]';
                 let icon = null;

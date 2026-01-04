@@ -8,6 +8,7 @@ import { splitDateTime } from '@/lib/utils';
 import EventRegistrationForm from '@/components/EventRegistrationForm';
 import { useGamification } from '@/app/context/GamificationContext';
 import { ArrowLeft, Zap } from 'lucide-react';
+import Image from 'next/image';
 
 export const dynamic = 'force-dynamic';
 
@@ -51,9 +52,9 @@ export default function UpcomingEventDetail() {
       if (!data.success || !data.event) throw new Error('Event not found');
 
       setEvent(data.event);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      setError(err.message || 'Something went wrong');
+      setError(err instanceof Error ? err.message : 'Something went wrong');
     } finally {
       setLoading(false);
     }
@@ -106,11 +107,12 @@ export default function UpcomingEventDetail() {
           <div className="lg:col-span-2">
 
             {/* Image */}
-            <div className="aspect-video overflow-hidden rounded-[30px] border-3 border-black neo-shadow bg-white mb-12">
-              {event.image && <img
-                src={event.image}
+            <div className="aspect-video overflow-hidden rounded-[30px] border-3 border-black neo-shadow bg-white mb-12 relative">
+              {event.image && <Image
+                src={event.image || "/placeholder.png"}
                 alt={event.title}
-                className="w-full h-full object-cover"
+                fill
+                className="object-cover"
               />}
             </div>
 
@@ -196,8 +198,8 @@ export default function UpcomingEventDetail() {
                 onClick={() => setShowRegistrationForm(true)}
                 disabled={isFull}
                 className={`w-full px-6 py-4 font-black text-xs tracking-widest rounded-xl border-2 border-black transition-all ${isFull
-                    ? 'bg-[#FF7675]/30 text-[#D63031] cursor-not-allowed opacity-60'
-                    : 'bg-[#6C5CE7] text-white neo-shadow hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none'
+                  ? 'bg-[#FF7675]/30 text-[#D63031] cursor-not-allowed opacity-60'
+                  : 'bg-[#6C5CE7] text-white neo-shadow hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none'
                   }`}
               >
                 {isFull ? 'EVENT FULL' : 'REGISTER NOW'}
@@ -231,7 +233,7 @@ export default function UpcomingEventDetail() {
 
 /* -------------------- HELPERS -------------------- */
 
-function Section({ title, children }: { title: string; children: any }) {
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="mb-12">
       <h2 className="font-black text-xs tracking-widest text-[#6C5CE7] mb-6 uppercase">
@@ -242,7 +244,7 @@ function Section({ title, children }: { title: string; children: any }) {
   );
 }
 
-function Info({ label, children }: { label: string; children: any }) {
+function Info({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="bg-white border-2 border-black rounded-xl p-6 neo-shadow hover:-translate-y-1 transition-transform">
       <div className="font-black text-[10px] tracking-widest text-black/40 mb-3 uppercase">

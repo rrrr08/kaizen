@@ -49,7 +49,7 @@ export default function PushNotificationsPage() {
     try {
       const { auth } = await import('@/lib/firebase');
       const currentUser = auth.currentUser;
-      
+
       if (currentUser) {
         const token = await currentUser.getIdToken();
         const response = await fetch('/api/admin/users/count', {
@@ -57,7 +57,7 @@ export default function PushNotificationsPage() {
             'Authorization': `Bearer ${token}`
           }
         });
-        
+
         if (response.ok) {
           const data = await response.json();
           setTotalUsers(data.count || 0);
@@ -120,10 +120,10 @@ export default function PushNotificationsPage() {
       // Send in-app notifications to users
       const { auth } = await import('@/lib/firebase');
       const currentUser = auth.currentUser;
-      
+
       if (currentUser) {
         const token = await currentUser.getIdToken();
-        
+
         const sendResponse = await fetch('/api/notifications/send', {
           method: 'POST',
           headers: {
@@ -157,12 +157,13 @@ export default function PushNotificationsPage() {
         }
       }
 
-      const newCampaign: any = {
+      const newCampaign: Omit<Campaign, 'id' | 'deliveredCount' | 'interactionCount'> = {
         title: formData.title,
         message: formData.message,
         status: 'sent',
         recipientCount: formData.recipientSegment === 'all' ? totalUsers : Math.floor(totalUsers * 0.1),
         priority: formData.priority,
+        createdAt: new Date().toISOString(),
       };
 
       // Only add optional fields if they have values
@@ -181,8 +182,7 @@ export default function PushNotificationsPage() {
           ...newCampaign,
           deliveredCount: 0,
           interactionCount: 0,
-          createdAt: new Date().toISOString(),
-        },
+        } as Campaign,
         ...campaigns,
       ]);
 
@@ -520,7 +520,7 @@ export default function PushNotificationsPage() {
                     Recipient Preview
                   </p>
                   <p className="text-sm text-black/60 font-bold mt-2">
-                    This will reach approximately all subscribed users in the "{formData.recipientSegment}" segment.
+                    This will reach approximately all subscribed users in the &quot;{formData.recipientSegment}&quot; segment.
                   </p>
                 </div>
 
@@ -582,10 +582,10 @@ export default function PushNotificationsPage() {
                       <div className="text-right">
                         <span
                           className={`inline-block px-3 py-1 rounded-lg border-2 border-black text-xs font-black uppercase tracking-wider ${campaign.status === 'sent'
-                              ? 'bg-[#00B894] text-black'
-                              : campaign.status === 'scheduled'
-                                ? 'bg-[#FFD93D] text-black'
-                                : 'bg-gray-100 text-black'
+                            ? 'bg-[#00B894] text-black'
+                            : campaign.status === 'scheduled'
+                              ? 'bg-[#FFD93D] text-black'
+                              : 'bg-gray-100 text-black'
                             }`}
                         >
                           {campaign.status.charAt(0).toUpperCase() + campaign.status.slice(1)}
@@ -607,7 +607,7 @@ export default function PushNotificationsPage() {
               <Clock className="w-16 h-16 text-black/20 mx-auto mb-4" />
               <p className="text-black font-black uppercase tracking-widest text-lg">No scheduled campaigns</p>
               <p className="text-sm text-black/60 font-bold mt-2">
-                Schedule a notification in the "Send Notification" tab to see it here
+                Schedule a notification in the &quot;Send Notification&quot; tab to see it here
               </p>
             </div>
           </TabsContent>

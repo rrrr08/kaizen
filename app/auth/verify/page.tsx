@@ -160,7 +160,7 @@ function VerifyPageContent() {
                     {currentUserEmail && !emailVerified && (
                         <div className="mt-6 text-center">
                             <p className="font-bold text-black/60 text-xs mb-3">
-                                Didn't receive an email?
+                                Didn&apos;t receive an email?
                             </p>
                             <button
                                 onClick={handleResendOTP}

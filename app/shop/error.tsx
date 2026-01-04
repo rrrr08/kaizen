@@ -26,7 +26,7 @@ export default function ShopError({ error, reset }: ShopErrorProps) {
         <div className="text-center mb-8">
           <h1 className="font-display text-4xl font-bold mb-4">Oops!</h1>
           <p className="text-muted-foreground font-body text-lg mb-4">
-            We couldn't load the shop. Please try again.
+            We couldn&apos;t load the shop. Please try again.
           </p>
 
           {/* Error Details (Development Only) */}

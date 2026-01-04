@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import SplashScreen from '@/components/ui/SplashScreen';
 import Navbar from '@/components/ui/JoyNavbar';
 import Footer from '@/components/ui/Footer';
@@ -10,52 +11,63 @@ interface ClientLayoutProps {
     children: React.ReactNode;
 }
 
-const SPLASH_SHOWN_KEY = 'joy-juncture-splash-shown';
-const LAST_USER_KEY = 'joy-juncture-last-user';
-
 export default function ClientLayout({ children }: ClientLayoutProps) {
-    const [showSplash, setShowSplash] = useState(false);
+    const pathname = usePathname();
+    const isHomePage = pathname === '/';
+    const [showSplash, setShowSplash] = useState(isHomePage);
     const [isClient, setIsClient] = useState(false);
+    const [hasShownInitialSplash, setHasShownInitialSplash] = useState(false);
+    const [previousAuthState, setPreviousAuthState] = useState<boolean | null>(null);
     const { user, loading } = useAuth();
 
     useEffect(() => {
         setIsClient(true);
     }, []);
 
+    // Show splash only on home page initial load
     useEffect(() => {
         if (!isClient || loading) return;
 
-        const splashShown = localStorage.getItem(SPLASH_SHOWN_KEY);
-        const lastUserId = localStorage.getItem(LAST_USER_KEY);
-        const currentUserId = user?.uid || 'guest';
-
-        // Show splash if:
-        // 1. Never shown before (first visit)
-        // 2. User changed (signed in/up from guest, or switched accounts)
-        const shouldShowSplash = !splashShown || lastUserId !== currentUserId;
-
-        if (shouldShowSplash) {
+        if (!hasShownInitialSplash && pathname === '/') {
             setShowSplash(true);
-            localStorage.setItem(SPLASH_SHOWN_KEY, 'true');
-            localStorage.setItem(LAST_USER_KEY, currentUserId);
+            setHasShownInitialSplash(true);
+            // Initialize the auth state after initial splash
+            setPreviousAuthState(!!user);
+        } else if (!hasShownInitialSplash) {
+            // If not on home page, just mark as shown without displaying
+            setHasShownInitialSplash(true);
+            setPreviousAuthState(!!user);
         }
-    }, [isClient, user, loading]);
+    }, [isClient, loading, hasShownInitialSplash, user, pathname]);
+
+    // Show splash when user authenticates (not on initial load)
+    useEffect(() => {
+        if (!isClient || loading || !hasShownInitialSplash || previousAuthState === null) return;
+
+        const isAuthenticated = !!user;
+        
+        // Show splash when transitioning from unauthenticated to authenticated
+        if (previousAuthState === false && isAuthenticated) {
+            setShowSplash(true);
+        }
+        
+        setPreviousAuthState(isAuthenticated);
+    }, [user, loading, isClient, hasShownInitialSplash, previousAuthState]);
 
     const handleSplashComplete = () => {
         setShowSplash(false);
     };
 
-    // Don't render splash on server
-    if (!isClient) {
+    // On home page, block content until splash completes
+    if (isHomePage && (!isClient || showSplash)) {
         return (
             <>
-                <Navbar />
-                {children}
-                <Footer />
+                {isClient && <SplashScreen onComplete={handleSplashComplete} />}
             </>
         );
     }
 
+    // For other pages or after splash completes
     return (
         <>
             {showSplash && <SplashScreen onComplete={handleSplashComplete} />}

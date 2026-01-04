@@ -2,6 +2,7 @@
 
 import { ReactNode, useState, useEffect } from 'react';
 import { AlertCircle } from 'lucide-react';
+import Link from 'next/link';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -74,12 +75,12 @@ export function ErrorBoundary({ children }: ErrorBoundaryProps) {
             >
               Refresh Page
             </button>
-            <a
+            <Link
               href="/"
               className="w-full block px-6 py-3 bg-primary/10 border border-primary/30 text-primary font-header font-bold rounded hover:bg-primary/20 transition-all"
             >
               Go Home
-            </a>
+            </Link>
           </div>
         </div>
       </div>

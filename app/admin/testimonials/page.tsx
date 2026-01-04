@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { MessageSquare, Check, X, Trash2, Search, Filter, Loader2 } from 'lucide-react';
+import Image from 'next/image';
 
 interface Testimonial {
     id: string;
@@ -125,8 +126,8 @@ export default function TestimonialsPage() {
                         key={f}
                         onClick={() => setFilter(f)}
                         className={`px-4 py-2 rounded-lg font-black uppercase text-xs tracking-widest border-2 transition-all ${filter === f
-                                ? 'bg-black text-white border-black'
-                                : 'bg-white text-black border-transparent hover:bg-gray-100'
+                            ? 'bg-black text-white border-black'
+                            : 'bg-white text-black border-transparent hover:bg-gray-100'
                             }`}
                     >
                         {f}
@@ -141,17 +142,19 @@ export default function TestimonialsPage() {
 
                         {/* Status Badge */}
                         <div className={`absolute top-4 right-4 px-3 py-1 rounded-full border-2 border-black text-[10px] font-black uppercase tracking-widest ${t.status === 'approved' ? 'bg-[#00B894] text-white' :
-                                t.status === 'rejected' ? 'bg-gray-200 text-gray-500' :
-                                    'bg-[#FF7675] text-white'
+                            t.status === 'rejected' ? 'bg-gray-200 text-gray-500' :
+                                'bg-[#FF7675] text-white'
                             }`}>
                             {t.status}
                         </div>
 
                         <div className="flex items-center gap-4">
-                            <img
+                            <Image
                                 src={t.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${t.name}`}
                                 alt={t.name}
-                                className="w-12 h-12 rounded-full border-2 border-black bg-gray-100"
+                                width={48}
+                                height={48}
+                                className="w-12 h-12 rounded-full border-2 border-black bg-gray-100 object-cover"
                             />
                             <div>
                                 <p className="font-black text-lg text-black leading-tight">{t.name}</p>
@@ -160,7 +163,7 @@ export default function TestimonialsPage() {
                         </div>
 
                         <div className="bg-gray-50 border-2 border-black/5 rounded-xl p-4 flex-1">
-                            <p className="italic font-medium text-black/80">"{t.quote}"</p>
+                            <p className="italic font-medium text-black/80">&quot;{t.quote}&quot;</p>
                         </div>
 
                         <p className="text-black/30 text-[10px] font-black uppercase text-right">

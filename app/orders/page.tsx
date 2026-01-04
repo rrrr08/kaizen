@@ -4,10 +4,10 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/app/context/AuthContext';
-import { 
-  Package, 
-  ArrowRight, 
-  Home, 
+import {
+  Package,
+  ArrowRight,
+  Home,
   Calendar,
   MapPin,
   CreditCard,
@@ -19,6 +19,7 @@ import {
   Coins
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Image from 'next/image';
 
 export const dynamic = 'force-dynamic';
 
@@ -195,31 +196,28 @@ export default function OrdersPage() {
         <div className="flex gap-3 mb-8 flex-wrap">
           <button
             onClick={() => setFilterStatus('all')}
-            className={`px-4 py-2 font-black text-xs uppercase tracking-widest rounded-lg border-2 border-black transition-all ${
-              filterStatus === 'all' 
-                ? 'bg-black text-white' 
+            className={`px-4 py-2 font-black text-xs uppercase tracking-widest rounded-lg border-2 border-black transition-all ${filterStatus === 'all'
+                ? 'bg-black text-white'
                 : 'bg-white text-black hover:bg-gray-100'
-            }`}
+              }`}
           >
             All Orders
           </button>
           <button
             onClick={() => setFilterStatus('recent')}
-            className={`px-4 py-2 font-black text-xs uppercase tracking-widest rounded-lg border-2 border-black transition-all ${
-              filterStatus === 'recent' 
-                ? 'bg-black text-white' 
+            className={`px-4 py-2 font-black text-xs uppercase tracking-widest rounded-lg border-2 border-black transition-all ${filterStatus === 'recent'
+                ? 'bg-black text-white'
                 : 'bg-white text-black hover:bg-gray-100'
-            }`}
+              }`}
           >
             Recent (5)
           </button>
           <button
             onClick={() => setFilterStatus('high-value')}
-            className={`px-4 py-2 font-black text-xs uppercase tracking-widest rounded-lg border-2 border-black transition-all ${
-              filterStatus === 'high-value' 
-                ? 'bg-black text-white' 
+            className={`px-4 py-2 font-black text-xs uppercase tracking-widest rounded-lg border-2 border-black transition-all ${filterStatus === 'high-value'
+                ? 'bg-black text-white'
                 : 'bg-white text-black hover:bg-gray-100'
-            }`}
+              }`}
           >
             High Value
           </button>
@@ -357,11 +355,12 @@ export default function OrdersPage() {
                                 <div key={idx} className="flex justify-between items-center bg-white border border-black/10 rounded-lg p-4">
                                   <div className="flex items-center gap-4">
                                     {item.product?.image && (
-                                      <div className="w-12 h-12 rounded-lg border border-black/10 overflow-hidden bg-gray-100">
-                                        <img 
-                                          src={item.product.image} 
-                                          alt={item.product.name || item.name || 'Product'} 
-                                          className="w-full h-full object-cover"
+                                      <div className="w-12 h-12 rounded-lg border border-black/10 overflow-hidden bg-gray-100 relative">
+                                        <Image
+                                          src={item.product.image}
+                                          alt={item.product.name || item.name || 'Product'}
+                                          fill
+                                          className="object-cover"
                                         />
                                       </div>
                                     )}
