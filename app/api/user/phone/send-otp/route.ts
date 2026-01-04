@@ -6,7 +6,7 @@ import { otpStore, generateOTP, OTP_EXPIRY_MS } from '@/lib/otpStore';
 export async function POST(req: NextRequest) {
   try {
     const authorization = req.headers.get('authorization');
-    
+
     if (!authorization?.startsWith('Bearer ')) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -25,8 +25,8 @@ export async function POST(req: NextRequest) {
     // Validate phone number format (basic E.164 validation)
     const phoneRegex = /^\+[1-9]\d{1,14}$/;
     if (!phoneRegex.test(phoneNumber)) {
-      return NextResponse.json({ 
-        error: 'Invalid phone number format. Use E.164 format (e.g., +1234567890)' 
+      return NextResponse.json({
+        error: 'Invalid phone number format. Use E.164 format (e.g., +1234567890)'
       }, { status: 400 });
     }
 
@@ -37,8 +37,8 @@ export async function POST(req: NextRequest) {
       .get();
 
     if (!existingUser.empty && existingUser.docs[0].id !== userId) {
-      return NextResponse.json({ 
-        error: 'This phone number is already verified by another account' 
+      return NextResponse.json({
+        error: 'This phone number is already verified by another account'
       }, { status: 409 });
     }
 
@@ -48,11 +48,22 @@ export async function POST(req: NextRequest) {
     const twilioPhone = process.env.TWILIO_PHONE_NUMBER;
 
     if (!accountSid || !authToken || !twilioPhone) {
-      console.error('Twilio credentials not configured');
-      return NextResponse.json({ 
-        error: 'SMS service not configured' 
+      console.error('Twilio credentials not configured:', {
+        hasAccountSid: !!accountSid,
+        hasAuthToken: !!authToken,
+        hasTwilioPhone: !!twilioPhone
+      });
+      return NextResponse.json({
+        error: 'SMS service not configured'
       }, { status: 500 });
     }
+
+    console.log('Twilio credentials loaded:', {
+      hasAccountSid: !!accountSid,
+      hasAuthToken: !!authToken,
+      hasTwilioPhone: !!twilioPhone,
+      phoneFormat: twilioPhone
+    });
 
     const client = twilio(accountSid, authToken);
 
@@ -85,16 +96,23 @@ export async function POST(req: NextRequest) {
       });
 
     } catch (twilioError: any) {
-      console.error('Twilio SMS error:', twilioError);
-      return NextResponse.json({ 
-        error: 'Failed to send SMS. Please check your phone number.' 
+      console.error('Twilio SMS error:', {
+        message: twilioError.message,
+        code: twilioError.code,
+        status: twilioError.status,
+        moreInfo: twilioError.moreInfo,
+        details: twilioError.details
+      });
+      return NextResponse.json({
+        error: 'Failed to send SMS. Please check your phone number.',
+        details: twilioError.message || 'Unknown error'
       }, { status: 500 });
     }
 
   } catch (error: any) {
     console.error('Error sending OTP:', error);
-    return NextResponse.json({ 
-      error: 'Internal server error' 
+    return NextResponse.json({
+      error: 'Internal server error'
     }, { status: 500 });
   }
 }

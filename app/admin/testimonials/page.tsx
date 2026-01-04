@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { MessageSquare, Check, X, Trash2, Search, Filter, Loader2 } from 'lucide-react';
+import { MessageSquare, Check, X, Trash2, Search, Filter, Loader2, Upload, Image as ImageIcon } from 'lucide-react';
 import Image from 'next/image';
+import { CldUploadWidget } from 'next-cloudinary';
 
 interface Testimonial {
     id: string;
@@ -18,6 +19,7 @@ export default function TestimonialsPage() {
     const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
+    const [uploadingPhoto, setUploadingPhoto] = useState<string | null>(null);
 
     useEffect(() => {
         fetchTestimonials();
@@ -59,7 +61,7 @@ export default function TestimonialsPage() {
 
     const handleDelete = async (id: string) => {
         if (!confirm('Are you sure you want to delete this testimonial?')) return;
-
+        
         try {
             const res = await fetch(`/api/testimonials?id=${id}`, {
                 method: 'DELETE',
@@ -74,6 +76,31 @@ export default function TestimonialsPage() {
         } catch (error) {
             console.error('Error deleting:', error);
             alert('Error deleting');
+        }
+    };
+
+    const handlePhotoUpload = async (id: string, imageUrl: string) => {
+        setUploadingPhoto(id);
+        try {
+            const res = await fetch('/api/testimonials', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, image: imageUrl }),
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                setTestimonials(prev => prev.map(t => 
+                    t.id === id ? { ...t, image: imageUrl } : t
+                ));
+            } else {
+                alert('Failed to upload photo');
+            }
+        } catch (error) {
+            console.error('Error uploading photo:', error);
+            alert('Error uploading photo');
+        } finally {
+            setUploadingPhoto(null);
         }
     };
 
@@ -149,16 +176,48 @@ export default function TestimonialsPage() {
                         </div>
 
                         <div className="flex items-center gap-4">
-                            <Image
-                                src={t.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${t.name}`}
-                                alt={t.name}
-                                width={48}
-                                height={48}
-                                className="w-12 h-12 rounded-full border-2 border-black bg-gray-100 object-cover"
-                            />
-                            <div>
+                            <div className="relative group/avatar">
+                                <Image
+                                    src={t.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${t.name}`}
+                                    alt={t.name}
+                                    width={48}
+                                    height={48}
+                                    className="w-12 h-12 rounded-full border-2 border-black bg-gray-100 object-cover"
+                                />
+                                {/* Upload overlay */}
+                                <CldUploadWidget
+                                    onSuccess={(result: any) => {
+                                        if (result.event === 'success' && result.info?.secure_url) {
+                                            handlePhotoUpload(t.id, result.info.secure_url);
+                                        }
+                                    }}
+                                    uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "kaizen_uploads"}
+                                >
+                                    {({ open }) => (
+                                        <button
+                                            type="button"
+                                            onClick={() => open()}
+                                            disabled={uploadingPhoto === t.id}
+                                            className="absolute inset-0 bg-black/70 rounded-full flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-opacity cursor-pointer disabled:cursor-not-allowed"
+                                        >
+                                            {uploadingPhoto === t.id ? (
+                                                <Loader2 size={20} className="text-white animate-spin" />
+                                            ) : (
+                                                <Upload size={20} className="text-white" />
+                                            )}
+                                        </button>
+                                    )}
+                                </CldUploadWidget>
+                            </div>
+                            <div className="flex-1">
                                 <p className="font-black text-lg text-black leading-tight">{t.name}</p>
                                 <p className="text-black/50 text-xs font-bold uppercase tracking-wider">{t.role}</p>
+                                {t.image && t.image.startsWith('http') && (
+                                    <div className="flex items-center gap-1 mt-1">
+                                        <ImageIcon size={12} className="text-green-600" />
+                                        <span className="text-[10px] font-bold text-green-600 uppercase">Has Photo</span>
+                                    </div>
+                                )}
                             </div>
                         </div>
 

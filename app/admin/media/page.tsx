@@ -121,11 +121,9 @@ const SiteContentManager = () => {
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
 
-    // State for different sections
+    // State for home page section
     const [homeContent, setHomeContent] = useState<any>({
-        hero: { backgroundImage: '' },
-        trending: { title: 'Trending Games', subtitle: 'The hottest drops this week.' },
-        bentoGrid: Array.from({ length: 4 }, () => ({ image: '' }))
+        hero: { backgroundImage: '' }
     });
 
     const [aboutContent, setAboutContent] = useState<any>({
@@ -186,69 +184,17 @@ const SiteContentManager = () => {
             <AccordionItem value="home" className="bg-white border-2 border-black rounded-xl px-4 neo-shadow">
                 <AccordionTrigger className="font-black hover:no-underline text-lg uppercase">Home Page</AccordionTrigger>
                 <AccordionContent className="space-y-8 pt-4 pb-8">
-                    {/* HOME: TRENDING SECTION */}
-                    <div className="space-y-4 border-b-2 border-black/10 pb-6">
-                        <h3 className="font-black text-sm uppercase tracking-widest bg-[#6C5CE7] text-white inline-block px-2 py-1 border border-black rounded">Trending Section</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label className="text-xs font-black uppercase block mb-1">Section Title</label>
-                                <input
-                                    type="text"
-                                    className="w-full bg-gray-50 border border-black rounded p-2 text-sm font-bold"
-                                    value={homeContent.trending?.title || ''}
-                                    onChange={(e) => setHomeContent({ ...homeContent, trending: { ...homeContent.trending, title: e.target.value } })}
-                                />
-                            </div>
-                            <div>
-                                <label className="text-xs font-black uppercase block mb-1">Section Subtitle</label>
-                                <input
-                                    type="text"
-                                    className="w-full bg-gray-50 border border-black rounded p-2 text-sm font-bold"
-                                    value={homeContent.trending?.subtitle || ''}
-                                    onChange={(e) => setHomeContent({ ...homeContent, trending: { ...homeContent.trending, subtitle: e.target.value } })}
-                                />
-                            </div>
-                        </div>
-                    </div>
-
                     {/* HOME: HERO */}
-                    <div className="space-y-4 border-b-2 border-black/10 pb-6">
+                    <div className="space-y-4">
                         <h3 className="font-black text-sm uppercase tracking-widest bg-[#FFD93D] inline-block px-2 py-1 border border-black rounded">Hero Section</h3>
                         <div>
-                            <label className="text-xs font-black uppercase block mb-1">Hero Image (The Blob)</label>
+                            <label className="text-xs font-black uppercase block mb-1">Hero Background Image</label>
                             <ImageUpload
                                 uploadId="home-hero-bg"
                                 value={homeContent.hero.backgroundImage ? [homeContent.hero.backgroundImage] : []}
                                 onChange={(url) => setHomeContent({ ...homeContent, hero: { ...homeContent.hero, backgroundImage: url } })}
                                 onRemove={() => setHomeContent({ ...homeContent, hero: { ...homeContent.hero, backgroundImage: '' } })}
                             />
-                        </div>
-                    </div>
-
-                    {/* HOME: BENTO GRID */}
-                    <div className="space-y-4 border-b-2 border-black/10 pb-6">
-                        <h3 className="font-black text-sm uppercase tracking-widest bg-[#00B894] text-white inline-block px-2 py-1 border border-black rounded">Bento Grid (4 Images)</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                            {homeContent.bentoGrid.map((item: any, i: number) => (
-                                <div key={i} className="border-2 border-black/10 p-4 rounded-lg">
-                                    <p className="font-black text-xs uppercase mb-2">Item #{i + 1}</p>
-                                    <ImageUpload
-                                        uploadId={`home-bento-${i}`}
-                                        value={item.image ? [item.image] : []}
-                                        onChange={(url) => {
-                                            const newGrid = [...homeContent.bentoGrid];
-                                            newGrid[i] = { ...newGrid[i], image: url };
-                                            setHomeContent({ ...homeContent, bentoGrid: newGrid });
-                                        }}
-                                        onRemove={() => {
-                                            const newGrid = [...homeContent.bentoGrid];
-                                            newGrid[i] = { ...newGrid[i], image: '' };
-                                            setHomeContent({ ...homeContent, bentoGrid: newGrid });
-                                        }}
-                                    />
-                                </div>
-                            ))}
                         </div>
                     </div>
 

@@ -3,8 +3,9 @@
 import { TESTIMONIALS, GAMES } from '@/lib/constants';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { X, ArrowRight } from 'lucide-react';
+import { X, ArrowRight, Upload, Image as ImageIcon } from 'lucide-react';
 import Image from 'next/image';
+import { CldUploadWidget } from 'next-cloudinary';
 
 export default function Community() {
   const [events, setEvents] = useState<any[]>([]);
@@ -16,8 +17,9 @@ export default function Community() {
   const [testimonials, setTestimonials] = useState<any[]>([]);
   const [loadingTestimonials, setLoadingTestimonials] = useState(true);
   const [isSubmitOpen, setIsSubmitOpen] = useState(false);
-  const [submitForm, setSubmitForm] = useState({ name: '', role: '', quote: '' });
+  const [submitForm, setSubmitForm] = useState({ name: '', role: '', quote: '', image: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
 
   useEffect(() => {
     fetchEvents();
@@ -38,6 +40,16 @@ export default function Community() {
     }
   };
 
+  const handlePhotoUpload = (result: any) => {
+    if (result.event !== 'success') return;
+    
+    if (result.info && result.info.secure_url) {
+      const imageUrl = result.info.secure_url;
+      setSubmitForm({ ...submitForm, image: imageUrl });
+      setPhotoPreview(imageUrl);
+    }
+  };
+
   const handleSubmitTestimonial = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -50,7 +62,8 @@ export default function Community() {
       const data = await res.json();
       if (data.success) {
         // Reset and close
-        setSubmitForm({ name: '', role: '', quote: '' });
+        setSubmitForm({ name: '', role: '', quote: '', image: '' });
+        setPhotoPreview(null);
         setIsSubmitOpen(false);
         alert('Thank you! Your story has been submitted for review.');
       } else {
@@ -360,6 +373,51 @@ export default function Community() {
                       className="w-full border-2 border-black rounded-xl p-3 font-bold focus:outline-none focus:ring-4 focus:ring-[#FFD93D]/50 transition-all min-h-[100px] placeholder:font-medium placeholder:text-black/20 resize-none"
                       placeholder="Tell us about your experience..."
                     />
+                  </div>
+
+                  {/* Photo Upload */}
+                  <div>
+                    <label className="block text-xs font-black uppercase tracking-widest mb-2 text-black/70">
+                      Add Photo (Optional)
+                    </label>
+                    <div className="border-2 border-dashed border-black rounded-xl p-6 hover:bg-gray-50 transition-colors">
+                      {photoPreview ? (
+                        <div className="relative">
+                          <img
+                            src={photoPreview}
+                            alt="Preview"
+                            className="w-full h-48 object-cover rounded-lg border-2 border-black"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setPhotoPreview(null);
+                              setSubmitForm({ ...submitForm, image: '' });
+                            }}
+                            className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition-colors"
+                          >
+                            <X size={16} />
+                          </button>
+                        </div>
+                      ) : (
+                        <CldUploadWidget
+                          onSuccess={handlePhotoUpload}
+                          uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "kaizen_uploads"}
+                        >
+                          {({ open }) => (
+                            <button
+                              type="button"
+                              onClick={() => open()}
+                              className="w-full flex flex-col items-center justify-center cursor-pointer py-4"
+                            >
+                              <Upload className="w-8 h-8 text-black/40 mb-2" />
+                              <p className="text-sm font-bold text-black/60 mb-1">Click to upload photo</p>
+                              <p className="text-xs text-black/40">JPG, PNG up to 10MB</p>
+                            </button>
+                          )}
+                        </CldUploadWidget>
+                      )}
+                    </div>
                   </div>
 
                   <button

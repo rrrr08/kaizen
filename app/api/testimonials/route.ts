@@ -85,26 +85,37 @@ export async function POST(req: NextRequest) {
 export async function PATCH(req: NextRequest) {
     try {
         const data = await req.json();
-        const { id, status } = data;
+        const { id, status, image } = data;
 
-        if (!id || !status) {
+        if (!id) {
             return NextResponse.json(
-                { success: false, error: 'ID and status are required' },
+                { success: false, error: 'ID is required' },
                 { status: 400 }
             );
         }
 
-        if (!['pending', 'approved', 'rejected'].includes(status)) {
-            return NextResponse.json(
-                { success: false, error: 'Invalid status' },
-                { status: 400 }
-            );
-        }
-
-        await adminDb.collection('testimonials').doc(id).update({
-            status,
+        // Build update object based on what's provided
+        const updateData: any = {
             updatedAt: Timestamp.now()
-        });
+        };
+
+        // Update status if provided
+        if (status) {
+            if (!['pending', 'approved', 'rejected'].includes(status)) {
+                return NextResponse.json(
+                    { success: false, error: 'Invalid status' },
+                    { status: 400 }
+                );
+            }
+            updateData.status = status;
+        }
+
+        // Update image if provided
+        if (image !== undefined) {
+            updateData.image = image;
+        }
+
+        await adminDb.collection('testimonials').doc(id).update(updateData);
 
         return NextResponse.json({ success: true, message: 'Testimonial updated' });
     } catch (error: any) {
