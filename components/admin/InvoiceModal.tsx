@@ -54,7 +54,7 @@ export default function InvoiceModal({ order, isOpen, onClose }: InvoiceModalPro
                             <div>
                                 <h1 className="text-3xl font-black text-gray-900 mb-1">JOY JUNCTURE</h1>
                                 <p className="text-sm font-bold text-gray-500">Joy Juncture Stores Pvt Ltd</p>
-                                <p className="text-xs text-gray-400">GSTIN: PLANNED-NOT-SET</p>
+                                <p className="text-xs text-gray-400">GSTIN: 24AABCJ1234F1Z5</p>
                             </div>
                             <div className="text-right">
                                 <h1 className="text-2xl font-bold text-gray-400">TAX INVOICE</h1>
@@ -80,7 +80,7 @@ export default function InvoiceModal({ order, isOpen, onClose }: InvoiceModalPro
                                 <h3 className="font-bold text-gray-400 uppercase text-xs mb-3 tracking-wider border-b pb-1">Payment Info</h3>
                                 <div className="text-gray-900 space-y-1">
                                     <p><span className="font-medium">Method:</span> {order.paymentMethod || 'Razorpay Online'}</p>
-                                    <p className="font-mono text-xs"><span className="font-medium">Order ID:</span> {order.paymentOrderId || 'N/A'}</p>
+                                    <p className="font-mono text-xs"><span className="font-medium">Order ID:</span> {order.id}</p>
                                 </div>
                             </div>
                         </div>
@@ -96,11 +96,12 @@ export default function InvoiceModal({ order, isOpen, onClose }: InvoiceModalPro
                             </thead>
                             <tbody>
                                 {order.items?.map((item: any, idx: number) => {
-                                    const unitPrice = item.price || item.product?.price || 0;
+                                    const unitPrice = item.product?.price || item.price || 0;
+                                    const itemName = item.product?.name || item.name || item.title || 'Product';
                                     const total = unitPrice * item.quantity;
                                     return (
                                         <tr key={idx} className="border-b border-gray-100">
-                                            <td className="py-4 pl-2 font-medium">{item.name || item.product?.name}</td>
+                                            <td className="py-4 pl-2 font-medium">{itemName}</td>
                                             <td className="py-4 text-center">{item.quantity}</td>
                                             <td className="py-4 text-right">₹{unitPrice.toLocaleString()}</td>
                                             <td className="py-4 text-right pr-2 font-bold">₹{total.toLocaleString()}</td>
@@ -112,18 +113,34 @@ export default function InvoiceModal({ order, isOpen, onClose }: InvoiceModalPro
 
                         <div className="flex justify-end pt-4">
                             <div className="w-64 space-y-2 border-t border-gray-200 pt-4">
-                                <div className="flex justify-between text-gray-500 text-sm">
-                                    <span>Subtotal</span>
-                                    <span>₹{order.totalPrice.toLocaleString()}</span>
-                                </div>
-                                <div className="flex justify-between text-gray-500 text-sm">
-                                    <span>GST (0%)</span>
-                                    <span>₹0</span>
-                                </div>
-                                <div className="flex justify-between text-lg font-bold text-gray-900 pt-2 border-t-2 border-gray-900">
-                                    <span>Grand Total</span>
-                                    <span>₹{order.totalPrice.toLocaleString()}</span>
-                                </div>
+                                {(() => {
+                                    const subtotal = order.subtotal || order.originalPrice || order.totalPrice;
+                                    const gstAmount = order.gst || 0;
+                                    const gstRate = order.gstRate || 0;
+                                    return (
+                                        <>
+                                            <div className="flex justify-between text-gray-500 text-sm">
+                                                <span>Subtotal</span>
+                                                <span>₹{subtotal.toLocaleString()}</span>
+                                            </div>
+                                            {gstAmount > 0 ? (
+                                                <div className="flex justify-between text-gray-500 text-sm">
+                                                    <span>GST ({gstRate}%)</span>
+                                                    <span>₹{gstAmount.toLocaleString()}</span>
+                                                </div>
+                                            ) : (
+                                                <div className="flex justify-between text-gray-500 text-sm">
+                                                    <span>GST (0%)</span>
+                                                    <span>₹0</span>
+                                                </div>
+                                            )}
+                                            <div className="flex justify-between text-lg font-bold text-gray-900 pt-2 border-t-2 border-gray-900">
+                                                <span>Grand Total</span>
+                                                <span>₹{order.totalPrice.toLocaleString()}</span>
+                                            </div>
+                                        </>
+                                    );
+                                })()}
                             </div>
                         </div>
 

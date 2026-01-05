@@ -119,12 +119,13 @@ export const getBaseEmailTemplate = (subject: string, message: string) => {
  */
 export const getOrderInvoiceTemplate = (order: any) => {
   const itemsHtml = (order.items || []).map((item: any) => {
-    const unitPrice = item.price || item.product?.price || 0;
+    const unitPrice = item.product?.price || item.price || 0;
+    const itemName = item.product?.name || item.name || item.title || 'Product';
     const quantity = item.quantity || 0;
     const total = unitPrice * quantity;
     return `
       <tr style="border-bottom: 1px solid #eee;">
-        <td style="padding: 12px 5px;">${item.name || item.product?.name}</td>
+        <td style="padding: 12px 5px;">${itemName}</td>
         <td style="padding: 12px 5px; text-align: center;">${quantity}</td>
         <td style="padding: 12px 5px; text-align: right;">₹${unitPrice.toLocaleString()}</td>
         <td style="padding: 12px 5px; text-align: right; font-weight: bold;">₹${total.toLocaleString()}</td>
@@ -162,7 +163,7 @@ export const getOrderInvoiceTemplate = (order: any) => {
               <td>
                 <strong>From:</strong><br>
                 Joy Juncture Stores Pvt Ltd<br>
-                GSTIN: PLANNED-NOT-SET
+                GSTIN: 24AABCJ1234F1Z5
               </td>
               <td align="right">
                 <strong>Bill To:</strong><br>
@@ -181,6 +182,27 @@ export const getOrderInvoiceTemplate = (order: any) => {
               <td align="right">Amount</td>
             </tr>
             ${itemsHtml}
+            ${(() => {
+              const subtotal = order.subtotal || order.originalPrice || order.totalPrice;
+              const gstAmount = order.gst || 0;
+              const gstRate = order.gstRate || 0;
+              let gstRow = '';
+              if (gstAmount > 0) {
+                gstRow = `
+                  <tr>
+                    <td colspan="2"></td>
+                    <td align="right" style="padding: 10px;">Subtotal:</td>
+                    <td align="right" style="padding: 10px;">₹${subtotal.toLocaleString()}</td>
+                  </tr>
+                  <tr>
+                    <td colspan="2"></td>
+                    <td align="right" style="padding: 10px;">GST (${gstRate}%):</td>
+                    <td align="right" style="padding: 10px;">₹${gstAmount.toLocaleString()}</td>
+                  </tr>
+                `;
+              }
+              return gstRow;
+            })()}
             <tr class="total">
               <td colspan="2"></td>
               <td align="right" style="padding-top: 20px;">Grand Total:</td>
@@ -266,7 +288,7 @@ export const getEventConfirmationTemplate = (registrationId: string, name: strin
                 <tr>
                    <td width="50%">
                       Joy Juncture Stores Pvt Ltd<br>
-                      GSTIN: PLANNED-NOT-SET
+                      GSTIN: 24AABCJ1234F1Z5
                    </td>
                    <td align="right">
                       Reg ID: #${registrationId}<br>
