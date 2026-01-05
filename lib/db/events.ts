@@ -41,7 +41,7 @@ export async function getEvents(filters: { status: 'upcoming' | 'past' }) {
     const database = await getFirebaseDb();
     const eventsCollection = collection(database, 'events');
 
-    const now = Timestamp.fromDate(new Date());
+    const now = new Date();
 
     let q: Query<DocumentData>;
 
