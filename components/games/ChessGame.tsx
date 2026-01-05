@@ -335,6 +335,7 @@ const ChessGame: React.FC = () => {
                   value={currentMoveInput}
                   onChange={e => setCurrentMoveInput(e.target.value)}
                   placeholder="SAN Move (e.g. Nf3)"
+                  maxLength={10}
                   className="flex-1 bg-[#FFFDF5] border-2 border-black rounded-lg px-4 py-3 font-bold focus:outline-none focus:shadow-[4px_4px_0px_#000] transition-all"
                 />
                 <button type="submit" className="bg-[#00B894] text-white px-6 py-3 rounded-lg border-2 border-black font-black hover:translate-y-1 transition-transform shadow-[4px_4px_0px_#000]">GO</button>

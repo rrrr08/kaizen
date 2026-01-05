@@ -354,8 +354,10 @@ export default function AdminBlogPage() {
                     onChange={(e) => setForm({ ...form, title: e.target.value })}
                     className="w-full bg-white border-2 border-black rounded-xl px-4 py-3 text-black placeholder-black/30 focus:outline-none focus:ring-0 focus:shadow-[4px_4px_0px_#000] transition-shadow font-bold text-lg"
                     placeholder="Enter catchy title"
+                    maxLength={100}
                     required
                   />
+                  <p className="text-[10px] text-black/40 font-bold mt-1 uppercase tracking-wider text-right">{form.title.length}/100</p>
                 </div>
                 <div>
                   <label className="block text-black font-black text-xs uppercase tracking-widest mb-2">Category *</label>
@@ -391,10 +393,12 @@ export default function AdminBlogPage() {
                   <input
                     value={form.excerpt}
                     onChange={(e) => setForm({ ...form, excerpt: e.target.value })}
-                    className="w-full bg-white border-2 border-black rounded-xl px-4 py-3 text-black placeholder-black/30 focus:outline-none focus:shadow-[4px_4px_0px_#000] transition-shadow font-bold"
+                    className="w-full bg-white border-2 border-black rounded-xl px-4 py-3 text-black placeholder-black/30 focus:outline-none focus:ring-0 focus:shadow-[4px_4px_0px_#000] transition-shadow font-bold"
                     placeholder="Short summary for the card"
+                    maxLength={300}
                     required
                   />
+                  <p className="text-[10px] text-black/40 font-bold mt-1 uppercase tracking-wider text-right">{form.excerpt.length}/300</p>
                 </div>
                 <div className="md:col-span-2">
                   <label className="block text-black font-black text-xs uppercase tracking-widest mb-2">Content *</label>
@@ -403,8 +407,10 @@ export default function AdminBlogPage() {
                     onChange={(e) => setForm({ ...form, content: e.target.value })}
                     className="w-full min-h-64 bg-white border-2 border-black rounded-xl px-4 py-3 text-black placeholder-black/30 focus:outline-none focus:shadow-[4px_4px_0px_#000] transition-shadow font-medium leading-relaxed"
                     placeholder="Write the full content here..."
+                    maxLength={10000}
                     required
                   />
+                  <p className="text-[10px] text-black/40 font-bold mt-1 uppercase tracking-wider text-right">{form.content.length}/10000</p>
                 </div>
               </div>
 

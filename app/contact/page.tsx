@@ -30,6 +30,9 @@ export default function ContactPage() {
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
+        // Basic check to prevent input beyond maxLength even if browser doesn't enforce it strictly
+        const limits: Record<string, number> = { name: 100, email: 100, subject: 100, message: 2000 };
+        if (limits[name] && value.length > limits[name]) return;
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
@@ -178,6 +181,7 @@ export default function ContactPage() {
                                                 value={formData.name}
                                                 onChange={handleInputChange}
                                                 placeholder="John Doe"
+                                                maxLength={100}
                                                 className="w-full pl-12 pr-4 py-4 bg-[#FFFDF5] border-2 border-black rounded-2xl focus:outline-none focus:shadow-[4px_4px_0px_#000] transition-all font-bold placeholder:text-black/20"
                                             />
                                         </div>
@@ -193,6 +197,7 @@ export default function ContactPage() {
                                                 value={formData.email}
                                                 onChange={handleInputChange}
                                                 placeholder="john@example.com"
+                                                maxLength={100}
                                                 className="w-full pl-12 pr-4 py-4 bg-[#FFFDF5] border-2 border-black rounded-2xl focus:outline-none focus:shadow-[4px_4px_0px_#000] transition-all font-bold placeholder:text-black/20"
                                             />
                                         </div>
@@ -210,6 +215,7 @@ export default function ContactPage() {
                                             value={formData.subject}
                                             onChange={handleInputChange}
                                             placeholder="How can we help?"
+                                            maxLength={100}
                                             className="w-full pl-12 pr-4 py-4 bg-[#FFFDF5] border-2 border-black rounded-2xl focus:outline-none focus:shadow-[4px_4px_0px_#000] transition-all font-bold placeholder:text-black/20"
                                         />
                                     </div>
@@ -224,8 +230,10 @@ export default function ContactPage() {
                                         value={formData.message}
                                         onChange={handleInputChange}
                                         placeholder="Tell us everything..."
+                                        maxLength={2000}
                                         className="w-full px-6 py-4 bg-[#FFFDF5] border-2 border-black rounded-2xl focus:outline-none focus:shadow-[4px_4px_0px_#000] transition-all font-bold placeholder:text-black/20 resize-none"
                                     />
+                                    <p className="text-[10px] text-black/40 font-bold mt-1 uppercase tracking-wider text-right">{formData.message.length}/2000</p>
                                 </div>
 
                                 {error && (

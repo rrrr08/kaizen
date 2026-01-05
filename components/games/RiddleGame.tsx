@@ -134,7 +134,7 @@ const RiddleGame: React.FC = () => {
                 <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowRules(false)}>
                     <div className="bg-white border-4 border-black rounded-[20px] p-6 sm:p-8 max-w-2xl max-h-[80vh] overflow-y-auto neo-shadow" onClick={e => e.stopPropagation()}>
                         <h2 className="text-2xl sm:text-3xl font-black mb-6 uppercase">🤔 How to Play Riddles</h2>
-                        
+
                         <div className="space-y-4 text-left">
                             <div>
                                 <h3 className="font-black text-lg mb-2 text-[#6C5CE7]">🎯 Objective</h3>
@@ -252,6 +252,7 @@ const RiddleGame: React.FC = () => {
                                 value={answer}
                                 onChange={(e) => setAnswer(e.target.value)}
                                 placeholder="Type your answer..."
+                                maxLength={100}
                                 className="w-full bg-[#FFFDF5] border-2 border-black rounded-xl px-6 py-4 text-center text-black font-bold text-lg focus:outline-none focus:shadow-[4px_4px_0px_#000] transition-all placeholder:text-black/30"
                             />
                             {error && (

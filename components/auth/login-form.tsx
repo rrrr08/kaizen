@@ -156,6 +156,7 @@ export function LoginForm() {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@example.com"
                   required
+                  maxLength={100}
                   className="w-full bg-[#FFFDF5] border-2 border-black rounded-[12px] text-black placeholder:text-black/30 pl-12 pr-4 py-4 text-sm font-bold focus:bg-[#FFD93D]/20 focus:outline-none transition-all shadow-[2px_2px_0px_#000]"
                 />
               </div>
@@ -174,6 +175,7 @@ export function LoginForm() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
+                  maxLength={100}
                   className="w-full bg-[#FFFDF5] border-2 border-black rounded-[12px] text-black placeholder:text-black/30 pl-12 pr-12 py-4 text-sm font-bold focus:bg-[#FFD93D]/20 focus:outline-none transition-all shadow-[2px_2px_0px_#000]"
                 />
                 <button

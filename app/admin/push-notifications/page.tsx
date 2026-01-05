@@ -314,6 +314,7 @@ export default function PushNotificationsPage() {
                     onChange={handleInputChange}
                     placeholder="https://example.com/image.jpg"
                     className="w-full bg-[#FFFDF5] border-2 border-black rounded-xl px-4 py-3 text-black placeholder-black/30 focus:outline-none focus:neo-shadow-sm transition-all font-bold"
+                    maxLength={500}
                   />
                   <p className="text-xs text-black/40 font-bold mt-1 uppercase tracking-wide">Recommended size: 1024x1024px</p>
                 </div>
@@ -330,6 +331,7 @@ export default function PushNotificationsPage() {
                     onChange={handleInputChange}
                     placeholder="https://joyjuncture.com/shop"
                     className="w-full bg-[#FFFDF5] border-2 border-black rounded-xl px-4 py-3 text-black placeholder-black/30 focus:outline-none focus:neo-shadow-sm transition-all font-bold"
+                    maxLength={500}
                   />
                 </div>
 
@@ -365,9 +367,8 @@ export default function PushNotificationsPage() {
                       </div>
                       <div className="flex-1">
                         <p className="font-black text-sm uppercase">Push Notifications</p>
-                        <p className={`text-xs font-bold uppercase tracking-wider mt-0.5 ${
-                          formData.channels.includes('push') ? 'text-white/80' : 'text-black/50'
-                        }`}>
+                        <p className={`text-xs font-bold uppercase tracking-wider mt-0.5 ${formData.channels.includes('push') ? 'text-white/80' : 'text-black/50'
+                          }`}>
                           Real-time device alerts
                         </p>
                       </div>
@@ -399,9 +400,8 @@ export default function PushNotificationsPage() {
                       </div>
                       <div className="flex-1">
                         <p className="font-black text-sm uppercase">In-App Notifications</p>
-                        <p className={`text-xs font-bold uppercase tracking-wider mt-0.5 ${
-                          formData.channels.includes('in-app') ? 'text-white/80' : 'text-black/50'
-                        }`}>
+                        <p className={`text-xs font-bold uppercase tracking-wider mt-0.5 ${formData.channels.includes('in-app') ? 'text-white/80' : 'text-black/50'
+                          }`}>
                           Notification bell icon
                         </p>
                       </div>
@@ -433,9 +433,8 @@ export default function PushNotificationsPage() {
                       </div>
                       <div className="flex-1">
                         <p className="font-black text-sm uppercase">SMS Notifications</p>
-                        <p className={`text-xs font-bold uppercase tracking-wider mt-0.5 ${
-                          formData.channels.includes('sms') ? 'text-white/80' : 'text-black/50'
-                        }`}>
+                        <p className={`text-xs font-bold uppercase tracking-wider mt-0.5 ${formData.channels.includes('sms') ? 'text-white/80' : 'text-black/50'
+                          }`}>
                           Text message alerts
                         </p>
                       </div>

@@ -506,8 +506,10 @@ export default function ProductsPage() {
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     className="w-full bg-white border-2 border-black rounded-xl px-4 py-3 text-black placeholder-black/30 focus:outline-none focus:ring-0 focus:shadow-[4px_4px_0px_#000] transition-shadow font-bold"
                     placeholder="Enter product name"
+                    maxLength={80}
                     required
                   />
+                  <p className="text-[10px] text-black/40 font-bold mt-1 uppercase tracking-wider text-right">{formData.name.length}/80</p>
                 </div>
 
                 {/* Subtitle */}
@@ -519,7 +521,9 @@ export default function ProductsPage() {
                     onChange={(e) => setFormData({ ...formData, subtitle: e.target.value })}
                     className="w-full bg-white border-2 border-black rounded-xl px-4 py-3 text-black placeholder-black/30 focus:outline-none focus:ring-0 focus:shadow-[4px_4px_0px_#000] transition-shadow font-bold"
                     placeholder="e.g. Pickleball Card Game"
+                    maxLength={100}
                   />
+                  <p className="text-[10px] text-black/40 font-bold mt-1 uppercase tracking-wider text-right">{formData.subtitle.length}/100</p>
                 </div>
                 {/* Description */}
                 <div className="md:col-span-2">
@@ -530,7 +534,9 @@ export default function ProductsPage() {
                     className="w-full bg-white border-2 border-black rounded-xl px-4 py-3 text-black placeholder-black/30 focus:outline-none focus:ring-0 focus:shadow-[4px_4px_0px_#000] transition-shadow font-bold"
                     placeholder="Detailed product description..."
                     rows={4}
+                    maxLength={2000}
                   />
+                  <p className="text-[10px] text-black/40 font-bold mt-1 uppercase tracking-wider text-right">{formData.description.length}/2000</p>
                 </div>
 
                 {/* Category */}
@@ -668,7 +674,9 @@ export default function ProductsPage() {
                     className="w-full bg-white border-2 border-black rounded-xl px-4 py-3 text-black placeholder-black/30 focus:outline-none focus:ring-0 focus:shadow-[4px_4px_0px_#000] transition-shadow font-bold"
                     placeholder="e.g. 52 Cards, Rulebook..."
                     rows={2}
+                    maxLength={500}
                   />
+                  <p className="text-[10px] text-black/40 font-bold mt-1 uppercase tracking-wider text-right">{formData.boxContent.length}/500</p>
                 </div>
 
 
@@ -717,6 +725,7 @@ export default function ProductsPage() {
                         value={feature.title}
                         onChange={(e) => updateFeature(index, 'title', e.target.value)}
                         className="flex-1 bg-white border-2 border-black rounded-lg px-2 py-1 text-sm font-bold"
+                        maxLength={50}
                       />
                       <input
                         type="text"
@@ -724,6 +733,7 @@ export default function ProductsPage() {
                         value={feature.description}
                         onChange={(e) => updateFeature(index, 'description', e.target.value)}
                         className="flex-1 bg-white border-2 border-black rounded-lg px-2 py-1 text-sm"
+                        maxLength={200}
                       />
                       <button type="button" onClick={() => removeFeature(index)} className="text-red-500"><X size={16} /></button>
                     </div>
@@ -745,6 +755,7 @@ export default function ProductsPage() {
                         value={step.title}
                         onChange={(e) => updateHowToPlay(index, 'title', e.target.value)}
                         className="w-1/4 bg-white border-2 border-black rounded-lg px-2 py-1 text-sm font-bold"
+                        maxLength={50}
                       />
                       <textarea
                         placeholder="Step Description"
@@ -752,6 +763,7 @@ export default function ProductsPage() {
                         onChange={(e) => updateHowToPlay(index, 'description', e.target.value)}
                         className="flex-1 bg-white border-2 border-black rounded-lg px-2 py-1 text-sm"
                         rows={2}
+                        maxLength={500}
                       />
                       <button type="button" onClick={() => removeHowToPlay(index)} className="text-red-500"><X size={16} /></button>
                     </div>

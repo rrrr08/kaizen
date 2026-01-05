@@ -126,7 +126,7 @@ export default function CreateEventPage() {
         <form onSubmit={handleSubmit} className="space-y-12">
 
           <Section title="Basic Information">
-            <Field label="Event Title" name="title" value={form.title} onChange={handleChange} />
+            <Field label="Event Title" name="title" value={form.title} onChange={handleChange} maxLength={100} />
             <Field
               label="Description"
               name="description"
@@ -134,6 +134,8 @@ export default function CreateEventPage() {
               rows={4}
               value={form.description}
               onChange={handleChange}
+              maxLength={2000}
+              showCounter
             />
             <div className="bg-white border-2 border-black rounded-xl p-6">
               <label className="font-black text-xs tracking-widest text-black/40 mb-3 uppercase block">Cover Image</label>
@@ -159,6 +161,7 @@ export default function CreateEventPage() {
                 name="location"
                 value={form.location}
                 onChange={handleChange}
+                maxLength={200}
               />
             </div>
           </Section>
@@ -261,20 +264,34 @@ function Section({ title, children, accent }: any) {
   );
 }
 
-function Field({ label, textarea, ...props }: any) {
+function Field({ label, textarea, showCounter, ...props }: any) {
   return (
     <div className="space-y-2">
       <label className="font-black text-xs tracking-widest text-black/40 uppercase pl-1">{label}</label>
       {textarea ? (
-        <textarea
-          {...props}
-          className="w-full px-4 py-3 bg-white border-2 border-black rounded-xl text-black placeholder:text-black/30 focus:outline-none focus:shadow-[4px_4px_0px_#000] transition-all font-medium resize-y min-h-[100px]"
-        />
+        <>
+          <textarea
+            {...props}
+            className="w-full px-4 py-3 bg-white border-2 border-black rounded-xl text-black placeholder:text-black/30 focus:outline-none focus:shadow-[4px_4px_0px_#000] transition-all font-medium resize-y min-h-[100px]"
+          />
+          {showCounter && props.maxLength && (
+            <p className="text-[10px] text-black/40 font-bold mt-1 uppercase tracking-wider text-right">
+              {props.value?.length || 0}/{props.maxLength}
+            </p>
+          )}
+        </>
       ) : (
-        <input
-          {...props}
-          className="w-full px-4 py-3 bg-white border-2 border-black rounded-xl text-black placeholder:text-black/30 focus:outline-none focus:shadow-[4px_4px_0px_#000] transition-all font-medium"
-        />
+        <>
+          <input
+            {...props}
+            className="w-full px-4 py-3 bg-white border-2 border-black rounded-xl text-black placeholder:text-black/30 focus:outline-none focus:shadow-[4px_4px_0px_#000] transition-all font-medium"
+          />
+          {props.maxLength && (
+            <p className="text-[10px] text-black/40 font-bold mt-1 uppercase tracking-wider text-right">
+              {props.value?.length || 0}/{props.maxLength}
+            </p>
+          )}
+        </>
       )}
     </div>
   );
