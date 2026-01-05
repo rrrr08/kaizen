@@ -55,10 +55,10 @@ export default function EventRegistrationForm({
     phone: '',
   });
 
-  // Fetch user's wallet points
+  // Fetch user's wallet points and saved checkout info
   useEffect(() => {
     if (user) {
-      const fetchWalletPoints = async () => {
+      const fetchUserData = async () => {
         try {
           const { getFirestore, doc, getDoc } = await import('firebase/firestore');
           const { app } = await import('@/lib/firebase');
@@ -68,12 +68,22 @@ export default function EventRegistrationForm({
           if (userSnap.exists()) {
             const userData = userSnap.data();
             setWalletPoints(userData?.points || 0);
+            
+            // Load saved checkout info for auto-fill
+            const savedInfo = userData?.checkoutInfo;
+            if (savedInfo) {
+              setFormData(prev => ({
+                name: savedInfo.name || user?.displayName || prev.name,
+                email: savedInfo.email || user?.email || prev.email,
+                phone: savedInfo.phone || prev.phone,
+              }));
+            }
           }
         } catch (error) {
-          console.error('Error fetching wallet points:', error);
+          console.error('Error fetching user data:', error);
         }
       };
-      fetchWalletPoints();
+      fetchUserData();
     }
   }, [user]);
 
@@ -281,6 +291,24 @@ export default function EventRegistrationForm({
         );
       }
 
+      // Save checkout info for future auto-fill
+      try {
+        const { getFirestore, doc, updateDoc } = await import('firebase/firestore');
+        const { app } = await import('@/lib/firebase');
+        const db = getFirestore(app);
+        const userRef = doc(db, 'users', user.uid);
+        await updateDoc(userRef, {
+          checkoutInfo: {
+            name: formData.name,
+            email: formData.email,
+            phone: formData.phone,
+            updatedAt: new Date().toISOString(),
+          }
+        });
+      } catch (saveError) {
+        console.error('Failed to save checkout info:', saveError);
+      }
+
       // Close modal and redirect to success page
       onSuccess?.();
       onClose();
@@ -430,6 +458,24 @@ export default function EventRegistrationForm({
                     `registration_${registrationId}`,
                     JSON.stringify(registrationDetails)
                   );
+                }
+
+                // Save checkout info for future auto-fill
+                try {
+                  const { getFirestore, doc, updateDoc } = await import('firebase/firestore');
+                  const { app } = await import('@/lib/firebase');
+                  const db = getFirestore(app);
+                  const userRef = doc(db, 'users', user.uid);
+                  await updateDoc(userRef, {
+                    checkoutInfo: {
+                      name: formData.name,
+                      email: formData.email,
+                      phone: formData.phone,
+                      updatedAt: new Date().toISOString(),
+                    }
+                  });
+                } catch (saveError) {
+                  console.error('Failed to save checkout info:', saveError);
                 }
 
                 // Close modal and redirect to success page

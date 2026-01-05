@@ -30,6 +30,7 @@ export default function CheckoutPage() {
   const [redeemPoints, setRedeemPoints] = useState(0);
   const [isFirstTime, setIsFirstTime] = useState(false);
   const [gstRate, setGstRate] = useState(18); // Default 18%
+  const [checkoutInfoLoaded, setCheckoutInfoLoaded] = useState(false);
 
   // Debug: Log cart items structure
   useEffect(() => {
@@ -37,6 +38,51 @@ export default function CheckoutPage() {
       console.log('Cart items structure:', JSON.stringify(items[0], null, 2));
     }
   }, [items]);
+
+  // Load saved checkout info from Firestore
+  useEffect(() => {
+    const loadSavedCheckoutInfo = async () => {
+      if (!user || checkoutInfoLoaded) return;
+
+      try {
+        const { getFirestore, doc, getDoc } = await import('firebase/firestore');
+        const { app } = await import('@/lib/firebase');
+        const db = getFirestore(app);
+        const userRef = doc(db, 'users', user.uid);
+        const userSnap = await getDoc(userRef);
+
+        if (userSnap.exists()) {
+          const userData = userSnap.data();
+          const savedInfo = userData?.checkoutInfo;
+
+          if (savedInfo) {
+            setFormData(prev => ({
+              name: savedInfo.name || user?.displayName || prev.name,
+              email: savedInfo.email || user?.email || prev.email,
+              phone: savedInfo.phone || prev.phone,
+              address: savedInfo.address || prev.address,
+              city: savedInfo.city || prev.city,
+              state: savedInfo.state || prev.state,
+              zipCode: savedInfo.zipCode || prev.zipCode,
+            }));
+          } else {
+            // Use auth defaults if no saved info
+            setFormData(prev => ({
+              ...prev,
+              name: user?.displayName || prev.name,
+              email: user?.email || prev.email,
+            }));
+          }
+        }
+        setCheckoutInfoLoaded(true);
+      } catch (error) {
+        console.error('Error loading saved checkout info:', error);
+        setCheckoutInfoLoaded(true);
+      }
+    };
+
+    loadSavedCheckoutInfo();
+  }, [user, checkoutInfoLoaded]);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -368,6 +414,28 @@ export default function CheckoutPage() {
 
           // Save to Firebase
           const orderId_New = await createOrder(currentUser.uid, orderData);
+
+          // Save checkout info for future auto-fill
+          try {
+            const { getFirestore, doc, updateDoc, setDoc } = await import('firebase/firestore');
+            const { app } = await import('@/lib/firebase');
+            const db = getFirestore(app);
+            const userRef = doc(db, 'users', currentUser.uid);
+            await updateDoc(userRef, {
+              checkoutInfo: {
+                name: formData.name,
+                email: formData.email,
+                phone: formData.phone,
+                address: formData.address,
+                city: formData.city,
+                state: formData.state,
+                zipCode: formData.zipCode,
+                updatedAt: new Date().toISOString(),
+              }
+            });
+          } catch (saveError) {
+            console.error('Failed to save checkout info:', saveError);
+          }
 
           // Send confirmation email via backend
           try {

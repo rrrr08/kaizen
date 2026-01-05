@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/app/context/AuthContext';
 import { useGamification } from '@/app/context/GamificationContext';
-import { Gift, Ticket, ShoppingBag, Sparkles, Check, Zap, Target, Gamepad2, CheckCircle2, XCircle } from 'lucide-react';
+import { Gift, Ticket, ShoppingBag, Sparkles, Check, Zap, Target, Gamepad2, CheckCircle2, XCircle, Copy } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { motion } from 'framer-motion';
 
@@ -31,6 +31,17 @@ export default function RewardsPage() {
   const [vouchers, setVouchers] = useState<Voucher[]>([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const [copiedCode, setCopiedCode] = useState<string | null>(null);
+
+  const copyToClipboard = async (code: string) => {
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopiedCode(code);
+      setTimeout(() => setCopiedCode(null), 2000);
+    } catch (error) {
+      console.error('Failed to copy:', error);
+    }
+  };
 
   useEffect(() => {
     fetchVouchers();
@@ -279,9 +290,22 @@ export default function RewardsPage() {
                   <div className="flex items-start justify-between mb-3">
                     <div>
                       <h4 className="font-black text-black text-lg">{voucher.name}</h4>
-                      <p className="text-xs text-black/60 font-bold mt-1">
-                        Code: <span className="font-mono font-black text-[#6C5CE7]">{voucher.code}</span>
-                      </p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <p className="text-xs text-black/60 font-bold">
+                          Code: <span className="font-mono font-black text-[#6C5CE7]">{voucher.code}</span>
+                        </p>
+                        <button
+                          onClick={() => copyToClipboard(voucher.code)}
+                          className="p-1 hover:bg-[#6C5CE7]/10 rounded transition-colors"
+                          title="Copy code"
+                        >
+                          {copiedCode === voucher.code ? (
+                            <Check size={14} className="text-[#00B894]" />
+                          ) : (
+                            <Copy size={14} className="text-[#6C5CE7]" />
+                          )}
+                        </button>
+                      </div>
                     </div>
                     {!voucher.used && (
                       <span className="px-3 py-1 bg-[#00B894] text-white text-xs font-black rounded-full uppercase">
