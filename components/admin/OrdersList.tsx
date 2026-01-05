@@ -102,7 +102,7 @@ export default function OrdersList() {
                             <th className="p-4 neo-border">Customer</th>
                             <th className="p-4 neo-border">Quantity</th>
                             <th className="p-4 neo-border">Total</th>
-                            <th className="p-4 neo-border">Date</th>
+                            <th className="p-4 neo-border">Date & Time</th>
                             <th className="p-4 neo-border">Actions</th>
                         </tr>
                     </thead>
@@ -134,7 +134,10 @@ export default function OrdersList() {
                                         </span>
                                     </td>
                                     <td className="p-4 neo-border font-bold">₹{order.totalPrice?.toLocaleString()}</td>
-                                    <td className="p-4 neo-border">{new Date(order.createdAt).toLocaleDateString()}</td>
+                                    <td className="p-4 neo-border">
+                                        <div className="font-bold">{new Date(order.createdAt).toLocaleDateString()}</div>
+                                        <div className="text-xs text-charcoal/60">{new Date(order.createdAt).toLocaleTimeString()}</div>
+                                    </td>
                                     <td className="p-4 neo-border">
                                         <div className="flex gap-2">
                                             {shipment ? (
