@@ -87,152 +87,186 @@ export default function About() {
           </div>
         </section>
 
-        {/* SECTION 3 — JOURNEY TIMELINE */}
-        <section className="mb-32 relative">
-          <h2 className="font-black text-sm tracking-[0.2em] text-[#6C5CE7] mb-8 uppercase font-header text-center">Our Journey</h2>
-          <h3 className="font-header text-4xl md:text-5xl mb-20 text-center text-black">The Joy Juncture Story</h3>
-          
-          <div className="relative max-w-4xl mx-auto">
-            {/* Connecting Path Through Checkpoints */}
-            <svg 
-              className="absolute top-0 left-0 w-full h-full pointer-events-none hidden md:block" 
-              viewBox="0 0 800 1000" 
+        {/* SECTION 3 — THE JOURNEY (PATHWAY) */}
+        <section className="mb-40 relative">
+          <div className="text-center mb-24">
+            <div className="inline-block bg-black text-white px-6 py-2 rounded-full font-black text-xs tracking-[0.3em] uppercase mb-4 shadow-[4px_4px_0px_#FFD93D] hover:translate-y-1 hover:shadow-none transition-all">
+              The Quest Log
+            </div>
+            <h2 className="font-header text-6xl md:text-7xl text-black leading-none uppercase drop-shadow-[5px_5px_0px_rgba(0,0,0,0.1)]">
+              Leveling Up <br /> Since 2020
+            </h2>
+          </div>
+
+          <div className="relative max-w-5xl mx-auto px-4">
+            {/* SVG PATHWAY BACKGROUND */}
+            <svg
+              className="absolute top-0 left-0 w-full h-[95%] pointer-events-none hidden md:block"
+              viewBox="0 0 1000 1200"
+              fill="none"
               preserveAspectRatio="xMidYMid meet"
               style={{ zIndex: 0 }}
             >
               <defs>
                 <linearGradient id="pathGradient" x1="0%" y1="0%" x2="0%" y2="100%">
                   <stop offset="0%" stopColor="#FFD93D" />
-                  <stop offset="25%" stopColor="#6C5CE7" />
-                  <stop offset="50%" stopColor="#FF7675" />
-                  <stop offset="75%" stopColor="#00B894" />
-                  <stop offset="100%" stopColor="#6C5CE7" />
+                  <stop offset="30%" stopColor="#FF7675" />
+                  <stop offset="70%" stopColor="#6C5CE7" />
+                  <stop offset="100%" stopColor="#00B894" />
                 </linearGradient>
               </defs>
-              {/* Path: Checkpoint 1 → Emoji → Checkpoint 2 → Emoji → Checkpoint 3 → Emoji → Checkpoint 4 → Emoji → Checkpoint 5 */}
               <path
-                d="M 200 60 
-                   C 280 60, 350 80, 400 100
-                   C 500 140, 550 180, 600 220
-                   C 550 280, 450 320, 400 360
-                   C 300 420, 250 460, 200 500
-                   C 280 540, 350 580, 400 620
-                   C 500 680, 550 720, 600 760
-                   C 550 820, 450 860, 400 900
-                   C 300 940, 250 960, 200 980"
+                d="M 500 50 
+                   C 500 100, 200 150, 200 300
+                   C 200 450, 800 500, 800 650
+                   C 800 800, 200 850, 200 1000
+                   C 200 1100, 500 1150, 500 1200"
                 stroke="url(#pathGradient)"
-                strokeWidth="4"
-                fill="none"
+                strokeWidth="6"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                opacity="0.7"
+                strokeDasharray="20 20"
+                className="opacity-40"
               />
             </svg>
 
-            {/* Timeline Checkpoints */}
-            <div className="relative z-10 space-y-24 py-12">
-              {/* Checkpoint 1 - The Spark */}
-              <div className="flex flex-col md:flex-row items-center gap-8">
-                <div className="md:w-1/2 md:text-right md:pr-12">
-                  <div className="bg-white p-8 rounded-[32px] border-4 border-[#FFD93D] shadow-[6px_6px_0px_#FFD93D] hover:shadow-[8px_8px_0px_#FFD93D] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all">
-                    <div className="flex items-center gap-4 mb-4 md:flex-row-reverse md:justify-end">
-                      <div className="w-14 h-14 bg-[#FFD93D] rounded-full border-4 border-black flex items-center justify-center font-black text-xl shadow-[3px_3px_0px_#000] flex-shrink-0">
-                        1
-                      </div>
-                      <h4 className="font-header text-2xl font-black">The Spark</h4>
-                    </div>
-                    <p className="text-black/70 font-bold text-sm mb-3">2020</p>
-                    <p className="text-black font-medium leading-relaxed">
-                      Two dreamers decided to break free from traditional family businesses. Armed with nothing but passion and a lot of naivety, Joy Juncture was born.
-                    </p>
-                  </div>
+            {/* Level 1: THE SPARK (Left Aligned on desktop path) */}
+            <div className="relative flex flex-col md:flex-row items-center gap-12 mb-36 group">
+              <div className="md:w-1/2 md:pr-16 text-right order-1 md:order-1 relative">
+                <div className="inline-block bg-[#FFD93D] border-2 border-black px-4 py-1 font-black text-xs mb-4 shadow-[3px_3px_0px_#000] rotate-2">
+                  LEVEL 1
                 </div>
-                <div className="flex-shrink-0 text-5xl">🎯</div>
-                <div className="md:w-1/2"></div>
+                <h3 className="font-header text-5xl mb-4 text-black">The Spark</h3>
+                <p className="text-black/80 font-bold text-lg leading-relaxed bg-white/60 backdrop-blur-sm p-6 rounded-[20px] border-2 border-black shadow-[4px_4px_0px_rgba(0,0,0,0.05)]">
+                  2020: Two dreamers quit the safety net. Armed with passion, zero business plan, and a lot of caffeine, <span className="bg-[#FFD93D] px-1 border-b-2 border-black">Joy Juncture</span> was born.
+                </p>
               </div>
 
-              {/* Checkpoint 2 - Learning the Ropes */}
-              <div className="flex flex-col md:flex-row items-center gap-8">
-                <div className="md:w-1/2"></div>
-                <div className="flex-shrink-0 text-5xl">🎲</div>
-                <div className="md:w-1/2 md:pl-12">
-                  <div className="bg-white p-8 rounded-[32px] border-4 border-[#6C5CE7] shadow-[6px_6px_0px_#6C5CE7] hover:shadow-[8px_8px_0px_#6C5CE7] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all">
-                    <div className="flex items-center gap-4 mb-4">
-                      <div className="w-14 h-14 bg-[#6C5CE7] rounded-full border-4 border-black flex items-center justify-center font-black text-xl text-white shadow-[3px_3px_0px_#000] flex-shrink-0">
-                        2
-                      </div>
-                      <h4 className="font-header text-2xl font-black">Learning the Ropes</h4>
-                    </div>
-                    <p className="text-black/70 font-bold text-sm mb-3">2021</p>
-                    <p className="text-black font-medium leading-relaxed">
-                      Experimented with game mechanics, learned from failures, and discovered that making people laugh is harder than it looks. But we kept going.
-                    </p>
-                  </div>
-                </div>
+              {/* Center Marker */}
+              <div className="absolute left-[20px] md:left-1/2 -translate-x-1/2 w-20 h-20 bg-white border-4 border-black rounded-full z-10 hidden md:flex items-center justify-center shadow-[6px_6px_0px_#FFD93D] group-hover:scale-110 transition-transform">
+                <span className="text-4xl">💡</span>
               </div>
 
-              {/* Checkpoint 3 - First Launch */}
-              <div className="flex flex-col md:flex-row items-center gap-8">
-                <div className="md:w-1/2 md:text-right md:pr-12">
-                  <div className="bg-white p-8 rounded-[32px] border-4 border-[#FF7675] shadow-[6px_6px_0px_#FF7675] hover:shadow-[8px_8px_0px_#FF7675] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all">
-                    <div className="flex items-center gap-4 mb-4 md:flex-row-reverse md:justify-end">
-                      <div className="w-14 h-14 bg-[#FF7675] rounded-full border-4 border-black flex items-center justify-center font-black text-xl text-white shadow-[3px_3px_0px_#000] flex-shrink-0">
-                        3
-                      </div>
-                      <h4 className="font-header text-2xl font-black">First Launch</h4>
-                    </div>
-                    <p className="text-black/70 font-bold text-sm mb-3">2022</p>
-                    <p className="text-black font-medium leading-relaxed">
-                      Our debut game hit the market! People actually bought it. And played it. And laughed. Mission accomplished.
-                    </p>
+              <div className="md:w-1/2 md:pl-16 order-2 md:order-2">
+                <div className="relative bg-[#FFD93D] p-2 rounded-3xl border-4 border-black rotate-3 group-hover:rotate-6 transition-transform hover:scale-105 duration-300">
+                  <div className="bg-black rounded-2xl h-48 flex items-center justify-center relative overflow-hidden">
+                    {/* Pattern */}
+                    <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#FFD93D_2px,transparent_2px)] [background-size:12px_12px]"></div>
+                    <span className="font-header text-[#FFD93D] text-8xl drop-shadow-[4px_4px_0px_#FFF]">2020</span>
                   </div>
                 </div>
-                <div className="flex-shrink-0 text-5xl">🚀</div>
-                <div className="md:w-1/2"></div>
-              </div>
-
-              {/* Checkpoint 4 - Growing Community */}
-              <div className="flex flex-col md:flex-row items-center gap-8">
-                <div className="md:w-1/2"></div>
-                <div className="flex-shrink-0 text-5xl">🎉</div>
-                <div className="md:w-1/2 md:pl-12">
-                  <div className="bg-white p-8 rounded-[32px] border-4 border-[#00B894] shadow-[6px_6px_0px_#00B894] hover:shadow-[8px_8px_0px_#00B894] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all">
-                    <div className="flex items-center gap-4 mb-4">
-                      <div className="w-14 h-14 bg-[#00B894] rounded-full border-4 border-black flex items-center justify-center font-black text-xl text-white shadow-[3px_3px_0px_#000] flex-shrink-0">
-                        4
-                      </div>
-                      <h4 className="font-header text-2xl font-black">Building Community</h4>
-                    </div>
-                    <p className="text-black/70 font-bold text-sm mb-3">2023-2024</p>
-                    <p className="text-black font-medium leading-relaxed">
-                      From hosting game nights to building an online platform, we created a space where players become family. The community grew beyond our wildest dreams.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Checkpoint 5 - Today & Beyond */}
-              <div className="flex flex-col md:flex-row items-center gap-8">
-                <div className="md:w-1/2 md:text-right md:pr-12">
-                  <div className="relative bg-gradient-to-br from-[#FFD93D] via-[#A78BFA] to-[#00B894] p-[6px] rounded-[36px] shadow-[8px_8px_0px_#000] hover:shadow-[10px_10px_0px_#000] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all">
-                    <div className="bg-gradient-to-br from-[#FFD93D]/95 via-[#8B7FE7]/95 to-[#00B894]/95 p-8 rounded-[32px] backdrop-blur-sm">
-                      <div className="flex items-center gap-4 mb-4 md:flex-row-reverse md:justify-end">
-                        <div className="w-14 h-14 bg-white rounded-full border-4 border-black flex items-center justify-center font-black text-xl shadow-[4px_4px_0px_rgba(0,0,0,0.2)] flex-shrink-0">
-                          5
-                        </div>
-                        <h4 className="font-header text-2xl font-black text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">Today & Beyond</h4>
-                      </div>
-                      <p className="text-white font-bold text-sm mb-3 drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)]">2025 - Future</p>
-                      <p className="text-white font-medium leading-relaxed drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)]">
-                        Joy Juncture is now a complete ecosystem - games, events, experiences, and a thriving rewards system. But we&apos;re just getting started. The best is yet to come!
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex-shrink-0 text-5xl">✨</div>
-                <div className="md:w-1/2"></div>
               </div>
             </div>
+
+            {/* Level 2: TRIAL & ERROR (Right Aligned on desktop path) */}
+            <div className="relative flex flex-col md:flex-row items-center gap-12 mb-36 group">
+              <div className="md:w-1/2 md:pr-16 order-2 md:order-1">
+                <div className="relative bg-[#FF7675] p-2 rounded-3xl border-4 border-black -rotate-2 group-hover:-rotate-6 transition-transform hover:scale-105 duration-300">
+                  <div className="bg-white rounded-2xl h-48 flex items-center justify-center relative overflow-hidden text-center p-4">
+                    <div className="absolute inset-0 opacity-10 bg-[linear-gradient(45deg,#FF7675_25%,transparent_25%,transparent_50%,#FF7675_50%,#FF7675_75%,transparent_75%,transparent)] [background-size:20px_20px]"></div>
+                    <div className="relative z-10 flex flex-col items-center">
+                      <span className="font-header text-black text-6xl block leading-none mb-2">⚠️</span>
+                      <span className="font-header text-white text-5xl bg-black px-4 py-1 -rotate-3 inline-block shadow-[4px_4px_0px_rgba(0,0,0,0.1)]">FAIL?</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Center Marker aligned with path curve roughly */}
+              <div className="absolute left-[20px] md:left-[20%] -translate-x-1/2 w-20 h-20 bg-white border-4 border-black rounded-full z-10 hidden md:flex items-center justify-center shadow-[6px_6px_0px_#FF7675] group-hover:scale-110 transition-transform">
+                <span className="text-4xl">🧪</span>
+              </div>
+
+              <div className="md:w-1/2 md:pl-16 order-1 md:order-2 text-left md:text-left">
+                <div className="md:pl-12">
+                  <div className="inline-block bg-[#FF7675] border-2 border-black px-4 py-1 font-black text-xs mb-4 shadow-[3px_3px_0px_#000] -rotate-1">
+                    LEVEL 2
+                  </div>
+                  <h3 className="font-header text-5xl mb-4 text-black">Trial & Chaos</h3>
+                  <p className="text-black/80 font-bold text-lg leading-relaxed bg-white/60 backdrop-blur-sm p-6 rounded-[20px] border-2 border-black shadow-[4px_4px_0px_rgba(0,0,0,0.05)]">
+                    2021: We made games. Some worked. Some didn't. We learned that breaking rules is fun, but game mechanics actually need rules.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Level 3: FIRST VICTORY (Left Aligned on desktop path) */}
+            <div className="relative flex flex-col md:flex-row items-center gap-12 mb-36 group">
+              <div className="md:w-1/2 md:pr-16 text-right order-1 md:order-1 relative">
+                <div className="inline-block bg-[#6C5CE7] text-white border-2 border-black px-4 py-1 font-black text-xs mb-4 shadow-[3px_3px_0px_#000] rotate-2">
+                  LEVEL 3
+                </div>
+                <h3 className="font-header text-5xl mb-4 text-black">Liftoff!</h3>
+                <p className="text-black/80 font-bold text-lg leading-relaxed bg-white/60 backdrop-blur-sm p-6 rounded-[20px] border-2 border-black shadow-[4px_4px_0px_rgba(0,0,0,0.05)]">
+                  2022: Our first hit game launched. People bought it. Played it. And actually laughed! We realized, "Wait, we might actually be good at this."
+                </p>
+              </div>
+
+              {/* Center Marker */}
+              <div className="absolute left-[20px] md:left-[80%] -translate-x-1/2 w-20 h-20 bg-white border-4 border-black rounded-full z-10 hidden md:flex items-center justify-center shadow-[6px_6px_0px_#6C5CE7] group-hover:scale-110 transition-transform">
+                <span className="text-4xl">🚀</span>
+              </div>
+
+              <div className="md:w-1/2 md:pl-16 order-2 md:order-2">
+                <div className="relative bg-[#6C5CE7] p-2 rounded-3xl border-4 border-black rotate-1 group-hover:rotate-3 transition-transform hover:scale-105 duration-300">
+                  <div className="bg-black rounded-2xl h-48 flex items-center justify-center relative overflow-hidden">
+                    <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#6C5CE7_2px,transparent_2px)] [background-size:12px_12px]"></div>
+                    <div className="relative z-10 flex items-baseline">
+                      <span className="font-header text-[#6C5CE7] text-[8rem] leading-none drop-shadow-[4px_4px_0px_#FFF]">W</span>
+                      <span className="font-header text-white text-6xl ml-1">IN!</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Level 4: EXPANSION (Right Aligned on desktop path) */}
+            <div className="relative flex flex-col md:flex-row items-center gap-12 mb-36 group">
+              <div className="md:w-1/2 md:pr-16 order-2 md:order-1">
+                <div className="relative bg-[#00B894] p-2 rounded-3xl border-4 border-black -rotate-2 group-hover:-rotate-4 transition-transform hover:scale-105 duration-300">
+                  <div className="bg-white rounded-2xl h-48 flex items-center justify-center relative overflow-hidden">
+                    <div className="absolute inset-x-0 bottom-0 h-1/2 bg-[#00B894]/20"></div>
+                    <span className="font-header text-black text-7xl z-10 tracking-widest">FAM</span>
+                    <div className="absolute -top-4 -right-4 w-12 h-12 bg-[#00B894] rounded-full border-2 border-black"></div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Center Marker aligned with path curve roughly */}
+              <div className="absolute left-[20px] md:left-[20%] -translate-x-1/2 w-20 h-20 bg-white border-4 border-black rounded-full z-10 hidden md:flex items-center justify-center shadow-[6px_6px_0px_#00B894] group-hover:scale-110 transition-transform">
+                <span className="text-4xl">🌍</span>
+              </div>
+
+              <div className="md:w-1/2 md:pl-16 order-1 md:order-2 text-left md:text-left">
+                <div className="md:pl-12">
+                  <div className="inline-block bg-[#00B894] border-2 border-black px-4 py-1 font-black text-xs mb-4 shadow-[3px_3px_0px_#000] -rotate-1">
+                    LEVEL 4
+                  </div>
+                  <h3 className="font-header text-5xl mb-4 text-black">Building the Guild</h3>
+                  <p className="text-black/80 font-bold text-lg leading-relaxed bg-white/60 backdrop-blur-sm p-6 rounded-[20px] border-2 border-black shadow-[4px_4px_0px_rgba(0,0,0,0.05)]">
+                    2023-2024: It wasn't just about the games anymore. It was about the players. Game nights, tournaments, and a community that felt less like customers and more like a chaotic family.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Level 5: THE FUTURE */}
+            <div className="relative flex justify-center mt-24">
+              <div className="bg-black text-white p-12 rounded-[40px] border-4 border-[#FFD93D] shadow-[0px_12px_0px_rgba(0,0,0,0.2)] max-w-2xl text-center relative overflow-hidden group hover:-translate-y-2 transition-transform">
+                <div className="absolute top-0 left-0 w-full h-3 bg-gradient-to-r from-[#FFD93D] via-[#FF7675] to-[#6C5CE7]"></div>
+
+                <div className="inline-block bg-white text-black px-4 py-1 rounded-full font-black text-xs tracking-widest mb-6 border-2 border-[#FFD93D]">LOADING NEXT LEVEL...</div>
+
+                <h3 className="font-header text-5xl md:text-7xl mb-6 text-[#FFD93D]">2025 & Beyond</h3>
+                <p className="text-xl text-gray-300 font-medium leading-relaxed mb-8">
+                  New worlds. New games. Same mission: To rid the world of boring evenings, one dice roll at a time.
+                </p>
+                <button className="bg-[#FFD93D] text-black font-black text-lg px-8 py-4 rounded-xl border-b-4 border-[#C5A300] active:border-b-0 active:translate-y-1 transition-all hover:bg-white hover:scale-105">
+                  JOIN THE ADVENTURE
+                </button>
+              </div>
+            </div>
+
           </div>
         </section>
 
@@ -300,53 +334,163 @@ export default function About() {
           </div>
         </section>
 
-        {/* SECTION 6 — MEET THE MINDS BEHIND THE MADNESS */}
-        <section className="mb-32">
-          <h2 className="font-header text-4xl md:text-5xl mb-16 text-center text-black">Meet the Minds <br /> Behind the Madness</h2>
+        {/* SECTION 6 — THE ORIGIN STORY & THE PLAYERS */}
+        <section className="mb-32 relative">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[120%] h-full bg-[#FFD93D]/10 -skew-y-3 pointer-events-none rounded-[60px] -z-10"></div>
 
-          <div className="space-y-12 mb-12">
-            <div>
-              <h2 className="font-black text-sm tracking-[0.2em] text-[#6C5CE7] mb-6 uppercase font-header">Founder&apos;s Journey</h2>
-              <h3 className="font-header text-3xl md:text-4xl mb-6 text-black">Why Joy Juncture Started</h3>
-              <div className="space-y-6 text-black/80 font-medium leading-relaxed max-w-4xl">
-                <p>
-                  Joy Juncture was born from a simple observation: in a world obsessed with digital isolation, people crave real connections and shared moments of joy. Games, in their purest form, are vehicles for these moments.
-                </p>
-                <p>
-                  The founder spent years observing how a single board game could transform a room full of strangers into a community of friends. That magic inspired the creation of Joy Juncture—a platform that celebrates games not as products, but as catalysts for belonging.
-                </p>
-                <p>
-                  Today, Joy Juncture is more than an e-commerce platform. It&apos;s a movement. A celebration of playfulness. A testament to the power of gathering, laughing, competing, and most importantly, connecting.
-                </p>
+          <h2 className="font-header text-5xl md:text-7xl mb-24 text-center text-black leading-[0.9] drop-shadow-[4px_4px_0px_#00B894]">
+            THE MINDS BEHIND <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#6C5CE7] to-[#FF7675]">THE MADNESS</span>
+          </h2>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start mb-24">
+            {/* The Story / Manifesto */}
+            <div className="bg-white p-10 rounded-[40px] border-4 border-black shadow-[12px_12px_0px_#6C5CE7] relative overflow-hidden group hover:-translate-y-2 transition-transform duration-300">
+              <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                <div className="text-9xl">📜</div>
               </div>
+
+              <div className="relative z-10">
+                <div className="inline-block px-4 py-2 bg-[#FFD93D] border-2 border-black rounded-full font-black text-xs tracking-[0.2em] mb-6 shadow-[4px_4px_0px_#000]">
+                  THE ORIGIN STORY
+                </div>
+                <h3 className="font-header text-4xl mb-8 text-black leading-none">Why We Started <br /> Joy Juncture?</h3>
+
+                <div className="space-y-6 text-lg font-medium text-black/80 leading-relaxed font-sans">
+                  <p>
+                    <span className="font-black text-black text-xl bg-[#00B894]/20 px-1">We noticed a glitch in the matrix:</span> In a world obsessed with screens, people were forgetting the art of face-to-face chaos.
+                  </p>
+                  <p>
+                    You know that feeling when you flip a board table in frustration? Or the high-five after a perfect team win? <span className="italic font-bold text-black">We missed that.</span>
+                  </p>
+                  <p>
+                    So we built Joy Juncture. Not just to sell games, but to design <span className="border-b-4 border-[#FF7675]">excuses to get together.</span> It started as a small idea and exploded into a movement of people who believe that play isn't just for kids—it's for anyone with a pulse.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Founder 1 Card - Player Style */}
+            <div className="relative mt-8 lg:mt-0">
+              {founders[0] && (
+                <div className="relative bg-[#FF7675] p-1 rounded-[32px] border-4 border-black shadow-[12px_12px_0px_#000] rotate-[-2deg] hover:rotate-0 transition-transform duration-300 group">
+                  <div className="bg-white rounded-[28px] p-6 h-full flex flex-col items-center text-center overflow-hidden relative">
+                    {/* Background Pattern */}
+                    <div className="absolute inset-0 opacity-5 bg-[radial-gradient(#000000_2px,transparent_2px)] [background-size:16px_16px]"></div>
+
+                    {/* Image / Avatar */}
+                    <div className="w-48 h-48 mb-6 relative z-10">
+                      <div className="absolute inset-0 bg-[#FFD93D] rounded-full border-4 border-black shadow-[4px_4px_0px_rgba(0,0,0,0.2)]"></div>
+                      <div className="absolute inset-0 rounded-full overflow-hidden border-4 border-black transform translate-x-1 translate-y-1 bg-white">
+                        {founders[0].image ? (
+                          <Image src={founders[0].image} alt={founders[0].name} fill className="object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-6xl">👩‍🎨</div>
+                        )}
+                      </div>
+                      <div className="absolute -bottom-2 -right-2 bg-black text-white px-3 py-1 rounded-full text-xs font-black tracking-widest border-2 border-white">LVL 99</div>
+                    </div>
+
+                    <h3 className="font-header text-4xl text-black mb-2 relative z-10">{founders[0].name}</h3>
+                    <div className="bg-[#FFD93D] px-4 py-1 border-2 border-black rounded-lg font-black text-xs uppercase tracking-[0.2em] mb-6 shadow-[2px_2px_0px_#000] z-10">
+                      {founders[0].role}
+                    </div>
+
+                    <p className="text-black/70 font-bold italic relative z-10">
+                      "{founders[0].description}"
+                    </p>
+
+                    {/* Stats or Fun Tags */}
+                    <div className="grid grid-cols-2 gap-2 w-full mt-6">
+                      <div className="border-2 border-black/10 rounded-xl p-2 bg-gray-50">
+                        <div className="text-[10px] font-black uppercase text-black/40">CHAOS</div>
+                        <div className="font-black text-black">100%</div>
+                      </div>
+                      <div className="border-2 border-black/10 rounded-xl p-2 bg-gray-50">
+                        <div className="text-[10px] font-black uppercase text-black/40">CREATIVITY</div>
+                        <div className="font-black text-black">MAX</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-4xl mx-auto">
-            {founders.map((founder, i) => (
-              <div key={i} className="group relative">
-                <div className="aspect-[4/5] bg-white border-2 border-black rounded-[20px] overflow-hidden mb-6 neo-shadow group-hover:scale-[1.02] transition-transform duration-300 transform-gpu isolation-isolate">
-                  {founder.image && founder.image.trim() !== "" ? (
-                    <Image
-                      src={founder.image}
-                      alt={founder.name}
-                      fill
-                      className="object-cover object-top"
-                    />
-                  ) : (
-                    <div className={`w-full h-full ${i === 0 ? 'bg-[#FFD93D]' : 'bg-[#00B894]'} flex items-center justify-center relative overflow-hidden`}>
-                      <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#000000_1px,transparent_1px)] [background-size:16px_16px]"></div>
-                      <span className="text-black font-header text-8xl opacity-20">{founder.name.split(' ').map((n: string) => n[0]).join('')}</span>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+            {/* Founder 2 Card - Player Style */}
+            <div className="relative order-2 lg:order-1">
+              {founders[1] && (
+                <div className="relative bg-[#6C5CE7] p-1 rounded-[32px] border-4 border-black shadow-[12px_12px_0px_#000] rotate-[2deg] hover:rotate-0 transition-transform duration-300 group">
+                  <div className="bg-white rounded-[28px] p-6 h-full flex flex-col items-center text-center overflow-hidden relative">
+                    {/* Background Pattern */}
+                    <div className="absolute inset-0 opacity-5 bg-[radial-gradient(#000000_2px,transparent_2px)] [background-size:16px_16px]"></div>
+
+                    {/* Image / Avatar */}
+                    <div className="w-48 h-48 mb-6 relative z-10">
+                      <div className="absolute inset-0 bg-[#00B894] rounded-full border-4 border-black shadow-[4px_4px_0px_rgba(0,0,0,0.2)]"></div>
+                      <div className="absolute inset-0 rounded-full overflow-hidden border-4 border-black transform translate-x-1 translate-y-1 bg-white">
+                        {founders[1].image ? (
+                          <Image src={founders[1].image} alt={founders[1].name} fill className="object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-6xl">🧙‍♀️</div>
+                        )}
+                      </div>
+                      <div className="absolute -bottom-2 -left-2 bg-black text-white px-3 py-1 rounded-full text-xs font-black tracking-widest border-2 border-white">LVL 99</div>
                     </div>
-                  )}
+
+                    <h3 className="font-header text-4xl text-black mb-2 relative z-10">{founders[1].name}</h3>
+                    <div className="bg-[#00B894] px-4 py-1 border-2 border-black rounded-lg font-black text-xs uppercase tracking-[0.2em] mb-6 shadow-[2px_2px_0px_#000] z-10">
+                      {founders[1].role}
+                    </div>
+
+                    <p className="text-black/70 font-bold italic relative z-10">
+                      "{founders[1].description}"
+                    </p>
+
+                    {/* Stats or Fun Tags */}
+                    <div className="grid grid-cols-2 gap-2 w-full mt-6">
+                      <div className="border-2 border-black/10 rounded-xl p-2 bg-gray-50">
+                        <div className="text-[10px] font-black uppercase text-black/40">DESIGN</div>
+                        <div className="font-black text-black">PIXEL PERFECT</div>
+                      </div>
+                      <div className="border-2 border-black/10 rounded-xl p-2 bg-gray-50">
+                        <div className="text-[10px] font-black uppercase text-black/40">VIBES</div>
+                        <div className="font-black text-black">IMMACULATE</div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <h3 className="font-header text-3xl mb-1 text-black">{founder.name}</h3>
-                <p className={`${i === 0 ? 'text-[#FF7675]' : 'text-[#6C5CE7]'} font-black text-xs tracking-[0.3em] uppercase mb-4 bg-black/5 inline-block px-2 py-1 rounded`}>{founder.role}</p>
-                <p className="text-black/70 font-bold text-sm">{founder.description}</p>
+              )}
+            </div>
+
+            {/* The Vision / Future Card */}
+            <div className="order-1 lg:order-2 bg-[#1A1A1A] p-10 rounded-[40px] border-4 border-black shadow-[-12px_12px_0px_#FFD93D] relative overflow-hidden group hover:-translate-y-2 transition-transform duration-300 text-white">
+              <div className="absolute -bottom-10 -right-10 w-48 h-48 bg-[#FFD93D] rounded-full blur-[60px] opacity-20"></div>
+
+              <div className="relative z-10">
+                <div className="inline-block px-4 py-2 bg-transparent border-2 border-[#FFD93D] text-[#FFD93D] rounded-full font-black text-xs tracking-[0.2em] mb-6">
+                  THE FUTURE
+                </div>
+                <h3 className="font-header text-4xl mb-8 leading-none">More Than Valid <br /> eCommerce.</h3>
+
+                <div className="space-y-6 text-lg font-medium text-white/80 leading-relaxed font-sans">
+                  <p>
+                    Today, Joy Juncture is a platform. <span className="text-[#FFD93D]">Tomorrow? Who knows.</span> Maybe a global tournament. Maybe a physical arcade. Maybe a colony on Mars (okay, maybe not that).
+                  </p>
+                  <p>
+                    But one thing won't change: our obsession with bringing people together.
+                  </p>
+                  <div className="pt-6">
+                    <p className="text-2xl font-black text-white italic">
+                      "We're building the <span className="text-[#00B894] underline decoration-4 decoration-wavy underline-offset-4">playground</span> of the future."
+                    </p>
+                  </div>
+                </div>
               </div>
-            ))}
+            </div>
           </div>
-        </section >
+        </section>
 
         {/* SECTION 7 — WHY CHOOSE JOY JUNCTURE? */}
         < section className="text-center py-20 border-t-2 border-black/10" >
