@@ -359,7 +359,7 @@ const ChessGame: React.FC = () => {
               <Trophy className="mx-auto text-white w-12 h-12 mb-2 drop-shadow-md" />
               <h2 className="text-2xl font-black text-white uppercase">VICTORY!</h2>
               <p className="text-white font-bold">{message}</p>
-              {points && <div className="text-4xl font-black text-white mt-2">+{points} XP</div>}
+              {points && <div className="text-4xl font-black text-white mt-2">+{points} JP</div>}
 
               {showScratcher && scratcherDrops && (
                 <div className="mt-4 bg-white p-4 rounded-xl border-2 border-black">

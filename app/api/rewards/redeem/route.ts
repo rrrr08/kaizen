@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminAuth, adminDb } from '@/lib/firebaseAdmin';
+import { FieldValue } from 'firebase-admin/firestore';
 
 // POST /api/rewards/redeem - Redeem points for voucher
 export async function POST(req: NextRequest) {
@@ -94,21 +95,23 @@ export async function POST(req: NextRequest) {
     });
 
     // Log transaction
-    await adminDb.collection('transactions').add({
-      userId: userUid,
-      type: 'voucher_redemption',
-      amount: -pointsCost,
-      voucherId,
-      voucherCode,
-      timestamp: new Date().toISOString()
+    // Log to New Transaction Ledger (User Subcollection)
+    await adminDb.collection('users').doc(userUid).collection('transactions').add({
+      type: 'SPEND',
+      amount: pointsCost,
+      source: 'REWARD_REDEMPTION',
+      description: `Redeemed ${template.name}`,
+      metadata: { voucherId, voucherCode, pointsCost },
+      timestamp: FieldValue.serverTimestamp()
     });
+
 
     return NextResponse.json({
       success: true,
       code: voucherCode,
       expiresAt: expiresAt.toISOString(),
       newBalance: currentBalance - pointsCost,
-      minPurchase: template.minPurchase || 0
+      minPurchase: template.minPurchase
     });
 
   } catch (error: any) {

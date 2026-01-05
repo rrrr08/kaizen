@@ -391,19 +391,46 @@ export default function CheckoutPage() {
           await updateUserWallet(currentUser.uid, earnedPoints - redeemPoints);
 
           // Add point history entries in Firebase
+          // Add point history entries in Firebase
+          // 1. Log Redemptions
           if (redeemPoints > 0) {
+            // Still add to legacy array for safety/back compat
             await addPointHistory(
               currentUser.uid,
               -redeemPoints,
               'Points redeemed for purchase',
               orderId_New
             );
+
+            // Log to New Transaction System
+            // We use dynamic import for logTransaction to avoid circular deps if any
+            const { logTransaction } = await import('@/lib/gamification');
+            await logTransaction(
+              currentUser.uid,
+              'SPEND',
+              redeemPoints,
+              'SHOP_REDEMPTION',
+              'Points Redeemed on Order',
+              { orderId: orderId_New }
+            );
           }
+
+          // 2. Log Earnings
           await addPointHistory(
             currentUser.uid,
             earnedPoints,
             isFirstTime ? 'First-time purchase bonus' : 'Purchase points earned',
             orderId_New
+          );
+
+          const { logTransaction } = await import('@/lib/gamification');
+          await logTransaction(
+            currentUser.uid,
+            'EARN',
+            earnedPoints,
+            'SHOP_PURCHASE',
+            'Shop Purchase Reward',
+            { orderId: orderId_New, isFirstTime }
           );
 
           // Mark voucher as used if one was applied

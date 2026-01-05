@@ -218,3 +218,37 @@ export const getMaxRedeemableAmount = (totalPrice: number, userPoints: number) =
   // The value in RUPEES that can be redeemed
   return Math.min(maxAllowedByPolicy, maxUserCanPay);
 };
+
+// ------------------------------------------------------------------
+// 6. TRANSACTION LOGGING
+// ------------------------------------------------------------------
+import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
+
+export const logTransaction = async (
+  userId: string,
+  type: 'EARN' | 'SPEND',
+  amount: number,
+  source: string,
+  description: string,
+  metadata: any = {}
+) => {
+  try {
+    const db = getFirestore(app);
+    const transactionsRef = collection(db, 'users', userId, 'transactions');
+    
+    await addDoc(transactionsRef, {
+      type,
+      amount,
+      source,
+      description,
+      metadata,
+      timestamp: serverTimestamp() // Server timestamp for accurate ordering
+    });
+    
+    console.log(`[Transaction] ${type} ${amount} JP logged for ${userId}`);
+    return true;
+  } catch (error) {
+    console.error('Error logging transaction:', error);
+    return false;
+  }
+};

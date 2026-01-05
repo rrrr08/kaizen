@@ -8,7 +8,7 @@ export async function GET() {
     // Fetch top 10 users by XP
     const snapshot = await adminDb
       .collection('users')
-      .orderBy('xp', 'desc')
+      .orderBy('game_xp', 'desc')
       .limit(10)
       .get();
 
@@ -18,6 +18,7 @@ export async function GET() {
         id: doc.id,
         name: data.name || 'Anonymous Player',
         xp: data.xp || 0,
+        game_xp: data.game_xp || 0,
         avatar_url: data.avatar_url || data.photoURL || ''
       };
     });

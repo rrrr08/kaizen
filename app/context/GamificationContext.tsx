@@ -3,9 +3,19 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { useAuth } from './AuthContext';
 import { UserProfile } from '@/lib/types';
-import { getTier, fetchTiersFromFirebase, fetchRewardsConfigFromFirebase, REWARDS as DEFAULT_REWARDS, STREAK_REWARDS, STREAK_FREEZE_COST, CONFIG, calculatePoints, calculatePointWorth, getMaxRedeemableAmount } from '@/lib/gamification';
-import { doc, onSnapshot, updateDoc, increment, setDoc, getFirestore, getDoc } from 'firebase/firestore';
+import { getTier, fetchTiersFromFirebase, fetchRewardsConfigFromFirebase, REWARDS as DEFAULT_REWARDS, STREAK_REWARDS, STREAK_FREEZE_COST, CONFIG, calculatePoints, calculatePointWorth, getMaxRedeemableAmount, logTransaction } from '@/lib/gamification';
+import { doc, onSnapshot, updateDoc, increment, setDoc, getFirestore, getDoc, collection, query, orderBy, limit, startAfter, getDocs, QueryDocumentSnapshot, DocumentData } from 'firebase/firestore';
 import { app } from '@/lib/firebase';
+
+export interface Transaction {
+  id: string;
+  type: 'EARN' | 'SPEND';
+  amount: number;
+  source: string;
+  description: string;
+  timestamp: any;
+  metadata?: any;
+}
 
 interface Tier {
   name: string;
@@ -20,6 +30,7 @@ interface Tier {
 
 interface GamificationContextType {
   xp: number;
+  game_xp: number;
   balance: number;
   tier: Tier;
   nextTier: Tier | null;
@@ -36,7 +47,7 @@ interface GamificationContextType {
     eggsFound: number;
   };
   loading: boolean;
-  awardPoints: (amount: number, reason: string) => Promise<void>;
+  awardPoints: (amount: number, reason: string, isGameXP?: boolean) => Promise<void>;
   spendPoints: (amount: number, reason: string) => Promise<boolean>;
   spinWheel: (prize: any) => Promise<void>;
   updateStreak: () => Promise<void>;
@@ -46,9 +57,14 @@ interface GamificationContextType {
   calculatePoints: (price: number, isFirstTime?: boolean) => number;
   calculatePointWorth: (points: number) => number;
   getMaxRedeemableAmount: (totalPrice: number, userPoints: number) => number;
+  awardEventAttendancePoints: (eventId: string, eventName: string) => Promise<void>;
   hasEarlyEventAccess: boolean;
   workshopDiscountPercent: number;
   hasVIPSeating: boolean;
+  history: Transaction[];
+  fetchHistory: (lastDoc?: QueryDocumentSnapshot<DocumentData>) => Promise<void>;
+  hasMoreHistory: boolean;
+  historyLoading: boolean;
 }
 
 const GamificationContext = createContext<GamificationContextType | undefined>(undefined);
@@ -59,11 +75,18 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
 
   // State
   const [xp, setXp] = useState(0);
+  const [game_xp, setGameXp] = useState(0);
   const [balance, setBalance] = useState(0);
   const [allTiers, setAllTiers] = useState<Tier[]>([]);
   const [rewardsConfig, setRewardsConfig] = useState(DEFAULT_REWARDS);
   const [streak, setStreak] = useState({ count: 0, lastActiveDate: null as string | null, freezeCount: 0 });
   const [dailyStats, setDailyStats] = useState({ lastSpinDate: null as string | null, eggsFound: 0 });
+
+  // History State
+  const [history, setHistory] = useState<Transaction[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [hasMoreHistory, setHasMoreHistory] = useState(true);
+  const [lastHistoryDoc, setLastHistoryDoc] = useState<QueryDocumentSnapshot<DocumentData> | null>(null);
 
   const db = getFirestore(app);
 
@@ -83,6 +106,7 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!user) {
       setXp(0);
+      setGameXp(0);
       setBalance(0);
       setStreak({ count: 0, lastActiveDate: null, freezeCount: 0 });
       setLoading(false);
@@ -97,6 +121,7 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
 
         // Sync State from DB
         setXp(data.xp || 0);
+        setGameXp(data.game_xp || 0);
         // Prioritize 'points' field as primary balance source
         setBalance(data.points || data.balance || data.wallet || 0);
 
@@ -119,6 +144,7 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
         // Init profile if missing
         setDoc(userRef, {
           xp: 0,
+          game_xp: 0,
           points: 0,
           streak: { count: 0, last_active_date: null, freeze_count: 0 },
           daily_stats: { eggs_found: 0 }
@@ -135,6 +161,7 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
           if (docSnap.exists()) {
             const data = docSnap.data() as UserProfile;
             setXp(data.xp || 0);
+            setGameXp(data.game_xp || 0);
             setBalance(data.points || data.balance || data.wallet || 0);
             setStreak({
               count: data.streak?.count || 0,
@@ -185,7 +212,7 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
   }, [user, loading, streak.lastActiveDate]);
 
   // Actions
-  const awardPoints = async (amount: number, reason: string) => {
+  const awardPoints = async (amount: number, reason: string, isGameXP: boolean = false) => {
     if (!user) return;
     const userRef = doc(db, 'users', user.uid);
 
@@ -193,13 +220,18 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
     // "Rule: Every action awards both JP and XP equally" - but modified by multiplier for JP
     const jpEarned = Math.round(amount * tier.multiplier);
 
-    await updateDoc(userRef, {
+    const updates: any = {
       xp: increment(amount),
       points: increment(jpEarned),
-      history: increment(1) // Just a placeholder, ideally push to array
-    });
+    };
 
-    // Log transaction (separate collection ideally)
+    if (isGameXP) {
+      updates.game_xp = increment(amount);
+    }
+
+    await updateDoc(userRef, updates);
+
+    logTransaction(user.uid, 'EARN', jpEarned, 'Award', reason, { xpEarned: amount, isGameXP });
   };
 
   const spendPoints = async (amount: number, reason: string) => {
@@ -208,6 +240,7 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
     await updateDoc(userRef, {
       points: increment(-amount)
     });
+    logTransaction(user.uid, 'SPEND', amount, 'Spend', reason);
     return true;
   };
 
@@ -282,6 +315,18 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
     }
 
     await updateDoc(userRef, updates);
+
+    // Log the transaction
+    if (prize.type === 'JP' || prize.type === 'JACKPOT') {
+      logTransaction(user.uid, 'EARN', Number(prize.value), 'Daily Spin', `Won ${prize.label}`, { prize });
+    } else if (prize.type === 'XP') {
+      // For XP only awards, we might still want to log it if we show XP in history, 
+      // but current history UI focuses on JP (points). 
+      // The logTransaction function is designed for JP (amount arg).
+      // We can log 0 JP but include metadata or update logTransaction to handle XP.
+      // For now, let's log it with 0 JP amount but detailed description.
+      logTransaction(user.uid, 'EARN', 0, 'Daily Spin', `Won ${prize.value} XP`, { prize, xpEarned: Number(prize.value) });
+    }
   }
 
   const foundEasterEgg = async () => {
@@ -299,15 +344,63 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
       points: increment(reward)
     });
 
+    logTransaction(user.uid, 'EARN', reward, 'Easter Egg', 'Found a hidden egg!', { eggsFound: dailyStats.eggsFound + 1 });
+
     return true;
   }
 
+  const fetchHistory = async (startAfterDoc?: QueryDocumentSnapshot<DocumentData>) => {
+    if (!user) return;
+
+    // If it's a fresh load (no cursor), start loading state
+    if (!startAfterDoc) {
+      setHistoryLoading(true);
+      setHistory([]);
+    }
+
+    try {
+      const q = query(
+        collection(db, 'users', user.uid, 'transactions'),
+        orderBy('timestamp', 'desc'),
+        limit(20),
+        ...(startAfterDoc ? [startAfter(startAfterDoc)] : [])
+      );
+
+      const snapshot = await getDocs(q);
+      const newTransactions: Transaction[] = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      } as Transaction));
+
+      if (startAfterDoc) {
+        setHistory(prev => [...prev, ...newTransactions]);
+      } else {
+        setHistory(newTransactions);
+      }
+
+      setLastHistoryDoc(snapshot.docs[snapshot.docs.length - 1] || null);
+      setHasMoreHistory(snapshot.docs.length === 20);
+    } catch (error) {
+      console.error("Error fetching history:", error);
+    } finally {
+      setHistoryLoading(false);
+    }
+  };
+
+  const awardEventAttendancePoints = async (eventId: string, eventName: string) => {
+    if (!user) return;
+    // TODO: verification logic (e.g. check if already attended)
+    const points = 50;
+    await awardPoints(points, `Attended: ${eventName}`);
+  };
+
   return (
     <GamificationContext.Provider value={{
-      xp, balance, tier, nextTier, allTiers, rewardsConfig, streak, dailyStats, loading,
+      xp, game_xp, balance, tier, nextTier, allTiers, rewardsConfig, streak, dailyStats, loading,
       awardPoints, spendPoints, spinWheel, updateStreak, buyStreakFreeze, foundEasterEgg,
-      config: CONFIG, calculatePoints, calculatePointWorth, getMaxRedeemableAmount,
-      hasEarlyEventAccess, workshopDiscountPercent, hasVIPSeating
+      config: CONFIG, calculatePoints, calculatePointWorth, getMaxRedeemableAmount, awardEventAttendancePoints,
+      hasEarlyEventAccess, workshopDiscountPercent, hasVIPSeating,
+      history, fetchHistory, hasMoreHistory, historyLoading
     }}>
       {children}
     </GamificationContext.Provider>

@@ -762,8 +762,10 @@ export async function createOrder(
     items: any[];
     totalPrice: number;
     totalPoints: number;
+    pointsRedeemed?: number;
     paymentId: string;
     shippingAddress?: any;
+    [key: string]: any;
   }
 ) {
   const orderId = Date.now().toString();
@@ -771,11 +773,7 @@ export async function createOrder(
   const order = {
     id: orderId,
     userId,
-    items: orderData.items,
-    totalPrice: orderData.totalPrice,
-    totalPoints: orderData.totalPoints,
-    paymentId: orderData.paymentId,
-    shippingAddress: orderData.shippingAddress || {},
+    ...orderData,
     status: 'completed',
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),

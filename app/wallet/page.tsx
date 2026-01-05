@@ -1,7 +1,10 @@
 'use client';
 
+import { useState, useEffect } from 'react';
+
 import { useGamification } from '@/app/context/GamificationContext';
 import Link from 'next/link';
+import { useAuth } from '@/app/context/AuthContext';
 import {
   Wallet as WalletIcon,
   TrendingUp,
@@ -17,7 +20,11 @@ import {
   Target,
   Trophy,
   ArrowRight,
-  Info
+  Info,
+  History,
+  Loader2,
+  ChevronDown,
+  RefreshCw
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import LevelBadge from '@/components/gamification/LevelBadge';
@@ -25,7 +32,39 @@ import LevelBadge from '@/components/gamification/LevelBadge';
 export const dynamic = 'force-dynamic';
 
 export default function WalletPage() {
-  const { xp, balance, tier, nextTier, loading, streak, buyStreakFreeze, config } = useGamification();
+  const { xp, balance, tier, nextTier, loading, streak, buyStreakFreeze, config, history, fetchHistory, hasMoreHistory, historyLoading } = useGamification();
+  const { user } = useAuth();
+  const [showHistory, setShowHistory] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+
+  const handleSyncHistory = async () => {
+    if (!user || syncing) return;
+    setSyncing(true);
+    try {
+      const token = await user.getIdToken();
+      const res = await fetch('/api/debug/backfill-history', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      const data = await res.json();
+      if (data.success) {
+        // Refresh history
+        fetchHistory();
+      }
+    } catch (error) {
+      console.error("Sync failed:", error);
+    } finally {
+      setSyncing(false);
+    }
+  };
+
+  useEffect(() => {
+    if (showHistory && history.length === 0) {
+      fetchHistory();
+    }
+  }, [showHistory]);
 
   if (loading) {
     return (
@@ -213,6 +252,89 @@ export default function WalletPage() {
           </motion.div>
         </div>
 
+        {/* Transaction History Section */}
+        <div className="mb-20">
+          <div className="flex items-center justify-between mb-8 cursor-pointer group" onClick={() => setShowHistory(!showHistory)}>
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-black text-white rounded-xl flex items-center justify-center border-2 border-black shadow-[3px_3px_0px_rgba(0,0,0,0.1)] group-hover:rotate-12 transition-transform">
+                <History size={20} />
+              </div>
+              <h2 className="font-display text-4xl font-black uppercase tracking-tighter">Transaction Ledger</h2>
+            </div>
+            <motion.div
+              animate={{ rotate: showHistory ? 180 : 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <ChevronDown size={32} />
+            </motion.div>
+          </div>
+
+          <div className="flex justify-end mb-4 px-2">
+            <button
+              onClick={handleSyncHistory}
+              disabled={syncing}
+              className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[#2D3436]/40 hover:text-[#6C5CE7] transition-colors disabled:opacity-50"
+            >
+              <RefreshCw size={12} className={syncing ? "animate-spin" : ""} />
+              {syncing ? 'Syncing...' : 'Sync Missing History'}
+            </button>
+          </div>
+
+          <motion.div
+            initial={false}
+            animate={{ height: showHistory ? 'auto' : 0, opacity: showHistory ? 1 : 0 }}
+            className="overflow-hidden"
+          >
+            <div className="bg-white border-3 border-black rounded-[35px] neo-shadow p-6 md:p-8">
+              {historyLoading && history.length === 0 ? (
+                <div className="flex justify-center py-12">
+                  <Loader2 className="animate-spin text-black" size={32} />
+                </div>
+              ) : history.length === 0 ? (
+                <div className="text-center py-12 text-black/40 font-bold uppercase tracking-widest">
+                  No transactions recorded yet
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {history.map((tx) => (
+                    <div key={tx.id} className="flex items-center justify-between p-4 bg-[#F9F9F9] border-2 border-black/5 rounded-2xl md:hover:scale-[1.01] transition-transform">
+                      <div className="flex items-center gap-4">
+                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center border-2 border-black font-black text-lg ${tx.type === 'EARN' ? 'bg-[#55EFC4] text-[#00B894]' : 'bg-[#fab1a0] text-[#d63031]'
+                          }`}>
+                          {tx.type === 'EARN' ? '+' : '-'}
+                        </div>
+                        <div>
+                          <p className="font-black text-black text-lg leading-none mb-1">{tx.description}</p>
+                          <div className="flex items-center gap-2 text-xs font-bold text-black/40 uppercase tracking-wider">
+                            <span>{tx.source}</span>
+                            <span>•</span>
+                            <span>{tx.timestamp?.seconds ? new Date(tx.timestamp.seconds * 1000).toLocaleDateString() : 'Just now'}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className={`font-display text-2xl font-black ${tx.type === 'EARN' ? 'text-[#00B894]' : 'text-[#d63031]'
+                        }`}>
+                        {tx.type === 'EARN' ? '+' : '-'}{tx.amount}
+                      </div>
+                    </div>
+                  ))}
+
+                  {hasMoreHistory && (
+                    <button
+                      onClick={() => fetchHistory(history[history.length - 1] as any)}
+                      disabled={historyLoading}
+                      className="w-full py-4 mt-4 bg-black text-white font-black uppercase tracking-widest rounded-xl hover:bg-black/80 disabled:opacity-50 flex items-center justify-center gap-2"
+                    >
+                      {historyLoading && <Loader2 className="animate-spin" size={20} />}
+                      {historyLoading ? 'Loading...' : 'Load More Records'}
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          </motion.div>
+        </div>
+
         {/* Economy Guide Section */}
         <div className="mb-20">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-12">
@@ -320,6 +442,8 @@ export default function WalletPage() {
             </div>
           </Link>
         </motion.div>
+
+
 
         <div className="mt-16 text-center">
           <p className="text-[10px] text-black/20 font-black tracking-[0.5em] uppercase">Joy Juncture Vault System v2.0</p>

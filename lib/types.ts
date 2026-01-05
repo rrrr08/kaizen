@@ -186,6 +186,8 @@ export interface UserProfile {
   };
 
   history?: { date: string; points: number; activity: string }[];
+  
+  game_xp?: number; // XP earned specifically from games (for leaderboard)
 }
 
 export interface ChatMessage {

@@ -336,7 +336,7 @@ export default function Play() {
                 <tr>
                   <th className="text-left p-6 font-black text-[10px] tracking-widest text-black">RANK</th>
                   <th className="text-left p-6 font-black text-[10px] tracking-widest text-black">PLAYER</th>
-                  <th className="text-left p-6 font-black text-[10px] tracking-widest text-black">XP SCORE</th>
+                  <th className="text-left p-6 font-black text-[10px] tracking-widest text-black">GAME XP</th>
 
                 </tr>
               </thead>
@@ -368,7 +368,7 @@ export default function Play() {
                           <span className="font-bold text-sm tracking-wide text-black">{player.name}</span>
                         </div>
                       </td>
-                      <td className="p-6 font-black text-xl text-black">{player.xp.toLocaleString()} XP</td>
+                      <td className="p-6 font-black text-xl text-black">{(player.game_xp || 0).toLocaleString()} XP</td>
 
                     </tr>
                   ))

@@ -95,6 +95,7 @@ export async function POST(req: NextRequest) {
     const userData = userSnap.exists ? userSnap.data() : {};
     const currentPoints = userData?.points || userData?.balance || 0;
     const currentXP = userData?.xp || 0;
+    const currentGameXP = userData?.game_xp || 0;
     
     // Get user's current tier from Firebase settings
     const xpSettingsSnap = await adminDb.doc('settings/xpSystem').get();
@@ -114,10 +115,26 @@ export async function POST(req: NextRequest) {
       {
         points: currentPoints + jpEarned,
         xp: currentXP + xpEarned,
+        game_xp: currentGameXP + xpEarned,
         lastPlayed: new Date().toISOString()
       },
       { merge: true }
     );
+
+    // Log transaction
+    await adminDb.collection('users').doc(userUid).collection('transactions').add({
+      type: 'EARN',
+      amount: jpEarned,
+      source: 'Game Award',
+      description: `Won ${gameId} (${level || 'Standard'})`,
+      timestamp: new Date(), // Use server timestamp if possible, but Date works for admin SDK usually
+      metadata: {
+        gameId,
+        xpEarned,
+        isGameXP: true,
+        multiplier: currentTier.multiplier
+      }
+    });
 
     // Add to leaderboard
     const leaderboardRef = adminDb.collection('leaderboards').doc(gameId);

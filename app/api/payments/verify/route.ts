@@ -94,6 +94,18 @@ export async function POST(request: NextRequest) {
         }, { merge: true });
 
         console.log(`Awarded ${purchaseXP} XP and ${purchaseJP} JP for purchase of ₹${amount}`);
+
+        // Log transaction
+        const { FieldValue } = await import('firebase-admin/firestore');
+        await adminDb.collection('users').doc(userId).collection('transactions').add({
+          type: 'EARN',
+          amount: purchaseJP,
+          source: 'SHOP_PURCHASE',
+          description: 'Shop Purchase Reward',
+          metadata: { orderId, purchaseAmount: amount, xpEarned: purchaseXP },
+          timestamp: FieldValue.serverTimestamp()
+        });
+
       } catch (xpError) {
         console.error('Error awarding XP for purchase:', xpError);
       }
@@ -255,6 +267,23 @@ export async function POST(request: NextRequest) {
           }, { merge: true });
 
           console.log(`Event Registration - Awarded ${totalXP} XP and ${totalJP} JP (base + ₹${amount} value)`);
+          
+          // Log transaction
+          const { FieldValue } = await import('firebase-admin/firestore');
+          await adminDb.collection('users').doc(userId).collection('transactions').add({
+            type: 'EARN',
+            amount: totalJP,
+            source: 'EVENT_REGISTRATION',
+            description: `Event: ${eventData?.title || 'Registration'}`,
+            metadata: { 
+              eventId, 
+              registrationId: regRef.id, 
+              amountPaid: amount, 
+              xpEarned: totalXP 
+            },
+            timestamp: FieldValue.serverTimestamp()
+          });
+
         } catch (xpError) {
           console.error('Error awarding XP for event registration:', xpError);
         }
