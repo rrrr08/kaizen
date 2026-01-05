@@ -43,7 +43,7 @@ import {
   deleteObject,
 } from "firebase/storage";
 // Type imports removed for JavaScript conversion - Re-added for TypeScript
-import { UserProfile, ChatMessage, Conversation, Product, GameEvent } from "./types";
+import { UserProfile, ChatMessage, Conversation, Product, GameEvent, ExperienceCategory, ExperienceEnquiry, ExperienceCaseStudy } from "./types";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -1248,6 +1248,207 @@ export async function handleGoogleSignInRedirect() {
     return null;
   } catch (error) {
     console.error("Error handling Google redirect result:", error);
+    throw error;
+  }
+}
+
+// Experience Categories Functions
+export async function getExperienceCategories() {
+  try {
+    const firebaseDb = await getFirebaseDb();
+    const q = query(collection(firebaseDb, 'experience_categories'), where('published', '==', true));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+      createdAt: doc.data().createdAt?.toDate(),
+      updatedAt: doc.data().updatedAt?.toDate(),
+    })) as ExperienceCategory[];
+  } catch (error) {
+    console.error('Error fetching experience categories:', error);
+    return [];
+  }
+}
+
+export async function getExperienceCategoryBySlug(slug: string) {
+  try {
+    const firebaseDb = await getFirebaseDb();
+    const q = query(collection(firebaseDb, 'experience_categories'), where('slug', '==', slug), where('published', '==', true));
+    const snapshot = await getDocs(q);
+    if (!snapshot.empty) {
+      const doc = snapshot.docs[0];
+      return {
+        id: doc.id,
+        ...doc.data(),
+        createdAt: doc.data().createdAt?.toDate(),
+        updatedAt: doc.data().updatedAt?.toDate(),
+      } as ExperienceCategory;
+    }
+    return null;
+  } catch (error) {
+    console.error('Error fetching experience category:', error);
+    return null;
+  }
+}
+
+export async function getAllExperienceCategories() {
+  try {
+    const firebaseDb = await getFirebaseDb();
+    const q = query(collection(firebaseDb, 'experience_categories'), orderBy('createdAt', 'desc'));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+      createdAt: doc.data().createdAt?.toDate(),
+      updatedAt: doc.data().updatedAt?.toDate(),
+    })) as ExperienceCategory[];
+  } catch (error) {
+    console.error('Error fetching all experience categories:', error);
+    return [];
+  }
+}
+
+export async function createExperienceCategory(category: Omit<ExperienceCategory, 'id' | 'createdAt' | 'updatedAt'>) {
+  try {
+    const firebaseDb = await getFirebaseDb();
+    const docRef = await addDoc(collection(firebaseDb, 'experience_categories'), {
+      ...category,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
+    return docRef.id;
+  } catch (error) {
+    console.error('Error creating experience category:', error);
+    throw error;
+  }
+}
+
+export async function updateExperienceCategory(id: string, updates: Partial<ExperienceCategory>) {
+  try {
+    const firebaseDb = await getFirebaseDb();
+    await updateDoc(doc(firebaseDb, 'experience_categories', id), {
+      ...updates,
+      updatedAt: serverTimestamp(),
+    });
+  } catch (error) {
+    console.error('Error updating experience category:', error);
+    throw error;
+  }
+}
+
+export async function deleteExperienceCategory(id: string) {
+  try {
+    const firebaseDb = await getFirebaseDb();
+    await deleteDoc(doc(firebaseDb, 'experience_categories', id));
+  } catch (error) {
+    console.error('Error deleting experience category:', error);
+    throw error;
+  }
+}
+
+// Experience Enquiries Functions
+export async function createExperienceEnquiry(enquiry: Omit<ExperienceEnquiry, 'id' | 'createdAt' | 'updatedAt' | 'status'>) {
+  try {
+    const firebaseDb = await getFirebaseDb();
+    const docRef = await addDoc(collection(firebaseDb, 'experience_enquiries'), {
+      ...enquiry,
+      status: 'new',
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
+    return docRef.id;
+  } catch (error) {
+    console.error('Error creating experience enquiry:', error);
+    throw error;
+  }
+}
+
+export async function getExperienceEnquiries() {
+  try {
+    const firebaseDb = await getFirebaseDb();
+    const q = query(collection(firebaseDb, 'experience_enquiries'), orderBy('createdAt', 'desc'));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+      createdAt: doc.data().createdAt?.toDate(),
+      updatedAt: doc.data().updatedAt?.toDate(),
+    })) as ExperienceEnquiry[];
+  } catch (error) {
+    console.error('Error fetching experience enquiries:', error);
+    return [];
+  }
+}
+
+export async function updateExperienceEnquiry(id: string, updates: Partial<ExperienceEnquiry>) {
+  try {
+    const firebaseDb = await getFirebaseDb();
+    await updateDoc(doc(firebaseDb, 'experience_enquiries', id), {
+      ...updates,
+      updatedAt: serverTimestamp(),
+    });
+  } catch (error) {
+    console.error('Error updating experience enquiry:', error);
+    throw error;
+  }
+}
+
+export async function getExperienceEnquiryById(id: string) {
+  try {
+    const firebaseDb = await getFirebaseDb();
+    const docSnap = await getDoc(doc(firebaseDb, 'experience_enquiries', id));
+    if (docSnap.exists()) {
+      return {
+        id: docSnap.id,
+        ...docSnap.data(),
+        createdAt: docSnap.data().createdAt?.toDate(),
+        updatedAt: docSnap.data().updatedAt?.toDate(),
+      } as ExperienceEnquiry;
+    }
+    return null;
+  } catch (error) {
+    console.error('Error fetching experience enquiry:', error);
+    return null;
+  }
+}
+
+// Experience Case Studies Functions
+export async function getExperienceCaseStudies() {
+  try {
+    const firebaseDb = await getFirebaseDb();
+    const q = query(collection(firebaseDb, 'experience_case_studies'), where('published', '==', true), orderBy('createdAt', 'desc'));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+      createdAt: doc.data().createdAt?.toDate(),
+    })) as ExperienceCaseStudy[];
+  } catch (error) {
+    console.error('Error fetching experience case studies:', error);
+    return [];
+  }
+}
+
+export async function createExperienceCaseStudy(caseStudy: Omit<ExperienceCaseStudy, 'id' | 'createdAt'>) {
+  try {
+    const firebaseDb = await getFirebaseDb();
+    const docRef = await addDoc(collection(firebaseDb, 'experience_case_studies'), {
+      ...caseStudy,
+      createdAt: serverTimestamp(),
+    });
+    return docRef.id;
+  } catch (error) {
+    console.error('Error creating experience case study:', error);
+    throw error;
+  }
+}
+
+export async function updateExperienceCaseStudy(id: string, updates: Partial<ExperienceCaseStudy>) {
+  try {
+    const firebaseDb = await getFirebaseDb();
+    await updateDoc(doc(firebaseDb, 'experience_case_studies', id), updates);
+  } catch (error) {
+    console.error('Error updating experience case study:', error);
     throw error;
   }
 }
