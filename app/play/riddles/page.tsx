@@ -1,5 +1,12 @@
+import type { Metadata } from 'next';
 import RiddleGame from '@/components/games/RiddleGame';
 import Link from 'next/link';
+
+export const metadata: Metadata = {
+  title: 'Play Riddles',
+  description: 'Solve challenging riddles and brain teasers online. Test your wit and earn rewards at Joy Juncture.',
+  keywords: ['riddles', 'brain teasers', 'puzzle games', 'logic puzzles', 'free riddles online'],
+};
 import { ArrowLeft } from 'lucide-react';
 
 export default function RiddlesPage() {

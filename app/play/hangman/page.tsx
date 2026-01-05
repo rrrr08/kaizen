@@ -1,5 +1,12 @@
+import type { Metadata } from 'next';
 import HangmanGame from '@/components/games/HangmanGame';
 import Link from 'next/link';
+
+export const metadata: Metadata = {
+  title: 'Play Hangman Online',
+  description: 'Play the classic Hangman word guessing game online for free. Guess the word before running out of chances at Joy Juncture.',
+  keywords: ['hangman game', 'word guessing game', 'play hangman online', 'free word games', 'educational games'],
+};
 import { ArrowLeft } from 'lucide-react';
 
 export default function HangmanPage() {

@@ -1,5 +1,12 @@
+import type { Metadata } from 'next';
 import ChessGame from '@/components/games/ChessGame';
 import Link from 'next/link';
+
+export const metadata: Metadata = {
+  title: 'Play Chess Online',
+  description: 'Play chess online for free at Joy Juncture. Challenge yourself with this classic strategy game and earn rewards.',
+  keywords: ['play chess online', 'free chess game', 'online chess', 'chess strategy', 'board game'],
+};
 import { ArrowLeft } from 'lucide-react';
 
 export default function ChessPage() {

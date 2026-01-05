@@ -1,5 +1,12 @@
+import type { Metadata } from 'next';
 import Game2048 from '@/components/games/Game2048';
 import Link from 'next/link';
+
+export const metadata: Metadata = {
+  title: 'Play 2048 Game Online',
+  description: 'Play the addictive 2048 number puzzle game online. Slide tiles to combine numbers and reach 2048!',
+  keywords: ['2048 game', 'play 2048 online', 'number puzzle', 'sliding puzzle', 'free puzzle game', 'math game'],
+};
 import { ArrowLeft } from 'lucide-react';
 
 export default function Game2048Page() {

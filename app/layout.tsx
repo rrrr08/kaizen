@@ -6,6 +6,7 @@ import { GamificationProvider } from "@/app/context/GamificationContext";
 import { AuthProvider } from "@/app/context/AuthContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import ClientLayout from "@/components/ClientLayout";
+import { defaultMetadata } from "@/lib/metadata";
 
 // Configure fonts
 const outfit = Outfit({
@@ -20,9 +21,59 @@ const fredoka = Fredoka({
   display: 'swap',
 });
 
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://joyjuncture.com';
+
 export const metadata: Metadata = {
-  title: "Joy Juncture | Playful E-commerce",
-  description: "Experience board games, events, and community engagement like never before",
+  metadataBase: new URL(baseUrl),
+  title: {
+    default: defaultMetadata.title,
+    template: '%s | Joy Juncture',
+  },
+  description: defaultMetadata.description,
+  keywords: defaultMetadata.keywords,
+  authors: [{ name: 'Joy Juncture Team' }],
+  creator: 'Joy Juncture',
+  publisher: 'Joy Juncture',
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: baseUrl,
+    siteName: defaultMetadata.siteName,
+    title: defaultMetadata.title,
+    description: defaultMetadata.description,
+    images: [
+      {
+        url: defaultMetadata.ogImage,
+        width: 1200,
+        height: 630,
+        alt: 'Joy Juncture - Playful E-commerce',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: defaultMetadata.title,
+    description: defaultMetadata.description,
+    images: [defaultMetadata.twitterImage],
+    creator: '@joyjuncture', // Update with your Twitter handle
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  // Add verification codes from Google Search Console, Bing, etc.
+  // verification: {
+  //   google: 'your-google-verification-code',
+  //   yandex: 'your-yandex-verification-code',
+  //   bing: 'your-bing-verification-code',
+  // },
 };
 
 export default function RootLayout({

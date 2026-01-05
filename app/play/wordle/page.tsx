@@ -1,5 +1,12 @@
+import type { Metadata } from 'next';
 import WordleGame from '@/components/games/WordleGame';
 import Link from 'next/link';
+
+export const metadata: Metadata = {
+  title: 'Play Wordle Game Online',
+  description: 'Play Wordle-style word puzzle game online. Guess the five-letter word in 6 tries. New puzzle daily!',
+  keywords: ['wordle', 'word puzzle', 'play wordle online', 'daily word game', 'vocabulary game', '5 letter words'],
+};
 import { ArrowLeft } from 'lucide-react';
 
 export default function WordlePage() {

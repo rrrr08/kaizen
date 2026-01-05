@@ -1,5 +1,12 @@
+import type { Metadata } from 'next';
 import WheelOfJoy from '@/components/gamification/WheelOfJoy';
 import Link from 'next/link';
+
+export const metadata: Metadata = {
+  title: 'Daily Spin',
+  description: 'Spin the Wheel of Joy daily for a chance to win rewards, coins, and exclusive prizes at Joy Juncture.',
+  keywords: ['daily spin', 'wheel of fortune', 'daily rewards', 'spin to win', 'free rewards'],
+};
 import { Gift, Coins, RotateCw, ArrowLeft } from 'lucide-react';
 
 export default function DailySpinPage() {

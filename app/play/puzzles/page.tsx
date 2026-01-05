@@ -1,5 +1,12 @@
+import type { Metadata } from 'next';
 import BrainGamesSet from '@/components/games/BrainGamesSet';
 import Link from 'next/link';
+
+export const metadata: Metadata = {
+  title: 'Brain Puzzles & Games',
+  description: 'Play free brain puzzles and logic games online. Sharpen your mind with our collection of puzzle games.',
+  keywords: ['brain puzzles', 'logic games', 'puzzle games online', 'brain games', 'free puzzles', 'mind games'],
+};
 import { ArrowLeft } from 'lucide-react';
 
 export default function PuzzlesPage() {

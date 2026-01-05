@@ -1,5 +1,12 @@
+import type { Metadata } from 'next';
 import MathQuizGame from '@/components/games/MathQuizGame';
 import Link from 'next/link';
+
+export const metadata: Metadata = {
+  title: 'Math Quiz Game',
+  description: 'Test your math skills with fun quizzes. Play free math games online and earn rewards at Joy Juncture.',
+  keywords: ['math quiz', 'math games online', 'free math quiz', 'arithmetic games', 'educational games'],
+};
 import { ArrowLeft } from 'lucide-react';
 
 export default function MathQuizPage() {

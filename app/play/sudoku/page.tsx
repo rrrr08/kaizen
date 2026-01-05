@@ -1,5 +1,12 @@
+import type { Metadata } from 'next';
 import SudokuGame from '@/components/games/SudokuGame';
 import Link from 'next/link';
+
+export const metadata: Metadata = {
+  title: 'Play Sudoku Online',
+  description: 'Play free Sudoku puzzles online. Challenge your mind with different difficulty levels at Joy Juncture.',
+  keywords: ['sudoku', 'play sudoku online', 'free sudoku', 'sudoku puzzles', 'brain games', 'number puzzles'],
+};
 import { ArrowLeft } from 'lucide-react';
 
 export default function SudokuPage() {

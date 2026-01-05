@@ -1,5 +1,12 @@
+import type { Metadata } from 'next';
 import TriviaGame from '@/components/games/TriviaGame';
 import Link from 'next/link';
+
+export const metadata: Metadata = {
+  title: 'Play Trivia Quiz Online',
+  description: 'Test your knowledge with fun trivia questions. Play free trivia quizzes on various topics and earn rewards.',
+  keywords: ['trivia', 'trivia quiz', 'play trivia online', 'quiz games', 'general knowledge quiz', 'free trivia'],
+};
 import { ArrowLeft } from 'lucide-react';
 
 export default function TriviaPage() {

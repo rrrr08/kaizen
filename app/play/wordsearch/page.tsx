@@ -1,5 +1,12 @@
+import type { Metadata } from 'next';
 import WordSearchGame from '@/components/games/WordSearchGame';
 import Link from 'next/link';
+
+export const metadata: Metadata = {
+  title: 'Play Word Search Online',
+  description: 'Find hidden words in our free online word search puzzles. Multiple difficulty levels and themes available.',
+  keywords: ['word search', 'word search puzzle', 'play word search online', 'free word search', 'word games'],
+};
 import { ArrowLeft } from 'lucide-react';
 
 export default function WordSearchPage() {
