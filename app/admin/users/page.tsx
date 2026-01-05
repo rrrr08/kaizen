@@ -121,7 +121,7 @@ const UserManagementPage = () => {
     setViewDetailsUser(user);
     setLoadingDetails(true);
     setDetailsTab('shop'); // Reset to shop tab when opening
-    
+
     try {
       // Fetch event registrations
       const registrationsQuery = query(
@@ -129,12 +129,12 @@ const UserManagementPage = () => {
         where('userId', '==', user.id)
       );
       const registrationsSnapshot = await getDocs(registrationsQuery);
-      
+
       const registrations: EventRegistration[] = [];
-      
+
       for (const docSnap of registrationsSnapshot.docs) {
         const data = docSnap.data();
-        
+
         // Fetch event details
         let eventName = 'Unknown Event';
         if (data.eventId) {
@@ -148,17 +148,17 @@ const UserManagementPage = () => {
             console.error('Error fetching event details:', error);
           }
         }
-        
+
         registrations.push({
           id: docSnap.id,
           eventName: eventName,
-          registeredAt: data.createdAt?.toDate?.()?.toLocaleDateString() || 
-                        data.timestamp?.toDate?.()?.toLocaleDateString() || 'N/A',
+          registeredAt: data.createdAt?.toDate?.()?.toLocaleDateString() ||
+            data.timestamp?.toDate?.()?.toLocaleDateString() || 'N/A',
           status: data.status || 'registered',
           ticketType: data.ticketType
         });
       }
-      
+
       setUserRegistrations(registrations);
 
       // Fetch purchases/orders
@@ -405,22 +405,20 @@ const UserManagementPage = () => {
                   <div className="mt-4 flex gap-2">
                     <button
                       onClick={() => setDetailsTab('shop')}
-                      className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-black text-sm uppercase tracking-wider border-2 border-black transition-all ${
-                        detailsTab === 'shop'
-                          ? 'bg-[#FFD93D] text-black shadow-[3px_3px_0px_rgba(0,0,0,1)]'
-                          : 'bg-white text-black/60 hover:bg-gray-50'
-                      }`}
+                      className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-black text-sm uppercase tracking-wider border-2 border-black transition-all ${detailsTab === 'shop'
+                        ? 'bg-[#FFD93D] text-black shadow-[3px_3px_0px_rgba(0,0,0,1)]'
+                        : 'bg-white text-black/60 hover:bg-gray-50'
+                        }`}
                     >
                       <ShoppingBag className="w-4 h-4" />
                       Shop ({userPurchases.length})
                     </button>
                     <button
                       onClick={() => setDetailsTab('events')}
-                      className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-black text-sm uppercase tracking-wider border-2 border-black transition-all ${
-                        detailsTab === 'events'
-                          ? 'bg-[#FFD93D] text-black shadow-[3px_3px_0px_rgba(0,0,0,1)]'
-                          : 'bg-white text-black/60 hover:bg-gray-50'
-                      }`}
+                      className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-black text-sm uppercase tracking-wider border-2 border-black transition-all ${detailsTab === 'events'
+                        ? 'bg-[#FFD93D] text-black shadow-[3px_3px_0px_rgba(0,0,0,1)]'
+                        : 'bg-white text-black/60 hover:bg-gray-50'
+                        }`}
                     >
                       <Calendar className="w-4 h-4" />
                       Events ({userRegistrations.length})
@@ -447,7 +445,7 @@ const UserManagementPage = () => {
                               Event Registrations ({userRegistrations.length})
                             </h3>
                           </div>
-                          
+
                           {userRegistrations.length > 0 ? (
                             <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
                               {userRegistrations.map((registration) => (
@@ -459,11 +457,10 @@ const UserManagementPage = () => {
                                 >
                                   <div className="flex justify-between items-start mb-2">
                                     <h4 className="font-bold text-black text-base">{registration.eventName}</h4>
-                                    <span className={`px-2 py-1 rounded-lg text-xs font-black uppercase border-2 border-black ${
-                                      registration.status === 'registered' || registration.status === 'confirmed' ? 'bg-[#00B894] text-black' : 
-                                      registration.status === 'cancelled' ? 'bg-[#FF7675] text-black' : 
-                                      'bg-gray-200 text-black'
-                                    }`}>
+                                    <span className={`px-2 py-1 rounded-lg text-xs font-black uppercase border-2 border-black ${registration.status === 'registered' || registration.status === 'confirmed' ? 'bg-[#00B894] text-black' :
+                                      registration.status === 'cancelled' ? 'bg-[#FF7675] text-black' :
+                                        'bg-gray-200 text-black'
+                                      }`}>
                                       {registration.status}
                                     </span>
                                   </div>
@@ -496,107 +493,106 @@ const UserManagementPage = () => {
                               Shop Purchases ({userPurchases.length})
                             </h3>
                           </div>
-                          
+
                           {userPurchases.length > 0 ? (
                             <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
-                            {userPurchases.map((purchase) => (
-                              <motion.div
-                                key={purchase.id}
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                className="p-5 bg-[#FFFDF5] rounded-xl border-2 border-black shadow-[3px_3px_0px_rgba(0,0,0,0.1)]"
-                              >
-                                {/* Header */}
-                                <div className="flex justify-between items-start mb-4 pb-3 border-b-2 border-black/10">
-                                  <div>
-                                    <div className="flex items-center space-x-2 mb-1">
-                                      <Package className="w-4 h-4 text-black/60" />
-                                      <span className="font-black text-black text-base">Order #{purchase.id.slice(-8).toUpperCase()}</span>
+                              {userPurchases.map((purchase) => (
+                                <motion.div
+                                  key={purchase.id}
+                                  initial={{ opacity: 0, y: 10 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  className="p-5 bg-[#FFFDF5] rounded-xl border-2 border-black shadow-[3px_3px_0px_rgba(0,0,0,0.1)]"
+                                >
+                                  {/* Header */}
+                                  <div className="flex justify-between items-start mb-4 pb-3 border-b-2 border-black/10">
+                                    <div>
+                                      <div className="flex items-center space-x-2 mb-1">
+                                        <Package className="w-4 h-4 text-black/60" />
+                                        <span className="font-black text-black text-base">Order #{purchase.id.slice(-8).toUpperCase()}</span>
+                                      </div>
+                                      <span className="text-xs text-black/50 font-medium">{purchase.createdAt}</span>
                                     </div>
-                                    <span className="text-xs text-black/50 font-medium">{purchase.createdAt}</span>
+                                    <span className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] ${purchase.status === 'completed' || purchase.status === 'delivered' ? 'bg-[#00B894] text-black' :
+                                      purchase.status === 'cancelled' ? 'bg-[#FF7675] text-black' :
+                                        'bg-[#FFD93D] text-black'
+                                      }`}>
+                                      {purchase.status}
+                                    </span>
                                   </div>
-                                  <span className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] ${
-                                    purchase.status === 'completed' || purchase.status === 'delivered' ? 'bg-[#00B894] text-black' : 
-                                    purchase.status === 'cancelled' ? 'bg-[#FF7675] text-black' : 
-                                    'bg-[#FFD93D] text-black'
-                                  }`}>
-                                    {purchase.status}
-                                  </span>
-                                </div>
-                                
-                                {/* Items List */}
-                                <div className="mb-4">
-                                  <h4 className="text-xs font-black text-black/70 uppercase tracking-wider mb-2">Items Ordered</h4>
-                                  <div className="space-y-2">
-                                    {purchase.items.map((item, idx) => (
-                                      <div key={idx} className="flex justify-between items-center p-2 bg-white rounded-lg border border-black/10">
-                                        <div className="flex-1">
-                                          <div className="font-bold text-black text-sm">{item.name}</div>
-                                          <div className="text-xs text-black/50 font-medium">Qty: {item.quantity} × ₹{item.price}</div>
+
+                                  {/* Items List */}
+                                  <div className="mb-4">
+                                    <h4 className="text-xs font-black text-black/70 uppercase tracking-wider mb-2">Items Ordered</h4>
+                                    <div className="space-y-2">
+                                      {purchase.items.map((item, idx) => (
+                                        <div key={idx} className="flex justify-between items-center p-2 bg-white rounded-lg border border-black/10">
+                                          <div className="flex-1">
+                                            <div className="font-bold text-black text-sm">{item.name}</div>
+                                            <div className="text-xs text-black/50 font-medium">Qty: {item.quantity} × ₹{item.price}</div>
+                                          </div>
+                                          <div className="font-black text-black">₹{(item.quantity * item.price).toFixed(2)}</div>
                                         </div>
-                                        <div className="font-black text-black">₹{(item.quantity * item.price).toFixed(2)}</div>
-                                      </div>
-                                    ))}
+                                      ))}
+                                    </div>
                                   </div>
-                                </div>
 
-                                {/* Payment Details */}
-                                <div className="mb-4 p-3 bg-white rounded-lg border border-black/10">
-                                  <h4 className="text-xs font-black text-black/70 uppercase tracking-wider mb-2">Payment Details</h4>
-                                  <div className="space-y-1.5">
-                                    <div className="flex justify-between text-sm">
-                                      <span className="text-black/60 font-medium">Subtotal</span>
-                                      <span className="font-bold text-black">₹{purchase.totalAmount}</span>
-                                    </div>
-                                    {purchase.pointsRedeemed > 0 && (
+                                  {/* Payment Details */}
+                                  <div className="mb-4 p-3 bg-white rounded-lg border border-black/10">
+                                    <h4 className="text-xs font-black text-black/70 uppercase tracking-wider mb-2">Payment Details</h4>
+                                    <div className="space-y-1.5">
                                       <div className="flex justify-between text-sm">
-                                        <span className="text-black/60 font-medium">Points Redeemed</span>
-                                        <span className="font-bold text-[#FF7675]">-₹{purchase.pointsRedeemed}</span>
+                                        <span className="text-black/60 font-medium">Subtotal</span>
+                                        <span className="font-bold text-black">₹{purchase.totalAmount}</span>
                                       </div>
-                                    )}
-                                    {purchase.totalPoints > 0 && (
-                                      <div className="flex justify-between text-sm">
-                                        <span className="text-black/60 font-medium">Points Earned</span>
-                                        <span className="font-bold text-[#00B894]">+{purchase.totalPoints} pts</span>
+                                      {(purchase.pointsRedeemed ?? 0) > 0 && (
+                                        <div className="flex justify-between text-sm">
+                                          <span className="text-black/60 font-medium">Points Redeemed</span>
+                                          <span className="font-bold text-[#FF7675]">-₹{purchase.pointsRedeemed}</span>
+                                        </div>
+                                      )}
+                                      {(purchase.totalPoints ?? 0) > 0 && (
+                                        <div className="flex justify-between text-sm">
+                                          <span className="text-black/60 font-medium">Points Earned</span>
+                                          <span className="font-bold text-[#00B894]">+{purchase.totalPoints} pts</span>
+                                        </div>
+                                      )}
+                                      <div className="flex justify-between text-sm pt-2 border-t border-black/10">
+                                        <span className="text-black/60 font-medium">Payment Method</span>
+                                        <span className="font-bold text-black">{purchase.paymentMethod}</span>
                                       </div>
-                                    )}
-                                    <div className="flex justify-between text-sm pt-2 border-t border-black/10">
-                                      <span className="text-black/60 font-medium">Payment Method</span>
-                                      <span className="font-bold text-black">{purchase.paymentMethod}</span>
                                     </div>
                                   </div>
-                                </div>
 
-                                {/* Shipping Address */}
-                                {purchase.shippingAddress && (
-                                  <div className="p-3 bg-white rounded-lg border border-black/10">
-                                    <h4 className="text-xs font-black text-black/70 uppercase tracking-wider mb-2">Shipping Address</h4>
-                                    <div className="text-sm space-y-0.5">
-                                      <div className="font-bold text-black">{purchase.shippingAddress.name}</div>
-                                      <div className="text-black/60 font-medium">{purchase.shippingAddress.phone}</div>
-                                      <div className="text-black/60 font-medium">{purchase.shippingAddress.address}</div>
-                                      <div className="text-black/60 font-medium">
-                                        {purchase.shippingAddress.city}, {purchase.shippingAddress.state} - {purchase.shippingAddress.pincode}
+                                  {/* Shipping Address */}
+                                  {purchase.shippingAddress && (
+                                    <div className="p-3 bg-white rounded-lg border border-black/10">
+                                      <h4 className="text-xs font-black text-black/70 uppercase tracking-wider mb-2">Shipping Address</h4>
+                                      <div className="text-sm space-y-0.5">
+                                        <div className="font-bold text-black">{purchase.shippingAddress.name}</div>
+                                        <div className="text-black/60 font-medium">{purchase.shippingAddress.phone}</div>
+                                        <div className="text-black/60 font-medium">{purchase.shippingAddress.address}</div>
+                                        <div className="text-black/60 font-medium">
+                                          {purchase.shippingAddress.city}, {purchase.shippingAddress.state} - {purchase.shippingAddress.pincode}
+                                        </div>
                                       </div>
                                     </div>
+                                  )}
+
+                                  {/* Total */}
+                                  <div className="flex justify-between items-center pt-4 mt-4 border-t-2 border-black/20">
+                                    <span className="text-black/70 font-bold text-sm uppercase tracking-wider">Order Total</span>
+                                    <span className="font-black text-black text-2xl">₹{purchase.totalAmount}</span>
                                   </div>
-                                )}
-                                
-                                {/* Total */}
-                                <div className="flex justify-between items-center pt-4 mt-4 border-t-2 border-black/20">
-                                  <span className="text-black/70 font-bold text-sm uppercase tracking-wider">Order Total</span>
-                                  <span className="font-black text-black text-2xl">₹{purchase.totalAmount}</span>
-                                </div>
-                              </motion.div>
-                            ))}
-                          </div>
-                        ) : (
-                          <div className="text-center py-8 bg-[#FFFDF5] rounded-xl border-2 border-black border-dashed">
-                            <ShoppingBag className="w-12 h-12 text-black/20 mx-auto mb-2" />
-                            <p className="text-black/60 font-bold text-sm">No purchases found</p>
-                          </div>
-                        )}
-                      </div>
+                                </motion.div>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="text-center py-8 bg-[#FFFDF5] rounded-xl border-2 border-black border-dashed">
+                              <ShoppingBag className="w-12 h-12 text-black/20 mx-auto mb-2" />
+                              <p className="text-black/60 font-bold text-sm">No purchases found</p>
+                            </div>
+                          )}
+                        </div>
                       )}
                     </>
                   )}
