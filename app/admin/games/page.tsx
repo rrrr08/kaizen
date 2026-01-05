@@ -259,7 +259,7 @@ export default function AdminGamesPage() {
         {/* Game of the Day */}
         {gameOfTheDay && (
           <div className="mb-12 bg-gradient-to-r from-[#FFD93D] to-[#FF7675] border-2 border-black p-8 rounded-[30px] neo-shadow">
-            <h2 className="font-header text-2xl mb-2 text-black">🎮 GAME OF THE DAY</h2>
+            <h2 className="font-header text-2xl mb-2 text-black"> GAME OF THE DAY</h2>
             <p className="text-black/80 font-bold text-lg">
               {gameOfTheDay.gameName || gameOfTheDay.gameId} - <span className="text-white">2x Points!</span>
             </p>
@@ -269,7 +269,7 @@ export default function AdminGamesPage() {
               disabled={saving}
               className="mt-4 px-4 py-2 bg-black text-white font-black text-xs tracking-[0.2em] hover:bg-black/80 transition-colors rounded-lg disabled:opacity-50"
             >
-              🎲 RANDOMIZE
+              RANDOMIZE
             </button>
           </div>
         )}
@@ -280,7 +280,7 @@ export default function AdminGamesPage() {
               disabled={saving}
               className="px-6 py-3 bg-[#FF7675] text-black font-black text-sm tracking-[0.2em] border-2 border-black shadow-[4px_4px_0px_#000] hover:translate-y-1 hover:shadow-none transition-all rounded-xl disabled:opacity-50"
             >
-              🎲 SET RANDOM GAM OF THE DAY
+              SET RANDOM GAM OF THE DAY
             </button>
           </div>
         )}
@@ -288,7 +288,7 @@ export default function AdminGamesPage() {
         {/* Rotation Policy */}
         {rotationPolicy && (
           <div className="mb-12 bg-gradient-to-r from-[#6C5CE7] to-[#A29BFE] border-2 border-black p-8 rounded-[30px] neo-shadow">
-            <h2 className="font-header text-2xl mb-4 text-white">🔄 DAILY ROTATION POLICY</h2>
+            <h2 className="font-header text-2xl mb-4 text-white"> DAILY ROTATION POLICY</h2>
             <p className="text-white/90 font-bold text-sm mb-6">
               Control which games appear on the play page each day
             </p>
