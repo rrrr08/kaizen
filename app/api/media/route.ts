@@ -10,12 +10,33 @@ cloudinary.config({
 export async function GET() {
     try {
         const result = await cloudinary.api.resources({
-            max_results: 50,
+            max_results: 100,
             direction: 'desc'
         });
         return NextResponse.json(result.resources);
     } catch (error) {
         console.error('Error fetching Cloudinary resources:', error);
         return NextResponse.json({ error: 'Failed to fetch resources' }, { status: 500 });
+    }
+}
+
+export async function DELETE(request: Request) {
+    try {
+        const { public_id } = await request.json();
+
+        if (!public_id) {
+            return NextResponse.json({ error: 'Public ID is required' }, { status: 400 });
+        }
+
+        const result = await cloudinary.uploader.destroy(public_id);
+
+        if (result.result === 'ok') {
+            return NextResponse.json({ success: true });
+        } else {
+            return NextResponse.json({ error: 'Failed to delete from Cloudinary', details: result }, { status: 500 });
+        }
+    } catch (error) {
+        console.error('Error deleting Cloudinary resource:', error);
+        return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }

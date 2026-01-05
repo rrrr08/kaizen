@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { ImagePlus, Trash, X } from 'lucide-react';
+import { ImagePlus, Trash, X, Library } from 'lucide-react';
 import Image from 'next/image';
 import { CldUploadWidget } from 'next-cloudinary';
+import { MediaGalleryModal } from '@/components/ui/MediaGalleryModal';
 
 interface ImageUploadProps {
     disabled?: boolean;
@@ -68,33 +69,39 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
                     </div>
                 ))}
             </div>
-            <CldUploadWidget
-                onSuccess={onUpload}
-                uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "kaizen_uploads"}
-                options={{
-                    ...(maxFiles ? { maxFiles } : {}),
-                    publicId: uploadId // Use unique ID to prevent widget conflicts
-                }}
-            >
-                {({ open }) => {
-                    const onClick = () => {
-                        open();
-                    };
+            <div className="flex flex-wrap items-center gap-3">
+                <CldUploadWidget
+                    onSuccess={onUpload}
+                    uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "kaizen_uploads"}
+                    options={{
+                        ...(maxFiles ? { maxFiles } : {}),
+                        publicId: uploadId // Use unique ID to prevent widget conflicts
+                    }}
+                >
+                    {({ open }) => {
+                        const onClick = () => {
+                            open();
+                        };
 
-                    return (
-                        <Button
-                            type="button"
-                            disabled={disabled}
-                            variant="secondary"
-                            onClick={onClick}
-                            className="bg-[#FFD93D] text-black font-black uppercase tracking-wide border-2 border-black neo-shadow hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all flex items-center gap-2"
-                        >
-                            <ImagePlus className="h-4 w-4 mr-2" />
-                            Upload an Image
-                        </Button>
-                    );
-                }}
-            </CldUploadWidget>
+                        return (
+                            <Button
+                                type="button"
+                                disabled={disabled}
+                                variant="secondary"
+                                onClick={onClick}
+                                className="bg-[#FFD93D] text-black font-black uppercase tracking-wide border-2 border-black neo-shadow hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all flex items-center gap-2 whitespace-nowrap"
+                            >
+                                <ImagePlus className="h-4 w-4 mr-2" />
+                                Upload new
+                            </Button>
+                        );
+                    }}
+                </CldUploadWidget>
+
+                <MediaGalleryModal
+                    onSelect={(url) => onChange(url)}
+                />
+            </div>
         </div>
     );
 }

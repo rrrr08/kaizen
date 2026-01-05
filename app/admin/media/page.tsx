@@ -7,7 +7,7 @@ import ImageUpload from '@/components/ui/ImageUpload';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Copy, Check, RefreshCw, ImagePlus, Loader2 } from 'lucide-react';
+import { Copy, Check, RefreshCw, ImagePlus, Loader2, Trash, Library } from 'lucide-react';
 import Image from 'next/image';
 import { CldUploadWidget } from 'next-cloudinary';
 
@@ -50,6 +50,26 @@ const MediaLibrary = () => {
         navigator.clipboard.writeText(url);
         setCopiedId(url);
         setTimeout(() => setCopiedId(null), 2000);
+    };
+
+    const handleDelete = async (public_id: string) => {
+        if (!confirm('Are you sure you want to delete this asset? This cannot be undone.')) return;
+
+        try {
+            const response = await fetch('/api/media', {
+                method: 'DELETE',
+                body: JSON.stringify({ public_id })
+            });
+
+            if (response.ok) {
+                setResources(prev => prev.filter(res => res.public_id !== public_id));
+            } else {
+                alert('Failed to delete asset');
+            }
+        } catch (error) {
+            console.error('Error deleting asset:', error);
+            alert('Error deleting asset');
+        }
     };
 
     const handleUploadSuccess = (result: any) => {
@@ -97,9 +117,14 @@ const MediaLibrary = () => {
                     {resources.map((resource) => (
                         <div key={resource.public_id} className="group relative aspect-square bg-gray-100 rounded-lg overflow-hidden border-2 border-black hover:neo-shadow transition-all">
                             <Image src={resource.secure_url} alt={resource.public_id} fill className="object-cover" />
-                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                <Button onClick={() => onCopy(resource.secure_url)} size="sm" className="bg-white text-black border-2 border-black hover:bg-[#FFD93D]">
+                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
+                                <Button onClick={() => onCopy(resource.secure_url)} size="sm" className="bg-white text-black border-2 border-black hover:bg-[#FFD93D] w-32 justify-start gap-2">
                                     {copiedId === resource.secure_url ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                                    <span className="text-[10px] uppercase font-black">{copiedId === resource.secure_url ? 'Copied' : 'Copy link'}</span>
+                                </Button>
+                                <Button onClick={() => handleDelete(resource.public_id)} size="sm" className="bg-[#FF7675] text-black border-2 border-black hover:bg-white w-32 justify-start gap-2">
+                                    <Trash className="w-4 h-4" />
+                                    <span className="text-[10px] uppercase font-black">Delete</span>
                                 </Button>
                             </div>
                         </div>

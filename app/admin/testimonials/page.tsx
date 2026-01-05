@@ -1,9 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { MessageSquare, Check, X, Trash2, Search, Filter, Loader2, Upload, Image as ImageIcon } from 'lucide-react';
+import { MessageSquare, Check, X, Trash2, Search, Filter, Loader2, Upload, Image as ImageIcon, Library } from 'lucide-react';
 import Image from 'next/image';
 import { CldUploadWidget } from 'next-cloudinary';
+import { MediaGalleryModal } from '@/components/ui/MediaGalleryModal';
 
 interface Testimonial {
     id: string;
@@ -61,7 +62,7 @@ export default function TestimonialsPage() {
 
     const handleDelete = async (id: string) => {
         if (!confirm('Are you sure you want to delete this testimonial?')) return;
-        
+
         try {
             const res = await fetch(`/api/testimonials?id=${id}`, {
                 method: 'DELETE',
@@ -90,7 +91,7 @@ export default function TestimonialsPage() {
             const data = await res.json();
 
             if (data.success) {
-                setTestimonials(prev => prev.map(t => 
+                setTestimonials(prev => prev.map(t =>
                     t.id === id ? { ...t, image: imageUrl } : t
                 ));
             } else {
@@ -185,29 +186,41 @@ export default function TestimonialsPage() {
                                     className="w-12 h-12 rounded-full border-2 border-black bg-gray-100 object-cover"
                                 />
                                 {/* Upload overlay */}
-                                <CldUploadWidget
-                                    onSuccess={(result: any) => {
-                                        if (result.event === 'success' && result.info?.secure_url) {
-                                            handlePhotoUpload(t.id, result.info.secure_url);
-                                        }
-                                    }}
-                                    uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "kaizen_uploads"}
-                                >
-                                    {({ open }) => (
-                                        <button
-                                            type="button"
-                                            onClick={() => open()}
-                                            disabled={uploadingPhoto === t.id}
-                                            className="absolute inset-0 bg-black/70 rounded-full flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-opacity cursor-pointer disabled:cursor-not-allowed"
-                                        >
-                                            {uploadingPhoto === t.id ? (
-                                                <Loader2 size={20} className="text-white animate-spin" />
-                                            ) : (
-                                                <Upload size={20} className="text-white" />
-                                            )}
-                                        </button>
-                                    )}
-                                </CldUploadWidget>
+                                <div className="flex flex-col gap-1">
+                                    <CldUploadWidget
+                                        onSuccess={(result: any) => {
+                                            if (result.event === 'success' && result.info?.secure_url) {
+                                                handlePhotoUpload(t.id, result.info.secure_url);
+                                            }
+                                        }}
+                                        uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "kaizen_uploads"}
+                                    >
+                                        {({ open }) => (
+                                            <button
+                                                type="button"
+                                                onClick={() => open()}
+                                                disabled={uploadingPhoto === t.id}
+                                                className="absolute inset-0 bg-black/70 rounded-full flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-opacity cursor-pointer disabled:cursor-not-allowed z-10"
+                                            >
+                                                {uploadingPhoto === t.id ? (
+                                                    <Loader2 size={20} className="text-white animate-spin" />
+                                                ) : (
+                                                    <Upload size={20} className="text-white" />
+                                                )}
+                                            </button>
+                                        )}
+                                    </CldUploadWidget>
+                                    <div className="absolute -bottom-2 -right-2 z-20 opacity-0 group-hover/avatar:opacity-100 transition-opacity">
+                                        <MediaGalleryModal
+                                            onSelect={(url) => handlePhotoUpload(t.id, url)}
+                                            trigger={
+                                                <button className="bg-[#FFD93D] p-1.5 rounded-full border-2 border-black neo-shadow-sm hover:scale-110 transition-transform">
+                                                    <Library size={12} />
+                                                </button>
+                                            }
+                                        />
+                                    </div>
+                                </div>
                             </div>
                             <div className="flex-1">
                                 <p className="font-black text-lg text-black leading-tight">{t.name}</p>

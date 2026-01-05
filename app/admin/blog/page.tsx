@@ -336,7 +336,7 @@ export default function AdminBlogPage() {
       {showForm && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-[#FFFDF5] border-4 border-black rounded-[20px] max-w-3xl w-full max-h-[90vh] overflow-y-auto neo-shadow-lg">
-            <div className="flex items-center justify-between p-6 border-b-4 border-black bg-[#FFD93D] sticky top-0 z-10">
+            <div className="flex items-center justify-between p-6 border-b-4 border-black bg-[#FFD93D] sticky top-0 z-30">
               <h2 className="font-header text-3xl font-black text-black uppercase tracking-tighter">
                 {editingId ? "Edit Post" : "New Post"}
               </h2>
