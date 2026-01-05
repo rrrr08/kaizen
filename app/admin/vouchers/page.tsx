@@ -14,7 +14,7 @@ interface VoucherTemplate {
   discountValue: number;
   icon: string;
   color: string;
-  category: 'shop' | 'events' | 'experiences';
+  category: 'shop' | 'events' | 'experiences' | 'all';
   expiryDays: number;
   minPurchase: number;
   maxDiscount?: number;
@@ -321,12 +321,13 @@ export default function AdminVouchersPage() {
               <label className="block text-xs font-black uppercase tracking-wider text-black/60 mb-2">Category</label>
               <select
                 value={formData.category}
-                onChange={(e) => setFormData({ ...formData, category: e.target.value as 'shop' | 'events' | 'experiences' })}
+                onChange={(e) => setFormData({ ...formData, category: e.target.value as 'shop' | 'events' | 'experiences' | 'all' })}
                 className="w-full px-4 py-3 bg-white border-3 border-black rounded-xl font-bold focus:outline-none focus:ring-4 focus:ring-[#FFD93D]"
               >
                 <option value="shop">🛍️ Shop</option>
                 <option value="events">🎫 Events</option>
                 <option value="experiences">🎮 Experiences</option>
+                <option value="all">🌟 All Categories</option>
               </select>
             </div>
 
@@ -408,7 +409,20 @@ export default function AdminVouchersPage() {
               <div className="flex items-center gap-4">
                 <div className="text-5xl">{voucher.icon}</div>
                 <div>
-                  <h3 className="font-header text-2xl font-black text-black">{voucher.name}</h3>
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="font-header text-2xl font-black text-black">{voucher.name}</h3>
+                    <span className={`px-2 py-0.5 rounded-lg text-xs font-black uppercase border-2 border-black ${
+                      voucher.category === 'shop' ? 'bg-[#FFD93D] text-black' :
+                      voucher.category === 'events' ? 'bg-[#6C5CE7] text-white' :
+                      voucher.category === 'experiences' ? 'bg-[#00B894] text-white' :
+                      'bg-gradient-to-r from-[#FFD93D] via-[#6C5CE7] to-[#00B894] text-white'
+                    }`}>
+                      {voucher.category === 'shop' ? '🛍️ SHOP' :
+                       voucher.category === 'events' ? '🎫 EVENTS' :
+                       voucher.category === 'experiences' ? '🎮 EXPERIENCES' :
+                       '🌟 ALL'}
+                    </span>
+                  </div>
                   <p className="text-black/60 font-bold text-sm">{voucher.description}</p>
                 </div>
               </div>

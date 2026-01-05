@@ -20,6 +20,7 @@ export default function UpcomingEventDetail() {
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
   const [showRegistrationForm, setShowRegistrationForm] = useState(false);
+  const [isRegistered, setIsRegistered] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -38,6 +39,31 @@ export default function UpcomingEventDetail() {
     if (!id) return;
     fetchEvent();
   }, [id]);
+
+  useEffect(() => {
+    if (user && id) {
+      checkRegistration();
+    }
+  }, [user, id]);
+
+  async function checkRegistration() {
+    try {
+      const { getFirestore, collection, query, where, getDocs } = await import('firebase/firestore');
+      const { app } = await import('@/lib/firebase');
+      const db = getFirestore(app);
+      
+      const q = query(
+        collection(db, 'event_registrations'),
+        where('eventId', '==', id),
+        where('userId', '==', user.uid)
+      );
+      
+      const snapshot = await getDocs(q);
+      setIsRegistered(!snapshot.empty);
+    } catch (err) {
+      console.error('Error checking registration:', err);
+    }
+  }
 
   async function fetchEvent() {
     try {
@@ -194,16 +220,16 @@ export default function UpcomingEventDetail() {
 
               <button
                 onClick={() => setShowRegistrationForm(true)}
-                disabled={isFull}
-                className={`w-full px-6 py-4 font-black text-xs tracking-widest rounded-xl border-2 border-black transition-all ${isFull
+                disabled={isFull || isRegistered}
+                className={`w-full px-6 py-4 font-black text-xs tracking-widest rounded-xl border-2 border-black transition-all ${isFull || isRegistered
                     ? 'bg-[#FF7675]/30 text-[#D63031] cursor-not-allowed opacity-60'
                     : 'bg-[#6C5CE7] text-white neo-shadow hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none'
                   }`}
               >
-                {isFull ? 'EVENT FULL' : 'REGISTER NOW'}
+                {isRegistered ? 'ALREADY REGISTERED' : isFull ? 'EVENT FULL' : 'REGISTER NOW'}
               </button>
 
-              {!isFull && (
+              {!isFull && !isRegistered && (
                 <p className="text-center text-black/40 font-bold text-xs mt-4">
                   Secure your spot today!
                 </p>
@@ -221,6 +247,7 @@ export default function UpcomingEventDetail() {
           onSuccess={() => {
             setShowRegistrationForm(false);
             setEvent({ ...event, registered: event.registered + 1 });
+            setIsRegistered(true);
           }}
           onClose={() => setShowRegistrationForm(false)}
         />

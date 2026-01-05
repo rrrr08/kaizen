@@ -64,10 +64,8 @@ export default function UpcomingEvents() {
 
   const handleRegistrationSuccess = () => {
     setSelectedEventForRegistration(null);
-    // Update events list to reflect registration
-    setEvents(prev => prev.map(e =>
-      e.id === selectedEventForRegistration?.id ? { ...e, registered: e.registered + 1 } : e
-    ));
+    // Refetch events from server to get updated registered count
+    fetchEvents();
   };
 
   if (loading) {

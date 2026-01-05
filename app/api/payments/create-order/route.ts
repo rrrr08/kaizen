@@ -26,6 +26,22 @@ export async function POST(request: NextRequest) {
 
     const { amount, currency = 'INR', receipt, notes } = await request.json();
 
+    // Check if user is already registered
+    if (notes?.userId && notes?.eventId) {
+      const { adminDb } = await import('@/lib/firebaseAdmin');
+      const existingReg = await adminDb.collection('event_registrations')
+        .where('eventId', '==', notes.eventId)
+        .where('userId', '==', notes.userId)
+        .get();
+
+      if (!existingReg.empty) {
+        return NextResponse.json(
+          { error: 'You are already registered for this event' },
+          { status: 400 }
+        );
+      }
+    }
+
     if (!amount || amount <= 0) {
       return NextResponse.json(
         { error: 'Invalid amount' },

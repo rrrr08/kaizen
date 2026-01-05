@@ -27,7 +27,7 @@ export default function EventRegistrationForm({
   onClose,
 }: EventRegistrationFormProps) {
   const router = useRouter();
-  const { hasEarlyEventAccess, workshopDiscountPercent, hasVIPSeating } = useGamification();
+  const { hasEarlyEventAccess, workshopDiscountPercent, hasVIPSeating, config, calculatePointWorth } = useGamification();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -42,17 +42,51 @@ export default function EventRegistrationForm({
   const [voucherError, setVoucherError] = useState('');
   const [checkingVoucher, setCheckingVoucher] = useState(false);
 
+  // JP Wallet state
+  const [walletPoints, setWalletPoints] = useState(0);
+  const [redeemPoints, setRedeemPoints] = useState(0);
+  const [pointsDiscount, setPointsDiscount] = useState(0);
+
   const [formData, setFormData] = useState({
     name: user?.displayName || '',
     email: user?.email || '',
     phone: '',
   });
 
+  // Fetch user's wallet points
+  useEffect(() => {
+    if (user) {
+      const fetchWalletPoints = async () => {
+        try {
+          const { getFirestore, doc, getDoc } = await import('firebase/firestore');
+          const { app } = await import('@/lib/firebase');
+          const db = getFirestore(app);
+          const userRef = doc(db, 'users', user.uid);
+          const userSnap = await getDoc(userRef);
+          if (userSnap.exists()) {
+            const userData = userSnap.data();
+            setWalletPoints(userData?.points || 0);
+          }
+        } catch (error) {
+          console.error('Error fetching wallet points:', error);
+        }
+      };
+      fetchWalletPoints();
+    }
+  }, [user]);
+
   // Calculate price with tier discount
   const basePrice = event.price || 0;
   const tierDiscount = workshopDiscountPercent > 0 ? (basePrice * workshopDiscountPercent / 100) : 0;
   const priceAfterTierDiscount = basePrice - tierDiscount;
-  const finalAmount = Math.max(0, priceAfterTierDiscount - voucherDiscount);
+  
+  // Maximum 50% of order can be paid with points
+  const maxRedeemable = priceAfterTierDiscount * 0.5;
+  const maxRedeemPoints = Math.floor(maxRedeemable / config.redeemRate);
+  const actualRedeemPoints = Math.min(redeemPoints, walletPoints, maxRedeemPoints);
+  const actualPointsDiscount = calculatePointWorth(actualRedeemPoints);
+  
+  const finalAmount = Math.max(0, priceAfterTierDiscount - actualPointsDiscount - voucherDiscount);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -146,6 +180,117 @@ export default function EventRegistrationForm({
     setVoucherError('');
   };
 
+  const handleRedeemPointsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let points = parseInt(e.target.value) || 0;
+    
+    if (points > walletPoints) {
+      points = walletPoints;
+    }
+    if (points > maxRedeemPoints) {
+      points = maxRedeemPoints;
+    }
+
+    setRedeemPoints(points);
+  };
+
+  const handleUseMaxPoints = () => {
+    const pointsToUse = Math.min(walletPoints, maxRedeemPoints);
+    setRedeemPoints(pointsToUse);
+  };
+
+  const handleFreeRegistration = async () => {
+    try {
+      // Complete registration directly without payment gateway
+      const registrationResult = await completeRegistration(
+        event.id,
+        user.uid,
+        null, // No payment order ID for free registration
+        0, // Amount paid is 0
+        0 // No wallet points for events
+      );
+
+      console.log('Registration result:', registrationResult);
+
+      if (!registrationResult.success) {
+        throw new Error(registrationResult.message || 'Registration failed');
+      }
+
+      // Mark voucher as used if one was applied
+      if (appliedVoucherId) {
+        try {
+          const token = await user.getIdToken();
+          await fetch('/api/rewards/use', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+              voucherId: appliedVoucherId,
+              orderId: registrationResult.registrationId
+            })
+          });
+        } catch (voucherError) {
+          console.error('Error marking voucher as used:', voucherError);
+        }
+      }
+
+      const registrationId = registrationResult.registrationId;
+
+      // Send confirmation email
+      try {
+        await fetch('/api/events/send-confirmation', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            registrationId,
+            email: formData.email,
+            name: formData.name,
+            eventTitle: event.title,
+            eventDate: event.datetime,
+            eventLocation: event.location,
+            amount: '0.00'
+          })
+        });
+      } catch (emailError) {
+        console.error('Error sending confirmation email:', emailError);
+      }
+
+      // Store registration details in localStorage for the success page
+      const registrationDetails = {
+        registrationId,
+        eventTitle: event.title,
+        eventDate: event.datetime ? new Date(event.datetime).toISOString() : undefined,
+        eventLocation: event.location,
+        amount: '0.00',
+        pointsUsed: 0,
+        userName: formData.name,
+        userEmail: formData.email,
+        vipSeating: hasVIPSeating && wantsVIPSeating,
+        tierDiscount: tierDiscount > 0 ? tierDiscount.toFixed(2) : null,
+        voucherDiscount: voucherDiscount > 0 ? voucherDiscount.toFixed(2) : null,
+      };
+
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(
+          `registration_${registrationId}`,
+          JSON.stringify(registrationDetails)
+        );
+      }
+
+      // Close modal and redirect to success page
+      onSuccess?.();
+      onClose();
+      router.push(`/events/registration-success/${registrationId}`);
+    } catch (error) {
+      console.error('Free registration error:', error);
+      setError(error instanceof Error ? error.message : 'Registration failed');
+      setShowErrorModal(true);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   const handlePayment = async () => {
     if (!user) {
       alert('Please sign in to register');
@@ -160,6 +305,13 @@ export default function EventRegistrationForm({
       setIsProcessing(true);
       setError(null);
 
+      // If final amount is 0 (fully covered by points/vouchers), skip Razorpay
+      if (finalAmount <= 0) {
+        // Handle free registration
+        await handleFreeRegistration();
+        return;
+      }
+
       // First, create a Razorpay order
       const orderResponse = await fetch('/api/payments/create-order', {
         method: 'POST',
@@ -170,6 +322,7 @@ export default function EventRegistrationForm({
           receipt: `EVT-${event.id}-${Date.now()}`,
           notes: {
             eventId: event.id,
+            userId: user.uid, // Add userId to notes for backend check
             eventName: event.title,
             userName: formData.name,
             userEmail: formData.email,
@@ -178,7 +331,8 @@ export default function EventRegistrationForm({
       });
 
       if (!orderResponse.ok) {
-        throw new Error('Failed to create payment order');
+        const errorData = await orderResponse.json();
+        throw new Error(errorData.error || 'Failed to create payment order');
       }
 
       const orderData = await orderResponse.json();
@@ -189,7 +343,7 @@ export default function EventRegistrationForm({
         event.id,
         user.uid,
         finalAmount * 100, // Convert to paise
-        0 // No wallet points used
+        0 // No wallet points for events
       );
 
       // Load Razorpay script
@@ -223,7 +377,7 @@ export default function EventRegistrationForm({
                   orderId: dbOrderResult.orderId,
                   eventId: event.id,
                   userId: user.uid,
-                  amount: finalAmount,
+                  amount: Math.round(finalAmount * 100),
                   walletPointsUsed: 0,
                 }),
               });
@@ -257,10 +411,10 @@ export default function EventRegistrationForm({
                 const registrationDetails = {
                   registrationId,
                   eventTitle: event.title,
-                  eventDate: event.date,
+                  eventDate: event.datetime ? new Date(event.datetime).toISOString() : undefined,
                   eventLocation: event.location,
                   amount: finalAmount.toFixed(2),
-                  pointsUsed: 0,
+                  pointsUsed: actualRedeemPoints,
                   userName: formData.name,
                   userEmail: formData.email,
                   vipSeating: hasVIPSeating && wantsVIPSeating,

@@ -59,7 +59,8 @@ export async function POST(req: NextRequest) {
     }
 
     // 4. Check category match (if specified)
-    if (category && voucher.category !== category) {
+    // Vouchers with category "all" can be used anywhere
+    if (category && voucher.category !== 'all' && voucher.category !== category) {
       validationErrors.push(`This voucher can only be used for ${voucher.category}`);
     }
 

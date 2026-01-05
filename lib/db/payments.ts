@@ -47,7 +47,7 @@ export async function createPaymentOrder(
 export async function completeRegistration(
   eventId: string,
   userId: string,
-  orderId: string,
+  orderId: string | null,
   amount: number,
   walletPointsUsed: number = 0
 ) {
@@ -91,10 +91,9 @@ export async function completeRegistration(
     const waitlisted = registrationCount.size >= capacity;
 
     // Create registration
-    const registrationData = {
+    const registrationData: any = {
       eventId,
       userId,
-      orderId,
       amountPaid: amount,
       walletPointsUsed,
       status: waitlisted ? 'waitlisted' : 'registered',
@@ -102,14 +101,26 @@ export async function completeRegistration(
       updatedAt: serverTimestamp(),
     };
 
-    const regRef = await addDoc(registrations, registrationData);
+    // Only include orderId if it exists (paid registrations)
+    if (orderId) {
+      registrationData.orderId = orderId;
+    }
 
-    // Update payment order status
-    await updateDoc(doc(firebaseDb, 'payment_orders', orderId), {
-      status: 'completed',
-      registrationId: regRef.id,
-      updatedAt: serverTimestamp(),
-    });
+    console.log('Creating event registration:', registrationData);
+    console.log('User ID:', userId);
+    console.log('Event ID:', eventId);
+    const regRef = await addDoc(registrations, registrationData);
+    console.log('Registration created successfully with ID:', regRef.id);
+    console.log('Saved to Firestore with userId:', userId);
+
+    // Update payment order status only if orderId exists
+    if (orderId) {
+      await updateDoc(doc(firebaseDb, 'payment_orders', orderId), {
+        status: 'completed',
+        registrationId: regRef.id,
+        updatedAt: serverTimestamp(),
+      });
+    }
 
     // Deduct wallet points if used
     if (walletPointsUsed > 0) {
@@ -132,12 +143,17 @@ export async function completeRegistration(
     // Update event registered count if not waitlisted
     if (!waitlisted) {
       try {
-        await updateDoc(doc(firebaseDb, 'events', eventId), {
+        const eventRef = doc(firebaseDb, 'events', eventId);
+        await updateDoc(eventRef, {
           registered: increment(1),
           updatedAt: serverTimestamp(),
         });
+        console.log(`Successfully incremented registered count for event ${eventId}`);
       } catch (error) {
         console.error('Error updating event count:', error);
+        // Log more details about the error
+        console.error('Event ID:', eventId);
+        console.error('Error details:', JSON.stringify(error, null, 2));
       }
     }
 
