@@ -47,33 +47,11 @@ export async function POST(req: NextRequest) {
         }
       });
 
-      const acknowledgementHtml = `
-        <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; border: 2px solid #000; border-radius: 12px; overflow: hidden; background-color: #FFFDF5; box-shadow: 8px 8px 0px #000;">
-          <div style="background-color: #6C5CE7; padding: 30px; text-align: center; border-bottom: 2px solid #000;">
-            <h1 style="color: white; margin: 0; font-size: 32px; text-transform: uppercase; letter-spacing: -1px;">Joy Juncture</h1>
-          </div>
-          <div style="padding: 40px; color: #2D3436;">
-            <h2 style="font-size: 24px; margin-top: 0;">Hello ${name},</h2>
-            <p style="font-size: 16px; line-height: 1.6; font-weight: 500;">
-              Thank you for reaching out to us! We've received your inquiry regarding "<strong>${subject}</strong>".
-            </p>
-            <div style="background-color: #FFD93D; padding: 20px; border: 2px solid #000; border-radius: 8px; margin: 25px 0; box-shadow: 4px 4px 0px #000;">
-              <p style="margin: 0; font-weight: 800; font-size: 14px; text-transform: uppercase; opacity: 0.6;">Your Message:</p>
-              <p style="margin: 10px 0 0 0; font-weight: 600; font-style: italic;">"${message}"</p>
-            </div>
-            <p style="font-size: 16px; line-height: 1.6; font-weight: 500;">
-              Our team will review your message and get back to you as soon as possible.
-            </p>
-            <div style="margin-top: 30px; border-top: 1px solid rgba(0,0,0,0.1); pt: 20px;">
-              <p style="margin: 0; font-weight: 800;">Best Regards,</p>
-              <p style="margin: 5px 0 0 0; font-weight: 800; color: #6C5CE7;">The Joy Juncture Team</p>
-            </div>
-          </div>
-          <div style="background-color: #2D3436; padding: 15px; text-align: center;">
-            <p style="color: white; margin: 0; font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;">© 2024 Joy Juncture Inc. • Play Responsibly</p>
-          </div>
-        </div>
-      `;
+      const { getBaseEmailTemplate } = await import('@/lib/email-templates');
+      const acknowledgementHtml = getBaseEmailTemplate(
+        `We've received your inquiry: ${subject}`,
+        `Hello ${name},<br><br>Thank you for reaching out to us! We've received your message and our team will get back to you shortly.<br><br><div style="background:white; border:2px solid black; padding:15px; box-shadow:4px 4px 0px black;"><strong>Your Message:</strong><br><br><i>${message}</i></div>`
+      );
 
       try {
         console.log('Attempting to send email to:', email);

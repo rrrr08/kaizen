@@ -7,6 +7,8 @@ import Link from 'next/link';
 import { db } from '@/lib/firebase';
 import { collection, query, orderBy, getDocs } from 'firebase/firestore';
 import CreateShipmentModal from './CreateShipmentModal';
+import InvoiceModal from './InvoiceModal';
+import { FileText } from 'lucide-react';
 
 interface Order {
     id: string;
@@ -25,6 +27,10 @@ export default function OrdersList() {
     // Shipment Modal State
     const [isShipmentModalOpen, setIsShipmentModalOpen] = useState(false);
     const [selectedOrderForShipment, setSelectedOrderForShipment] = useState<Order | null>(null);
+
+    // Invoice State
+    const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
+    const [selectedOrderForInvoice, setSelectedOrderForInvoice] = useState<Order | null>(null);
 
     const [shipmentsCache, setShipmentsCache] = useState<Record<string, any>>({});
 
@@ -63,6 +69,11 @@ export default function OrdersList() {
     const handleCreateShipment = (order: Order) => {
         setSelectedOrderForShipment(order);
         setIsShipmentModalOpen(true);
+    };
+
+    const handleShowInvoice = (order: Order) => {
+        setSelectedOrderForInvoice(order);
+        setIsInvoiceModalOpen(true);
     };
 
     if (loading) return (
@@ -132,10 +143,11 @@ export default function OrdersList() {
                                             )}
                                             {/* Placeholder for future details view if needed */}
                                             <button
-                                                className="p-1.5 bg-white neo-border hover:translate-x-[-2px] hover:translate-y-[-2px] transition-transform neo-shadow-hover opacity-50 cursor-not-allowed"
-                                                title="View Details"
+                                                onClick={() => handleShowInvoice(order)}
+                                                className="p-1.5 bg-mint neo-border hover:translate-x-[-2px] hover:translate-y-[-2px] transition-transform neo-shadow-hover text-charcoal"
+                                                title="View Invoice"
                                             >
-                                                <Eye size={16} />
+                                                <FileText size={16} />
                                             </button>
                                         </div>
                                     </td>
@@ -167,6 +179,11 @@ export default function OrdersList() {
                     customerPhone: selectedOrderForShipment.shippingAddress?.phone,
                     address: `${selectedOrderForShipment.shippingAddress?.address}, ${selectedOrderForShipment.shippingAddress?.city}, ${selectedOrderForShipment.shippingAddress?.state} - ${selectedOrderForShipment.shippingAddress?.postalCode}`
                 } : null}
+            />
+            <InvoiceModal
+                isOpen={isInvoiceModalOpen}
+                onClose={() => setIsInvoiceModalOpen(false)}
+                order={selectedOrderForInvoice}
             />
         </>
     );

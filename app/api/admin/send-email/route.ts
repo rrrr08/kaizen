@@ -77,22 +77,8 @@ export async function POST(req: NextRequest) {
     }
 
     // Prepare email content
-    const emailHtml = htmlContent || `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <div style="background-color: #6C5CE7; padding: 20px; text-align: center;">
-          <h1 style="color: white; margin: 0;">GWOC</h1>
-        </div>
-        <div style="padding: 30px; background-color: #f9f9f9;">
-          <h2 style="color: #2D3436;">${subject}</h2>
-          <div style="background-color: white; padding: 20px; border-radius: 8px; border: 2px solid #000; box-shadow: 4px 4px 0px #000;">
-            ${message.replace(/\n/g, '<br>')}
-          </div>
-        </div>
-        <div style="background-color: #2D3436; padding: 20px; text-align: center;">
-          <p style="color: white; margin: 0; font-size: 12px;">© ${new Date().getFullYear()} GWOC. All rights reserved.</p>
-        </div>
-      </div>
-    `;
+    const { getBaseEmailTemplate } = await import('@/lib/email-templates');
+    const emailHtml = htmlContent || getBaseEmailTemplate(subject, message);
 
     // Send emails (batch sending)
     let sentCount = 0;

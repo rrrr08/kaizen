@@ -63,18 +63,18 @@ export async function POST(request: NextRequest) {
         const userData = userSnap.exists ? userSnap.data() : {};
         const currentXP = userData?.xp || 0;
         const currentPoints = userData?.points || 0;
-        
+
         // Get XP settings
         const db = getFirestore(app);
         const xpSettingsRef = doc(db, 'settings', 'xpSystem');
         const xpSettingsSnap = await getDoc(xpSettingsRef);
         const xpSettings = xpSettingsSnap.exists() ? xpSettingsSnap.data() : null;
-        
+
         // Calculate XP for purchase (default: 10 XP per ₹100)
         const shopXPSource = xpSettings?.xpSources?.find((s: any) => s.name.includes('Shop Purchase'));
         const xpPer100 = shopXPSource?.baseXP || 10;
         const purchaseXP = Math.floor((amount / 100) * xpPer100);
-        
+
         // Get tier multiplier
         const TIERS = xpSettings?.tiers || [
           { name: 'Newbie', minXP: 0, multiplier: 1.0 },
@@ -83,16 +83,16 @@ export async function POST(request: NextRequest) {
           { name: 'Grandmaster', minXP: 5000, multiplier: 1.5 }
         ];
         const currentTier = [...TIERS].reverse().find((tier: any) => currentXP >= tier.minXP) || TIERS[0];
-        
+
         // Award JP based on purchase (customizable via Firebase, default: 10 JP per ₹100)
         const jpPer100 = shopXPSource?.baseJP || 10;
         const purchaseJP = Math.floor((amount / 100) * jpPer100 * currentTier.multiplier);
-        
+
         await userRef.set({
           xp: currentXP + purchaseXP,
           points: currentPoints + purchaseJP
         }, { merge: true });
-        
+
         console.log(`Awarded ${purchaseXP} XP and ${purchaseJP} JP for purchase of ₹${amount}`);
       } catch (xpError) {
         console.error('Error awarding XP for purchase:', xpError);
@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
         // Use adminDb for server-side registration to bypass client-side auth rules
         const registrationsRef = adminDb.collection('event_registrations');
         const eventsRef = adminDb.collection('events');
-        
+
         // Check if already registered
         const existingReg = await registrationsRef
           .where('eventId', '==', eventId)
@@ -154,7 +154,7 @@ export async function POST(request: NextRequest) {
           try {
             const userDoc = await adminDb.collection('users').doc(userId).get();
             const userData = userDoc.data();
-            
+
             if (userData?.email) {
               const emailUser = process.env.EMAIL_USER;
               const emailPass = process.env.EMAIL_APP_PASSWORD;
@@ -168,63 +168,15 @@ export async function POST(request: NextRequest) {
                   tls: { rejectUnauthorized: false }
                 });
 
-                const eventDate = eventData?.datetime?.toDate();
-                const formattedDate = eventDate ? new Date(eventDate).toLocaleString('en-US', {
-                  weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
-                }) : 'Date to be announced';
-
-                const ticketHtml = `
-                  <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; border: 4px solid #000; border-radius: 20px; overflow: hidden; background-color: #FFFDF5; box-shadow: 12px 12px 0px #000;">
-                    <div style="background-color: #6C5CE7; padding: 40px; text-align: center; border-bottom: 4px solid #000;">
-                      <h1 style="color: #fff; margin: 0; font-size: 32px; text-transform: uppercase; letter-spacing: -1px; font-weight: 900; text-shadow: 3px 3px 0px #000;">Event Registration</h1>
-                      <p style="margin: 10px 0 0 0; color: #fff; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; font-size: 14px;">Confirmed & Verified</p>
-                    </div>
-                    <div style="padding: 40px; color: #2D3436;">
-                      <div style="margin-bottom: 30px; text-align: center;">
-                        <h2 style="font-size: 24px; margin: 0; text-transform: uppercase; font-weight: 900;">Hello, ${userData.displayName || userData.name || 'Gamer'}!</h2>
-                        <p style="font-size: 16px; font-weight: 700; margin-top: 5px; opacity: 0.6;">You are going to...</p>
-                      </div>
-                      <div style="background-color: #fff; border: 3px solid #000; border-radius: 15px; overflow: hidden; margin-bottom: 30px; box-shadow: 6px 6px 0px #000;">
-                        <div style="background-color: #FFD93D; padding: 15px; border-bottom: 3px solid #000;">
-                            <h3 style="margin: 0; font-size: 20px; text-transform: uppercase; font-weight: 900; color: #000;">${eventData?.title || 'Event'}</h3>
-                        </div>
-                        <div style="padding: 25px;">
-                            <div style="margin-bottom: 15px;">
-                                <p style="margin: 0; font-size: 12px; font-weight: 900; text-transform: uppercase; color: #b2bec3; letter-spacing: 1px;">When</p>
-                                <p style="margin: 5px 0 0 0; font-size: 16px; font-weight: 800; color: #2d3436;">${formattedDate}</p>
-                            </div>
-                            <div style="margin-bottom: 15px;">
-                                <p style="margin: 0; font-size: 12px; font-weight: 900; text-transform: uppercase; color: #b2bec3; letter-spacing: 1px;">Where</p>
-                                <p style="margin: 5px 0 0 0; font-size: 16px; font-weight: 800; color: #2d3436;">${eventData?.location || 'Location to be announced'}</p>
-                            </div>
-                            <div>
-                                <p style="margin: 0; font-size: 12px; font-weight: 900; text-transform: uppercase; color: #b2bec3; letter-spacing: 1px;">Registration ID</p>
-                                <p style="margin: 5px 0 0 0; font-family: monospace; font-size: 16px; font-weight: 800; color: #6C5CE7;">${regRef.id}</p>
-                            </div>
-                        </div>
-                      </div>
-                      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
-                        <div style="background-color: #00B894; border: 3px solid #000; border-radius: 15px; padding: 20px; box-shadow: 4px 4px 0px #000;">
-                          <h4 style="margin: 0 0 10px 0; font-size: 14px; text-transform: uppercase; font-weight: 900; color: #fff;">Status</h4>
-                          <p style="margin: 0; font-weight: 900; font-size: 18px; color: #fff;">CONFIRMED</p>
-                        </div>
-                        <div style="background-color: #FF7675; border: 3px solid #000; border-radius: 15px; padding: 20px; box-shadow: 4px 4px 0px #000;">
-                          <h4 style="margin: 0 0 10px 0; font-size: 14px; text-transform: uppercase; font-weight: 900; color: #fff;">Amount Paid</h4>
-                          <p style="margin: 0; font-weight: 900; font-size: 18px; color: #fff;">₹${amount}</p>
-                        </div>
-                      </div>
-                      <div style="text-align: center; margin-top: 40px;">
-                        <p style="font-weight: 800; font-size: 14px; opacity: 0.5; text-transform: uppercase; margin-bottom: 20px;">Present this email at the venue</p>
-                        <div style="display: inline-block;">
-                            <span style="background: #000; color: #fff; padding: 10px 20px; border-radius: 10px; font-weight: 900; text-decoration: none; display: inline-block;">JOY JUNCTURE EVENTS</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div style="background-color: #000; padding: 20px; text-align: center;">
-                      <p style="color: white; margin: 0; font-size: 10px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase;">© 2024 Joy Juncture Inc. • Play Smart, Play Fun</p>
-                    </div>
-                  </div>
-                `;
+                const { getEventConfirmationTemplate } = await import('@/lib/email-templates');
+                const ticketHtml = getEventConfirmationTemplate(
+                  regRef.id,
+                  userData.displayName || userData.name || 'Gamer',
+                  eventData?.title || 'Event',
+                  eventData?.datetime?.toDate(),
+                  eventData?.location,
+                  amount
+                );
 
                 await transporter.sendMail({
                   from: `"Joy Juncture Events" <${emailUser}>`,
@@ -256,7 +208,7 @@ export async function POST(request: NextRequest) {
           message: waitlisted ? 'Added to waitlist' : 'Successfully registered',
           registrationId: regRef.id,
         };
-        
+
         // Award bonus XP for event registration
         try {
           const userRef = adminDb.collection('users').doc(userId);
@@ -264,28 +216,28 @@ export async function POST(request: NextRequest) {
           const userData = userSnap.exists ? userSnap.data() : {};
           const currentXP = userData?.xp || 0;
           const currentPoints = userData?.points || 0;
-          
+
           // Get XP settings
           const db = getFirestore(app);
           const xpSettingsRef = doc(db, 'settings', 'xpSystem');
           const xpSettingsSnap = await getDoc(xpSettingsRef);
           const xpSettings = xpSettingsSnap.exists() ? xpSettingsSnap.data() : null;
-          
+
           // Base registration bonus
           const eventXPSource = xpSettings?.xpSources?.find((s: any) => s.name.includes('Event Registration'));
           const baseEventXP = eventXPSource?.baseXP || 50;
           const baseEventJP = eventXPSource?.baseJP || 50;
-          
+
           // Additional XP/JP based on event price (similar to shop purchase: 10 XP per ₹100)
           const shopXPSource = xpSettings?.xpSources?.find((s: any) => s.name.includes('Shop Purchase'));
           const xpPer100 = shopXPSource?.baseXP || 10;
           const jpPer100 = shopXPSource?.baseJP || 10;
           const priceBasedXP = Math.floor((amount / 100) * xpPer100);
           const priceBasedJP = Math.floor((amount / 100) * jpPer100);
-          
+
           // Total XP and JP
           const totalXP = baseEventXP + priceBasedXP;
-          
+
           // Get tier multiplier for JP
           const TIERS = xpSettings?.tiers || [
             { name: 'Newbie', minXP: 0, multiplier: 1.0 },
@@ -294,14 +246,14 @@ export async function POST(request: NextRequest) {
             { name: 'Grandmaster', minXP: 5000, multiplier: 1.5 }
           ];
           const currentTier = [...TIERS].reverse().find((tier: any) => currentXP >= tier.minXP) || TIERS[0];
-          
+
           const totalJP = Math.floor((baseEventJP + priceBasedJP) * currentTier.multiplier);
-          
+
           await userRef.set({
             xp: currentXP + totalXP,
             points: currentPoints + totalJP
           }, { merge: true });
-          
+
           console.log(`Event Registration - Awarded ${totalXP} XP and ${totalJP} JP (base + ₹${amount} value)`);
         } catch (xpError) {
           console.error('Error awarding XP for event registration:', xpError);
