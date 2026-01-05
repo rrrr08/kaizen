@@ -3,7 +3,7 @@ import { getProducts, getExperienceCategories, getBlogPosts } from '@/lib/fireba
 import { getEvents } from '@/lib/db/events';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://joyjuncture.com';
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://joy-juncture.vercel.app';
   const currentDate = new Date();
 
   // Static routes
