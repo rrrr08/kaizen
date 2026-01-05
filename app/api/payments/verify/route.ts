@@ -1,6 +1,7 @@
 import crypto from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebaseAdmin';
+import { FieldValue } from 'firebase-admin/firestore';
 import { doc, getDoc, getFirestore } from 'firebase/firestore';
 import { app } from '@/lib/firebase';
 import nodemailer from 'nodemailer';
@@ -207,8 +208,28 @@ export async function POST(request: NextRequest) {
         if (!waitlisted) {
           try {
             await eventsRef.doc(eventId).update({
-              registered: (eventData?.registered || 0) + 1
+              registered: FieldValue.increment(1)
             });
+            
+            // RELEASE LOCK
+            // Check for any active locks for this user and event and delete them
+            try {
+              const locksRef = adminDb.collection('event_locks');
+              const locksSnap = await locksRef
+                .where('eventId', '==', eventId)
+                .where('userId', '==', userId)
+                .get();
+                
+              if (!locksSnap.empty) {
+                const batch = adminDb.batch();
+                locksSnap.docs.forEach(doc => batch.delete(doc.ref));
+                await batch.commit();
+                console.log(`Released ${locksSnap.size} locks for user ${userId} event ${eventId}`);
+              }
+            } catch (lockError) {
+              console.error('Error releasing locks in verify:', lockError);
+            }
+            
           } catch (error) {
             console.error('Error updating event count:', error);
           }

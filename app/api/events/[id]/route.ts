@@ -7,16 +7,50 @@ export async function GET(
 ) {
     try {
         const { id } = await context.params;
-        const event = await getEventById(id);
-        if (!event) {
+        
+        // Use Admin SDK to fetch event data ensures fresh data and bypasses client cache
+        const eventDoc = await db.collection('events').doc(id).get();
+        
+        if (!eventDoc.exists) {
             return NextResponse.json(
                 { success: false, error: "Event not found" },
                 { status: 404 }
             );
         }
+
+        const data = eventDoc.data();
+        const event: any = {
+            id: eventDoc.id,
+            ...data,
+            datetime: data?.datetime?.toDate(),
+            createdAt: data?.createdAt?.toDate(),
+            updatedAt: data?.updatedAt?.toDate(),
+        };
+
+        // Calculate active locks to determine true availability
+        let availableSlots = event.capacity - event.registered;
+        let activeLocksCount = 0;
+
+        try {
+            const locksRef = db.collection('event_locks');
+            const now = new Date();
+            const activeLocksSnap = await locksRef
+                .where('eventId', '==', id)
+                .where('expiresAt', '>', now) // Assuming expiresAt is stored as compatible type (Timestamp or Date)
+                .get();
+            
+            activeLocksCount = activeLocksSnap.size;
+            availableSlots = Math.max(0, availableSlots - activeLocksCount);
+        } catch (lockError) {
+            console.error("Error fetching event locks:", lockError);
+            // Fallback to basic availability if lock check fails
+        }
+
         return NextResponse.json({
             success: true,
             event,
+            availableSlots,
+            activeLocks: activeLocksCount
         });
     } catch (error) {
         console.error("Error fetching event:", error);
