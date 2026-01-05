@@ -20,6 +20,9 @@ export async function initializeFirebaseData() {
     // 0. Initialize Testimonials (Moved to top)
     await initializeTestimonials(firebaseDb, setDoc, doc, addDoc);
 
+    // 1. Initialize Experience Categories
+    await initializeExperienceCategories(firebaseDb, addDoc);
+
     /*
     // 1. Initialize Gamification Config
     await initializeGamificationConfig(firebaseDb, setDoc, doc, serverTimestamp);
@@ -613,6 +616,191 @@ async function initializeTestimonials(db: any, setDoc: any, doc: any, addDoc: an
     }
   } catch (error) {
     console.error('❌ Error initializing testimonials:', error);
+    // Don't throw, just log so other initializations can proceed if this fails
+  }
+}
+
+/**
+ * Initialize Experience Categories
+ */
+async function initializeExperienceCategories(firebaseDb: any, addDoc: any) {
+  try {
+    console.log('🎭 Initializing Experience Categories...');
+
+    const experienceCategoriesRef = firebaseDb.collection('experience_categories');
+
+    // Check if categories already exist
+    const existingSnapshot = await experienceCategoriesRef.get();
+    if (!existingSnapshot.empty) {
+      console.log('✅ Experience categories already exist, skipping initialization');
+      return;
+    }
+
+    const mockExperienceCategories = [
+      {
+        name: 'Corporate Engagement',
+        slug: 'corporate-engagement',
+        shortDescription: 'Transform your corporate events with interactive gaming experiences that boost team morale and engagement.',
+        image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&h=600&fit=crop',
+        whoFor: 'Corporate teams, companies, and organizations looking to create memorable team-building experiences.',
+        problemsSolved: [
+          'Low team engagement during corporate events',
+          'Traditional team-building activities that feel forced',
+          'Difficulty in creating lasting memories',
+          'Need for unique, memorable corporate experiences'
+        ],
+        gamesFormats: [
+          'Custom corporate trivia challenges',
+          'Team-based puzzle solving',
+          'Interactive escape rooms',
+          'Gamified workshops and seminars'
+        ],
+        imageGallery: [
+          'https://images.unsplash.com/photo-1552664730-d307ca884978?w=600&h=400&fit=crop',
+          'https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=600&h=400&fit=crop',
+          'https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=600&h=400&fit=crop'
+        ],
+        testimonials: [
+          {
+            author: 'Sarah Johnson',
+            text: 'The corporate gaming experience completely transformed our annual team retreat. Our employees are still talking about it months later!',
+            occasion: 'Annual Team Retreat'
+          },
+          {
+            author: 'Mike Chen',
+            text: 'Outstanding engagement levels. Our team productivity increased by 25% after the event.',
+            occasion: 'Company Offsite'
+          }
+        ],
+        published: true
+      },
+      {
+        name: 'Weddings',
+        slug: 'weddings',
+        shortDescription: 'Make your special day unforgettable with custom games and interactive experiences for you and your guests.',
+        image: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=800&h=600&fit=crop',
+        whoFor: 'Couples planning weddings, engagement parties, and wedding celebrations.',
+        problemsSolved: [
+          'Keeping guests engaged during long reception hours',
+          'Creating unique memories for the couple and guests',
+          'Breaking the ice between different groups of guests',
+          'Adding fun activities beyond traditional wedding games'
+        ],
+        gamesFormats: [
+          'Custom wedding trivia about the couple',
+          'Interactive photo booths with games',
+          'Couple\'s story timeline games',
+          'Guest networking games'
+        ],
+        imageGallery: [
+          'https://images.unsplash.com/photo-1519741497674-611481863552?w=600&h=400&fit=crop',
+          'https://images.unsplash.com/photo-1465495976277-4387d4b0e4a6?w=600&h=400&fit=crop',
+          'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=600&h=400&fit=crop'
+        ],
+        testimonials: [
+          {
+            author: 'Emma & James',
+            text: 'Our wedding was absolutely magical! The games kept everyone entertained and created so many beautiful memories.',
+            occasion: 'Wedding Reception'
+          },
+          {
+            author: 'Lisa Martinez',
+            text: 'The custom trivia about our relationship had everyone in tears of laughter. Best wedding investment ever!',
+            occasion: 'Wedding Celebration'
+          }
+        ],
+        published: true
+      },
+      {
+        name: 'Birthdays / Anniversaries',
+        slug: 'birthdays-anniversaries',
+        shortDescription: 'Celebrate life\'s milestones with personalized gaming experiences that create joy and lasting memories.',
+        image: 'https://images.unsplash.com/photo-1464349095431-e9a21285b5f3?w=800&h=600&fit=crop',
+        whoFor: 'Individuals celebrating birthdays, anniversaries, and other personal milestones.',
+        problemsSolved: [
+          'Making birthday parties memorable for all ages',
+          'Creating unique anniversary celebrations',
+          'Engaging guests of different age groups',
+          'Adding interactive elements to traditional celebrations'
+        ],
+        gamesFormats: [
+          'Personalized birthday trivia',
+          'Timeline memory games',
+          'Group challenge activities',
+          'Interactive storytelling games'
+        ],
+        imageGallery: [
+          'https://images.unsplash.com/photo-1464349095431-e9a21285b5f3?w=600&h=400&fit=crop',
+          'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=600&h=400&fit=crop',
+          'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=600&h=400&fit=crop'
+        ],
+        testimonials: [
+          {
+            author: 'David Kim',
+            text: 'My 50th birthday party was incredible! The games were perfect for all ages and everyone had a blast.',
+            occasion: '50th Birthday'
+          },
+          {
+            author: 'Maria Gonzalez',
+            text: 'Our 25th anniversary celebration was magical. The personalized games brought tears to our eyes.',
+            occasion: '25th Anniversary'
+          }
+        ],
+        published: true
+      },
+      {
+        name: 'Carnivals & Game Zones',
+        slug: 'carnivals-game-zones',
+        shortDescription: 'Create vibrant, interactive game zones for festivals, carnivals, and large-scale events.',
+        image: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&h=600&fit=crop',
+        whoFor: 'Event organizers, festival planners, and companies hosting large-scale celebrations.',
+        problemsSolved: [
+          'Creating engaging entertainment for large crowds',
+          'Managing multiple activities simultaneously',
+          'Ensuring activities suit different age groups',
+          'Building excitement and energy at events'
+        ],
+        gamesFormats: [
+          'Multiple game stations setup',
+          'Rotating activity zones',
+          'Team competition formats',
+          'Interactive carnival games'
+        ],
+        imageGallery: [
+          'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=600&h=400&fit=crop',
+          'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=600&h=400&fit=crop',
+          'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&h=400&fit=crop'
+        ],
+        testimonials: [
+          {
+            author: 'Festival Director',
+            text: 'The game zone was the highlight of our festival. Thousands of attendees participated and loved every minute!',
+            occasion: 'Annual Music Festival'
+          },
+          {
+            author: 'Event Coordinator',
+            text: 'Perfect for corporate carnivals. The games were engaging, professional, and created amazing team spirit.',
+            occasion: 'Corporate Family Day'
+          }
+        ],
+        published: true
+      }
+    ];
+
+    let addedCount = 0;
+    for (const category of mockExperienceCategories) {
+      await addDoc(experienceCategoriesRef, {
+        ...category,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      });
+      console.log(`✅ Added experience category: ${category.name}`);
+      addedCount++;
+    }
+
+    console.log(`✅ Experience categories initialization complete - Added ${addedCount} categories`);
+  } catch (error) {
+    console.error('❌ Error initializing experience categories:', error);
     // Don't throw, just log so other initializations can proceed if this fails
   }
 }

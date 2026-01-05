@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Settings, Users, BarChart3, Zap, Bell, ShoppingBag, Home, Calendar, LayoutGrid, FileText, Gamepad2, Trophy, Database, Ticket, TrendingUp, MessageSquare, Mail, Truck, ChevronLeft, ChevronRight, Menu, X } from 'lucide-react';
+import { Settings, Users, BarChart3, Zap, Bell, ShoppingBag, Home, Calendar, LayoutGrid, FileText, Gamepad2, Trophy, Database, Ticket, TrendingUp, MessageSquare, Mail, Truck, ChevronLeft, ChevronRight, Menu, X, Sparkles } from 'lucide-react';
 
 import { useAuth } from '@/app/context/AuthContext';
 
@@ -62,6 +62,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: '/admin/media', label: 'Media', icon: FileText },
     { href: '/admin/blog', label: 'Blog', icon: FileText },
     { href: '/admin/events', label: 'Events', icon: Calendar },
+    { href: '/admin/experiences', label: 'Experiences', icon: Sparkles },
+    { href: '/admin/experiences/enquiries', label: 'Experience Enquiries', icon: MessageSquare },
     { href: '/admin/testimonials', label: 'Testimonials', icon: MessageSquare },
     { href: '/admin/push-notifications', label: 'Notifications', icon: Bell },
     { href: '/admin/emails', label: 'Send Emails', icon: Mail },

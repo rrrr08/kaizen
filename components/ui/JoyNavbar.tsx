@@ -146,22 +146,24 @@ const Navbar: React.FC = () => {
         <div className="flex items-center gap-2 z-50">
           {/* Wallet Capsule (Hidden on small mobile) */}
           <div className="hidden sm:flex items-center gap-2">
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              className="flex items-center gap-2 bg-[#00B894] px-3 py-1.5 rounded-full border-2 border-black neo-shadow"
-            >
+            <Link href="/rewards">
               <motion.div
-                animate={{ rotateY: [0, 360] }}
-                transition={{ duration: 2, repeat: Infinity, repeatDelay: 3, ease: "easeInOut" }}
-                className="flex items-center justify-center"
+                whileHover={{ scale: 1.05 }}
+                className="flex items-center gap-2 bg-[#00B894] px-3 py-1.5 rounded-full border-2 border-black neo-shadow cursor-pointer"
               >
-                <Coins className="text-black w-4 h-4" />
+                <motion.div
+                  animate={{ rotateY: [0, 360] }}
+                  transition={{ duration: 2, repeat: Infinity, repeatDelay: 3, ease: "easeInOut" }}
+                  className="flex items-center justify-center"
+                >
+                  <Coins className="text-black w-4 h-4" />
+                </motion.div>
+                <div className="flex flex-col">
+                  <span className="text-[7px] text-black font-black uppercase leading-none tracking-widest">Balance</span>
+                  <span className="text-black font-black whitespace-nowrap text-xs leading-none">{balance.toLocaleString()}</span>
+                </div>
               </motion.div>
-              <div className="flex flex-col">
-                <span className="text-[7px] text-black font-black uppercase leading-none tracking-widest">Balance</span>
-                <span className="text-black font-black whitespace-nowrap text-xs leading-none">{balance.toLocaleString()}</span>
-              </div>
-            </motion.div>
+            </Link>
           </div>
 
           {/* Cart Button */}
