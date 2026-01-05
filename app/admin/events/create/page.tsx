@@ -7,9 +7,7 @@ import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { getAuth } from 'firebase/auth';
 
-export const dynamic = 'force-dynamic';
 
-export const dynamic = 'force-dynamic';
 
 export default function CreateEventPage() {
   const router = useRouter();
