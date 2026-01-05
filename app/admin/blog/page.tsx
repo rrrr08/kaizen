@@ -15,6 +15,7 @@ import {
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/app/context/AuthContext";
+import { usePopup } from "@/app/context/PopupContext";
 import {
   Plus,
   Edit2,
@@ -58,6 +59,7 @@ const CATEGORIES = [
 
 export default function AdminBlogPage() {
   const { user } = useAuth();
+  const { showAlert, showConfirm } = usePopup();
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -139,14 +141,15 @@ export default function AdminBlogPage() {
   };
 
   const onDelete = async (id: string) => {
-    if (!confirm("Delete this post? This cannot be undone.")) return;
+    const confirmed = await showConfirm("Delete this post? This cannot be undone.", "Delete Post");
+    if (!confirmed) return;
     try {
       await deleteDoc(doc(db, "blog_posts", id));
       setPosts((p) => p.filter((x) => x.id !== id));
-      alert("Post deleted");
+      await showAlert("Post deleted", "success");
     } catch (e) {
       console.error("Delete failed", e);
-      alert("Failed to delete");
+      await showAlert("Failed to delete", "error");
     }
   };
 
@@ -155,7 +158,7 @@ export default function AdminBlogPage() {
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.title || !form.excerpt || !form.content) {
-      alert("Please fill title, excerpt and content");
+      await showAlert("Please fill title, excerpt and content", "warning");
       return;
     }
     setSubmitting(true);
@@ -173,7 +176,7 @@ export default function AdminBlogPage() {
       if (editingId) {
         await updateDoc(doc(db, "blog_posts", editingId), data);
         setPosts((prev) => prev.map((p) => (p.id === editingId ? { ...p, ...data, updatedAt: new Date() } : p)));
-        alert("Post updated");
+        await showAlert("Post updated", "success");
       } else {
         const ref = doc(collection(db, "blog_posts"));
         await setDoc(ref, {
@@ -188,13 +191,13 @@ export default function AdminBlogPage() {
           } as BlogPost,
           ...prev,
         ]);
-        alert("Post created");
+        await showAlert("Post created", "success");
       }
       setShowForm(false);
       setEditingId(null);
     } catch (e) {
       console.error("Save failed", e);
-      alert("Failed to save post");
+      await showAlert("Failed to save post", "error");
     } finally {
       setSubmitting(false);
     }

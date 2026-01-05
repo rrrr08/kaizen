@@ -6,6 +6,7 @@ import { Trash2, ExternalLink, Calendar, User, Mail, MessageSquare, AlertCircle 
 import RoleProtected from '@/components/auth/RoleProtected';
 import { USER_ROLES } from '@/lib/roles';
 import { format } from 'date-fns';
+import { usePopup } from '@/app/context/PopupContext';
 
 interface Inquiry {
     id: string;
@@ -18,6 +19,7 @@ interface Inquiry {
 }
 
 export default function AdminInquiriesPage() {
+    const { showConfirm } = usePopup();
     const [inquiries, setInquiries] = useState<Inquiry[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedInquiry, setSelectedInquiry] = useState<Inquiry | null>(null);
@@ -48,7 +50,8 @@ export default function AdminInquiriesPage() {
 
     const handleDelete = async (id: string, e: React.MouseEvent) => {
         e.stopPropagation();
-        if (!confirm('Are you sure you want to delete this inquiry?')) return;
+        const confirmed = await showConfirm('Are you sure you want to delete this inquiry?', 'Delete Inquiry');
+        if (!confirmed) return;
 
         try {
             const currentUser = auth.currentUser;

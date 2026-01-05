@@ -5,11 +5,13 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { GameEvent } from '@/lib/types';
 import { splitDateTime } from '@/lib/utils';
+import { usePopup } from '@/app/context/PopupContext';
 
 export const dynamic = 'force-dynamic';
 
 export default function EventDetail() {
   const { id } = useParams<{ id: string }>();
+  const { showAlert } = usePopup();
   const [user, setUser] = useState<any>(null);
   const [event, setEvent] = useState<GameEvent | null>(null);
   const [loading, setLoading] = useState(true);
@@ -73,7 +75,7 @@ export default function EventDetail() {
   async function submitTestimonial() {
     if (!event || !user) return;
     if (rating === 0 || comment.trim() === '') {
-      alert('Please add rating and comment');
+      await showAlert('Please add rating and comment', 'warning');
       return;
     }
 
@@ -103,7 +105,7 @@ export default function EventDetail() {
       );
     } catch (err) {
       console.error(err);
-      alert('Could not save testimonial');
+      await showAlert('Could not save testimonial', 'error');
     } finally {
       setSubmitting(false);
     }

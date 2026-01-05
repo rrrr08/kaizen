@@ -23,6 +23,7 @@ import { db } from '@/lib/firebase';
 import { USER_ROLES, ROLE_LABELS, getRoleColor, getRoleIcon } from '@/lib/roles';
 import { Users, Search, Edit3, Shield, Check, X, Eye, Calendar, ShoppingBag, Package } from 'lucide-react';
 import RoleProtected from '@/components/auth/RoleProtected';
+import { usePopup } from '@/app/context/PopupContext';
 
 interface User {
   id: string;
@@ -62,6 +63,7 @@ interface Purchase {
 }
 
 const UserManagementPage = () => {
+  const { showAlert } = usePopup();
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [viewDetailsUser, setViewDetailsUser] = useState<User | null>(null);
@@ -104,10 +106,10 @@ const UserManagementPage = () => {
         await updateDoc(userRef, { role: newRole });
         setUsers(users.map(user => user.id === selectedUser.id ? { ...user, role: newRole } : user));
         setSelectedUser(null);
-        alert('✅ User role updated successfully!');
+        await showAlert('User role updated successfully!', 'success');
       } catch (error) {
         console.error('Error updating role:', error);
-        alert('❌ Failed to update role. Please check your permissions.');
+        await showAlert('Failed to update role. Please check your permissions.', 'error');
       }
     }
   };

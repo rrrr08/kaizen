@@ -4,6 +4,7 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import { saveShipment } from '@/lib/db/shipments';
+import { usePopup } from '@/app/context/PopupContext';
 
 interface CreateShipmentModalProps {
     isOpen: boolean;
@@ -19,6 +20,7 @@ interface CreateShipmentModalProps {
 }
 
 export default function CreateShipmentModal({ isOpen, onClose, onSuccess, initialData }: CreateShipmentModalProps) {
+    const { showAlert } = usePopup();
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
         orderId: initialData?.orderId || '',
@@ -67,7 +69,7 @@ export default function CreateShipmentModal({ isOpen, onClose, onSuccess, initia
             onClose();
         } catch (error) {
             console.error('Failed to create shipment:', error);
-            alert('Failed to create shipment. Please try again.');
+            await showAlert('Failed to create shipment. Please try again.', 'error');
         } finally {
             setLoading(false);
         }

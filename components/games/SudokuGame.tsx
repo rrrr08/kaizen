@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Scratcher from '../gamification/Scratcher';
 import { Clock, RefreshCcw, Trophy, AlertCircle, Star, Lightbulb, Eraser, Undo, Redo, PenTool, Pencil } from 'lucide-react';
 import { awardGamePoints, getGameHistory } from '@/lib/gameApi';
+import { usePopup } from '@/app/context/PopupContext';
 import confetti from 'canvas-confetti';
 
 async function fetchSudokuBoard(difficulty = 'easy') {
@@ -29,6 +30,7 @@ const LEVELS = [
 ];
 
 const SudokuGame: React.FC = () => {
+    const { showAlert, showConfirm } = usePopup();
     const [level, setLevel] = useState('medium');
     const [puzzle, setPuzzle] = useState<number[][]>([]);
     const [solution, setSolution] = useState<number[][]>([]);
@@ -342,7 +344,8 @@ const SudokuGame: React.FC = () => {
     };
 
     const handleShowSolution = async () => {
-        if (!confirm('Spend 50 JP to reveal the solution?')) {
+        const confirmed = await showConfirm('Spend 50 JP to reveal the solution?', 'Reveal Solution');
+        if (!confirmed) {
             return;
         }
 
@@ -353,7 +356,7 @@ const SudokuGame: React.FC = () => {
             const user = auth.currentUser;
 
             if (!user) {
-                alert('⚠️ Please sign in to use this feature');
+                await showAlert('Please sign in to use this feature', 'warning');
                 return;
             }
 
@@ -375,11 +378,11 @@ const SudokuGame: React.FC = () => {
                 confetti({ particleCount: 100, spread: 60, origin: { y: 0.6 } });
             } else {
                 const errorMsg = data.error || 'Failed to deduct JP';
-                alert(`❌ ${errorMsg}\n\nYou need 50 JP to reveal the solution. Play more games or complete challenges to earn JP!`);
+                await showAlert(`${errorMsg}\n\nYou need 50 JP to reveal the solution. Play more games or complete challenges to earn JP!`, 'error', 'Insufficient JP');
             }
         } catch (error) {
             console.error('Error revealing solution:', error);
-            alert('❌ Error revealing solution. Please check your internet connection and try again.');
+            await showAlert('Error revealing solution. Please check your internet connection and try again.', 'error');
         }
     };
 

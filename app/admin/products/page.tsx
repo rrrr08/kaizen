@@ -6,6 +6,7 @@ import { getDocs, collection, deleteDoc, doc, setDoc, updateDoc } from 'firebase
 import { db } from '@/lib/firebase';
 import ImageUpload from '@/components/ui/ImageUpload';
 import Image from 'next/image';
+import { usePopup } from '@/app/context/PopupContext';
 
 interface Product {
   id: string;
@@ -51,6 +52,7 @@ interface FormData {
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const { showConfirm, showAlert } = usePopup();
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<'all' | 'apparel' | 'accessories' | 'collectibles'>('all');
   const [showAddForm, setShowAddForm] = useState(false);
@@ -145,15 +147,16 @@ export default function ProductsPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this product?')) return;
+    const confirmed = await showConfirm('Are you sure you want to delete this product?', 'Delete Product');
+    if (!confirmed) return;
 
     try {
       await deleteDoc(doc(db, 'products', id));
       setProducts(products.filter(p => p.id !== id));
-      alert('Product deleted successfully!');
+      await showAlert('Product deleted successfully!', 'success');
     } catch (error: any) {
       console.error('Error deleting product:', error);
-      alert(`Failed to delete product: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      await showAlert(`Failed to delete product: ${error instanceof Error ? error.message : 'Unknown error'}`, 'error');
     }
   };
 
@@ -161,7 +164,7 @@ export default function ProductsPage() {
     e.preventDefault();
 
     if (!formData.name || !formData.price || !formData.cost || !formData.stock) {
-      alert('Please fill in all required fields');
+      await showAlert('Please fill in all required fields', 'warning');
       return;
     }
 
@@ -192,7 +195,7 @@ export default function ProductsPage() {
         // Update existing product
         await updateDoc(doc(db, 'products', editingId), productData);
         setProducts(products.map(p => p.id === editingId ? { ...p, ...productData } : p));
-        alert('Product updated successfully!');
+        await showAlert('Product updated successfully!', 'success');
       } else {
         // Create new product
         const newDocRef = doc(collection(db, 'products'));
@@ -201,14 +204,14 @@ export default function ProductsPage() {
           createdAt: new Date().toISOString(),
         });
         setProducts([...products, { id: newDocRef.id, ...productData } as any]);
-        alert('Product created successfully!');
+        await showAlert('Product created successfully!', 'success');
       }
 
       setShowAddForm(false);
       setEditingId(null);
     } catch (error) {
       console.error('Error saving product:', error);
-      alert('Failed to save product');
+      await showAlert('Failed to save product', 'error');
     } finally {
       setSubmitting(false);
     }

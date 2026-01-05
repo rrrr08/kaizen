@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/app/context/AuthContext';
+import { usePopup } from '@/app/context/PopupContext';
 import {
   Package,
   ArrowRight,
@@ -96,6 +97,7 @@ export default function OrdersPage() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const [orders, setOrders] = useState<Order[]>([]);
+  const { showAlert, showConfirm } = usePopup();
   const [eventRegistrations, setEventRegistrations] = useState<EventRegistration[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -283,10 +285,10 @@ export default function OrdersPage() {
                     });
                     const data = await res.json();
                     console.log('Debug Registrations:', data);
-                    alert(`Found ${data.count} registrations in DB. Check console for details.`);
+                    await showAlert(`Found ${data.count} registrations in DB. Check console for details.`, 'info', 'Debug Info');
                   } catch (e) {
                     console.error(e);
-                    alert('Debug check failed');
+                    await showAlert('Debug check failed', 'error');
                   }
                 }}
                 className="px-6 py-3 bg-gray-800 text-white border-2 border-black rounded-xl neo-shadow font-black text-xs tracking-widest hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all uppercase"
@@ -295,7 +297,8 @@ export default function OrdersPage() {
               </button>
               <button
                 onClick={async () => {
-                  if (!confirm('Are you sure you want to clear your entire order history? This cannot be undone.')) return;
+                  const confirmed = await showConfirm('Are you sure you want to clear your entire order history? This cannot be undone.', 'Clear History');
+                  if (!confirmed) return;
                   try {
                     setLoading(true);
                     const token = await user.getIdToken();
@@ -308,14 +311,14 @@ export default function OrdersPage() {
                     if (res.ok) {
                       setOrders([]);
                       setEventRegistrations([]);
-                      alert('History cleared successfully');
+                      await showAlert('History cleared successfully', 'success');
                     } else {
                       const data = await res.json();
-                      alert('Failed to clear history: ' + data.error);
+                      await showAlert('Failed to clear history: ' + data.error, 'error');
                     }
                   } catch (err) {
                     console.error(err);
-                    alert('Error clearing history');
+                    await showAlert('Error clearing history', 'error');
                   } finally {
                     setLoading(false);
                   }

@@ -6,11 +6,13 @@ import ImageUpload from '@/components/ui/ImageUpload';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { getAuth } from 'firebase/auth';
+import { usePopup } from '@/app/context/PopupContext';
 
 
 
 export default function CreateEventPage() {
   const router = useRouter();
+  const { showAlert } = usePopup();
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [form, setForm] = useState({
@@ -90,7 +92,7 @@ export default function CreateEventPage() {
     const user = auth.currentUser;
 
     if (!user) {
-      alert('Not authenticated');
+      await showAlert('Not authenticated', 'error');
       return;
     }
 
@@ -108,7 +110,7 @@ export default function CreateEventPage() {
     setLoading(false);
 
     if (res.ok) router.push('/admin/events');
-    else alert('Failed to create event');
+    else await showAlert('Failed to create event', 'error');
   };
 
   return (

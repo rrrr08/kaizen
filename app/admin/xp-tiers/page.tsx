@@ -5,6 +5,7 @@ import { doc, getDoc, setDoc, getFirestore } from 'firebase/firestore';
 import { app } from '@/lib/firebase';
 import { motion } from 'framer-motion';
 import { Trophy, Zap, Settings, AlertCircle, Save, CheckCircle } from 'lucide-react';
+import { usePopup } from '@/app/context/PopupContext';
 
 interface Tier {
   name: string;
@@ -25,6 +26,7 @@ interface XPSource {
 }
 
 export default function XPTiersAdmin() {
+  const { showAlert } = usePopup();
   const [tiers, setTiers] = useState<Tier[]>([]);
   const [xpSources, setXPSources] = useState<XPSource[]>([]);
   const [loading, setLoading] = useState(true);
@@ -81,11 +83,11 @@ export default function XPTiersAdmin() {
         xpSources,
         updatedAt: new Date().toISOString()
       });
-      alert('✅ XP System settings saved successfully!');
+      await showAlert('XP System settings saved successfully!', 'success');
       setIsInitialized(true);
     } catch (error) {
       console.error('Error saving settings:', error);
-      alert('❌ Failed to save settings');
+      await showAlert('Failed to save settings', 'error');
     } finally {
       setSaving(false);
     }

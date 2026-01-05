@@ -2,12 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/app/context/AuthContext';
+import { usePopup } from '@/app/context/PopupContext';
 import { Plus, Trash2, Edit2 } from 'lucide-react';
 
 type GameType = 'riddle' | 'trivia' | 'wordle' | 'hangman' | 'wordsearch' | 'chess';
 
 export default function GameContentPage() {
   const { user } = useAuth();
+  const { showConfirm } = usePopup();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [selectedGame, setSelectedGame] = useState<GameType>('riddle');
@@ -108,7 +110,9 @@ export default function GameContentPage() {
   };
 
   const handleDeleteItem = async (itemId: string) => {
-    if (!user || !confirm('Delete this item?')) return;
+    if (!user) return;
+    const confirmed = await showConfirm('Delete this item?', 'Delete Item');
+    if (!confirmed) return;
 
     setLoading(true);
     try {

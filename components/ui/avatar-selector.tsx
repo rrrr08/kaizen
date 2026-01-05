@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Camera, Shuffle, Upload, X } from 'lucide-react';
 import { generateRandomMultiavatar } from '@/lib/multiavatar';
+import { usePopup } from '@/app/context/PopupContext';
 
 interface AvatarSelectorProps {
   currentAvatar: string;
@@ -23,6 +24,7 @@ export default function AvatarSelector({
   className = "w-32 h-32",
   trigger
 }: AvatarSelectorProps) {
+  const { showAlert } = usePopup();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedAvatar, setSelectedAvatar] = useState<string>(currentAvatar);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -37,19 +39,19 @@ export default function AvatarSelector({
     setIsGenerating(false);
   };
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
     // Check file type
     if (!file.type.startsWith('image/')) {
-      alert('Please select an image file');
+      await showAlert('Please select an image file', 'warning');
       return;
     }
 
     // Check file size (limit to 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      alert('Please select an image smaller than 5MB');
+      await showAlert('Please select an image smaller than 5MB', 'warning');
       return;
     }
 

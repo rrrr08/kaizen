@@ -10,6 +10,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Copy, Check, RefreshCw, ImagePlus, Loader2, Trash, Library } from 'lucide-react';
 import Image from 'next/image';
 import { CldUploadWidget } from 'next-cloudinary';
+import { usePopup } from '@/app/context/PopupContext';
 
 // --- TYPES ---
 interface CloudinaryResource {
@@ -23,6 +24,7 @@ interface CloudinaryResource {
 
 // --- MEDIA LIBRARY COMPONENT ---
 const MediaLibrary = () => {
+    const { showAlert, showConfirm } = usePopup();
     const [resources, setResources] = useState<CloudinaryResource[]>([]);
     const [loading, setLoading] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
@@ -53,7 +55,8 @@ const MediaLibrary = () => {
     };
 
     const handleDelete = async (public_id: string) => {
-        if (!confirm('Are you sure you want to delete this asset? This cannot be undone.')) return;
+        const confirmed = await showConfirm('Are you sure you want to delete this asset? This cannot be undone.', 'Delete Asset');
+        if (!confirmed) return;
 
         try {
             const response = await fetch('/api/media', {
@@ -64,11 +67,11 @@ const MediaLibrary = () => {
             if (response.ok) {
                 setResources(prev => prev.filter(res => res.public_id !== public_id));
             } else {
-                alert('Failed to delete asset');
+                await showAlert('Failed to delete asset', 'error');
             }
         } catch (error) {
             console.error('Error deleting asset:', error);
-            alert('Error deleting asset');
+            await showAlert('Error deleting asset', 'error');
         }
     };
 
@@ -143,6 +146,7 @@ const MediaLibrary = () => {
 
 // --- SITE CONTENT MANAGER COMPONENT ---
 const SiteContentManager = () => {
+    const { showAlert } = usePopup();
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
 
@@ -191,10 +195,10 @@ const SiteContentManager = () => {
         setSaving(true);
         try {
             await setDoc(doc(db, 'content', collection), data);
-            alert(`${collection} content updated!`);
+            await showAlert(`${collection} content updated!`, 'success');
         } catch (error) {
             console.error(`Error saving ${collection}:`, error);
-            alert('Save failed');
+            await showAlert('Save failed', 'error');
         } finally {
             setSaving(false);
         }
@@ -370,10 +374,10 @@ const SiteContentManager = () => {
                             setSaving(true);
                             try {
                                 await setDoc(doc(db, 'content', 'siteSettings'), { logoUrl });
-                                alert('Logo updated successfully!');
+                                await showAlert('Logo updated successfully!', 'success');
                             } catch (error) {
                                 console.error('Error saving logo:', error);
-                                alert('Save failed');
+                                await showAlert('Save failed', 'error');
                             } finally {
                                 setSaving(false);
                             }

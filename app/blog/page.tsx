@@ -158,13 +158,13 @@ export default function Blog() {
                 </section>
 
                 {/* SECTION 3 — FILTERS */}
-                <div className="mb-20 sticky top-24 z-40 bg-[#FFFDF5]/95 backdrop-blur py-4 border-b-2 border-black/10 overflow-x-auto">
-                    <div className="flex items-center gap-4 min-w-max pb-2">
+                <div className="mb-20 py-4">
+                    <div className="flex items-center gap-4 overflow-x-auto scrollbar-hide">
                         {categories.map((cat) => (
                             <button
                                 key={cat}
                                 onClick={() => setActiveCategory(cat)}
-                                className={`px-4 py-2 rounded-xl text-[10px] font-black tracking-[0.2em] uppercase transition-all border-2 ${activeCategory === cat
+                                className={`px-4 py-2 rounded-xl text-[10px] font-black tracking-[0.2em] uppercase transition-all border-2 whitespace-nowrap ${activeCategory === cat
                                     ? 'bg-black text-white border-black shadow-[4px_4px_0px_rgba(0,0,0,0.2)]'
                                     : 'bg-white text-black border-black hover:bg-[#FFD93D] shadow-[2px_2px_0px_rgba(0,0,0,0.1)]'
                                     }`}

@@ -8,10 +8,12 @@ import { splitDateTime } from '@/lib/utils';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import { usePopup } from '@/app/context/PopupContext';
 
 
 export default function EventsPage() {
   const router = useRouter();
+  const { showAlert, showConfirm } = usePopup();
   const [events, setEvents] = useState<GameEvent[]>([]);
   const [checkingAdmin, setCheckingAdmin] = useState(true);
   const [loading, setLoading] = useState(true);
@@ -95,14 +97,15 @@ export default function EventsPage() {
   };
 
   const handleDeleteEvent = async (eventId: string) => {
-    if (!window.confirm('Are you sure you want to cancel this event?')) return;
+    const confirmed = await showConfirm('Are you sure you want to cancel this event?', 'Cancel Event');
+    if (!confirmed) return;
 
     try {
       const auth = getAuth();
       const user = auth.currentUser;
 
       if (!user) {
-        alert('Not authenticated');
+        await showAlert('Not authenticated', 'error');
         return;
       }
 
@@ -124,7 +127,7 @@ export default function EventsPage() {
       setEvents(prev => prev.filter(e => e.id !== eventId));
     } catch (error) {
       console.error('Error deleting event:', error);
-      alert('Failed to delete event');
+      await showAlert('Failed to delete event', 'error');
     }
   };
 

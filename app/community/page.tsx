@@ -6,8 +6,10 @@ import { useState, useEffect } from 'react';
 import { X, ArrowRight, Upload, Image as ImageIcon } from 'lucide-react';
 import Image from 'next/image';
 import { CldUploadWidget } from 'next-cloudinary';
+import { usePopup } from '@/app/context/PopupContext';
 
 export default function Community() {
+  const { showAlert } = usePopup();
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -65,12 +67,12 @@ export default function Community() {
         setSubmitForm({ name: '', role: '', quote: '', image: '' });
         setPhotoPreview(null);
         setIsSubmitOpen(false);
-        alert('Thank you! Your story has been submitted for review.');
+        await showAlert('Thank you! Your story has been submitted for review.', 'success');
       } else {
-        alert(data.error || 'Failed to submit');
+        await showAlert(data.error || 'Failed to submit', 'error');
       }
     } catch (error) {
-      alert('Error submitting testimonial');
+      await showAlert('Error submitting testimonial', 'error');
     } finally {
       setIsSubmitting(false);
     }

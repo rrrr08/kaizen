@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useAuth } from '@/app/context/AuthContext';
+import { usePopup } from '@/app/context/PopupContext';
 import { Play, CheckCircle, XCircle, Loader } from 'lucide-react';
 
 interface TestResult {
@@ -16,6 +17,7 @@ interface TestResult {
 
 export default function APITestPage() {
   const { user } = useAuth();
+  const { showAlert } = usePopup();
   const [testing, setTesting] = useState(false);
   const [results, setResults] = useState<TestResult[]>([]);
 
@@ -36,7 +38,7 @@ export default function APITestPage() {
 
   const runTests = async () => {
     if (!user) {
-      alert('Please log in first!');
+      await showAlert('Please log in first!', 'warning');
       return;
     }
 

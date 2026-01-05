@@ -4,6 +4,7 @@ import { collection, doc, getDoc, setDoc, getFirestore } from 'firebase/firestor
 import { app } from '@/lib/firebase';
 const db = getFirestore(app);
 import { Trash, Plus, Save } from 'lucide-react';
+import { usePopup } from '@/app/context/PopupContext';
 
 interface WheelPrize {
     id: string;
@@ -15,6 +16,7 @@ interface WheelPrize {
 }
 
 export default function WheelSettingsPage() {
+    const { showAlert } = usePopup();
     const [prizes, setPrizes] = useState<WheelPrize[]>([]);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -45,7 +47,7 @@ export default function WheelSettingsPage() {
             // Validate probabilities sum to 1 (warn only?)
             const totalProb = prizes.reduce((sum, p) => sum + Number(p.probability), 0);
             if (Math.abs(totalProb - 1) > 0.01) {
-                alert(`Warning: Total probability is ${totalProb.toFixed(2)}, should be 1.00`);
+                await showAlert(`Warning: Total probability is ${totalProb.toFixed(2)}, should be 1.00`, 'warning');
             }
 
             await setDoc(doc(db, 'settings', 'wheelPrizes'), {
@@ -55,10 +57,10 @@ export default function WheelSettingsPage() {
                     value: p.type === 'JP' || p.type === 'XP' || p.type === 'JACKPOT' ? Number(p.value) : p.value
                 }))
             });
-            alert('Settings saved!');
+            await showAlert('Settings saved!', 'success');
         } catch (error) {
             console.error("Save failed", error);
-            alert('Failed to save');
+            await showAlert('Failed to save', 'error');
         } finally {
             setSaving(false);
         }

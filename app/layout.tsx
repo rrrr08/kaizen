@@ -4,6 +4,7 @@ import "./globals.css";
 import { CartProvider } from "@/app/context/CartContext";
 import { GamificationProvider } from "@/app/context/GamificationContext";
 import { AuthProvider } from "@/app/context/AuthContext";
+import { PopupProvider } from "@/app/context/PopupContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import ClientLayout from "@/components/ClientLayout";
 import { defaultMetadata } from "@/lib/metadata";
@@ -95,9 +96,11 @@ export default function RootLayout({
           <AuthProvider>
             <GamificationProvider>
               <CartProvider>
-                <ClientLayout>
-                  {children}
-                </ClientLayout>
+                <PopupProvider>
+                  <ClientLayout>
+                    {children}
+                  </ClientLayout>
+                </PopupProvider>
 
                 {/* SVG Definition for Blob Mask */}
                 <svg width="0" height="0" className="absolute">

@@ -3,11 +3,13 @@
 import React, { useState, useEffect } from 'react';
 import { motion, useAnimation } from 'framer-motion';
 import { useGamification } from '@/app/context/GamificationContext';
+import { usePopup } from '@/app/context/PopupContext';
 import { WHEEL_PRIZES, SPIN_COST, WheelPrize } from '@/lib/gamification';
 import { Trophy, Loader2 } from 'lucide-react';
 
 const WheelOfJoy: React.FC = () => {
     const { spinWheel, spendPoints, dailyStats, balance, loading: contextLoading } = useGamification();
+    const { showAlert } = usePopup();
     const [isSpinning, setIsSpinning] = useState(false);
     const [result, setResult] = useState<WheelPrize | null>(null);
     const [currentRotation, setCurrentRotation] = useState(0);
@@ -43,7 +45,7 @@ const WheelOfJoy: React.FC = () => {
         if (canFreeSpin) {
             isFree = true;
         } else if (!canPaidSpin) {
-            alert("Insufficient Points!");
+            await showAlert("Insufficient Points!", 'warning');
             return;
         }
 
@@ -58,7 +60,7 @@ const WheelOfJoy: React.FC = () => {
             const user = auth.currentUser;
 
             if (!user) {
-                alert("Please login first");
+                await showAlert("Please login first", 'warning');
                 setIsSpinning(false);
                 return;
             }
@@ -136,7 +138,7 @@ const WheelOfJoy: React.FC = () => {
 
         } catch (error: any) {
             console.error('Spin Loop Error:', error);
-            alert(error.message);
+            await showAlert(error.message, 'error');
         } finally {
             setIsSpinning(false);
         }

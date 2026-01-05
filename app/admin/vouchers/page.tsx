@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/app/context/AuthContext';
+import { usePopup } from '@/app/context/PopupContext';
 import { Plus, Edit2, Trash2, Save, Ticket, AlertCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -24,6 +25,7 @@ interface VoucherTemplate {
 
 export default function AdminVouchersPage() {
   const { user } = useAuth();
+  const { showConfirm } = usePopup();
   const [vouchers, setVouchers] = useState<VoucherTemplate[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -116,7 +118,10 @@ export default function AdminVouchersPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!user || !confirm('Delete this voucher? This action cannot be undone.')) return;
+    if (!user) return;
+    
+    const confirmed = await showConfirm('Delete this voucher? This action cannot be undone.', 'Delete Voucher');
+    if (!confirmed) return;
 
     setSaving(true);
     try {
@@ -151,7 +156,10 @@ export default function AdminVouchersPage() {
   };
 
   const handleInitializeDefaults = async () => {
-    if (!user || !confirm('Initialize default vouchers? This will add 6 pre-configured vouchers.')) return;
+    if (!user) return;
+    
+    const confirmed = await showConfirm('Initialize default vouchers? This will add 6 pre-configured vouchers.', 'Initialize Vouchers');
+    if (!confirmed) return;
 
     setSaving(true);
     try {

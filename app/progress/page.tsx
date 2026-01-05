@@ -2,6 +2,7 @@
 
 import { useGamification } from '@/app/context/GamificationContext';
 import { useAuth } from '@/app/context/AuthContext';
+import { usePopup } from '@/app/context/PopupContext';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { doc, getDoc, getFirestore } from 'firebase/firestore';
@@ -23,6 +24,7 @@ interface Tier {
 export default function ProgressPage() {
   const { user } = useAuth();
   const { xp, balance, tier, nextTier, loading } = useGamification();
+  const { showAlert, showConfirm } = usePopup();
   const router = useRouter();
   const [allTiers, setAllTiers] = useState<Tier[]>([]);
   const [loadingTiers, setLoadingTiers] = useState(true);
@@ -65,16 +67,17 @@ export default function ProgressPage() {
 
   const handleUnlockTier = async (tierToUnlock: Tier) => {
     if (!tierToUnlock.unlockPrice || tierToUnlock.unlockPrice === 0) {
-      alert('This tier cannot be purchased. Earn XP to unlock it!');
+      await showAlert('This tier cannot be purchased. Earn XP to unlock it!', 'info');
       return;
     }
 
     if (balance < tierToUnlock.unlockPrice) {
-      alert(`You need ${tierToUnlock.unlockPrice.toLocaleString()} JP to unlock this tier. You have ${balance.toLocaleString()} JP.`);
+      await showAlert(`You need ${tierToUnlock.unlockPrice.toLocaleString()} JP to unlock this tier. You have ${balance.toLocaleString()} JP.`, 'warning');
       return;
     }
 
-    if (!confirm(`Unlock ${tierToUnlock.name} tier for ${tierToUnlock.unlockPrice.toLocaleString()} JP? This will instantly grant you ${tierToUnlock.minXP} XP.`)) {
+    const confirmed = await showConfirm(`Unlock ${tierToUnlock.name} tier for ${tierToUnlock.unlockPrice.toLocaleString()} JP? This will instantly grant you ${tierToUnlock.minXP} XP.`, 'Unlock Tier');
+    if (!confirmed) {
       return;
     }
 
@@ -100,14 +103,14 @@ export default function ProgressPage() {
       const data = await response.json();
       
       if (data.success) {
-        alert(`🎉 ${tierToUnlock.name} tier unlocked! You now have ${tierToUnlock.minXP} XP!`);
+        await showAlert(`🎉 ${tierToUnlock.name} tier unlocked! You now have ${tierToUnlock.minXP} XP!`, 'success');
         window.location.reload();
       } else {
-        alert(`Failed to unlock tier: ${data.error}`);
+        await showAlert(`Failed to unlock tier: ${data.error}`, 'error');
       }
     } catch (error) {
       console.error('Error unlocking tier:', error);
-      alert('Failed to unlock tier. Please try again.');
+      await showAlert('Failed to unlock tier. Please try again.', 'error');
     }
   };
 

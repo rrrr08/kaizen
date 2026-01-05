@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/app/context/AuthContext';
+import { usePopup } from '@/app/context/PopupContext';
 import { ExperienceEnquiry, EnquiryStatus } from '@/lib/types';
 import { Calendar, Eye, CheckCircle, Clock, AlertCircle, XCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -47,6 +48,7 @@ const STATUS_CONFIG = {
 
 export default function ProfileEnquiriesPage() {
   const { user, loading: authLoading } = useAuth();
+  const { showAlert } = usePopup();
   const router = useRouter();
   const [enquiries, setEnquiries] = useState<ExperienceEnquiry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -95,9 +97,9 @@ export default function ProfileEnquiriesPage() {
     }
   };
 
-  const handleRegister = (enquiryId: string) => {
+  const handleRegister = async (enquiryId: string) => {
     // For now, just show an alert. In a real app, this would navigate to a registration/payment page
-    alert(`Registration feature for enquiry ${enquiryId} would be implemented here!\n\nThis would typically:\n- Show final pricing\n- Collect payment details\n- Confirm participation\n- Send confirmation email`);
+    await showAlert(`Registration feature for enquiry ${enquiryId} would be implemented here!\n\nThis would typically:\n- Show final pricing\n- Collect payment details\n- Confirm participation\n- Send confirmation email`, 'info', 'Coming Soon');
   };
 
   if (authLoading) {

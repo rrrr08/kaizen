@@ -6,6 +6,7 @@ import { updateShipmentStatus, deleteShipment } from '@/lib/db/shipments';
 import { Pencil, Trash2, Printer, Check, X } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { usePopup } from '@/app/context/PopupContext';
 
 interface Shipment {
     id: string;
@@ -20,6 +21,7 @@ interface Shipment {
 const STATUS_OPTIONS = ['NEW', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELED', 'RETURNED'];
 
 export default function ShipmentList() {
+    const { showConfirm } = usePopup();
     const [shipments, setShipments] = useState<Shipment[]>([]);
     const [loading, setLoading] = useState(true);
     const [editingId, setEditingId] = useState<string | null>(null);
@@ -54,7 +56,8 @@ export default function ShipmentList() {
     };
 
     const handleDelete = async (id: string) => {
-        if (!confirm('Are you sure you want to delete this shipment?')) return;
+        const confirmed = await showConfirm('Are you sure you want to delete this shipment?', 'Delete Shipment');
+        if (!confirmed) return;
         try {
             setShipments(shipments.filter(s => s.id !== id));
             await deleteShipment(id);

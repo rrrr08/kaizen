@@ -8,11 +8,13 @@ import { ArrowLeft } from 'lucide-react';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import { usePopup } from '@/app/context/PopupContext';
 
 
 export default function EditEventPage() {
   const router = useRouter();
   const { id } = useParams<{ id: string }>();
+  const { showAlert } = usePopup();
   const [checkingAdmin, setCheckingAdmin] = useState(true);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -92,7 +94,7 @@ export default function EditEventPage() {
         });
       } catch (err) {
         console.error(err);
-        alert('Failed to load event');
+        showAlert('Failed to load event', 'error');
         router.push('/admin/events');
       } finally {
         setLoading(false);
@@ -143,7 +145,7 @@ export default function EditEventPage() {
       const user = auth.currentUser;
 
       if (!user) {
-        alert('Not authenticated');
+        await showAlert('Not authenticated', 'error');
         return;
       }
 
@@ -165,7 +167,7 @@ export default function EditEventPage() {
       router.push('/admin/events');
     } catch (err) {
       console.error(err);
-      alert('Failed to update event');
+      await showAlert('Failed to update event', 'error');
     } finally {
       setSaving(false);
     }

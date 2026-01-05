@@ -7,8 +7,10 @@ import Link from 'next/link';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import { usePopup } from '@/app/context/PopupContext';
 
 export default function AdminExperiencesPage() {
+  const { showConfirm } = usePopup();
   const [categories, setCategories] = useState<ExperienceCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [checkingAdmin, setCheckingAdmin] = useState(true);
@@ -103,7 +105,8 @@ export default function AdminExperiencesPage() {
   };
 
   const deleteCategory = async (categoryId: string) => {
-    if (!confirm('Are you sure you want to delete this category? This action cannot be undone.')) {
+    const confirmed = await showConfirm('Are you sure you want to delete this category? This action cannot be undone.', 'Delete Category');
+    if (!confirmed) {
       return;
     }
 

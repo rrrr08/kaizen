@@ -5,6 +5,7 @@ import { MessageSquare, Check, X, Trash2, Search, Filter, Loader2, Upload, Image
 import Image from 'next/image';
 import { CldUploadWidget } from 'next-cloudinary';
 import { MediaGalleryModal } from '@/components/ui/MediaGalleryModal';
+import { usePopup } from '@/app/context/PopupContext';
 
 interface Testimonial {
     id: string;
@@ -17,6 +18,7 @@ interface Testimonial {
 }
 
 export default function TestimonialsPage() {
+    const { showAlert, showConfirm } = usePopup();
     const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
@@ -52,16 +54,17 @@ export default function TestimonialsPage() {
             if (data.success) {
                 setTestimonials(prev => prev.map(t => t.id === id ? { ...t, status: newStatus } : t));
             } else {
-                alert('Failed to update status');
+                await showAlert('Failed to update status', 'error');
             }
         } catch (error) {
             console.error('Error updating status:', error);
-            alert('Error updating status');
+            await showAlert('Error updating status', 'error');
         }
     };
 
     const handleDelete = async (id: string) => {
-        if (!confirm('Are you sure you want to delete this testimonial?')) return;
+        const confirmed = await showConfirm('Are you sure you want to delete this testimonial?', 'Delete Testimonial');
+        if (!confirmed) return;
 
         try {
             const res = await fetch(`/api/testimonials?id=${id}`, {
@@ -72,11 +75,11 @@ export default function TestimonialsPage() {
             if (data.success) {
                 setTestimonials(prev => prev.filter(t => t.id !== id));
             } else {
-                alert('Failed to delete');
+                await showAlert('Failed to delete', 'error');
             }
         } catch (error) {
             console.error('Error deleting:', error);
-            alert('Error deleting');
+            await showAlert('Error deleting', 'error');
         }
     };
 
@@ -95,11 +98,11 @@ export default function TestimonialsPage() {
                     t.id === id ? { ...t, image: imageUrl } : t
                 ));
             } else {
-                alert('Failed to upload photo');
+                await showAlert('Failed to upload photo', 'error');
             }
         } catch (error) {
             console.error('Error uploading photo:', error);
-            alert('Error uploading photo');
+            await showAlert('Error uploading photo', 'error');
         } finally {
             setUploadingPhoto(null);
         }

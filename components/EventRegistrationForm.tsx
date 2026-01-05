@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { User } from 'firebase/auth';
 import { createPaymentOrder, completeRegistration } from '@/lib/db/payments';
 import { useGamification } from '@/app/context/GamificationContext';
+import { usePopup } from '@/app/context/PopupContext';
 import { X, Check } from 'lucide-react';
 
 interface EventRegistrationFormProps {
@@ -28,6 +29,7 @@ export default function EventRegistrationForm({
 }: EventRegistrationFormProps) {
   const router = useRouter();
   const { hasEarlyEventAccess, workshopDiscountPercent, hasVIPSeating, config, calculatePointWorth } = useGamification();
+  const { showAlert } = usePopup();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -294,7 +296,7 @@ export default function EventRegistrationForm({
 
   const handlePayment = async () => {
     if (!user) {
-      alert('Please sign in to register');
+      await showAlert('Please sign in to register', 'warning');
       return;
     }
 
