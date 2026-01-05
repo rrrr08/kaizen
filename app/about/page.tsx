@@ -87,7 +87,156 @@ export default function About() {
           </div>
         </section>
 
-        {/* SECTION 3 — WHY GAMES? (THE WHY) */}
+        {/* SECTION 3 — JOURNEY TIMELINE */}
+        <section className="mb-32 relative">
+          <h2 className="font-black text-sm tracking-[0.2em] text-[#6C5CE7] mb-8 uppercase font-header text-center">Our Journey</h2>
+          <h3 className="font-header text-4xl md:text-5xl mb-20 text-center text-black">The Joy Juncture Story</h3>
+          
+          <div className="relative max-w-4xl mx-auto">
+            {/* Connecting Path Through Checkpoints */}
+            <svg 
+              className="absolute top-0 left-0 w-full h-full pointer-events-none hidden md:block" 
+              viewBox="0 0 800 1000" 
+              preserveAspectRatio="xMidYMid meet"
+              style={{ zIndex: 0 }}
+            >
+              <defs>
+                <linearGradient id="pathGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#FFD93D" />
+                  <stop offset="25%" stopColor="#6C5CE7" />
+                  <stop offset="50%" stopColor="#FF7675" />
+                  <stop offset="75%" stopColor="#00B894" />
+                  <stop offset="100%" stopColor="#6C5CE7" />
+                </linearGradient>
+              </defs>
+              {/* Path: Checkpoint 1 → Emoji → Checkpoint 2 → Emoji → Checkpoint 3 → Emoji → Checkpoint 4 → Emoji → Checkpoint 5 */}
+              <path
+                d="M 200 60 
+                   C 280 60, 350 80, 400 100
+                   C 500 140, 550 180, 600 220
+                   C 550 280, 450 320, 400 360
+                   C 300 420, 250 460, 200 500
+                   C 280 540, 350 580, 400 620
+                   C 500 680, 550 720, 600 760
+                   C 550 820, 450 860, 400 900
+                   C 300 940, 250 960, 200 980"
+                stroke="url(#pathGradient)"
+                strokeWidth="4"
+                fill="none"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                opacity="0.7"
+              />
+            </svg>
+
+            {/* Timeline Checkpoints */}
+            <div className="relative z-10 space-y-24 py-12">
+              {/* Checkpoint 1 - The Spark */}
+              <div className="flex flex-col md:flex-row items-center gap-8">
+                <div className="md:w-1/2 md:text-right md:pr-12">
+                  <div className="bg-white p-8 rounded-[32px] border-4 border-[#FFD93D] shadow-[6px_6px_0px_#FFD93D] hover:shadow-[8px_8px_0px_#FFD93D] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all">
+                    <div className="flex items-center gap-4 mb-4 md:flex-row-reverse md:justify-end">
+                      <div className="w-14 h-14 bg-[#FFD93D] rounded-full border-4 border-black flex items-center justify-center font-black text-xl shadow-[3px_3px_0px_#000] flex-shrink-0">
+                        1
+                      </div>
+                      <h4 className="font-header text-2xl font-black">The Spark</h4>
+                    </div>
+                    <p className="text-black/70 font-bold text-sm mb-3">2020</p>
+                    <p className="text-black font-medium leading-relaxed">
+                      Two dreamers decided to break free from traditional family businesses. Armed with nothing but passion and a lot of naivety, Joy Juncture was born.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex-shrink-0 text-5xl">🎯</div>
+                <div className="md:w-1/2"></div>
+              </div>
+
+              {/* Checkpoint 2 - Learning the Ropes */}
+              <div className="flex flex-col md:flex-row items-center gap-8">
+                <div className="md:w-1/2"></div>
+                <div className="flex-shrink-0 text-5xl">🎲</div>
+                <div className="md:w-1/2 md:pl-12">
+                  <div className="bg-white p-8 rounded-[32px] border-4 border-[#6C5CE7] shadow-[6px_6px_0px_#6C5CE7] hover:shadow-[8px_8px_0px_#6C5CE7] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all">
+                    <div className="flex items-center gap-4 mb-4">
+                      <div className="w-14 h-14 bg-[#6C5CE7] rounded-full border-4 border-black flex items-center justify-center font-black text-xl text-white shadow-[3px_3px_0px_#000] flex-shrink-0">
+                        2
+                      </div>
+                      <h4 className="font-header text-2xl font-black">Learning the Ropes</h4>
+                    </div>
+                    <p className="text-black/70 font-bold text-sm mb-3">2021</p>
+                    <p className="text-black font-medium leading-relaxed">
+                      Experimented with game mechanics, learned from failures, and discovered that making people laugh is harder than it looks. But we kept going.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Checkpoint 3 - First Launch */}
+              <div className="flex flex-col md:flex-row items-center gap-8">
+                <div className="md:w-1/2 md:text-right md:pr-12">
+                  <div className="bg-white p-8 rounded-[32px] border-4 border-[#FF7675] shadow-[6px_6px_0px_#FF7675] hover:shadow-[8px_8px_0px_#FF7675] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all">
+                    <div className="flex items-center gap-4 mb-4 md:flex-row-reverse md:justify-end">
+                      <div className="w-14 h-14 bg-[#FF7675] rounded-full border-4 border-black flex items-center justify-center font-black text-xl text-white shadow-[3px_3px_0px_#000] flex-shrink-0">
+                        3
+                      </div>
+                      <h4 className="font-header text-2xl font-black">First Launch</h4>
+                    </div>
+                    <p className="text-black/70 font-bold text-sm mb-3">2022</p>
+                    <p className="text-black font-medium leading-relaxed">
+                      Our debut game hit the market! People actually bought it. And played it. And laughed. Mission accomplished.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex-shrink-0 text-5xl">🚀</div>
+                <div className="md:w-1/2"></div>
+              </div>
+
+              {/* Checkpoint 4 - Growing Community */}
+              <div className="flex flex-col md:flex-row items-center gap-8">
+                <div className="md:w-1/2"></div>
+                <div className="flex-shrink-0 text-5xl">🎉</div>
+                <div className="md:w-1/2 md:pl-12">
+                  <div className="bg-white p-8 rounded-[32px] border-4 border-[#00B894] shadow-[6px_6px_0px_#00B894] hover:shadow-[8px_8px_0px_#00B894] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all">
+                    <div className="flex items-center gap-4 mb-4">
+                      <div className="w-14 h-14 bg-[#00B894] rounded-full border-4 border-black flex items-center justify-center font-black text-xl text-white shadow-[3px_3px_0px_#000] flex-shrink-0">
+                        4
+                      </div>
+                      <h4 className="font-header text-2xl font-black">Building Community</h4>
+                    </div>
+                    <p className="text-black/70 font-bold text-sm mb-3">2023-2024</p>
+                    <p className="text-black font-medium leading-relaxed">
+                      From hosting game nights to building an online platform, we created a space where players become family. The community grew beyond our wildest dreams.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Checkpoint 5 - Today & Beyond */}
+              <div className="flex flex-col md:flex-row items-center gap-8">
+                <div className="md:w-1/2 md:text-right md:pr-12">
+                  <div className="relative bg-gradient-to-br from-[#FFD93D] via-[#A78BFA] to-[#00B894] p-[6px] rounded-[36px] shadow-[8px_8px_0px_#000] hover:shadow-[10px_10px_0px_#000] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all">
+                    <div className="bg-gradient-to-br from-[#FFD93D]/95 via-[#8B7FE7]/95 to-[#00B894]/95 p-8 rounded-[32px] backdrop-blur-sm">
+                      <div className="flex items-center gap-4 mb-4 md:flex-row-reverse md:justify-end">
+                        <div className="w-14 h-14 bg-white rounded-full border-4 border-black flex items-center justify-center font-black text-xl shadow-[4px_4px_0px_rgba(0,0,0,0.2)] flex-shrink-0">
+                          5
+                        </div>
+                        <h4 className="font-header text-2xl font-black text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">Today & Beyond</h4>
+                      </div>
+                      <p className="text-white font-bold text-sm mb-3 drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)]">2025 - Future</p>
+                      <p className="text-white font-medium leading-relaxed drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)]">
+                        Joy Juncture is now a complete ecosystem - games, events, experiences, and a thriving rewards system. But we&apos;re just getting started. The best is yet to come!
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex-shrink-0 text-5xl">✨</div>
+                <div className="md:w-1/2"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* SECTION 4 — WHY GAMES? (THE WHY) */}
         <section className="mb-32 py-24 border-y-2 border-black relative overflow-hidden bg-white neo-pattern">
           <div className="absolute top-0 right-0 w-64 h-64 bg-[#FFD93D]/20 blur-[100px] rounded-full pointer-events-none"></div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center relative z-10">

@@ -108,8 +108,15 @@ export default function AdminVouchersPage() {
     }
   };
 
+  const handleToggleEnabled = async (voucher: VoucherTemplate) => {
+    if (!user) return;
+
+    const updatedVoucher = { ...voucher, enabled: !voucher.enabled };
+    await handleSave(updatedVoucher);
+  };
+
   const handleDelete = async (id: string) => {
-    if (!user || !confirm('Delete this voucher?')) return;
+    if (!user || !confirm('Delete this voucher? This action cannot be undone.')) return;
 
     setSaving(true);
     try {
@@ -426,13 +433,31 @@ export default function AdminVouchersPage() {
                   <p className="text-black/60 font-bold text-sm">{voucher.description}</p>
                 </div>
               </div>
-              <button
-                onClick={() => handleDelete(voucher.id)}
-                disabled={saving}
-                className="p-3 text-white bg-[#FF6B6B] hover:bg-[#ff5252] rounded-xl border-3 border-black transition-all disabled:opacity-50"
-              >
-                <Trash2 size={20} />
-              </button>
+              <div className="flex items-center gap-2">
+                {/* Toggle Switch */}
+                <div className="flex flex-col items-center">
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={voucher.enabled}
+                      onChange={() => handleToggleEnabled(voucher)}
+                      disabled={saving}
+                      className="sr-only peer"
+                    />
+                    <div className="w-14 h-8 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#FFD93D] rounded-full peer border-3 border-black peer-checked:after:translate-x-6 peer-checked:after:border-black after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-black after:border-3 after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-[#00B894]"></div>
+                  </label>
+                  <span className="text-xs font-bold mt-1 text-black/60">{voucher.enabled ? 'ON' : 'OFF'}</span>
+                </div>
+                {/* Delete Button */}
+                <button
+                  onClick={() => handleDelete(voucher.id)}
+                  disabled={saving}
+                  className="p-3 text-white bg-[#FF6B6B] hover:bg-[#ff5252] rounded-xl border-3 border-black transition-all disabled:opacity-50"
+                  title="Delete Permanently"
+                >
+                  <Trash2 size={20} />
+                </button>
+              </div>
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
