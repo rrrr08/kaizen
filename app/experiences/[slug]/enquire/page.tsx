@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { ExperienceCategory } from '@/lib/types';
 import { ArrowLeft, Send } from 'lucide-react';
 import Link from 'next/link';
+import { useAuth } from '@/app/context/AuthContext';
 
 interface EnquiryFormData {
   name: string;
@@ -22,6 +23,7 @@ export default function ExperienceEnquiryPage() {
   const params = useParams();
   const router = useRouter();
   const slug = params.slug as string;
+  const { user, loading: authLoading } = useAuth();
 
   const [category, setCategory] = useState<ExperienceCategory | null>(null);
   const [loading, setLoading] = useState(true);
@@ -42,6 +44,13 @@ export default function ExperienceEnquiryPage() {
   });
 
   useEffect(() => {
+    if (authLoading) return; // Wait for auth to load
+
+    if (!user) {
+      router.push('/auth/login?redirect=' + encodeURIComponent(window.location.pathname));
+      return;
+    }
+
     const fetchCategory = async () => {
       try {
         setLoading(true);
@@ -59,7 +68,18 @@ export default function ExperienceEnquiryPage() {
     if (slug) {
       fetchCategory();
     }
-  }, [slug]);
+  }, [slug, user, authLoading, router]);
+
+  // Pre-fill form with user data when user is loaded
+  useEffect(() => {
+    if (user && !authLoading) {
+      setFormData(prev => ({
+        ...prev,
+        name: user.displayName || prev.name,
+        email: user.email || prev.email,
+      }));
+    }
+  }, [user, authLoading]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -90,6 +110,7 @@ export default function ExperienceEnquiryPage() {
         budgetRange: formData.budgetRange,
         specialRequirements: formData.specialRequirements,
         message: formData.message,
+        userId: user?.uid || null, // Include userId if authenticated
       };
 
       const response = await fetch('/api/experiences/enquiries', {

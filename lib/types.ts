@@ -113,6 +113,7 @@ export interface ExperienceEnquiry {
   name: string;
   email: string;
   phone?: string;
+  userId?: string; // Optional - for authenticated users
   categoryId: string;
   categoryName: string;
   occasionDetails: string;

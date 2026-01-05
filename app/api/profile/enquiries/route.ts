@@ -14,12 +14,30 @@ export async function GET(request: NextRequest) {
     const decoded = await auth.verifyIdToken(token);
 
     /* ---------------- GET USER ENQUIRIES ---------------- */
-    const enquiriesSnap = await db
+    // First try to get enquiries by userId (for authenticated submissions)
+    const enquiriesByUserIdSnap = await db
+      .collection('experience_enquiries')
+      .where('userId', '==', decoded.uid)
+      .get();
+
+    // Also get enquiries by email (for legacy enquiries or anonymous submissions that match user email)
+    const enquiriesByEmailSnap = await db
       .collection('experience_enquiries')
       .where('email', '==', decoded.email)
       .get();
 
-    const enquiries = enquiriesSnap.docs
+    // Combine results and filter out duplicates (enquiries that have userId set should only appear once)
+    const allDocs = [...enquiriesByUserIdSnap.docs];
+    const userIdDocIds = new Set(enquiriesByUserIdSnap.docs.map(doc => doc.id));
+
+    // Add email-based enquiries that don't already have userId set
+    enquiriesByEmailSnap.docs.forEach(doc => {
+      if (!userIdDocIds.has(doc.id) && !doc.data().userId) {
+        allDocs.push(doc);
+      }
+    });
+
+    const enquiries = allDocs
       .map(doc => ({
         id: doc.id,
         ...doc.data(),
