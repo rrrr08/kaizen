@@ -27,7 +27,9 @@ export const ROLE_ICONS = {
 
 // Get role display label
 export const getRoleLabel = (role: string) => {
-  return ROLE_LABELS[role] || 'Member';
+  if (!role) return 'Member';
+  const normalizedRole = role.toLowerCase();
+  return ROLE_LABELS[normalizedRole] || 'Member';
 };
 
 // Get role description
@@ -47,7 +49,7 @@ export const getRoleIcon = (role: string) => {
 
 // Check if user has admin privileges
 export const isAdmin = (user: { role?: string } | null | undefined) => {
-  return user?.role === USER_ROLES.ADMIN;
+  return user?.role?.toLowerCase() === USER_ROLES.ADMIN;
 };
 
 // Get all available roles for selection
@@ -62,5 +64,6 @@ export const getAvailableRoles = () => {
 
 // Validate role
 export const isValidRole = (role: string) => {
-  return Object.values(USER_ROLES).includes(role);
+  const normalizedRole = role?.toLowerCase();
+  return Object.values(USER_ROLES).includes(normalizedRole);
 };

@@ -72,8 +72,10 @@ const UserManagementPage = () => {
         await updateDoc(userRef, { role: newRole });
         setUsers(users.map(user => user.id === selectedUser.id ? { ...user, role: newRole } : user));
         setSelectedUser(null);
+        alert('✅ User role updated successfully!');
       } catch (error) {
         console.error('Error updating role:', error);
+        alert('❌ Failed to update role. Please check your permissions.');
       }
     }
   };
@@ -177,8 +179,7 @@ const UserManagementPage = () => {
                       </TableCell>
                       <TableCell className="text-black font-medium">{user.email}</TableCell>
                       <TableCell>
-                        <span className={`inline-flex items-center px-3 py-1 rounded-lg text-xs font-black uppercase tracking-wider border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,0.1)] ${user.role === 'admin' ? 'bg-[#FF7675] text-black' :
-                            user.role === 'manager' ? 'bg-[#00B894] text-black' : 'bg-gray-100 text-black/60'
+                        <span className={`inline-flex items-center px-3 py-1 rounded-lg text-xs font-black uppercase tracking-wider border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,0.1)] ${user.role === 'admin' ? 'bg-[#FF7675] text-black' : 'bg-gray-100 text-black/60'
                           }`}>
                           <span className="mr-2">{getRoleIcon(user.role)}</span>
                           {ROLE_LABELS[user.role] || 'Unknown'}
