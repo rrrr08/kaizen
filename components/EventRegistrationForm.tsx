@@ -79,13 +79,13 @@ export default function EventRegistrationForm({
   const basePrice = event.price || 0;
   const tierDiscount = workshopDiscountPercent > 0 ? (basePrice * workshopDiscountPercent / 100) : 0;
   const priceAfterTierDiscount = basePrice - tierDiscount;
-  
+
   // Maximum 50% of order can be paid with points
   const maxRedeemable = priceAfterTierDiscount * 0.5;
   const maxRedeemPoints = Math.floor(maxRedeemable / config.redeemRate);
   const actualRedeemPoints = Math.min(redeemPoints, walletPoints, maxRedeemPoints);
   const actualPointsDiscount = calculatePointWorth(actualRedeemPoints);
-  
+
   const finalAmount = Math.max(0, priceAfterTierDiscount - actualPointsDiscount - voucherDiscount);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -182,7 +182,7 @@ export default function EventRegistrationForm({
 
   const handleRedeemPointsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let points = parseInt(e.target.value) || 0;
-    
+
     if (points > walletPoints) {
       points = walletPoints;
     }
@@ -199,6 +199,7 @@ export default function EventRegistrationForm({
   };
 
   const handleFreeRegistration = async () => {
+    if (!user) return;
     try {
       // Complete registration directly without payment gateway
       const registrationResult = await completeRegistration(
