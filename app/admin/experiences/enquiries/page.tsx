@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { ExperienceEnquiry, EnquiryStatus } from '@/lib/types';
-import { Eye, MessageSquare, Phone, Mail, Calendar, DollarSign, Users } from 'lucide-react';
+import { Eye, MessageSquare, Phone, Mail, Calendar, DollarSign, Users, ChevronRight, MessageCircleReply, Trash2, Send } from 'lucide-react';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
@@ -25,6 +25,8 @@ export default function AdminEnquiriesPage() {
   const [error, setError] = useState<string | null>(null);
   const [selectedEnquiry, setSelectedEnquiry] = useState<ExperienceEnquiry | null>(null);
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
+  const [savingReply, setSavingReply] = useState(false);
+  const [replyText, setReplyText] = useState('');
 
   useEffect(() => {
     const auth = getAuth();
@@ -45,7 +47,7 @@ export default function AdminEnquiriesPage() {
 
         // ✅ admin confirmed
         setCheckingAdmin(false);
-        fetchEnquiries(user);
+        fetchEnquiries();
       } catch (err) {
         console.error('Admin check failed', err);
         window.location.href = '/';
@@ -55,12 +57,16 @@ export default function AdminEnquiriesPage() {
     return () => unsubscribe();
   }, []);
 
-  const fetchEnquiries = async (user: any) => {
+  useEffect(() => {
+    if (selectedEnquiry) {
+      setReplyText(selectedEnquiry.adminReply || '');
+    }
+  }, [selectedEnquiry]);
+
+  const fetchEnquiries = async () => {
     try {
       setLoading(true);
 
-      // Get auth token
-      const { getAuth } = await import('firebase/auth');
       const auth = getAuth();
       const user = auth.currentUser;
       if (!user) {
@@ -95,8 +101,6 @@ export default function AdminEnquiriesPage() {
     try {
       setUpdatingStatus(enquiryId);
 
-      // Get auth token
-      const { getAuth } = await import('firebase/auth');
       const auth = getAuth();
       const user = auth.currentUser;
       if (!user) {
@@ -123,8 +127,12 @@ export default function AdminEnquiriesPage() {
 
       // Update local state
       setEnquiries(prev => prev.map(enquiry =>
-        enquiry.id === enquiryId ? data.enquiry : enquiry
+        enquiry.id === enquiryId ? { ...enquiry, status: newStatus, updatedAt: new Date() } : enquiry
       ));
+
+      if (selectedEnquiry?.id === enquiryId) {
+        setSelectedEnquiry(prev => prev ? { ...prev, status: newStatus } : null);
+      }
     } catch (err) {
       console.error('Error updating enquiry status:', err);
       setError('Failed to update enquiry status');
@@ -135,14 +143,9 @@ export default function AdminEnquiriesPage() {
 
   const updateInternalNotes = async (enquiryId: string, notes: string) => {
     try {
-      // Get auth token
-      const { getAuth } = await import('firebase/auth');
       const auth = getAuth();
       const user = auth.currentUser;
-      if (!user) {
-        setError('Authentication required');
-        return;
-      }
+      if (!user) return;
 
       const token = await user.getIdToken();
 
@@ -155,19 +158,58 @@ export default function AdminEnquiriesPage() {
         body: JSON.stringify({ internalNotes: notes }),
       });
 
+      if (response.ok) {
+        setEnquiries(prev => prev.map(enquiry =>
+          enquiry.id === enquiryId ? { ...enquiry, internalNotes: notes } : enquiry
+        ));
+      }
+    } catch (err) {
+      console.error('Error updating internal notes:', err);
+    }
+  };
+
+  const saveReply = async (enquiryId: string) => {
+    try {
+      setSavingReply(true);
+      const auth = getAuth();
+      const user = auth.currentUser;
+      if (!user) return;
+
+      const token = await user.getIdToken();
+
+      const response = await fetch(`/api/experiences/enquiries/${enquiryId}`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          adminReply: replyText,
+          repliedAt: new Date()
+        }),
+      });
+
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to update internal notes');
+        throw new Error(data.error || 'Failed to save reply');
       }
 
       // Update local state
       setEnquiries(prev => prev.map(enquiry =>
-        enquiry.id === enquiryId ? data.enquiry : enquiry
+        enquiry.id === enquiryId ? { ...enquiry, adminReply: replyText, repliedAt: new Date() } : enquiry
       ));
+
+      if (selectedEnquiry?.id === enquiryId) {
+        setSelectedEnquiry(prev => prev ? { ...prev, adminReply: replyText, repliedAt: new Date() } : null);
+      }
+
+      alert('Reply saved successfully!');
     } catch (err) {
-      console.error('Error updating internal notes:', err);
-      setError('Failed to update internal notes');
+      console.error('Error saving reply:', err);
+      setError('Failed to save reply');
+    } finally {
+      setSavingReply(false);
     }
   };
 
@@ -197,7 +239,7 @@ export default function AdminEnquiriesPage() {
     <div className="p-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-black mb-2">Experience Enquiries</h1>
-        <p className="text-black/60">Manage incoming experience enquiries</p>
+        <p className="text-black/60">Manage incoming experience enquiries and reply to users</p>
       </div>
 
       {error && (
@@ -206,36 +248,46 @@ export default function AdminEnquiriesPage() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         {/* Enquiries List */}
         <div className="lg:col-span-2">
           <div className="bg-white rounded-lg border-2 border-black neo-shadow overflow-hidden">
-            <div className="p-6 border-b border-black/10">
+            <div className="p-6 border-b border-black/10 flex justify-between items-center">
               <h2 className="text-xl font-bold text-black">All Enquiries ({enquiries.length})</h2>
             </div>
 
-            <div className="max-h-[600px] overflow-y-auto">
+            <div className="max-h-[800px] overflow-y-auto">
               {enquiries.map((enquiry) => (
                 <div
                   key={enquiry.id}
-                  className={`p-6 border-b border-black/10 cursor-pointer hover:bg-black/5 transition-colors ${
-                    selectedEnquiry?.id === enquiry.id ? 'bg-[#FFD93D]/10' : ''
-                  }`}
+                  className={`p-6 border-b border-black/10 cursor-pointer hover:bg-black/5 transition-colors ${selectedEnquiry?.id === enquiry.id ? 'bg-[#FFD93D]/10' : ''
+                    }`}
                   onClick={() => setSelectedEnquiry(enquiry)}
                 >
                   <div className="flex items-start justify-between mb-4">
-                    <div>
-                      <h3 className="font-bold text-black text-lg">{enquiry.name}</h3>
-                      <p className="text-black/60">{enquiry.categoryName}</p>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="font-bold text-black text-lg">{enquiry.name}</h3>
+                        {enquiry.adminReply ? (
+                          <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-tight border border-green-200">
+                            Replied
+                          </span>
+                        ) : (
+                          <span className="bg-red-100 text-red-700 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-tight border border-red-200">
+                            Pending
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-black/60 text-sm">{enquiry.categoryName}</p>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-col items-end gap-2">
                       <select
                         value={enquiry.status}
+                        onClick={(e) => e.stopPropagation()}
                         onChange={(e) => updateEnquiryStatus(enquiry.id, e.target.value as EnquiryStatus)}
                         disabled={updatingStatus === enquiry.id}
-                        className={`px-3 py-1 rounded-full text-xs font-bold tracking-[0.1em] uppercase border-2 ${
-                          STATUS_COLORS[enquiry.status]
-                        } ${updatingStatus === enquiry.id ? 'opacity-50' : ''}`}
+                        className={`px-3 py-1 rounded-full text-[10px] font-bold tracking-[0.1em] uppercase border-2 ${STATUS_COLORS[enquiry.status]
+                          } ${updatingStatus === enquiry.id ? 'opacity-50' : ''} cursor-pointer`}
                       >
                         {STATUS_OPTIONS.map((status) => (
                           <option key={status} value={status}>
@@ -243,25 +295,20 @@ export default function AdminEnquiriesPage() {
                           </option>
                         ))}
                       </select>
-                      <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold tracking-[0.1em] uppercase border-2 ${
-                        STATUS_COLORS[enquiry.status]
-                      }`}>
-                        {enquiry.status.replace('_', ' ')}
-                      </span>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setSelectedEnquiry(enquiry); }}
+                        className="flex items-center gap-2 text-blue-600 font-black text-[10px] uppercase tracking-widest hover:underline"
+                      >
+                        <MessageCircleReply size={14} /> Reply
+                      </button>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                  <div className="grid grid-cols-2 gap-y-2 gap-x-4 text-xs">
                     <div className="flex items-center gap-2">
                       <Mail size={14} className="text-black/60" />
-                      <span className="text-black/80">{enquiry.email}</span>
+                      <span className="text-black/80 truncate">{enquiry.email}</span>
                     </div>
-                    {enquiry.phone && (
-                      <div className="flex items-center gap-2">
-                        <Phone size={14} className="text-black/60" />
-                        <span className="text-black/80">{enquiry.phone}</span>
-                      </div>
-                    )}
                     <div className="flex items-center gap-2">
                       <Users size={14} className="text-black/60" />
                       <span className="text-black/80">{enquiry.audienceSize}</span>
@@ -270,16 +317,21 @@ export default function AdminEnquiriesPage() {
                       <Calendar size={14} className="text-black/60" />
                       <span className="text-black/80">{enquiry.preferredDateRange}</span>
                     </div>
-                  </div>
-
-                  <div className="mt-4 flex items-center gap-4 text-sm">
                     <div className="flex items-center gap-2">
                       <DollarSign size={14} className="text-black/60" />
                       <span className="text-black/80">{enquiry.budgetRange}</span>
                     </div>
-                    <span className="text-black/40">
-                      {enquiry.createdAt ? new Date(enquiry.createdAt).toLocaleDateString() : 'N/A'} at {enquiry.createdAt ? new Date(enquiry.createdAt).toLocaleTimeString() : ''}
+                  </div>
+
+                  <div className="mt-4 flex items-center justify-between text-[10px] font-bold uppercase tracking-widest text-black/40">
+                    <span>
+                      {enquiry.createdAt ? new Date(enquiry.createdAt).toLocaleDateString() : 'N/A'}
                     </span>
+                    {enquiry.repliedAt && (
+                      <span className="text-green-600">
+                        Replied: {new Date(enquiry.repliedAt).toLocaleDateString()}
+                      </span>
+                    )}
                   </div>
                 </div>
               ))}
@@ -294,71 +346,125 @@ export default function AdminEnquiriesPage() {
           </div>
         </div>
 
-        {/* Enquiry Details */}
-        <div className="lg:col-span-1">
+        {/* Enquiry Details & Reply */}
+        <div className="lg:col-span-2 space-y-8">
           {selectedEnquiry ? (
-            <div className="bg-white rounded-lg border-2 border-black neo-shadow p-6 sticky top-8">
-              <h2 className="text-xl font-bold text-black mb-6">Enquiry Details</h2>
-
-              <div className="space-y-6">
-                <div>
-                  <h3 className="font-bold text-black mb-2">Contact Information</h3>
-                  <div className="space-y-2 text-sm">
-                    <p><strong>Name:</strong> {selectedEnquiry.name}</p>
-                    <p><strong>Email:</strong> {selectedEnquiry.email}</p>
-                    {selectedEnquiry.phone && <p><strong>Phone:</strong> {selectedEnquiry.phone}</p>}
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="font-bold text-black mb-2">Experience Details</h3>
-                  <div className="space-y-2 text-sm">
-                    <p><strong>Category:</strong> {selectedEnquiry.categoryName}</p>
-                    <p><strong>Occasion:</strong> {selectedEnquiry.occasionDetails}</p>
-                    <p><strong>Audience Size:</strong> {selectedEnquiry.audienceSize}</p>
-                    <p><strong>Date Range:</strong> {selectedEnquiry.preferredDateRange}</p>
-                    <p><strong>Budget:</strong> {selectedEnquiry.budgetRange}</p>
-                  </div>
-                </div>
-
-                {selectedEnquiry.specialRequirements && (
+            <>
+              {/* Info Card */}
+              <div className="bg-white rounded-lg border-2 border-black neo-shadow p-6">
+                <div className="flex justify-between items-start mb-6 pb-4 border-b-2 border-black/5">
                   <div>
-                    <h3 className="font-bold text-black mb-2">Special Requirements</h3>
-                    <p className="text-sm text-black/80">{selectedEnquiry.specialRequirements}</p>
+                    <h2 className="text-2xl font-black uppercase tracking-tighter text-black">Enquiry Data</h2>
+                    <p className="text-xs font-bold text-black/40 uppercase tracking-widest">ID: {selectedEnquiry.id}</p>
                   </div>
-                )}
+                  <div className={`px-4 py-2 rounded-xl border-2 ${STATUS_COLORS[selectedEnquiry.status]} font-black text-xs uppercase tracking-widest`}>
+                    {selectedEnquiry.status.replace('_', ' ')}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="space-y-4">
+                    <div>
+                      <h3 className="text-xs font-black text-black/40 uppercase tracking-widest mb-1">Customer</h3>
+                      <p className="font-bold">{selectedEnquiry.name}</p>
+                      <p className="text-sm font-medium">{selectedEnquiry.email}</p>
+                      {selectedEnquiry.phone && <p className="text-sm font-medium">{selectedEnquiry.phone}</p>}
+                    </div>
+                    <div>
+                      <h3 className="text-xs font-black text-black/40 uppercase tracking-widest mb-1">Occasion</h3>
+                      <p className="font-bold">{selectedEnquiry.occasionDetails}</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div>
+                      <h3 className="text-xs font-black text-black/40 uppercase tracking-widest mb-1">Specs</h3>
+                      <div className="grid grid-cols-2 gap-2 text-sm">
+                        <div>
+                          <p className="text-[10px] font-black uppercase text-black/30">Audience</p>
+                          <p className="font-bold">{selectedEnquiry.audienceSize}</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-black uppercase text-black/30">Budget</p>
+                          <p className="font-bold">{selectedEnquiry.budgetRange}</p>
+                        </div>
+                        <div className="col-span-2">
+                          <p className="text-[10px] font-black uppercase text-black/30">Date Preference</p>
+                          <p className="font-bold">{selectedEnquiry.preferredDateRange}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
                 {selectedEnquiry.message && (
-                  <div>
-                    <h3 className="font-bold text-black mb-2">Message</h3>
-                    <p className="text-sm text-black/80">{selectedEnquiry.message}</p>
+                  <div className="mt-8 pt-6 border-t-2 border-black/5">
+                    <h3 className="text-xs font-black text-black/40 uppercase tracking-widest mb-2">User Message</h3>
+                    <div className="bg-[#F8F9FA] p-4 rounded-xl border-2 border-black/5 text-sm font-medium italic">
+                      "{selectedEnquiry.message}"
+                    </div>
                   </div>
                 )}
+              </div>
 
-                <div>
-                  <h3 className="font-bold text-black mb-2">Internal Notes</h3>
-                  <textarea
-                    value={selectedEnquiry.internalNotes || ''}
-                    onChange={(e) => updateInternalNotes(selectedEnquiry.id, e.target.value)}
-                    placeholder="Add internal notes..."
-                    className="w-full px-3 py-2 border-2 border-black rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#6C5CE7] focus:border-transparent resize-none"
-                    rows={3}
-                  />
+              {/* Action Section */}
+              <div className="bg-white rounded-lg border-2 border-black neo-shadow overflow-hidden">
+                <div className="p-6 bg-black text-white flex items-center gap-3">
+                  <MessageCircleReply size={20} />
+                  <h3 className="font-black uppercase tracking-widest text-sm">Admin Response Protocol</h3>
                 </div>
 
-                <div>
-                  <h3 className="font-bold text-black mb-2">Status History</h3>
-                  <div className="space-y-2 text-sm">
-                    <p><strong>Created:</strong> {selectedEnquiry.createdAt ? new Date(selectedEnquiry.createdAt).toLocaleString() : 'N/A'}</p>
-                    <p><strong>Last Updated:</strong> {selectedEnquiry.updatedAt ? new Date(selectedEnquiry.updatedAt).toLocaleString() : 'N/A'}</p>
+                <div className="p-6 space-y-6">
+                  {/* Public Reply */}
+                  <div>
+                    <div className="flex justify-between items-end mb-2">
+                      <h4 className="text-xs font-black text-black/40 uppercase tracking-widest">Public Reply (Visible to User)</h4>
+                      {selectedEnquiry.adminReply && (
+                        <span className="text-[10px] font-black text-green-600 uppercase tracking-widest">
+                          Last Saved: {selectedEnquiry.repliedAt ? new Date(selectedEnquiry.repliedAt).toLocaleString() : 'Recently'}
+                        </span>
+                      )}
+                    </div>
+                    <textarea
+                      value={replyText}
+                      onChange={(e) => setReplyText(e.target.value)}
+                      placeholder="Type your reply to the user here. This will be visible on their profile hub."
+                      className="w-full px-4 py-3 border-2 border-black rounded-xl text-sm font-bold focus:outline-none focus:ring-4 focus:ring-[#FFD93D]/20 transition-all resize-none min-h-[150px] shadow-inner"
+                    />
+                    <button
+                      onClick={() => saveReply(selectedEnquiry.id)}
+                      disabled={savingReply}
+                      id="save-reply-experience"
+                      className={`mt-4 w-full py-5 rounded-xl font-black text-xs uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-3 ${savingReply ? 'bg-gray-200 text-gray-500' : 'bg-[#FFD93D] text-black border-2 border-black neo-shadow hover:translate-y-[-2px]'
+                        }`}
+                    >
+                      {savingReply ? 'TRANSMITTING...' : (
+                        <>
+                          <Send size={18} /> SEND & SAVE OFFICIAL REPLY
+                        </>
+                      )}
+                    </button>
+                  </div>
+
+                  {/* Internal Notes */}
+                  <div className="pt-6 border-t-2 border-black/5">
+                    <h4 className="text-xs font-black text-black/40 uppercase tracking-widest mb-2">Internal HQ Notes (Private)</h4>
+                    <textarea
+                      value={selectedEnquiry.internalNotes || ''}
+                      onChange={(e) => updateInternalNotes(selectedEnquiry.id, e.target.value)}
+                      placeholder="Add internal notes for other admins..."
+                      className="w-full px-3 py-2 border-2 border-black/5 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#6C5CE7] focus:border-transparent resize-none bg-[#F8F9FA]"
+                      rows={3}
+                    />
                   </div>
                 </div>
               </div>
-            </div>
+            </>
           ) : (
-            <div className="bg-white rounded-lg border-2 border-black neo-shadow p-6 text-center">
-              <Eye size={48} className="text-black/20 mx-auto mb-4" />
-              <p className="text-black/60 font-bold">Select an enquiry to view details</p>
+            <div className="bg-white rounded-lg border-4 border-black neo-shadow p-12 text-center h-[400px] flex flex-col items-center justify-center border-dashed">
+              <Eye size={64} className="text-black/10 mb-4" />
+              <h3 className="text-2xl font-black uppercase text-black/40 tracking-tighter">No Access Point Selected</h3>
+              <p className="font-bold text-black/20 text-sm">Select an enquiry from the list to begin transmission.</p>
             </div>
           )}
         </div>

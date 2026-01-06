@@ -427,7 +427,7 @@ export default function EventRegistrationForm({
         body: JSON.stringify({
           amount: finalAmount,
           currency: 'INR',
-          receipt: `EVT-${event.id}-${Date.now()}`,
+          receipt: `EVT-${event.id}-${Date.now()}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`,
           notes: {
             eventId: event.id,
             userId: user.uid, // Add userId to notes for backend check

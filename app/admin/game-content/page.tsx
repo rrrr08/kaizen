@@ -79,7 +79,8 @@ export default function GameContentPage() {
     setLoading(true);
     try {
       const token = await user.getIdToken();
-      const updatedItems = [...(gameContent?.items || []), { ...newItem, id: `${selectedGame}_${Date.now()}` }];
+      const randomSuffix = Math.random().toString(36).substring(2, 7).toUpperCase();
+      const updatedItems = [...(gameContent?.items || []), { ...newItem, id: `${selectedGame}_${Date.now()}_${randomSuffix}` }];
 
       const response = await fetch('/api/games/content', {
         method: 'POST',
@@ -337,10 +338,10 @@ export default function GameContentPage() {
 
         {message && (
           <div className={`mb-6 p-4 rounded-xl border-2 ${message.startsWith('✅')
-              ? 'bg-green-100 border-green-500 text-green-800'
-              : message.startsWith('❌')
-                ? 'bg-red-100 border-red-500 text-red-800'
-                : 'bg-blue-100 border-blue-500 text-blue-800'
+            ? 'bg-green-100 border-green-500 text-green-800'
+            : message.startsWith('❌')
+              ? 'bg-red-100 border-red-500 text-red-800'
+              : 'bg-blue-100 border-blue-500 text-blue-800'
             }`}>
             <p className="font-bold">{message}</p>
           </div>
@@ -369,8 +370,8 @@ export default function GameContentPage() {
                   key={game}
                   onClick={() => setSelectedGame(game)}
                   className={`px-4 py-2 font-bold text-xs uppercase rounded-lg border-2 transition-all ${selectedGame === game
-                      ? 'bg-[#6C5CE7] text-white border-black'
-                      : 'bg-white text-black border-black/20 hover:border-black'
+                    ? 'bg-[#6C5CE7] text-white border-black'
+                    : 'bg-white text-black border-black/20 hover:border-black'
                     }`}
                 >
                   {game}

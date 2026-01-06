@@ -87,7 +87,10 @@ export default function AdminGamificationPage() {
             <div className="flex justify-between items-center mb-6">
               <h2 className="font-header text-2xl text-black">🎡 WHEEL PRIZES</h2>
               <button
-                onClick={() => setPrizes([...prizes, { id: `new_${Date.now()}`, type: 'JP', value: 10, label: '10 JP', probability: 0, color: '#000000' }])}
+                onClick={() => {
+                  const randomSuffix = Math.random().toString(36).substring(2, 7).toUpperCase();
+                  setPrizes([...prizes, { id: `new_${Date.now()}_${randomSuffix}`, type: 'JP', value: 10, label: '10 JP', probability: 0, color: '#000000' }]);
+                }}
                 className="px-4 py-2 bg-green-400 border-2 border-black rounded-lg font-bold text-xs uppercase hover:bg-green-500 transition-colors"
               >
                 + Add Prize

@@ -3,9 +3,11 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/app/context/AuthContext';
 import { usePopup } from '@/app/context/PopupContext';
-import { ExperienceEnquiry, EnquiryStatus } from '@/lib/types';
-import { Calendar, Eye, CheckCircle, Clock, AlertCircle, XCircle } from 'lucide-react';
+import { ExperienceEnquiry } from '@/lib/types';
+import { Calendar, Eye, CheckCircle, Clock, AlertCircle, XCircle, ArrowLeft, Zap, ArrowRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
+import Link from 'next/link';
 
 const STATUS_CONFIG = {
   new: {
@@ -18,17 +20,17 @@ const STATUS_CONFIG = {
     icon: Eye,
     color: 'bg-yellow-100 text-yellow-800 border-yellow-500',
     label: 'Contacted',
-    description: 'We\'ve reached out to discuss your requirements.'
+    description: "We've reached out to discuss your requirements."
   },
   in_discussion: {
     icon: AlertCircle,
     color: 'bg-orange-100 text-orange-800 border-orange-500',
     label: 'In Discussion',
-    description: 'We\'re working on a customized proposal for you.'
+    description: "We're working on a customized proposal for you."
   },
   confirmed: {
     icon: CheckCircle,
-    color: 'bg-green-100 text-green-800 border-green-500',
+    color: 'bg-[#00B894]/10 text-[#00B894] border-[#00B894]',
     label: 'Confirmed',
     description: 'Your experience has been confirmed! Ready to register.'
   },
@@ -52,16 +54,13 @@ export default function ProfileEnquiriesPage() {
   const router = useRouter();
   const [enquiries, setEnquiries] = useState<ExperienceEnquiry[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (authLoading) return; // Wait for auth to load
-
+    if (authLoading) return;
     if (!user) {
       router.push('/auth/login');
       return;
     }
-
     fetchUserEnquiries();
   }, [user, authLoading, router]);
 
@@ -71,209 +70,165 @@ export default function ProfileEnquiriesPage() {
       const { getAuth } = await import('firebase/auth');
       const auth = getAuth();
       const currentUser = auth.currentUser;
-
       if (!currentUser) return;
-
       const token = await currentUser.getIdToken();
-
       const response = await fetch('/api/profile/enquiries', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
+        headers: { 'Authorization': `Bearer ${token}` },
       });
-
       const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to fetch enquiries');
-      }
-
+      if (!response.ok) throw new Error(data.error || 'Failed to fetch enquiries');
       setEnquiries(data.enquiries);
     } catch (err) {
       console.error('Error fetching enquiries:', err);
-      setError('Failed to load your enquiries');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleRegister = async (enquiryId: string) => {
-    // For now, just show an alert. In a real app, this would navigate to a registration/payment page
-    await showAlert(`Registration feature for enquiry ${enquiryId} would be implemented here!\n\nThis would typically:\n- Show final pricing\n- Collect payment details\n- Confirm participation\n- Send confirmation email`, 'info', 'Coming Soon');
-  };
-
-  if (authLoading) {
+  if (authLoading || loading) {
     return (
-      <div className="min-h-screen pt-28 pb-16 bg-[#FFFDF5] flex items-center justify-center">
+      <div className="min-h-screen pt-32 pb-16 bg-[#FFFDF5] flex items-center justify-center">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[#FFD93D] border-t-black mb-4"></div>
-          <p className="text-black/60 font-black text-xs tracking-[0.4em]">LOADING...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    router.push('/auth/login');
-    return null;
-  }
-
-  if (loading) {
-    return (
-      <div className="min-h-screen pt-28 pb-16 bg-[#FFFDF5] flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[#FFD93D] border-t-black mb-4"></div>
-          <p className="text-black/60 font-black text-xs tracking-[0.4em]">LOADING YOUR ENQUIRIES...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen pt-28 pb-16 bg-[#FFFDF5] flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-500 font-black text-lg">{error}</p>
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-black border-t-[#FFD93D] mb-4"></div>
+          <p className="text-black font-black text-xs tracking-[0.4em]">RETRIEVING ENVOYS...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen pt-28 pb-16 bg-[#FFFDF5]">
-      <div className="max-w-6xl mx-auto px-6 md:px-12">
+    <div className="min-h-screen pt-28 pb-20 bg-[#FFFDF5] text-black">
+      <div className="max-w-6xl mx-auto px-6">
         {/* Header */}
         <div className="mb-12">
-          <h1 className="font-header text-5xl md:text-6xl font-black tracking-tighter mb-4 text-black">
-            MY EXPERIENCE ENQUIRIES
+          <Link
+            href="/profile"
+            className="inline-flex items-center gap-2 text-black/40 hover:text-black font-black text-[10px] uppercase tracking-[0.3em] mb-8 transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" /> Back to Base
+          </Link>
+          <h1 className="font-header text-6xl font-black tracking-tighter uppercase leading-none mb-4">
+            Experience <br />Enquiries
           </h1>
-          <p className="text-xl text-black/60 font-bold">
-            Track the status of your submitted experience enquiries
-          </p>
+          <p className="text-xl font-bold text-black/60 max-w-md">Track and manage your incoming custom event requests.</p>
         </div>
 
-        {/* Enquiries List */}
-        <div className="space-y-6">
+        <div className="space-y-8">
           {enquiries.length === 0 ? (
-            <div className="text-center py-16">
-              <Calendar size={64} className="text-black/20 mx-auto mb-6" />
-              <h2 className="font-header text-3xl font-black text-black mb-4">
-                No Enquiries Yet
-              </h2>
-              <p className="text-black/60 font-bold text-lg mb-8 max-w-md mx-auto">
-                You haven't submitted any experience enquiries yet. Browse our experiences and get started!
-              </p>
-              <button
-                onClick={() => router.push('/experiences')}
-                className="px-8 py-4 bg-[#6C5CE7] text-white font-black text-sm tracking-[0.2em] neo-border neo-shadow hover:scale-105 transition-all rounded-xl"
-              >
-                BROWSE EXPERIENCES
-              </button>
+            <div className="text-center py-24 bg-white border-4 border-black rounded-[40px] neo-shadow border-dashed">
+              <div className="w-20 h-20 bg-black/5 rounded-full flex items-center justify-center mx-auto mb-6 border-2 border-black/10">
+                <Calendar size={32} className="text-black/20" />
+              </div>
+              <h3 className="font-header text-3xl font-black uppercase mb-2">No Requests Found</h3>
+              <p className="font-bold text-black/40 mb-8">Initiate a custom experience enquiry to see logs here.</p>
+              <Link href="/experiences" className="inline-flex items-center gap-2 px-10 py-5 bg-[#6C5CE7] text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] neo-shadow hover:translate-y-[-2px] transition-all">
+                EXPLORE EXPERIENCES <ArrowRight size={18} />
+              </Link>
             </div>
           ) : (
-            enquiries.map((enquiry) => {
-              const statusConfig = STATUS_CONFIG[enquiry.status];
-              const StatusIcon = statusConfig.icon;
+            enquiries.map((enquiry, i) => {
+              const status = STATUS_CONFIG[enquiry.status] || STATUS_CONFIG.new;
+              const StatusIcon = status.icon;
 
               return (
-                <div
+                <motion.div
                   key={enquiry.id}
-                  className="bg-white rounded-[20px] border-2 border-black neo-shadow p-8"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.1 }}
+                  className="bg-white border-4 border-black rounded-[35px] neo-shadow p-8 group relative overflow-hidden"
                 >
-                  {/* Header */}
-                  <div className="flex items-start justify-between mb-6">
+                  <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-8">
                     <div>
-                      <h3 className="font-header text-2xl font-black text-black mb-2">
-                        {enquiry.categoryName}
-                      </h3>
-                      <p className="text-black/60 font-bold">
-                        Submitted {enquiry.createdAt ? new Date(enquiry.createdAt).toLocaleDateString() : 'N/A'}
-                      </p>
-                    </div>
-                    <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold tracking-[0.1em] border-2 ${statusConfig.color}`}>
-                      <StatusIcon size={16} />
-                      {statusConfig.label}
-                    </div>
-                  </div>
-
-                  {/* Status Description */}
-                  <div className="bg-black/5 rounded-lg p-4 mb-6">
-                    <p className="text-black/80 font-medium">
-                      {statusConfig.description}
-                    </p>
-                  </div>
-
-                  {/* Enquiry Details */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                    <div className="bg-[#FFD93D] p-4 rounded-lg">
-                      <p className="text-xs font-black text-black tracking-[0.2em] uppercase mb-1">Occasion</p>
-                      <p className="font-bold text-black">{enquiry.occasionDetails}</p>
-                    </div>
-                    <div className="bg-[#6C5CE7] p-4 rounded-lg">
-                      <p className="text-xs font-black text-white tracking-[0.2em] uppercase mb-1">Audience</p>
-                      <p className="font-bold text-white">{enquiry.audienceSize}</p>
-                    </div>
-                    <div className="bg-[#00B894] p-4 rounded-lg">
-                      <p className="text-xs font-black text-white tracking-[0.2em] uppercase mb-1">Budget</p>
-                      <p className="font-bold text-white">{enquiry.budgetRange}</p>
-                    </div>
-                    <div className="bg-[#FF7675] p-4 rounded-lg">
-                      <p className="text-xs font-black text-white tracking-[0.2em] uppercase mb-1">Preferred Date</p>
-                      <p className="font-bold text-white">{enquiry.preferredDateRange}</p>
-                    </div>
-                  </div>
-
-                  {/* Special Requirements */}
-                  {enquiry.specialRequirements && (
-                    <div className="mb-6">
-                      <h4 className="font-bold text-black mb-2">Special Requirements</h4>
-                      <p className="text-black/80 bg-black/5 p-3 rounded-lg">
-                        {enquiry.specialRequirements}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Message */}
-                  {enquiry.message && (
-                    <div className="mb-6">
-                      <h4 className="font-bold text-black mb-2">Your Message</h4>
-                      <p className="text-black/80 bg-black/5 p-3 rounded-lg italic">
-                        "{enquiry.message}"
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Register Button for Confirmed Status */}
-                  {enquiry.status === 'confirmed' && (
-                    <div className="pt-6 border-t-2 border-black/10">
-                      <div className="bg-green-50 border-2 border-green-200 rounded-lg p-4 mb-4">
-                        <p className="text-green-800 font-bold mb-2">🎉 Your experience has been confirmed!</p>
-                        <p className="text-green-700 text-sm">
-                          Complete your registration to secure your spot and receive all the details.
-                        </p>
+                      <div className="flex items-center gap-3 mb-2">
+                        <h3 className="font-header text-3xl font-black uppercase tracking-tight group-hover:text-[#6C5CE7] transition-colors">{enquiry.categoryName}</h3>
+                        {enquiry.status === 'confirmed' && <Zap size={20} className="text-[#FFD93D] fill-[#FFD93D]" />}
                       </div>
-                      <button
-                        onClick={() => handleRegister(enquiry.id)}
-                        className="px-8 py-4 bg-green-600 text-white font-black text-sm tracking-[0.2em] neo-border neo-shadow hover:scale-105 transition-all rounded-xl"
-                      >
-                        REGISTER NOW
+                      <p className="text-[10px] font-black uppercase tracking-widest text-black/40">
+                        Received: {enquiry.createdAt ? new Date(enquiry.createdAt).toLocaleDateString() : 'N/A'} // Log ID: {enquiry.id.slice(0, 8)}
+                      </p>
+                    </div>
+                    <div className="flex flex-col items-end gap-2">
+                      <div className={`px-5 py-2 rounded-full border-2 ${status.color} flex items-center gap-2 font-black text-[10px] uppercase tracking-widest shadow-[3px_3px_0px_#000]`}>
+                        <StatusIcon size={14} /> {status.label}
+                      </div>
+                      {enquiry.adminReply ? (
+                        <div className="bg-[#FFD93D] text-black px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest border-2 border-black">
+                          Admin Replied
+                        </div>
+                      ) : (
+                        <div className="bg-black/5 text-black/40 px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest border-2 border-black/10">
+                          Waiting for HQ
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="bg-black/5 p-4 rounded-xl mb-8 border-l-4 border-black font-bold text-sm italic">
+                    "{status.description}"
+                  </div>
+
+                  {/* Info Chips */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                    {[
+                      { label: 'Occasion', val: enquiry.occasionDetails, color: 'bg-[#FFD93D]' },
+                      { label: 'Audience', val: enquiry.audienceSize, color: 'bg-[#6C5CE7]', text: 'text-white' },
+                      { label: 'Budget', val: enquiry.budgetRange, color: 'bg-[#00B894]', text: 'text-white' },
+                      { label: 'Date', val: enquiry.preferredDateRange, color: 'bg-[#FF7675]', text: 'text-white' }
+                    ].map((chip, idx) => (
+                      <div key={idx} className={`${chip.color} border-2 border-black p-4 rounded-2xl shadow-[3px_3px_0px_#000]`}>
+                        <p className={`text-[8px] font-black uppercase tracking-widest ${chip.text ? 'text-white/60' : 'text-black/40'} mb-1`}>{chip.label}</p>
+                        <p className={`font-black text-xs uppercase leading-tight ${chip.text || 'text-black'}`}>{chip.val}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Messages Section */}
+                  <div className="space-y-4">
+                    {enquiry.message && (
+                      <div>
+                        <p className="text-[9px] font-black uppercase text-black/40 tracking-widest mb-2">My Requirement Protocol</p>
+                        <div className="bg-gray-50 border-2 border-black/5 rounded-2xl p-4 text-sm font-bold text-black/70 italic">
+                          "{enquiry.message}"
+                        </div>
+                      </div>
+                    )}
+                    {enquiry.adminReply && (
+                      <div className="relative pt-4">
+                        <div className="absolute top-0 left-6 px-3 py-1 bg-black text-white text-[9px] font-black uppercase tracking-widest rounded-full border-2 border-black -translate-y-1/2">
+                          HQ RESPONSE
+                        </div>
+                        <div className="bg-[#FFD93D] text-black border-4 border-black rounded-[25px] p-6 neo-shadow">
+                          <p className="text-sm font-black leading-relaxed">{enquiry.adminReply}</p>
+                          {enquiry.repliedAt && (
+                            <p className="text-[8px] font-black uppercase mt-4 text-black/40 text-right tracking-[0.2em]">
+                              Transmitted: {new Date(enquiry.repliedAt).toLocaleString()}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {enquiry.status === 'confirmed' && (
+                    <div className="mt-10 pt-8 border-t-2 border-black/10 flex flex-col md:flex-row items-center justify-between gap-6">
+                      <div>
+                        <h4 className="font-black text-xl uppercase tracking-tight">Mission Confirmed</h4>
+                        <p className="text-xs font-bold text-black/40">Proceed to final registration to lock in your slot.</p>
+                      </div>
+                      <button className="px-10 py-4 bg-[#00B894] text-white border-2 border-black rounded-xl font-black text-xs uppercase tracking-widest neo-shadow hover:scale-105 transition-all">
+                        Complete Registration
                       </button>
                     </div>
                   )}
-
-                  {/* Internal Notes (if any) */}
-                  {enquiry.internalNotes && (
-                    <div className="mt-6 pt-6 border-t-2 border-black/10">
-                      <h4 className="font-bold text-black mb-2">Latest Update from Our Team</h4>
-                      <div className="bg-[#6C5CE7] text-white p-4 rounded-lg">
-                        <p className="font-medium">{enquiry.internalNotes}</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
+                </motion.div>
               );
             })
           )}
+        </div>
+
+        <div className="mt-20 text-center opacity-20">
+          <p className="text-[8px] font-black tracking-[0.8em] uppercase">ENQUIRY_STREAM_LOGS_v2.1</p>
         </div>
       </div>
     </div>

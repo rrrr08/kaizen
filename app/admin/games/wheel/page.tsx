@@ -67,8 +67,9 @@ export default function WheelSettingsPage() {
     };
 
     const addPrize = () => {
+        const randomSuffix = Math.random().toString(36).substring(2, 7).toUpperCase();
         setPrizes([...prizes, {
-            id: `prize_${Date.now()}`,
+            id: `prize_${Date.now()}_${randomSuffix}`,
             type: 'JP',
             value: 10,
             label: '10 JP',

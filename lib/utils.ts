@@ -30,8 +30,14 @@ export function calculateTotal(subtotal: number, shipping = 0, tax = 0) {
   return subtotal + shipping + tax;
 }
 
+export function generateUniqueId(prefix = '') {
+  const randomPart = Math.random().toString(36).substring(2, 11).toUpperCase();
+  const timePart = Date.now().toString(36).toUpperCase();
+  return prefix ? `${prefix}-${timePart}-${randomPart}` : `${timePart}-${randomPart}`;
+}
+
 export function generateOrderId() {
-  return `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+  return generateUniqueId('ORD');
 }
 
 export function formatDate(date: string | number | Date) {
@@ -78,7 +84,7 @@ export function getOrderStatus(status: string) {
     delivered: { text: 'Delivered', color: 'green' },
     cancelled: { text: 'Cancelled', color: 'red' }
   };
-  
+
   return statusMap[status] || { text: 'Unknown', color: 'gray' };
 }
 

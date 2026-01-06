@@ -8,9 +8,17 @@
     --purple: #6C5CE7;
     --mint: #00B894;
     --charcoal: #2D3436;
+    --red: #FF7675;
 
     --background: var(--cream);
     --foreground: var(--charcoal);
+
+    --midnight-bg: #0A0A0B;
+    --midnight-card: rgba(23, 23, 26, 0.7);
+    --midnight-border: rgba(255, 255, 255, 0.08);
+    --midnight-accent: #6C5CE7;
+    --midnight-text: #F8F9FA;
+    --midnight-text-muted: #A0A0AB;
   }
 }
 

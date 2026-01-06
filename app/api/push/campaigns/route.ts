@@ -1,20 +1,28 @@
-import { getServerSession } from 'next-auth';
-import { db } from '@/lib/firebase-admin';
+import { db, auth } from '@/lib/firebase-admin';
 import { Timestamp } from 'firebase-admin/firestore';
+import { sendNotifications } from '@/lib/notification-service';
 
 export async function POST(request: Request) {
   try {
-    const session = await getServerSession();
-
-    if (!session?.user?.email) {
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const token = authHeader.split('Bearer ')[1];
+    const decodedToken = await auth.verifyIdToken(token);
+
+    if (!decodedToken.uid) {
+      return Response.json({ error: 'Invalid token' }, { status: 401 });
+    }
+
     // Check if user is admin
-    const userDoc = await db.collection('users').doc(session.user.email).get();
+    const userDoc = await db.collection('users').doc(decodedToken.uid).get();
     if (!userDoc.exists || userDoc.data()?.role !== 'admin') {
       return Response.json({ error: 'Admin access required' }, { status: 403 });
     }
+
+    const userEmail = decodedToken.email || userDoc.data()?.email;
 
     const body = await request.json();
     const {
@@ -109,15 +117,54 @@ export async function POST(request: Request) {
       deliveredCount: 0,
       failedCount: 0,
       interactionCount: 0,
-      createdBy: session.user.email,
+      createdBy: userEmail,
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
     });
 
+    // Also add to the legacy 'campaigns' collection for immediate UI visibility
+    const legacyCampaignRef = await db.collection('campaigns').add({
+      title,
+      message,
+      status: scheduledFor ? 'scheduled' : 'sent',
+      recipientCount,
+      deliveredCount: 0,
+      interactionCount: 0,
+      priority,
+      image: image || null,
+      actionUrl: actionUrl || null,
+      createdAt: new Date().toISOString(),
+      scheduledFor: scheduledFor || null,
+      pushCampaignId: campaignRef.id // Link them
+    });
+
     // If not scheduled, send immediately
     if (!scheduledFor) {
-      // Queue the campaign for sending
-      await queueCampaignForSending(campaignRef.id, recipientSnapshot.docs);
+      try {
+        const results = await sendNotifications({
+          title,
+          message,
+          type: actionType,
+          actionUrl,
+          image,
+          recipientSegment,
+          channels: body.channels || ['push', 'in-app'],
+          priority
+        });
+
+        // Update campaign with delivery results
+        await campaignRef.update({
+          deliveredCount: results.pushSentCount,
+          updatedAt: Timestamp.now(),
+        });
+
+        // Update the legacy record as well
+        await legacyCampaignRef.update({
+          deliveredCount: results.pushSentCount
+        });
+      } catch (sendError) {
+        console.error('Error sending immediate campaign:', sendError);
+      }
     }
 
     return Response.json({
@@ -137,55 +184,3 @@ export async function POST(request: Request) {
   }
 }
 
-async function queueCampaignForSending(
-  campaignId: string,
-  recipientDocs: FirebaseFirestore.QueryDocumentSnapshot<FirebaseFirestore.DocumentData>[]
-) {
-  try {
-    const campaignRef = db.collection('pushCampaigns').doc(campaignId);
-    const campaignData = (await campaignRef.get()).data();
-
-    if (!campaignData) return;
-
-    // Create push activity records for each recipient
-    const batch = db.batch();
-    let batchCount = 0;
-
-    for (const userDoc of recipientDocs) {
-      const userDevices = await db
-        .collection('userDeviceTokens')
-        .where('userEmail', '==', userDoc.id)
-        .where('isActive', '==', true)
-        .get();
-
-      for (const deviceDoc of userDevices.docs) {
-        const activityRef = db.collection('pushActivities').doc();
-        batch.set(activityRef, {
-          campaignId,
-          userEmail: userDoc.id,
-          deviceId: deviceDoc.id,
-          deviceToken: deviceDoc.data().deviceToken,
-          status: 'queued',
-          createdAt: Timestamp.now(),
-        });
-
-        batchCount++;
-
-        // Commit batch every 500 writes
-        if (batchCount === 500) {
-          await batch.commit();
-          batchCount = 0;
-        }
-      }
-    }
-
-    // Commit remaining
-    if (batchCount > 0) {
-      await batch.commit();
-    }
-
-    console.log(`Queued ${batchCount} push notifications for campaign ${campaignId}`);
-  } catch (error) {
-    console.error('Error queuing campaign for sending:', error);
-  }
-}

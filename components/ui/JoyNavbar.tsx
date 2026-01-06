@@ -64,15 +64,15 @@ const Navbar: React.FC = () => {
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-50 px-4 py-3 flex items-center justify-between bg-[#FFFDF5] border-b-2 border-black transition-all">
+      <nav className="fixed top-0 left-0 right-0 z-50 px-4 py-3 flex items-center justify-between bg-[#FFFDF5] border-b-4 border-black transition-all">
         {/* Logo */}
         <Logo size="medium" linkTo="/" showText={true} />
 
         {/* Desktop Menu */}
         <div className="relative hidden lg:flex bg-white/50 p-1 rounded-full border-2 border-black items-center shadow-[4px_4px_0px_rgba(0,0,0,0.1)]">
           {navItems.map((item, idx) => {
+            const isActive = pathname.startsWith(item.path);
             if (item.name === 'Events') {
-              const isActive = pathname.startsWith('/events');
               return (
                 <DropdownMenu.Root key={item.path}>
                   <DropdownMenu.Trigger asChild>
@@ -97,7 +97,7 @@ const Navbar: React.FC = () => {
                       className="w-48 bg-white border-2 border-black rounded-xl p-2 neo-shadow z-[60] data-[side=bottom]:animate-slideUpAndFade"
                       sideOffset={10}
                     >
-                      <DropdownMenu.Item className="group">
+                      <DropdownMenu.Item className="outline-none">
                         <Link
                           href="/events/upcoming"
                           className="flex items-center gap-2 px-3 py-2 text-sm font-black text-black rounded-lg hover:bg-[#FFD93D] hover:text-black hover:border-black transition-colors border-2 border-transparent uppercase tracking-wide"
@@ -105,7 +105,7 @@ const Navbar: React.FC = () => {
                           Upcoming
                         </Link>
                       </DropdownMenu.Item>
-                      <DropdownMenu.Item className="group mt-1">
+                      <DropdownMenu.Item className="outline-none mt-1">
                         <Link
                           href="/events/past"
                           className="flex items-center gap-2 px-3 py-2 text-sm font-black text-black rounded-lg hover:bg-[#6C5CE7] hover:text-white transition-colors border-2 border-transparent uppercase tracking-wide"
@@ -119,7 +119,6 @@ const Navbar: React.FC = () => {
               );
             }
 
-            const isActive = pathname.startsWith(item.path);
             return (
               <Link
                 key={item.path}
@@ -144,7 +143,7 @@ const Navbar: React.FC = () => {
 
         {/* User Actions */}
         <div className="flex items-center gap-2 z-50">
-          {/* Wallet Capsule (Hidden on small mobile) */}
+          {/* Wallet Capsule */}
           <div className="hidden sm:flex items-center gap-2">
             <Link href="/rewards">
               <motion.div
@@ -207,7 +206,7 @@ const Navbar: React.FC = () => {
               <DropdownMenu.Portal>
                 <DropdownMenu.Content
                   className="w-56 bg-white border-2 border-black rounded-xl p-2 neo-shadow z-[60] data-[side=bottom]:animate-slideUpAndFade data-[side=right]:animate-slideLeftAndFade data-[side=left]:animate-slideRightAndFade data-[side=top]:animate-slideDownAndFade"
-                  sideOffset={5}
+                  sideOffset={10}
                 >
                   <div className="px-2 py-2 mb-2 bg-gray-100 rounded-lg border border-black/10">
                     <p className="text-xs font-bold text-black/50 uppercase tracking-wider mb-1">Signed in as</p>
@@ -215,39 +214,37 @@ const Navbar: React.FC = () => {
                   </div>
 
                   {isAdmin && (
-                    <DropdownMenu.Item className="group flex items-center gap-3 px-3 py-2 text-sm font-bold text-black rounded-lg outline-none cursor-pointer hover:bg-[#FF7675] hover:text-white hover:border-black transition-colors border border-transparent">
-                      <Link href="/admin" className="flex items-center gap-3 w-full">
+                    <DropdownMenu.Item className="outline-none">
+                      <Link href="/admin" className="group flex items-center gap-3 px-3 py-2 text-sm font-bold text-black rounded-lg hover:bg-[#FF7675] hover:text-white hover:border-black transition-colors border border-transparent">
                         <LayoutDashboard size={16} strokeWidth={2.5} />
-                        Admin Dashboard
+                        Admin Panel
                       </Link>
                     </DropdownMenu.Item>
                   )}
 
-                  <DropdownMenu.Item className="group flex items-center gap-3 px-3 py-2 text-sm font-bold text-black rounded-lg outline-none cursor-pointer hover:bg-[#FFD93D] hover:text-black hover:border-black transition-colors border border-transparent">
-                    <Link href="/profile" className="flex items-center gap-3 w-full">
+                  <DropdownMenu.Item className="outline-none">
+                    <Link href="/profile" className="group flex items-center gap-3 px-3 py-2 text-sm font-bold text-black rounded-lg hover:bg-[#FFD93D] hover:text-black hover:border-black transition-colors border border-transparent">
                       <User size={16} strokeWidth={2.5} />
                       My Profile
                     </Link>
                   </DropdownMenu.Item>
 
-                  <DropdownMenu.Item className="group flex items-center gap-3 px-3 py-2 text-sm font-bold text-black rounded-lg outline-none cursor-pointer hover:bg-[#FFD93D] hover:text-black hover:border-black transition-colors border border-transparent">
-                    <Link href="/profile/settings" className="flex items-center gap-3 w-full">
+                  <DropdownMenu.Item className="outline-none">
+                    <Link href="/profile/settings" className="group flex items-center gap-3 px-3 py-2 text-sm font-bold text-black rounded-lg hover:bg-[#FFD93D] hover:text-black hover:border-black transition-colors border border-transparent">
                       <Settings size={16} strokeWidth={2.5} />
                       Settings
                     </Link>
                   </DropdownMenu.Item>
 
-                  <DropdownMenu.Separator className="h-[2px] bg-black my-2" />
+                  <div className="h-[2px] bg-black my-2" />
 
                   <DropdownMenu.Item
-                    className="group flex items-center gap-3 px-3 py-2 text-sm font-bold text-red-500 rounded-lg outline-none cursor-pointer hover:bg-black hover:text-white hover:border-transparent transition-colors border border-transparent"
+                    className="group flex items-center gap-3 px-3 py-2 text-sm font-bold text-red-500 rounded-lg outline-none cursor-pointer hover:bg-black hover:text-white transition-colors border border-transparent"
                     onSelect={handleLogout}
                   >
                     <LogOut size={16} strokeWidth={2.5} />
                     Log Out
                   </DropdownMenu.Item>
-
-                  <DropdownMenu.Arrow className="fill-black" />
                 </DropdownMenu.Content>
               </DropdownMenu.Portal>
             </DropdownMenu.Root>
@@ -291,16 +288,16 @@ const Navbar: React.FC = () => {
                       <Link
                         href="/events/upcoming"
                         onClick={() => setIsMobileMenuOpen(false)}
-                        className="text-2xl font-black text-black hover:text-[#FFD93D] uppercase tracking-tighter pl-4"
+                        className="text-2xl font-black text-black hover:text-[#FFD93D] uppercase tracking-tighter pl-4 flex items-center gap-2"
                       >
-                        <span className="flex items-center gap-2"><ArrowRight size={16} /> Upcoming</span>
+                        <ArrowRight size={16} /> Upcoming
                       </Link>
                       <Link
                         href="/events/past"
                         onClick={() => setIsMobileMenuOpen(false)}
-                        className="text-2xl font-black text-black hover:text-[#6C5CE7] uppercase tracking-tighter pl-4"
+                        className="text-2xl font-black text-black hover:text-[#6C5CE7] uppercase tracking-tighter pl-4 flex items-center gap-2"
                       >
-                        <span className="flex items-center gap-2"><ArrowRight size={16} /> Past</span>
+                        <ArrowRight size={16} /> Past
                       </Link>
                     </div>
                   );
@@ -322,16 +319,16 @@ const Navbar: React.FC = () => {
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="text-4xl font-black text-red-500 hover:text-red-600 uppercase tracking-tighter"
                 >
-                  Admin Dashboard
+                  Admin Panel
                 </Link>
               )}
               <div className="h-px bg-black/10 my-4" />
               <Link href={user ? "/profile" : "/auth/login"} className="text-xl font-bold text-black/60 uppercase tracking-widest">
                 {user ? "My Profile" : "Login / Sign Up"}
               </Link>
-              <div className="mt-8 p-6 bg-[#00B894] rounded-2xl border-2 border-black neo-shadow">
+              <div className="mt-8 p-6 bg-[#00B894] rounded-2xl border-4 border-black neo-shadow">
                 <p className="font-black text-black uppercase tracking-widest mb-2">My Balance</p>
-                <p className="text-4xl font-black text-black">{balance.toLocaleString()} PTS</p>
+                <p className="text-4xl font-black text-black">{balance.toLocaleString()} JP</p>
               </div>
               {user && (
                 <button
