@@ -136,11 +136,11 @@ export default function UpcomingEventDetail() {
           <div className="lg:col-span-2">
 
             {/* Image */}
-            <div className="aspect-video overflow-hidden rounded-[30px] border-3 border-black neo-shadow bg-white mb-12">
+            <div className="aspect-video overflow-hidden rounded-[30px] border-3 border-black neo-shadow bg-white mb-12 group">
               {event.image && <img
                 src={event.image}
                 alt={event.title}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover group-hover:scale-110 transition duration-500"
               />}
             </div>
 
@@ -296,7 +296,7 @@ function Section({ title, children }: { title: string; children: any }) {
 
 function Info({ label, children }: { label: string; children: any }) {
   return (
-    <div className="bg-white border-2 border-black rounded-xl p-6 neo-shadow hover:-translate-y-1 transition-transform">
+    <div className="bg-[#FFFDF5] border-2 border-black rounded-xl p-3 neo-shadow hover:-translate-y-1 transition-transform">
       <div className="font-black text-[10px] tracking-widest text-black/40 mb-3 uppercase">
         {label}
       </div>
