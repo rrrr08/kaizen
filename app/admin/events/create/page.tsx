@@ -25,8 +25,7 @@ export default function CreateEventPage() {
     capacity: '',
     highlights: '',
     gallery: '',
-    testimonials: '',
-    registered: ''
+    testimonials: ''
   });
 
   useEffect(() => {
@@ -65,7 +64,6 @@ export default function CreateEventPage() {
       location: form.location,
       description: form.description,
       capacity: Number(form.capacity),
-      registered: Number(form.registered) || 0,
       status: isPast ? 'past' : 'upcoming'
     };
 
@@ -168,6 +166,7 @@ export default function CreateEventPage() {
                 type="datetime-local"
                 value={form.datetime}
                 onChange={handleChange}
+                min={new Date().toISOString().slice(0, 16)}
               />
               <Field
                 label="Location"
@@ -193,13 +192,6 @@ export default function CreateEventPage() {
                 name="capacity"
                 type="number"
                 value={form.capacity}
-                onChange={handleChange}
-              />
-              <Field
-                label="Registered"
-                name="registered"
-                type="number"
-                value={form.registered}
                 onChange={handleChange}
               />
             </div>
