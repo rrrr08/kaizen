@@ -119,7 +119,7 @@ export default function AdminVouchersPage() {
 
   const handleDelete = async (id: string) => {
     if (!user) return;
-    
+
     const confirmed = await showConfirm('Delete this voucher? This action cannot be undone.', 'Delete Voucher');
     if (!confirmed) return;
 
@@ -148,16 +148,17 @@ export default function AdminVouchersPage() {
   };
 
   const handleAddNew = () => {
+    const randomSuffix = Math.random().toString(36).substring(2, 7).toUpperCase();
     const newVoucher: VoucherTemplate = {
       ...formData as VoucherTemplate,
-      id: `voucher_${Date.now()}`,
+      id: `voucher_${Date.now()}_${randomSuffix}`,
     };
     handleSave(newVoucher);
   };
 
   const handleInitializeDefaults = async () => {
     if (!user) return;
-    
+
     const confirmed = await showConfirm('Initialize default vouchers? This will add 6 pre-configured vouchers.', 'Initialize Vouchers');
     if (!confirmed) return;
 
@@ -223,8 +224,8 @@ export default function AdminVouchersPage() {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           className={`mb-6 p-4 rounded-2xl border-4 border-black font-bold flex items-center gap-3 ${message.startsWith('✅')
-              ? 'bg-[#00B894] text-white'
-              : 'bg-[#FF6B6B] text-white'
+            ? 'bg-[#00B894] text-white'
+            : 'bg-[#FF6B6B] text-white'
             }`}
         >
           <AlertCircle className="w-5 h-5" />
@@ -426,16 +427,15 @@ export default function AdminVouchersPage() {
                 <div>
                   <div className="flex items-center gap-2 mb-1">
                     <h3 className="font-header text-2xl font-black text-black">{voucher.name}</h3>
-                    <span className={`px-2 py-0.5 rounded-lg text-xs font-black uppercase border-2 border-black ${
-                      voucher.category === 'shop' ? 'bg-[#FFD93D] text-black' :
-                      voucher.category === 'events' ? 'bg-[#6C5CE7] text-white' :
-                      voucher.category === 'experiences' ? 'bg-[#00B894] text-white' :
-                      'bg-gradient-to-r from-[#FFD93D] via-[#6C5CE7] to-[#00B894] text-white'
-                    }`}>
+                    <span className={`px-2 py-0.5 rounded-lg text-xs font-black uppercase border-2 border-black ${voucher.category === 'shop' ? 'bg-[#FFD93D] text-black' :
+                        voucher.category === 'events' ? 'bg-[#6C5CE7] text-white' :
+                          voucher.category === 'experiences' ? 'bg-[#00B894] text-white' :
+                            'bg-gradient-to-r from-[#FFD93D] via-[#6C5CE7] to-[#00B894] text-white'
+                      }`}>
                       {voucher.category === 'shop' ? '🛍️ SHOP' :
-                       voucher.category === 'events' ? '🎫 EVENTS' :
-                       voucher.category === 'experiences' ? '🎮 EXPERIENCES' :
-                       '🌟 ALL'}
+                        voucher.category === 'events' ? '🎫 EVENTS' :
+                          voucher.category === 'experiences' ? '🎮 EXPERIENCES' :
+                            '🌟 ALL'}
                     </span>
                   </div>
                   <p className="text-black/60 font-bold text-sm">{voucher.description}</p>

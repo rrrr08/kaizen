@@ -44,6 +44,7 @@ import {
 } from "firebase/storage";
 // Type imports removed for JavaScript conversion - Re-added for TypeScript
 import { UserProfile, ChatMessage, Conversation, Product, GameEvent, ExperienceCategory, ExperienceEnquiry, ExperienceCaseStudy } from "./types";
+import { generateOrderId } from "./utils";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -768,7 +769,7 @@ export async function createOrder(
     [key: string]: any;
   }
 ) {
-  const orderId = Date.now().toString();
+  const orderId = generateOrderId();
 
   const order = {
     id: orderId,
@@ -956,6 +957,7 @@ export interface Campaign {
   deliveredCount: number;
   interactionCount: number;
   createdAt: string;
+  scheduledFor?: string;
   image?: string;
   actionUrl?: string;
   priority?: string;

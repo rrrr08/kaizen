@@ -65,8 +65,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: '/admin/experiences', label: 'Experiences', icon: Sparkles },
     { href: '/admin/experiences/enquiries', label: 'Experience Enquiries', icon: MessageSquare },
     { href: '/admin/testimonials', label: 'Testimonials', icon: MessageSquare },
-    { href: '/admin/push-notifications', label: 'Notifications', icon: Bell },
-    { href: '/admin/emails', label: 'Send Emails', icon: Mail },
+    { href: '/admin/push-notifications', label: 'Notifications', icon: Zap },
     { href: '/admin/inquiries', label: 'Enquiries', icon: MessageSquare },
     { href: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
   ];
@@ -124,7 +123,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
           <nav className="space-y-2">
             {adminMenuItems.map((item) => {
-              const Icon = item.icon;
+              const Icon = item?.icon || Settings; // Fallback to Settings icon
               const isActive = pathname === item.href;
               return (
                 <Link

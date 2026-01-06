@@ -330,7 +330,7 @@ export default function CheckoutPage() {
       }
 
       // Create order in our system and get Razorpay order ID
-      const receiptId = `RCP-${Date.now()}`;
+      const receiptId = `RCP-${Date.now()}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
       const response = await fetch('/api/payments/create-order', {
         method: 'POST',
         headers: {

@@ -7,8 +7,9 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Bell, Send, Clock, BarChart3, Users, Smartphone, MessageSquare } from 'lucide-react';
+import { Bell, Send, Clock, BarChart3, Users, Smartphone, MessageSquare, Mail, CheckCircle } from 'lucide-react';
 import { getCampaigns, addCampaign, Campaign } from '@/lib/firebase';
+import { auth } from '@/lib/firebase';
 
 export default function PushNotificationsPage() {
   const { addToast } = useToast();
@@ -18,7 +19,7 @@ export default function PushNotificationsPage() {
   const [recipientPreview, setRecipientPreview] = useState(0);
   const [totalUsers, setTotalUsers] = useState(0);
 
-  // Form state
+  // Form state for Push
   const [formData, setFormData] = useState({
     title: '',
     message: '',
@@ -28,6 +29,13 @@ export default function PushNotificationsPage() {
     recipientSegment: 'all',
     scheduledFor: '',
     channels: ['push', 'in-app'] as ('push' | 'in-app' | 'sms')[],
+  });
+
+  // Form state for Email
+  const [emailFormData, setEmailFormData] = useState({
+    subject: '',
+    message: '',
+    recipientSegment: 'all',
   });
 
   useEffect(() => {
@@ -79,6 +87,16 @@ export default function PushNotificationsPage() {
     }));
   }
 
+  function handleEmailInputChange(
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) {
+    const { name, value } = e.target;
+    setEmailFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  }
+
   async function handleSendCampaign(e: React.FormEvent) {
     e.preventDefault();
 
@@ -115,81 +133,51 @@ export default function PushNotificationsPage() {
     }
 
     setLoading(true);
-
     try {
-      // Send in-app notifications to users
       const { auth } = await import('@/lib/firebase');
       const currentUser = auth.currentUser;
 
-      if (currentUser) {
-        const token = await currentUser.getIdToken();
-
-        const sendResponse = await fetch('/api/notifications/send', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({
-            title: formData.title,
-            message: formData.message,
-            type: 'info',
-            actionUrl: formData.actionUrl || null,
-            recipientSegment: formData.recipientSegment,
-            image: formData.image || null,
-            channels: formData.channels
-          })
-        });
-
-        if (!sendResponse.ok) {
-          throw new Error('Failed to send notifications');
-        }
-
-        const sendData = await sendResponse.json();
-        console.log('Notifications sent:', sendData);
-
-        // Show quiet hours info if applicable
-        if (sendData.skippedDueToQuietHours?.total > 0) {
-          addToast({
-            title: 'Quiet Hours Active',
-            description: `${sendData.skippedDueToQuietHours.total} users skipped due to quiet hours (Normal priority respects user preferences)`,
-          });
-        }
+      if (!currentUser) {
+        throw new Error('Not authenticated');
       }
 
-      const newCampaign: Omit<Campaign, 'id' | 'deliveredCount' | 'interactionCount'> = {
-        title: formData.title,
-        message: formData.message,
-        status: 'sent',
-        recipientCount: formData.recipientSegment === 'all' ? totalUsers : Math.floor(totalUsers * 0.1),
-        priority: formData.priority,
-        createdAt: new Date().toISOString(),
-      };
+      const token = await currentUser.getIdToken();
 
-      // Only add optional fields if they have values
-      if (formData.image && formData.image.trim()) {
-        newCampaign.image = formData.image;
+      const response = await fetch('/api/push/campaigns', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          title: formData.title,
+          message: formData.message,
+          image: formData.image || null,
+          actionUrl: formData.actionUrl || null,
+          priority: formData.priority,
+          recipientSegment: formData.recipientSegment,
+          scheduledFor: formData.scheduledFor || null,
+          channels: formData.channels,
+          actionType: 'navigate' // Default action
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to send campaign');
       }
-      if (formData.actionUrl && formData.actionUrl.trim()) {
-        newCampaign.actionUrl = formData.actionUrl;
-      }
 
-      const docId = await addCampaign(newCampaign);
+      const result = await response.json();
+      console.log('Campaign handled:', result);
 
-      setCampaigns([
-        {
-          id: docId,
-          ...newCampaign,
-          deliveredCount: 0,
-          interactionCount: 0,
-        } as Campaign,
-        ...campaigns,
-      ]);
-
+      // Show toast
       addToast({
         title: 'Success',
-        description: 'Campaign sent successfully!',
+        description: result.message || 'Campaign processed successfully!',
       });
+
+      // Reload campaigns to show the new one
+      await loadCampaigns();
 
       // Reset form
       setFormData({
@@ -213,6 +201,64 @@ export default function PushNotificationsPage() {
     }
   }
 
+  async function handleSendEmail(e: React.FormEvent) {
+    e.preventDefault();
+
+    if (!emailFormData.subject || !emailFormData.message) {
+      addToast({
+        title: 'Validation Error',
+        description: 'Subject and message are required',
+      });
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const { auth } = await import('@/lib/firebase');
+      const currentUser = auth.currentUser;
+
+      if (currentUser) {
+        const token = await currentUser.getIdToken();
+
+        const response = await fetch('/api/admin/send-email', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(emailFormData)
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to send emails');
+        }
+
+        addToast({
+          title: 'Success!',
+          description: data.message,
+        });
+
+        // Reset form
+        setEmailFormData({
+          subject: '',
+          message: '',
+          recipientSegment: 'all',
+        });
+      }
+    } catch (error: any) {
+      console.error('Error sending emails:', error);
+      addToast({
+        title: 'Error',
+        description: error.message || 'Failed to send emails',
+      });
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <div className="min-h-screen pt-28 pb-16 bg-[#FFFDF5]">
       <div className="max-w-6xl mx-auto px-6 md:px-12">
@@ -230,17 +276,24 @@ export default function PushNotificationsPage() {
         </div>
 
         <Tabs defaultValue="send" className="space-y-8">
-          <TabsList className="grid grid-cols-3 w-full bg-transparent gap-4 h-auto p-0">
+          <TabsList className="grid grid-cols-4 w-full bg-transparent gap-4 h-auto p-0">
             <TabsTrigger
               value="send"
               className="flex items-center gap-2 bg-white border-2 border-black rounded-xl py-4 data-[state=active]:bg-[#FFD93D] data-[state=active]:text-black font-black uppercase tracking-widest text-black/40 hover:bg-gray-50 transition-all shadow-[4px_4px_0px_rgba(0,0,0,1)] data-[state=active]:shadow-none data-[state=active]:translate-x-[2px] data-[state=active]:translate-y-[2px]"
             >
               <Send className="w-4 h-4" strokeWidth={3} />
-              Send Notification
+              Notification
+            </TabsTrigger>
+            <TabsTrigger
+              value="email"
+              className="flex items-center gap-2 bg-white border-2 border-black rounded-xl py-4 data-[state=active]:bg-[#00B894] data-[state=active]:text-black font-black uppercase tracking-widest text-black/40 hover:bg-gray-50 transition-all shadow-[4px_4px_0px_rgba(0,0,0,1)] data-[state=active]:shadow-none data-[state=active]:translate-x-[2px] data-[state=active]:translate-y-[2px]"
+            >
+              <Mail className="w-4 h-4" strokeWidth={3} />
+              Email
             </TabsTrigger>
             <TabsTrigger
               value="scheduled"
-              className="flex items-center gap-2 bg-white border-2 border-black rounded-xl py-4 data-[state=active]:bg-[#00B894] data-[state=active]:text-black font-black uppercase tracking-widest text-black/40 hover:bg-gray-50 transition-all shadow-[4px_4px_0px_rgba(0,0,0,1)] data-[state=active]:shadow-none data-[state=active]:translate-x-[2px] data-[state=active]:translate-y-[2px]"
+              className="flex items-center gap-2 bg-white border-2 border-black rounded-xl py-4 data-[state=active]:bg-[#6C5CE7] data-[state=active]:text-black font-black uppercase tracking-widest text-black/40 hover:bg-gray-50 transition-all shadow-[4px_4px_0px_rgba(0,0,0,1)] data-[state=active]:shadow-none data-[state=active]:translate-x-[2px] data-[state=active]:translate-y-[2px]"
             >
               <Clock className="w-4 h-4" strokeWidth={3} />
               Scheduled
@@ -590,13 +643,113 @@ export default function PushNotificationsPage() {
                           {campaign.status.charAt(0).toUpperCase() + campaign.status.slice(1)}
                         </span>
                         <p className="text-xs text-black/40 font-bold mt-2 uppercase tracking-wide">
-                          {new Date(campaign.createdAt).toLocaleDateString()}
+                          {campaign.status === 'scheduled' && campaign.scheduledFor ? (
+                            <span className="text-black font-black bg-[#FFD93D] px-1 rounded">
+                              Scheduled: {new Date(campaign.scheduledFor).toLocaleString()}
+                            </span>
+                          ) : (
+                            new Date(campaign.createdAt).toLocaleDateString()
+                          )}
                         </p>
                       </div>
                     </div>
                   ))}
                 </div>
               )}
+            </div>
+          </TabsContent>
+
+          {/* Send Email Tab */}
+          <TabsContent value="email">
+            <div className="bg-white border-2 border-black rounded-[25px] p-8 max-w-2xl neo-shadow">
+              <form onSubmit={handleSendEmail} className="space-y-6">
+                {/* Subject */}
+                <div>
+                  <label className="block text-black font-black text-xs uppercase tracking-widest mb-2">
+                    Email Subject <span className="text-[#FF7675]">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="subject"
+                    value={emailFormData.subject}
+                    onChange={handleEmailInputChange}
+                    placeholder="e.g., Weekly Newsletter - Game Updates"
+                    maxLength={100}
+                    className="w-full bg-[#FFFDF5] border-2 border-black rounded-xl px-4 py-3 text-black placeholder-black/30 focus:outline-none focus:neo-shadow-sm transition-all font-bold"
+                  />
+                  <p className="text-xs text-black/40 font-bold mt-1 uppercase tracking-wide">
+                    Keep it concise and clear
+                  </p>
+                </div>
+
+                {/* Message */}
+                <div>
+                  <label className="block text-black font-black text-xs uppercase tracking-widest mb-2">
+                    Email Message <span className="text-[#FF7675]">*</span>
+                  </label>
+                  <Textarea
+                    name="message"
+                    value={emailFormData.message}
+                    onChange={handleEmailInputChange}
+                    placeholder="Write your email content here... This will be sent to all selected users."
+                    rows={10}
+                    maxLength={5000}
+                    className="w-full bg-[#FFFDF5] border-2 border-black rounded-xl px-4 py-3 text-black placeholder-black/30 focus:outline-none focus:neo-shadow-sm transition-all resize-none font-medium leading-relaxed"
+                  />
+                  <p className="text-[10px] text-black/40 font-bold mt-1 uppercase tracking-wider text-right">{emailFormData.message.length}/5000</p>
+                </div>
+
+                {/* Recipient Segment */}
+                <div>
+                  <label className="block text-black font-black text-xs uppercase tracking-widest mb-2">
+                    Send To
+                  </label>
+                  <Select
+                    value={emailFormData.recipientSegment}
+                    onValueChange={(value) =>
+                      setEmailFormData((prev) => ({ ...prev, recipientSegment: value }))
+                    }
+                  >
+                    <SelectTrigger className="w-full bg-[#FFFDF5] border-2 border-black rounded-xl px-4 py-3 text-black font-bold focus:ring-0 focus:ring-offset-0 h-auto">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white border-2 border-black rounded-xl neo-shadow">
+                      <SelectItem value="all" className="font-bold focus:bg-[#FFD93D] focus:text-black cursor-pointer">
+                        <div className="flex items-center gap-2">
+                          <Users className="w-4 h-4" />
+                          All Users
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="Bronze" className="font-bold focus:bg-[#FFD93D] focus:text-black cursor-pointer">Bronze Tier Users</SelectItem>
+                      <SelectItem value="Silver" className="font-bold focus:bg-[#FFD93D] focus:text-black cursor-pointer">Silver Tier Users</SelectItem>
+                      <SelectItem value="Gold" className="font-bold focus:bg-[#FFD93D] focus:text-black cursor-pointer">Gold Tier Users</SelectItem>
+                      <SelectItem value="Platinum" className="font-bold focus:bg-[#FFD93D] focus:text-black cursor-pointer">Platinum Tier Users</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-black/40 font-bold mt-1 uppercase tracking-wide flex items-center gap-2">
+                    <CheckCircle className="w-3 h-3" />
+                    Emails only go to users with verified email addresses
+                  </p>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-4 pt-4">
+                  <button
+                    type="submit"
+                    disabled={loading || !emailFormData.subject || !emailFormData.message}
+                    className="flex-1 px-6 py-4 bg-[#00B894] text-black font-black uppercase tracking-widest rounded-xl border-2 border-black neo-shadow hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                  >
+                    {loading ? 'Sending...' : 'Send Emails'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEmailFormData({ subject: '', message: '', recipientSegment: 'all' })}
+                    className="px-6 py-4 bg-white text-black font-black uppercase tracking-widest rounded-xl border-2 border-black hover:bg-gray-50 transition-all"
+                  >
+                    Clear
+                  </button>
+                </div>
+              </form>
             </div>
           </TabsContent>
 
@@ -623,6 +776,6 @@ export default function PushNotificationsPage() {
           </TabsContent>
         </Tabs>
       </div>
-    </div>
+    </div >
   );
 }

@@ -28,7 +28,7 @@ export default function NotificationCenter() {
     const setupRealtimeListener = async () => {
       try {
         const { auth, db } = await import('@/lib/firebase');
-        
+
         if (!auth || !auth.currentUser || !db) {
           setNotifications([]);
           setUnreadCount(0);
@@ -60,7 +60,7 @@ export default function NotificationCenter() {
             })) as InAppNotification[];
 
             const unread = notifs.filter(n => !n.read).length;
-            
+
             setNotifications(prev => {
               // Check if there are new notifications
               if (prev.length > 0 && unread > 0) {
@@ -184,11 +184,10 @@ export default function NotificationCenter() {
             setHasNewNotifications(false);
           }
         }}
-        className={`relative p-3 rounded-xl border-2 border-black transition-all ${
-          hasNewNotifications 
-            ? 'bg-red-400 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none' 
+        className={`relative p-3 rounded-xl border-2 border-black transition-all ${hasNewNotifications
+            ? 'bg-red-400 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none'
             : 'bg-white hover:bg-gray-50 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]'
-        }`}
+          }`}
         aria-label="Notifications"
       >
         <Bell className={`w-5 h-5 transition-all ${hasNewNotifications ? 'text-white animate-swing' : 'text-black'}`} />
@@ -260,9 +259,9 @@ export default function NotificationCenter() {
                       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
                     })
                     .map((notif, index) => {
-                      const TypeIcon = typeIcons[notif.type];
-                      const colors = typeColors[notif.type];
-                      
+                      const TypeIcon = typeIcons[notif.type] || Info; // Fallback to Info icon
+                      const colors = typeColors[notif.type] || typeColors.info; // Fallback to info colors
+
                       return (
                         <motion.div
                           key={notif.id}
