@@ -83,12 +83,19 @@ export async function completeRegistration(
     const eventDoc = eventDocs.docs.find((d: any) => d.id === eventId);
     const capacity = (eventDoc?.data() as any)?.capacity || 50;
 
-    // Check if waitlisted
+    // Check if event is at capacity
     const registrationCount = await getDocs(
       query(registrations, where('eventId', '==', eventId), where('status', '==', 'registered'))
     );
 
-    const waitlisted = registrationCount.size >= capacity;
+    if (registrationCount.size >= capacity) {
+      return {
+        success: false,
+        waitlisted: false,
+        message: 'Event is at full capacity',
+        fullCapacity: true
+      };
+    }
 
     // Create registration
     const registrationData: any = {
@@ -96,7 +103,7 @@ export async function completeRegistration(
       userId,
       amountPaid: amount,
       walletPointsUsed,
-      status: waitlisted ? 'waitlisted' : 'registered',
+      status: 'registered',
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     };
@@ -140,27 +147,25 @@ export async function completeRegistration(
       }
     }
 
-    // Update event registered count if not waitlisted
-    if (!waitlisted) {
-      try {
-        const eventRef = doc(firebaseDb, 'events', eventId);
-        await updateDoc(eventRef, {
-          registered: increment(1),
-          updatedAt: serverTimestamp(),
-        });
-        console.log(`Successfully incremented registered count for event ${eventId}`);
-      } catch (error) {
-        console.error('Error updating event count:', error);
-        // Log more details about the error
-        console.error('Event ID:', eventId);
-        console.error('Error details:', JSON.stringify(error, null, 2));
-      }
+    // Update event registered count
+    try {
+      const eventRef = doc(firebaseDb, 'events', eventId);
+      await updateDoc(eventRef, {
+        registered: increment(1),
+        updatedAt: serverTimestamp(),
+      });
+      console.log(`Successfully incremented registered count for event ${eventId}`);
+    } catch (error) {
+      console.error('Error updating event count:', error);
+      // Log more details about the error
+      console.error('Event ID:', eventId);
+      console.error('Error details:', JSON.stringify(error, null, 2));
     }
 
     return {
       success: true,
-      waitlisted,
-      message: waitlisted ? 'Added to waitlist' : 'Successfully registered',
+      waitlisted: false,
+      message: 'Successfully registered',
       registrationId: regRef.id,
       eventId,
       userId,

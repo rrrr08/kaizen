@@ -195,7 +195,7 @@ export default function UpcomingEvents() {
                     className="w-full px-6 py-4 bg-[#6C5CE7] text-white font-black text-xs tracking-[0.2em] hover:bg-[#5849be] transition-all rounded-xl border-2 border-transparent shadow-[4px_4px_0px_rgba(0,0,0,0.2)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#6C5CE7] disabled:hover:scale-100"
                     disabled={event.registered >= event.capacity}
                   >
-                    {event.registered >= event.capacity ? 'WAITLIST JOIN' : 'REGISTER NOW'}
+                      {event.registered >= event.capacity ? 'EVENT FULL' : 'REGISTER NOW'}
                   </button>
                 </div>
               </div>

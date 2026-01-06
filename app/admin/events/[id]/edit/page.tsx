@@ -247,6 +247,7 @@ export default function EditEventPage() {
                 type="datetime-local"
                 value={form.datetime}
                 onChange={handleChange}
+                min={new Date().toISOString().slice(0, 16)}
               />
               <Field
                 label="Location"

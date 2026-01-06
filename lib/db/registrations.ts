@@ -43,44 +43,46 @@ export async function registerForEvent(eventId: string, userId: string) {
       return null;
     }).catch(() => null);
 
-    // Check capacity - determine if waitlisted
+    // Check capacity - prevent registration if at capacity
     const registrationCount = await getDocs(
       query(registrationsCollection, where('eventId', '==', eventId), where('status', '==', 'registered'))
     );
 
-    let waitlisted = false;
     const capacity = eventDoc?.capacity || 50;
 
     if (registrationCount.size >= capacity) {
-      waitlisted = true;
+      return {
+        success: false,
+        waitlisted: false,
+        message: 'Event is at full capacity',
+        fullCapacity: true
+      };
     }
 
     // Create registration record
     const registrationData = {
       eventId,
       userId,
-      status: waitlisted ? 'waitlisted' : 'registered',
+      status: 'registered',
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     };
 
     const regRef = await addDoc(registrationsCollection, registrationData);
 
-    // Update event registered count if not waitlisted
-    if (!waitlisted) {
-      try {
-        await updateDoc(doc(database, 'events', eventId), {
-          registered: increment(1),
-        });
-      } catch (error) {
-        console.error('Error updating event count:', error);
-      }
+    // Update event registered count
+    try {
+      await updateDoc(doc(database, 'events', eventId), {
+        registered: increment(1),
+      });
+    } catch (error) {
+      console.error('Error updating event count:', error);
     }
 
     return {
       success: true,
-      waitlisted,
-      message: waitlisted ? 'Added to waitlist' : 'Successfully registered',
+      waitlisted: false,
+      message: 'Successfully registered',
       registrationId: regRef.id,
       eventId,
       userId,
@@ -140,18 +142,33 @@ export async function getUserEventRegistrations(userId: string) {
 export async function cancelRegistration(registrationId: string, eventId: string) {
   try {
     const database = await getFirebaseDb();
+    
+    // Get current registration status
+    const regDoc = await getDocs(query(
+      collection(database, 'event_registrations'),
+      where('__name__', '==', registrationId)
+    ));
+    
+    if (regDoc.empty) {
+      throw new Error('Registration not found');
+    }
+    
+    const currentStatus = regDoc.docs[0].data().status;
+    
     await updateDoc(doc(database, 'event_registrations', registrationId), {
       status: 'cancelled',
       updatedAt: serverTimestamp(),
     });
 
-    // Decrement event registered count
-    try {
-      await updateDoc(doc(database, 'events', eventId), {
-        registered: increment(-1),
-      });
-    } catch (error) {
-      console.error('Error updating event count:', error);
+    // Decrement event registered count only if it was registered
+    if (currentStatus === 'registered') {
+      try {
+        await updateDoc(doc(database, 'events', eventId), {
+          registered: increment(-1),
+        });
+      } catch (error) {
+        console.error('Error updating event count:', error);
+      }
     }
 
     return {

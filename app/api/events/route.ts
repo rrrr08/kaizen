@@ -112,7 +112,7 @@ export async function POST(req: NextRequest) {
       datetime: Timestamp.fromDate(new Date(datetime)),
       location,
       status: status ?? 'upcoming',
-      registered: registered || 0,
+      registered: 0,
       capacity: Number(capacity),
       createdAt: FieldValue.serverTimestamp(),
       updatedAt: FieldValue.serverTimestamp(),
