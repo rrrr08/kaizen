@@ -1,5 +1,5 @@
 # robots.txt for Joy Juncture (Kaizen)
-# https://www.joyjuncture.com/robots.txt
+# https://joy-juncture.vercel.app/robots.txt
 
 # Allow all crawlers by default
 User-agent: *
@@ -8,7 +8,6 @@ Allow: /
 # Disallow admin and API routes
 Disallow: /admin/
 Disallow: /api/
-Disallow: /_next/
 Disallow: /auth/
 
 # Disallow user-specific pages
