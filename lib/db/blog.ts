@@ -14,33 +14,33 @@ export async function getBlogPosts(filter?: { category?: string; includeUnpublis
     const database = await getFirebaseDb();
     const blogCollection = collection(database, 'blog_posts');
     let q: any;
-    
+
     const includeUnpublished = !!filter?.includeUnpublished;
 
     if (filter?.category && filter.category !== 'all') {
       q = includeUnpublished
         ? query(
-            blogCollection,
-            where('category', '==', filter.category),
-            orderBy('createdAt', 'desc')
-          )
+          blogCollection,
+          where('category', '==', filter.category),
+          orderBy('createdAt', 'desc')
+        )
         : query(
-            blogCollection,
-            where('category', '==', filter.category),
-            where('published', '==', true),
-            orderBy('publishedAt', 'desc')
-          );
+          blogCollection,
+          where('category', '==', filter.category),
+          where('published', '==', true),
+          orderBy('publishedAt', 'desc')
+        );
     } else {
       q = includeUnpublished
         ? query(
-            blogCollection,
-            orderBy('createdAt', 'desc')
-          )
+          blogCollection,
+          orderBy('createdAt', 'desc')
+        )
         : query(
-            blogCollection,
-            where('published', '==', true),
-            orderBy('publishedAt', 'desc')
-          );
+          blogCollection,
+          where('published', '==', true),
+          orderBy('publishedAt', 'desc')
+        );
     }
 
     const snapshot = await getDocs(q);
@@ -58,9 +58,11 @@ export async function getBlogPosts(filter?: { category?: string; includeUnpublis
 
     return posts;
   } catch (error) {
-    console.error('Error getting blog posts', error);
-    // Return mock data if Firestore collection doesn't exist
-    console.warn('Firestore collection unavailable, returning mock blog data');
+    // Only log in development to avoid build warnings
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Error getting blog posts', error);
+    }
+    // Return mock data if Firestore collection doesn't exist or index is missing
     return getMockBlogPosts(filter);
   }
 }

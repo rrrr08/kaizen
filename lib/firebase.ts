@@ -1265,7 +1265,10 @@ export async function getExperienceCategories() {
       updatedAt: doc.data().updatedAt?.toDate(),
     })) as ExperienceCategory[];
   } catch (error) {
-    console.error('Error fetching experience categories:', error);
+    // Only log in development to avoid build warnings
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Error fetching experience categories:', error);
+    }
     return [];
   }
 }
