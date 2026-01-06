@@ -755,12 +755,48 @@ export default function PushNotificationsPage() {
 
           {/* Scheduled Tab */}
           <TabsContent value="scheduled">
-            <div className="bg-white border-2 border-black rounded-[25px] p-12 text-center neo-shadow">
-              <Clock className="w-16 h-16 text-black/20 mx-auto mb-4" />
-              <p className="text-black font-black uppercase tracking-widest text-lg">No scheduled campaigns</p>
-              <p className="text-sm text-black/60 font-bold mt-2">
-                Schedule a notification in the &quot;Send Notification&quot; tab to see it here
-              </p>
+            <div>
+              {campaigns.filter(c => c.status === 'scheduled').length === 0 ? (
+                <div className="bg-white border-2 border-black rounded-[25px] p-12 text-center neo-shadow">
+                  <Clock className="w-16 h-16 text-black/20 mx-auto mb-4" />
+                  <p className="text-black font-black uppercase tracking-widest text-lg">No scheduled campaigns</p>
+                  <p className="text-sm text-black/60 font-bold mt-2">
+                    Schedule a notification in the &quot;Send Notification&quot; tab to see it here
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {campaigns
+                    .filter(c => c.status === 'scheduled')
+                    .map((campaign) => (
+                      <div
+                        key={campaign.id}
+                        className="bg-white border-2 border-black rounded-xl p-6 flex justify-between items-start hover:neo-shadow transition-all"
+                      >
+                        <div className="flex-1">
+                          <h3 className="font-header text-xl font-black text-black uppercase tracking-tight">{campaign.title}</h3>
+                          <p className="text-sm text-black/60 font-bold mt-2 line-clamp-2">
+                            {campaign.message}
+                          </p>
+                          <div className="flex gap-6 mt-4 text-xs font-black text-black/40 uppercase tracking-widest">
+                            <span>📧 {campaign.recipientCount} recipients</span>
+                            <span>⏰ Scheduled for: {campaign.scheduledFor ? new Date(campaign.scheduledFor).toLocaleString() : 'N/A'}</span>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <span
+                            className="inline-block px-3 py-1 rounded-lg border-2 border-black text-xs font-black uppercase tracking-wider bg-[#FFD93D] text-black"
+                          >
+                            Scheduled
+                          </span>
+                          <p className="text-xs text-black/40 font-bold mt-2 uppercase tracking-wide">
+                            Created: {new Date(campaign.createdAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              )}
             </div>
           </TabsContent>
 
