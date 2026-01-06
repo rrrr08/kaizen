@@ -6,6 +6,7 @@ import { useParams } from 'next/navigation';
 import { GameEvent } from '@/lib/types';
 import { splitDateTime } from '@/lib/utils';
 import { usePopup } from '@/app/context/PopupContext';
+import { ArrowLeft } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -113,9 +114,10 @@ export default function EventDetail() {
 
   if (loading) {
     return (
-      <div className="min-h-screen pt-28 pb-16 flex items-center justify-center">
-        <div className="text-amber-500 font-header tracking-[0.3em] animate-pulse">
-          LOADING EVENT...
+      <div className="min-h-screen pt-28 pb-16 flex items-center justify-center bg-[#FFFDF5]">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[#FFD93D] border-t-black mb-4"></div>
+          <p className="text-black/60 font-black text-xs tracking-[0.4em]">LOADING EVENT...</p>
         </div>
       </div>
     );
@@ -123,14 +125,14 @@ export default function EventDetail() {
 
   if (error || !event) {
     return (
-      <div className="min-h-screen pt-28 pb-16 flex items-center justify-center">
+      <div className="min-h-screen pt-28 pb-16 flex items-center justify-center bg-[#FFFDF5]">
         <div className="text-center">
-          <h1 className="font-header text-4xl mb-4">EVENT NOT FOUND</h1>
+          <h1 className="font-header text-4xl md:text-6xl mb-6 text-black">EVENT NOT FOUND</h1>
           <Link
             href="/events/past"
-            className="text-amber-500 font-header text-[10px] tracking-[0.4em]"
+            className="px-6 py-3 bg-[#FFD93D] text-black border-2 border-black rounded-xl neo-shadow font-black text-xs tracking-widest hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all inline-flex items-center gap-2"
           >
-            RETURN TO EVENTS
+            <ArrowLeft size={16} /> RETURN TO EVENTS
           </Link>
         </div>
       </div>
@@ -141,34 +143,50 @@ export default function EventDetail() {
   const { date, time } = splitDateTime(event.datetime);
 
   return (
-    <div className="min-h-screen pt-28 pb-16">
+    <div className="min-h-screen pt-28 pb-16 bg-[#FFFDF5]">
       <div className="max-w-7xl mx-auto px-6 md:px-12">
 
         <Link
           href="/events/past"
-          className="font-header text-[10px] tracking-[0.4em] text-charcoal/50 hover:text-amber-500 mb-12 inline-block"
+          className="font-black text-xs tracking-widest text-black/50 hover:text-[#6C5CE7] mb-12 inline-flex items-center gap-2 transition-colors uppercase"
         >
-          ← BACK TO EVENTS
+          <ArrowLeft size={16} /> BACK TO EVENTS
         </Link>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-16">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 md:gap-16">
 
           {/* LEFT */}
-          <div className="md:col-span-2">
+          <div className="lg:col-span-2">
 
-            <div className="aspect-video overflow-hidden rounded-sm border border-black/10 bg-black/5 mb-8">
-              <img src={event.image} alt={event.title} className="w-full h-full object-cover" />
+            {/* Image */}
+            <div className="aspect-video overflow-hidden rounded-[30px] border-3 border-black neo-shadow bg-white mb-12 group">
+              {event.image && <img
+                src={event.image}
+                alt={event.title}
+                className="w-full h-full object-cover group-hover:scale-110 transition duration-500"
+              />}
             </div>
 
+            {/* Title */}
+            <div className="mb-12">
+              <div className="bg-gray-300 text-black/60 px-4 py-1.5 rounded-lg neo-border shadow-[2px_2px_0px_#000] inline-block font-black text-[10px] tracking-[0.2em] mb-6 uppercase">
+                {date} • {time}
+              </div>
+              <h1 className="font-header text-5xl md:text-7xl text-black mb-6 tracking-tight leading-none">
+                {event.title}
+              </h1>
+            </div>
+
+            {/* Description */}
             <Section title="Event Details">
-              <p className="text-charcoal/70 font-serif italic text-lg leading-relaxed">
+              <p className="text-black/70 font-medium text-lg leading-relaxed">
                 {event.description}
               </p>
             </Section>
 
             {event.highlights && event.highlights.length > 0 && (
               <Section title="Event Highlights">
-                <ul className="space-y-3 list-disc list-inside text-charcoal/70 font-serif italic">
+                <ul className="space-y-3 list-disc list-inside text-black/70 font-medium">
                   {event.highlights.map((h, i) => (
                     <li key={i}>{h.text}</li>
                   ))}
@@ -182,7 +200,7 @@ export default function EventDetail() {
                   {event.gallery.map((img, i) => (
                     <div
                       key={i}
-                      className="aspect-video overflow-hidden rounded-sm border border-black/10 bg-black/5"
+                      className="aspect-video overflow-hidden rounded-[20px] border-2 border-black neo-shadow bg-white"
                     >
                       <img src={img} className="w-full h-full object-cover hover:scale-105 transition-transform" />
                     </div>
@@ -194,18 +212,18 @@ export default function EventDetail() {
             {/* Testimonials */}
             {user && myTestimonial && (
               <Section title="Your Experience">
-                <div className="space-y-4 max-w-xl">
+                <div className="space-y-4 max-w-xl bg-white border-2 border-black rounded-xl p-6 neo-shadow">
 
                   {/* Rating */}
                   <div>
-                    <p className="text-white/40 text-xs mb-2">RATING</p>
+                    <p className="text-black/40 text-xs font-black uppercase tracking-widest mb-2">RATING</p>
                     <div className="flex gap-2">
                       {[1, 2, 3, 4, 5].map(n => (
                         <button
                           key={n}
                           type="button"
                           onClick={() => setRating(n)}
-                          className={`text-2xl transition ${n <= rating ? 'text-amber-500' : 'text-white/20'
+                          className={`text-2xl transition ${n <= rating ? 'text-[#FFD93D]' : 'text-black/20'
                             }`}
                         >
                           ★
@@ -220,13 +238,13 @@ export default function EventDetail() {
                     onChange={e => setComment(e.target.value)}
                     placeholder="Share your experience..."
                     rows={4}
-                    className="w-full bg-white/5 border border-white/10 p-4 text-white text-sm rounded-sm focus:outline-none focus:border-amber-500"
+                    className="w-full bg-[#FFFDF5] border-2 border-black rounded-xl px-4 py-3 text-black placeholder-black/30 focus:outline-none focus:ring-0 font-bold transition-all"
                   />
 
                   <button
                     onClick={submitTestimonial}
                     disabled={submitting}
-                    className="px-6 py-2 bg-amber-500 text-black text-xs font-header tracking-widest hover:bg-amber-400 disabled:opacity-50"
+                    className="px-6 py-3 bg-[#FFD93D] text-black font-black uppercase tracking-wide rounded-xl border-2 border-black neo-shadow hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all disabled:opacity-50"
                   >
                     {myTestimonial?.comment ? 'UPDATE TESTIMONIAL' : 'SUBMIT TESTIMONIAL'}
                   </button>
@@ -238,12 +256,12 @@ export default function EventDetail() {
               <Section title="What People Said">
                 <div className="space-y-6">
                   {event.testimonials.map((t, i) => (
-                    <blockquote key={i} className="border-l-2 border-amber-500 pl-6 text-white/70 font-serif italic">
+                    <blockquote key={i} className="bg-[#FFFDF5] border-2 border-black rounded-xl p-6 neo-shadow text-black/70 font-medium italic">
                       "{t.comment}"
-                      <footer className="mt-2 text-white/40 text-sm not-italic">
+                      <footer className="mt-4 text-black/40 text-sm not-italic font-black uppercase tracking-widest">
                         — {t.name}
                         {t.edited && (
-                          <span className="ml-2 text-[10px] uppercase tracking-widest text-amber-500">
+                          <span className="ml-2 text-[10px] text-[#6C5CE7]">
                             Edited
                           </span>
                         )}
@@ -254,42 +272,58 @@ export default function EventDetail() {
               </Section>
             )}
 
-            <div className="grid grid-cols-2 gap-8 mb-12">
+            {/* Info Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-12">
               <Info label="DATE & TIME">
                 <p>{date}</p>
-                <p className="text-charcoal/60">{time}</p>
+                <p className="text-black/60 text-sm">{time}</p>
               </Info>
+
               <Info label="LOCATION">{event.location}</Info>
-              <Info label="CAPACITY">{event.registered} / {event.capacity}</Info>
-              <Info label="PRICE">{event.price === 0 ? 'FREE' : `₹${event.price}`}</Info>
+              <Info label="ATTENDED">
+                {event.registered} / {event.capacity}
+              </Info>
+              <Info label="PRICE">
+                {event.price === 0 ? 'FREE' : `₹${event.price}`}
+              </Info>
             </div>
 
+            {/* Availability */}
             <div className="mb-12">
-              <p className="font-header text-[8px] tracking-widest text-charcoal/50 mb-3">
+              <p className="font-black text-xs tracking-widest text-black/60 mb-3 uppercase">
                 AVAILABILITY
               </p>
-              <div className="w-full bg-black/10 rounded-full h-2">
+              <div className="w-full bg-gray-200 rounded-full h-4 border-2 border-black overflow-hidden">
                 <div
-                  className={`h-full rounded-full ${isFull ? 'bg-red-500' : 'bg-amber-500'}`}
-                  style={{ width: `${(event.registered / event.capacity) * 100}%` }}
+                  className={`h-full ${isFull ? 'bg-[#FF7675]' : 'bg-[#00B894]'
+                    } transition-all`}
+                  style={{
+                    width: `${Math.min(100, (event.registered / event.capacity) * 100)}%`,
+                  }}
                 />
               </div>
+              <p className="text-black/60 font-bold text-sm mt-2">
+                {event.registered} spots filled
+              </p>
             </div>
           </div>
 
           {/* RIGHT */}
-          <div className="md:col-span-1">
-            <div className="border border-black/10 bg-white p-8 rounded-sm sticky top-32 neo-shadow">
-              <h3 className="font-header text-[10px] tracking-[0.4em] text-amber-500 mb-6 uppercase">
+          <div className="lg:col-span-1">
+            <div className="bg-white border-3 border-black p-8 rounded-[30px] neo-shadow sticky top-32">
+              <h3 className="font-black text-xs tracking-widest text-[#6C5CE7] mb-8 uppercase">
                 EVENT SUMMARY
               </h3>
 
-              <div className="space-y-6 mb-8 pb-8 border-b border-black/10">
-                <Stat label="REGISTERED" value={event.registered} />
-                <Stat label="PRICE" value={event.price === 0 ? 'FREE' : `₹${event.price}`} />
+              <div className="space-y-8 mb-8 pb-8 border-b-2 border-black/10">
+                <Stat label="ATTENDED" value={event.registered} />
+                <Stat
+                  label="PRICE"
+                  value={event.price === 0 ? 'FREE' : `₹${event.price}`}
+                />
               </div>
 
-              <p className="text-charcoal/50 font-serif italic text-xs">
+              <p className="text-black/40 font-bold text-xs">
                 This is a past event. Registration is closed.
               </p>
             </div>
@@ -301,12 +335,12 @@ export default function EventDetail() {
   );
 }
 
-/* ---------------- HELPERS ---------------- */
+/* -------------------- HELPERS -------------------- */
 
 function Section({ title, children }: { title: string; children: any }) {
   return (
     <div className="mb-12">
-      <h2 className="font-header text-[10px] tracking-[0.4em] text-amber-500 mb-4 uppercase">
+      <h2 className="font-black text-xs tracking-widest text-[#6C5CE7] mb-6 uppercase">
         {title}
       </h2>
       {children}
@@ -316,11 +350,11 @@ function Section({ title, children }: { title: string; children: any }) {
 
 function Info({ label, children }: { label: string; children: any }) {
   return (
-    <div className="border-b border-black/10 pb-6">
-      <div className="font-header text-[8px] tracking-widest text-charcoal/50 mb-3">
+    <div className="bg-[#FFFDF5] border-2 border-black rounded-xl p-3 neo-shadow hover:-translate-y-1 transition-transform">
+      <div className="font-black text-[10px] tracking-widest text-black/40 mb-3 uppercase">
         {label}
       </div>
-      <div className="font-serif text-charcoal">{children}</div>
+      <div className="font-bold text-black text-lg">{children}</div>
     </div>
   );
 }
@@ -328,10 +362,10 @@ function Info({ label, children }: { label: string; children: any }) {
 function Stat({ label, value }: { label: string; value: any }) {
   return (
     <div>
-      <p className="font-header text-[8px] tracking-widest text-charcoal/50 mb-2">
+      <p className="font-black text-[10px] tracking-widest text-black/40 mb-2 uppercase">
         {label}
       </p>
-      <p className="font-serif italic text-2xl text-amber-500">{value}</p>
+      <p className="font-header text-4xl text-[#6C5CE7] font-black">{value}</p>
     </div>
   );
 }

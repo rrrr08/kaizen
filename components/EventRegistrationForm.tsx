@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { User } from 'firebase/auth';
 import { createPaymentOrder, completeRegistration } from '@/lib/db/payments';
@@ -13,6 +13,8 @@ interface EventRegistrationFormProps {
   user: User | null;
   onSuccess: () => void;
   onClose: () => void;
+  onLockAcquired?: () => void;
+  onLockReleased?: () => void;
 }
 
 declare global {
@@ -25,9 +27,20 @@ export default function EventRegistrationForm({
   event,
   user,
   onSuccess,
-  onClose,
+  onClose: propsOnClose,
+  onLockAcquired,
+  onLockReleased,
 }: EventRegistrationFormProps) {
   const router = useRouter();
+
+  // Wrapper for onClose to release lock
+  const onClose = async () => {
+    // We can't access lockId state easily here if we are defining it before state :P 
+    // We need to define this later or use effect.
+    // Let's pass a handler to the actual buttons.
+    propsOnClose();
+  };
+
   const { hasEarlyEventAccess, workshopDiscountPercent, hasVIPSeating, config, calculatePointWorth } = useGamification();
   const { showAlert } = usePopup();
   const [loading, setLoading] = useState(false);
@@ -48,12 +61,43 @@ export default function EventRegistrationForm({
   const [walletPoints, setWalletPoints] = useState(0);
   const [redeemPoints, setRedeemPoints] = useState(0);
   const [pointsDiscount, setPointsDiscount] = useState(0);
+  const [lockId, setLockId] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     name: user?.displayName || '',
     email: user?.email || '',
     phone: '',
   });
+
+  const isSuccessRef = useRef(false);
+
+  // Release lock on unmount or close if transaction not completed
+  useEffect(() => {
+    return () => {
+      if (lockId && !isSuccessRef.current) {
+        // Only release (and notify) if NOT successful
+        releaseLock(lockId);
+      }
+    };
+  }, [lockId]);
+
+  const releaseLock = async (id: string, notify = true) => {
+    try {
+      await fetch('/api/events/lock', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lockId: id }),
+        keepalive: true
+      });
+      setLockId(null);
+    } catch (e) {
+      console.error('Failed to release lock', e);
+    } finally {
+      if (notify) {
+        onLockReleased?.();
+      }
+    }
+  };
 
   // Fetch user's wallet points and saved checkout info
   useEffect(() => {
@@ -310,8 +354,17 @@ export default function EventRegistrationForm({
       }
 
       // Close modal and redirect to success page
+      isSuccessRef.current = true;
+      setLockId(null); // Clear lock state so we don't try to release it
+      // For free registration, the registration itself "consumes" the spot. 
+      // We should technically release the lock or let backend handle it?
+      // The lock is still in 'event_locks'. We SHOULD release it.
+      if (lockId) {
+        await releaseLock(lockId, false); // Don't notify UI, as we are converting to registration
+      }
+
       onSuccess?.();
-      onClose();
+      propsOnClose();
       router.push(`/events/registration-success/${registrationId}`);
     } catch (error) {
       console.error('Free registration error:', error);
@@ -335,6 +388,30 @@ export default function EventRegistrationForm({
     try {
       setIsProcessing(true);
       setError(null);
+
+      // 0. Acquire Lock First
+      if (!lockId) {
+        try {
+          // console.log('Attempting to acquire lock with:', { eventId: event?.id, userId: user?.uid });
+          const lockRes = await fetch('/api/events/lock', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ eventId: event.id, userId: user.uid })
+          });
+
+          const lockData = await lockRes.json();
+          if (!lockRes.ok || !lockData.success) {
+            throw new Error(lockData.error || 'Event temporarily full. Please try again later.');
+          }
+          setLockId(lockData.lockId);
+          onLockAcquired?.(); // Notify parent that lock is active
+        } catch (lockError: any) {
+          setError(lockError.message);
+          setShowErrorModal(true);
+          setIsProcessing(false);
+          return;
+        }
+      }
 
       // If final amount is 0 (fully covered by points/vouchers), skip Razorpay
       if (finalAmount <= 0) {
@@ -416,6 +493,11 @@ export default function EventRegistrationForm({
               const paymentData = await paymentResponse.json();
 
               if (paymentData.success) {
+                isSuccessRef.current = true; // Prevents lock release/notify on cleanup
+
+                // Clear lock ID so we don't try to release it manually either
+                setLockId(null);
+
                 // Mark voucher as used if one was applied
                 if (appliedVoucherId) {
                   try {
@@ -495,6 +577,15 @@ export default function EventRegistrationForm({
           theme: {
             color: '#fbbf24',
           },
+          modal: {
+            ondismiss: function () {
+              setIsProcessing(false);
+              // Do NOT release lock immediately on modal dismiss? 
+              // Actually user might want to try again. 
+              // If we release lock here, they lose spot. 
+              // Better to keep lock until they interact with OUR modal close.
+            }
+          }
         };
 
         const razorpay = new window.Razorpay(options);
@@ -506,6 +597,9 @@ export default function EventRegistrationForm({
       setError(err.message || 'Failed to initiate payment');
       setShowErrorModal(true);
       setIsProcessing(false);
+
+      // If payment initiation failed completely, we might want to release lock?
+      // Or keep it for retry. Let's keep it.
     }
   };
 
@@ -570,7 +664,8 @@ export default function EventRegistrationForm({
         onClick={(e) => {
           // Close modal when clicking on the backdrop (outside the modal content)
           if (e.target === e.currentTarget) {
-            onClose();
+            if (lockId) releaseLock(lockId);
+            propsOnClose();
           }
         }}
       >
@@ -584,7 +679,10 @@ export default function EventRegistrationForm({
               <h2 className="font-header text-3xl md:text-4xl text-black leading-none">{event.title}</h2>
             </div>
             <button
-              onClick={onClose}
+              onClick={() => {
+                if (lockId) releaseLock(lockId);
+                propsOnClose();
+              }}
               className="w-10 h-10 flex items-center justify-center bg-white border-2 border-black rounded-full hover:bg-black hover:text-white transition-colors"
             >
               <X className="w-5 h-5" strokeWidth={3} />
@@ -775,7 +873,10 @@ export default function EventRegistrationForm({
           {/* Buttons */}
           <div className="grid grid-cols-2 gap-4">
             <button
-              onClick={onClose}
+              onClick={() => {
+                if (lockId) releaseLock(lockId);
+                propsOnClose();
+              }}
               disabled={isProcessing}
               className="px-6 py-4 bg-white text-black border-2 border-black rounded-xl font-black text-xs tracking-widest hover:bg-gray-50 transition-all uppercase disabled:opacity-50"
             >

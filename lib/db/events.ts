@@ -78,7 +78,7 @@ export async function getEvents(filters: { status: 'upcoming' | 'past' }) {
   }
 }
 
-export async function getEventById(eventId: string) {
+export async function getEventById(eventId: string): Promise<GameEvent | null> {
   try {
     const database = await getFirebaseDb();
     const ref = doc(database, "events", eventId);
@@ -96,7 +96,7 @@ export async function getEventById(eventId: string) {
       datetime: data.datetime?.toDate(),
       createdAt: data.createdAt?.toDate(),
       updatedAt: data.updatedAt?.toDate(),
-    };
+    } as GameEvent;
   } catch (error) {
     console.error("Error getting event by id", error);
     throw error;

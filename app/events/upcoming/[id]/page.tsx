@@ -16,6 +16,7 @@ export default function UpcomingEventDetail() {
   const { hasEarlyEventAccess } = useGamification();
 
   const [event, setEvent] = useState<GameEvent | null>(null);
+  const [availableSlots, setAvailableSlots] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
@@ -51,13 +52,13 @@ export default function UpcomingEventDetail() {
       const { getFirestore, collection, query, where, getDocs } = await import('firebase/firestore');
       const { app } = await import('@/lib/firebase');
       const db = getFirestore(app);
-      
+
       const q = query(
         collection(db, 'event_registrations'),
         where('eventId', '==', id),
         where('userId', '==', user.uid)
       );
-      
+
       const snapshot = await getDocs(q);
       setIsRegistered(!snapshot.empty);
     } catch (err) {
@@ -70,13 +71,16 @@ export default function UpcomingEventDetail() {
       setLoading(true);
       setError(null);
 
-      const res = await fetch(`/api/events/${id}`);
+      const res = await fetch(`/api/events/${id}`, { cache: 'no-store' });
       if (!res.ok) throw new Error(`Failed to fetch event (${res.status})`);
 
       const data = await res.json();
       if (!data.success || !data.event) throw new Error('Event not found');
 
       setEvent(data.event);
+      if (typeof data.availableSlots === 'number') {
+        setAvailableSlots(data.availableSlots);
+      }
     } catch (err: any) {
       console.error(err);
       setError(err.message || 'Something went wrong');
@@ -112,7 +116,7 @@ export default function UpcomingEventDetail() {
     );
   }
 
-  const isFull = event.registered >= event.capacity;
+  const isFull = (availableSlots !== null ? availableSlots <= 0 : event.registered >= event.capacity);
   const { date, time } = splitDateTime(event.datetime);
 
   return (
@@ -132,11 +136,11 @@ export default function UpcomingEventDetail() {
           <div className="lg:col-span-2">
 
             {/* Image */}
-            <div className="aspect-video overflow-hidden rounded-[30px] border-3 border-black neo-shadow bg-white mb-12">
+            <div className="aspect-video overflow-hidden rounded-[30px] border-3 border-black neo-shadow bg-white mb-12 group">
               {event.image && <img
                 src={event.image}
                 alt={event.title}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover group-hover:scale-110 transition duration-500"
               />}
             </div>
 
@@ -183,12 +187,14 @@ export default function UpcomingEventDetail() {
                   className={`h-full ${isFull ? 'bg-[#FF7675]' : 'bg-[#00B894]'
                     } transition-all`}
                   style={{
-                    width: `${(event.registered / event.capacity) * 100}%`,
+                    width: `${Math.min(100, ((event.capacity - (availableSlots ?? (event.capacity - event.registered))) / event.capacity) * 100)}%`,
+                    // Calculate percentage based on used slots (registered + locks)
+                    // Used = Capacity - Available
                   }}
                 />
               </div>
               <p className="text-black/60 font-bold text-sm mt-2">
-                {event.capacity - event.registered} spots remaining
+                {availableSlots !== null ? availableSlots : event.capacity - event.registered} spots remaining
               </p>
             </div>
           </div>
@@ -222,8 +228,8 @@ export default function UpcomingEventDetail() {
                 onClick={() => setShowRegistrationForm(true)}
                 disabled={isFull || isRegistered}
                 className={`w-full px-6 py-4 font-black text-xs tracking-widest rounded-xl border-2 border-black transition-all ${isFull || isRegistered
-                    ? 'bg-[#FF7675]/30 text-[#D63031] cursor-not-allowed opacity-60'
-                    : 'bg-[#6C5CE7] text-white neo-shadow hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none'
+                  ? 'bg-[#FF7675]/30 text-[#D63031] cursor-not-allowed opacity-60'
+                  : 'bg-[#6C5CE7] text-white neo-shadow hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none'
                   }`}
               >
                 {isRegistered ? 'ALREADY REGISTERED' : isFull ? 'EVENT FULL' : 'REGISTER NOW'}
@@ -247,7 +253,26 @@ export default function UpcomingEventDetail() {
           onSuccess={() => {
             setShowRegistrationForm(false);
             setEvent({ ...event, registered: event.registered + 1 });
+            // Lock logic handles available slots decrement, so we don't double count here
+            // If the user somehow registered without a lock, we might be off by 1, 
+            // but the flow forces lock acquisition.
             setIsRegistered(true);
+          }}
+          onLockAcquired={() => {
+            // Lock acquired: Decrease spots, Increase registered count
+            if (availableSlots !== null && availableSlots > 0) {
+              setAvailableSlots(prev => (prev !== null ? prev - 1 : null));
+            }
+            // Optimistically update registered count as per user request
+            setEvent(prev => prev ? ({ ...prev, registered: Number(prev.registered) + 1 }) : null);
+          }}
+          onLockReleased={() => {
+            // Lock released: Increase spots, Decrease registered count
+            if (availableSlots !== null) {
+              setAvailableSlots(prev => (prev !== null ? prev + 1 : null));
+            }
+            // Revert optimistic registered count
+            setEvent(prev => prev ? ({ ...prev, registered: Math.max(0, Number(prev.registered) - 1) }) : null);
           }}
           onClose={() => setShowRegistrationForm(false)}
         />
@@ -271,7 +296,7 @@ function Section({ title, children }: { title: string; children: any }) {
 
 function Info({ label, children }: { label: string; children: any }) {
   return (
-    <div className="bg-white border-2 border-black rounded-xl p-6 neo-shadow hover:-translate-y-1 transition-transform">
+    <div className="bg-[#FFFDF5] border-2 border-black rounded-xl p-3 neo-shadow hover:-translate-y-1 transition-transform">
       <div className="font-black text-[10px] tracking-widest text-black/40 mb-3 uppercase">
         {label}
       </div>
