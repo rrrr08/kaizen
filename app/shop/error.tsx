@@ -1,8 +1,5 @@
 'use client';
 
-import Link from 'next/link';
-import { AlertCircle, ArrowLeft, Home } from 'lucide-react';
-
 interface ShopErrorProps {
   error: Error & { digest?: string };
   reset: () => void;
@@ -10,33 +7,81 @@ interface ShopErrorProps {
 
 export default function ShopError({ error, reset }: ShopErrorProps) {
   return (
-    <div className="min-h-screen bg-background text-foreground flex items-center justify-center px-6 pt-28 pb-16">
-      <div className="max-w-lg w-full">
+    <div style={{
+      minHeight: '100vh',
+      background: '#FFFDF5',
+      color: '#2D3436',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '24px',
+      paddingTop: '112px',
+      paddingBottom: '64px'
+    }}>
+      <div style={{ maxWidth: '600px', width: '100%' }}>
         {/* Icon */}
-        <div className="mb-8 flex justify-center">
-          <div className="relative">
-            <div className="absolute inset-0 bg-red-500/20 blur-lg rounded-full"></div>
-            <div className="relative bg-red-500/10 border border-red-500/30 rounded-full p-6">
-              <AlertCircle width={48} height={48} className="text-red-500" />
+        <div style={{ marginBottom: '32px', display: 'flex', justifyContent: 'center' }}>
+          <div style={{ position: 'relative' }}>
+            <div style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'rgba(239, 68, 68, 0.2)',
+              filter: 'blur(16px)',
+              borderRadius: '50%'
+            }}></div>
+            <div style={{
+              position: 'relative',
+              background: 'rgba(239, 68, 68, 0.1)',
+              border: '1px solid rgba(239, 68, 68, 0.3)',
+              borderRadius: '50%',
+              padding: '24px',
+              display: 'inline-flex'
+            }}>
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
             </div>
           </div>
         </div>
 
         {/* Content */}
-        <div className="text-center mb-8">
-          <h1 className="font-display text-4xl font-bold mb-4">Oops!</h1>
-          <p className="text-muted-foreground font-body text-lg mb-4">
-            We couldn&apos;t load the shop. Please try again.
+        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+          <h1 style={{ fontSize: '36px', fontWeight: 'bold', marginBottom: '16px', margin: '0 0 16px 0' }}>
+            Oops!
+          </h1>
+          <p style={{ fontSize: '18px', color: '#6B7280', marginBottom: '16px' }}>
+            We couldn't load the shop. Please try again.
           </p>
 
           {/* Error Details (Development Only) */}
           {process.env.NODE_ENV === 'development' && error && (
-            <div className="mt-6 p-4 bg-red-950/20 border border-red-500/30 rounded-lg text-left">
-              <p className="text-xs text-red-400 font-mono break-all">
+            <div style={{
+              marginTop: '24px',
+              padding: '16px',
+              background: 'rgba(127, 29, 29, 0.2)',
+              border: '1px solid rgba(239, 68, 68, 0.3)',
+              borderRadius: '8px',
+              textAlign: 'left'
+            }}>
+              <p style={{
+                fontSize: '12px',
+                color: '#f87171',
+                fontFamily: 'monospace',
+                wordBreak: 'break-all',
+                margin: 0
+              }}>
                 {error.message || 'Unknown error'}
               </p>
               {error.digest && (
-                <p className="text-xs text-red-400/70 font-mono mt-2">
+                <p style={{
+                  fontSize: '12px',
+                  color: 'rgba(248, 113, 113, 0.7)',
+                  fontFamily: 'monospace',
+                  marginTop: '8px',
+                  marginBottom: 0
+                }}>
                   ID: {error.digest}
                 </p>
               )}
@@ -44,54 +89,74 @@ export default function ShopError({ error, reset }: ShopErrorProps) {
           )}
         </div>
 
-        {/* Possible Issues */}
-        <div className="bg-red-950/20 border border-red-500/30 rounded-lg p-6 mb-8">
-          <p className="text-sm text-red-300 mb-4 font-header">
-            What might have happened:
-          </p>
-          <ul className="space-y-2 text-sm text-red-300/80">
-            <li className="flex items-start gap-2">
-              <span className="text-red-500 mt-1">•</span>
-              <span>Network connection issue</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-red-500 mt-1">•</span>
-              <span>Temporary server error</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-red-500 mt-1">•</span>
-              <span>Products database unavailable</span>
-            </li>
-          </ul>
-        </div>
-
         {/* Actions */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '16px',
+          justifyContent: 'center'
+        }}>
           <button
             onClick={reset}
-            className="flex items-center justify-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-body font-semibold"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              padding: '12px 24px',
+              background: '#2D3436',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '16px',
+              fontWeight: '600',
+              cursor: 'pointer'
+            }}
           >
-            <RotateCcw width={18} height={18} />
             Try Again
           </button>
-          <Link
+          <a
             href="/shop"
-            className="flex items-center justify-center gap-2 px-6 py-3 bg-white/10 text-foreground rounded-lg hover:bg-white/20 transition-colors font-body font-semibold"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              padding: '12px 24px',
+              background: 'rgba(255, 255, 255, 0.1)',
+              color: '#2D3436',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '16px',
+              fontWeight: '600',
+              textDecoration: 'none',
+              cursor: 'pointer'
+            }}
           >
-            <ArrowLeft width={18} height={18} />
             Back to Shop
-          </Link>
-          <Link
+          </a>
+          <a
             href="/"
-            className="flex items-center justify-center gap-2 px-6 py-3 bg-white/10 text-foreground rounded-lg hover:bg-white/20 transition-colors font-body font-semibold"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              padding: '12px 24px',
+              background: 'rgba(255, 255, 255, 0.1)',
+              color: '#2D3436',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '16px',
+              fontWeight: '600',
+              textDecoration: 'none',
+              cursor: 'pointer'
+            }}
           >
-            <Home width={18} height={18} />
             Home
-          </Link>
+          </a>
         </div>
       </div>
     </div>
   );
 }
-
-import { RotateCcw } from 'lucide-react';

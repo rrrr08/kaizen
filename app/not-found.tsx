@@ -1,59 +1,141 @@
-'use client';
-
-import Link from 'next/link';
-import { AlertTriangle, Home, ArrowRight } from 'lucide-react';
-
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-background text-foreground flex items-center justify-center px-6 pt-32 pb-16">
-      <div className="max-w-lg w-full text-center">
-        {/* Icon */}
-        <div className="mb-8 flex justify-center">
-          <div className="relative">
-            <div className="absolute inset-0 bg-amber-500/20 blur-lg rounded-full"></div>
-            <div className="relative bg-amber-500/10 border border-amber-500/30 rounded-full p-6">
-              <AlertTriangle size={48} className="text-amber-500" />
+    <html lang="en">
+      <head>
+        <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>404 - Page Not Found | Joy Juncture</title>
+      </head>
+      <body style={{
+        margin: 0,
+        padding: 0,
+        fontFamily: 'system-ui, -apple-system, sans-serif',
+        background: '#FFFDF5',
+        color: '#2D3436'
+      }}>
+        <div style={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '24px'
+        }}>
+          <div style={{ maxWidth: '600px', width: '100%', textAlign: 'center' }}>
+            {/* Icon */}
+            <div style={{ marginBottom: '32px', display: 'flex', justifyContent: 'center' }}>
+              <div style={{
+                background: 'rgba(245, 158, 11, 0.1)',
+                border: '1px solid rgba(245, 158, 11, 0.3)',
+                borderRadius: '50%',
+                padding: '24px',
+                display: 'inline-flex'
+              }}>
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                  <line x1="12" y1="9" x2="12" y2="13" />
+                  <line x1="12" y1="17" x2="12.01" y2="17" />
+                </svg>
+              </div>
             </div>
+
+            {/* Content */}
+            <div style={{ marginBottom: '32px' }}>
+              <h1 style={{ fontSize: '72px', fontWeight: 'bold', marginBottom: '16px', margin: '0 0 16px 0' }}>
+                404
+              </h1>
+              <p style={{ fontSize: '24px', fontWeight: '600', marginBottom: '16px', letterSpacing: '0.1em' }}>
+                PAGE NOT FOUND
+              </p>
+              <p style={{ fontSize: '18px', color: '#6B7280', marginBottom: '16px' }}>
+                The page you're looking for doesn't exist or has been moved.
+              </p>
+            </div>
+
+            {/* Suggestions */}
+            <div style={{
+              marginBottom: '32px',
+              padding: '24px',
+              background: 'rgba(255, 255, 255, 0.5)',
+              border: '1px solid rgba(0, 0, 0, 0.1)',
+              borderRadius: '12px'
+            }}>
+              <p style={{ fontSize: '14px', color: '#6B7280', marginBottom: '16px', fontWeight: '600' }}>
+                You might want to visit:
+              </p>
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: '12px',
+                fontSize: '14px'
+              }}>
+                <a href="/shop" style={{
+                  color: '#2D3436',
+                  textDecoration: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  transition: 'opacity 0.2s'
+                }}>
+                  → Shop
+                </a>
+                <a href="/wallet" style={{
+                  color: '#2D3436',
+                  textDecoration: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}>
+                  → Wallet
+                </a>
+                <a href="/events/upcoming" style={{
+                  color: '#2D3436',
+                  textDecoration: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}>
+                  → Events
+                </a>
+                <a href="/community" style={{
+                  color: '#2D3436',
+                  textDecoration: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}>
+                  → Community
+                </a>
+              </div>
+            </div>
+
+            {/* Action */}
+            <a
+              href="/"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                padding: '12px 32px',
+                background: '#2D3436',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                fontSize: '16px',
+                fontWeight: '700',
+                textDecoration: 'none',
+                cursor: 'pointer'
+              }}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                <polyline points="9 22 9 12 15 12 15 22" />
+              </svg>
+              Go Home
+            </a>
           </div>
         </div>
-
-        {/* Content */}
-        <div className="mb-8">
-          <h1 className="font-display text-6xl font-bold mb-4">404</h1>
-          <p className="text-2xl font-header tracking-widest mb-4">PAGE NOT FOUND</p>
-          <p className="text-muted-foreground font-body text-lg">
-            The page you&apos;re looking for doesn&apos;t exist or has been moved.
-          </p>
-        </div>
-
-        {/* Suggestions */}
-        <div className="mb-8 p-6 bg-white/5 border border-white/10 rounded-lg">
-          <p className="text-sm text-muted-foreground mb-4 font-header">You might want to visit:</p>
-          <div className="grid grid-cols-2 gap-3 text-xs">
-            <Link href="/shop" className="text-primary hover:text-primary/80 transition-colors flex items-center gap-1">
-              <ArrowRight size={12} /> Shop
-            </Link>
-            <Link href="/wallet" className="text-primary hover:text-primary/80 transition-colors flex items-center gap-1">
-              <ArrowRight size={12} /> Wallet
-            </Link>
-            <Link href="/events" className="text-primary hover:text-primary/80 transition-colors flex items-center gap-1">
-              <ArrowRight size={12} /> Events
-            </Link>
-            <Link href="/community" className="text-primary hover:text-primary/80 transition-colors flex items-center gap-1">
-              <ArrowRight size={12} /> Community
-            </Link>
-          </div>
-        </div>
-
-        {/* Action */}
-        <Link
-          href="/"
-          className="inline-flex items-center justify-center gap-2 px-8 py-3 bg-primary text-primary-foreground font-header font-bold rounded hover:opacity-90 transition-all"
-        >
-          <Home size={18} />
-          Go Home
-        </Link>
-      </div>
-    </div>
+      </body>
+    </html>
   );
 }
