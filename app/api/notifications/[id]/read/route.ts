@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { adminAuth, adminDb } from '@/app/api/auth/firebase-admin';
+import { adminAuth as authAdmin } from '@/app/api/auth/firebase-admin';
+import { adminDb } from '@/lib/firebaseAdmin';
 import { cookies } from 'next/headers';
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -11,7 +12,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     let userId: string | null = null;
 
     if (sessionCookie) {
-      const decodedClaims = await adminAuth.verifySessionCookie(sessionCookie);
+      const decodedClaims = await authAdmin.verifySessionCookie(sessionCookie);
       userId = decodedClaims.uid;
     } else {
       const authHeader = request.headers.get('authorization');
@@ -19,7 +20,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
       }
       const idToken = authHeader.substring(7);
-      const decodedClaims = await adminAuth.verifyIdToken(idToken);
+      const decodedClaims = await authAdmin.verifyIdToken(idToken);
       userId = decodedClaims.uid;
     }
 

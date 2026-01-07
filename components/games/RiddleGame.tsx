@@ -37,8 +37,88 @@ async function fetchRiddle() {
 
 const RIDDLE_GAME_ID = 'riddle';
 
+// Helper function to normalize answers (case-insensitive: converts to lowercase, removes spaces and special chars)
+// This ensures "CLOCK", "Clock", and "clock" all work the same way
+const normalizeAnswer = (answer: string): string => {
+    return answer.toLowerCase().trim().replace(/[^a-z0-9]/g, '');
+};
+
+// Levenshtein distance helper function for fuzzy matching
+const levenshteinDistance = (str1: string, str2: string): number => {
+    const matrix: number[][] = [];
+    
+    for (let i = 0; i <= str2.length; i++) {
+        matrix[i] = [i];
+    }
+    
+    for (let j = 0; j <= str1.length; j++) {
+        matrix[0][j] = j;
+    }
+    
+    for (let i = 1; i <= str2.length; i++) {
+        for (let j = 1; j <= str1.length; j++) {
+            if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
+                matrix[i][j] = matrix[i - 1][j - 1];
+            } else {
+                matrix[i][j] = Math.min(
+                    matrix[i - 1][j - 1] + 1,
+                    matrix[i][j - 1] + 1,
+                    matrix[i - 1][j] + 1
+                );
+            }
+        }
+    }
+    
+    return matrix[str2.length][str1.length];
+};
+
+// Check if answer matches any valid answer (exact or similar)
+// Case-insensitive: "CLOCK", "Clock", and "clock" are all treated the same
+const isAnswerCorrect = (userAnswer: string, validAnswers: string | string[]): boolean => {
+    const normalizedUserAnswer = normalizeAnswer(userAnswer);
+    
+    // Convert single answer to array for consistent handling
+    const answers = Array.isArray(validAnswers) ? validAnswers : [validAnswers];
+    
+    // Check exact matches
+    for (const answer of answers) {
+        const normalizedAnswer = normalizeAnswer(answer);
+        if (normalizedUserAnswer === normalizedAnswer) {
+            return true;
+        }
+    }
+    
+    // Check for similar answers (fuzzy matching)
+    // This handles cases like "clock" vs "stopwatch" vs "timepiece"
+    for (const answer of answers) {
+        const normalizedAnswer = normalizeAnswer(answer);
+        
+        // Check if user answer contains the valid answer or vice versa
+        if (normalizedUserAnswer.includes(normalizedAnswer) || 
+            normalizedAnswer.includes(normalizedUserAnswer)) {
+            // Only accept if the length difference is reasonable (similar words)
+            const lengthDiff = Math.abs(normalizedUserAnswer.length - normalizedAnswer.length);
+            if (lengthDiff <= 3) { // Allow up to 3 character difference
+                return true;
+            }
+        }
+        
+        // Check Levenshtein distance for similar words
+        const distance = levenshteinDistance(normalizedUserAnswer, normalizedAnswer);
+        const maxLength = Math.max(normalizedUserAnswer.length, normalizedAnswer.length);
+        const similarity = maxLength > 0 ? 1 - (distance / maxLength) : 0;
+        
+        // Accept if similarity is above 0.7 (70% similar)
+        if (similarity >= 0.7 && maxLength > 0) {
+            return true;
+        }
+    }
+    
+    return false;
+};
+
 const RiddleGame: React.FC = () => {
-    const [riddle, setRiddle] = useState<{ question: string; answer: string; hint: string } | null>(null);
+    const [riddle, setRiddle] = useState<{ question: string; answer: string | string[]; hint: string } | null>(null);
     const [answer, setAnswer] = useState('');
     const [hintRevealed, setHintRevealed] = useState(false);
     const [isWon, setIsWon] = useState(false);
@@ -88,7 +168,8 @@ const RiddleGame: React.FC = () => {
         e.preventDefault();
         if (isWon || !riddle || alreadyPlayed) return;
 
-        if (answer.toLowerCase().trim() === riddle.answer) {
+        // Use the new validation function that supports multiple answers and fuzzy matching
+        if (isAnswerCorrect(answer, riddle.answer)) {
             setIsWon(true);
             setError('');
             confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
@@ -231,8 +312,18 @@ const RiddleGame: React.FC = () => {
                         <div className="inline-flex items-center gap-2 px-6 py-3 bg-[#00B894] border-2 border-black text-white rounded-full font-black tracking-widest text-sm shadow-[2px_2px_0px_#000] mb-6">
                             <Trophy size={16} /> SOLVED
                         </div>
-                        <p className="text-black/60 font-medium mb-2">The answer was:</p>
-                        <p className="text-4xl font-black text-black uppercase mb-6">{riddle.answer}</p>
+                        <p className="text-black/60 font-medium mb-2">
+                            The answer{Array.isArray(riddle.answer) && riddle.answer.length > 1 ? 's were' : ' was'}:
+                        </p>
+                        <div className="mb-6">
+                            {Array.isArray(riddle.answer) ? (
+                                riddle.answer.map((ans, idx) => (
+                                    <p key={idx} className="text-4xl font-black text-black uppercase mb-2">{ans}</p>
+                                ))
+                            ) : (
+                                <p className="text-4xl font-black text-black uppercase mb-6">{riddle.answer}</p>
+                            )}
+                        </div>
 
                         <p className={`font-bold text-sm ${alreadyPlayed ? 'text-black/50' : 'text-[#00B894]'}`}>
                             {message}

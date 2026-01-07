@@ -5,15 +5,24 @@ import { Timestamp } from 'firebase-admin/firestore';
 
 export async function GET(request: Request) {
     // Optional: Add a simple secret check if needed
+    // Note: Vercel cron jobs don't send auth headers, so we check for CRON_SECRET in query params or headers
     const authHeader = request.headers.get('authorization');
-    if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const url = new URL(request.url);
+    const secretParam = url.searchParams.get('secret');
+    
+    if (process.env.CRON_SECRET) {
+        const providedSecret = authHeader?.replace('Bearer ', '') || secretParam;
+        if (providedSecret !== process.env.CRON_SECRET) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
     }
 
     try {
+        // Get current time in UTC (Firestore Timestamp)
         const now = Timestamp.now();
 
-        // Find scheduled campaigns that are due
+        // Find scheduled campaigns that are due (scheduledFor is stored as UTC Timestamp)
+        // This query finds all campaigns where scheduledFor <= current time (UTC)
         const campaignsSnapshot = await adminDb.collection('pushCampaigns')
             .where('status', '==', 'scheduled')
             .where('scheduledFor', '<=', now)
@@ -63,8 +72,25 @@ export async function GET(request: Request) {
                     await legacySnapshot.docs[0].ref.update({
                         status: 'sent',
                         deliveredCount: results.pushSentCount,
-                        sentAt: now
+                        sentAt: now.toDate().toISOString() // Convert to ISO string for UI compatibility
                     });
+                } else {
+                    // If no legacy record found, try to find by title and scheduledFor as fallback
+                    console.warn(`No legacy campaign found for pushCampaignId: ${campaignId}, trying fallback search`);
+                    const fallbackSnapshot = await adminDb.collection('campaigns')
+                        .where('title', '==', campaign.title)
+                        .where('status', '==', 'scheduled')
+                        .limit(1)
+                        .get();
+                    
+                    if (!fallbackSnapshot.empty) {
+                        await fallbackSnapshot.docs[0].ref.update({
+                            status: 'sent',
+                            deliveredCount: results.pushSentCount,
+                            sentAt: now.toDate().toISOString(),
+                            pushCampaignId: campaignId // Link them for future updates
+                        });
+                    }
                 }
 
                 processedCampaigns.push({
