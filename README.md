@@ -2,8 +2,7 @@
 
 A modern, elegant digital platform for board games, events, experiences, and community engagement.
 
-##  About Joy Juncture
-
+##  About Joy 
 Joy Juncture is a playful, experience-driven website built around one core belief: **Games are moments, memories, and shared joy.**
 
 ##  Live Demo
