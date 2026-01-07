@@ -10,8 +10,8 @@ export default function GlobalError({
   return (
     <html lang="en">
       <head>
-        <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta charSet="utf-8" key="charset" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" key="viewport" />
         <title>Error - Joy Juncture</title>
       </head>
       <body style={{ 
@@ -29,7 +29,6 @@ export default function GlobalError({
           padding: '24px'
         }}>
           <div style={{ maxWidth: '500px', width: '100%', textAlign: 'center' }}>
-            {/* Icon */}
             <div style={{ marginBottom: '32px', display: 'flex', justifyContent: 'center' }}>
               <div style={{
                 background: 'rgba(239, 68, 68, 0.1)',
@@ -39,14 +38,13 @@ export default function GlobalError({
                 display: 'inline-flex'
               }}>
                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="10"/>
-                  <line x1="12" y1="8" x2="12" y2="12"/>
-                  <line x1="12" y1="16" x2="12.01" y2="16"/>
+                  <circle cx="12" cy="12" r="10" key="circle"/>
+                  <line x1="12" y1="8" x2="12" y2="12" key="line1"/>
+                  <line x1="12" y1="16" x2="12.01" y2="16" key="line2"/>
                 </svg>
               </div>
             </div>
 
-            {/* Content */}
             <div style={{ marginBottom: '32px' }}>
               <h1 style={{ fontSize: '48px', fontWeight: 'bold', marginBottom: '16px' }}>
                 Oops!
@@ -54,40 +52,8 @@ export default function GlobalError({
               <p style={{ fontSize: '18px', color: '#6B7280', marginBottom: '16px' }}>
                 Something went wrong. Please try refreshing the page.
               </p>
-
-              {/* Error Details (Development Only) */}
-              {process.env.NODE_ENV === 'development' && error && (
-                <div style={{
-                  marginTop: '24px',
-                  padding: '16px',
-                  background: 'rgba(127, 29, 29, 0.2)',
-                  border: '1px solid rgba(239, 68, 68, 0.3)',
-                  borderRadius: '8px',
-                  textAlign: 'left'
-                }}>
-                  <p style={{
-                    fontSize: '12px',
-                    color: '#f87171',
-                    fontFamily: 'monospace',
-                    wordBreak: 'break-all'
-                  }}>
-                    {error.message || 'Unknown error'}
-                  </p>
-                  {error.digest && (
-                    <p style={{
-                      fontSize: '12px',
-                      color: 'rgba(248, 113, 113, 0.7)',
-                      fontFamily: 'monospace',
-                      marginTop: '8px'
-                    }}>
-                      ID: {error.digest}
-                    </p>
-                  )}
-                </div>
-              )}
             </div>
 
-            {/* Actions */}
             <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
               <button
                 onClick={reset}
@@ -102,11 +68,8 @@ export default function GlobalError({
                   borderRadius: '8px',
                   fontSize: '16px',
                   fontWeight: '600',
-                  cursor: 'pointer',
-                  transition: 'background 0.2s'
+                  cursor: 'pointer'
                 }}
-                onMouseOver={(e) => e.currentTarget.style.background = '#dc2626'}
-                onMouseOut={(e) => e.currentTarget.style.background = '#ef4444'}
               >
                 Try Again
               </button>
@@ -124,15 +87,12 @@ export default function GlobalError({
                   fontSize: '16px',
                   fontWeight: '600',
                   textDecoration: 'none',
-                  cursor: 'pointer',
-                  transition: 'background 0.2s'
+                  cursor: 'pointer'
                 }}
-                onMouseOver={(e) => e.currentTarget.style.background = '#F3F4F6'}
-                onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-                  <polyline points="9 22 9 12 15 12 15 22"/>
+                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" key="path"/>
+                  <polyline points="9 22 9 12 15 12 15 22" key="polyline"/>
                 </svg>
                 Go Home
               </a>
