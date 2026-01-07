@@ -10,13 +10,13 @@ export default function GlobalError({
   return (
     <html lang="en">
       <head>
-        <meta charSet="utf-8" key="charset" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" key="viewport" />
+        <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>Error - Joy Juncture</title>
       </head>
-      <body style={{ 
-        margin: 0, 
-        padding: 0, 
+      <body style={{
+        margin: 0,
+        padding: 0,
         fontFamily: 'system-ui, -apple-system, sans-serif',
         background: '#FFFDF5',
         color: '#2D3436'
@@ -38,9 +38,9 @@ export default function GlobalError({
                 display: 'inline-flex'
               }}>
                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="10" key="circle"/>
-                  <line x1="12" y1="8" x2="12" y2="12" key="line1"/>
-                  <line x1="12" y1="16" x2="12.01" y2="16" key="line2"/>
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="12" y1="8" x2="12" y2="12" />
+                  <line x1="12" y1="16" x2="12.01" y2="16" />
                 </svg>
               </div>
             </div>
@@ -91,8 +91,8 @@ export default function GlobalError({
                 }}
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" key="path"/>
-                  <polyline points="9 22 9 12 15 12 15 22" key="polyline"/>
+                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                  <polyline points="9 22 9 12 15 12 15 22" />
                 </svg>
                 Go Home
               </a>
