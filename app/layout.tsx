@@ -86,6 +86,7 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <script
+          key="razorpay-checkout"
           src="https://checkout.razorpay.com/v1/checkout.js"
           async
           defer
