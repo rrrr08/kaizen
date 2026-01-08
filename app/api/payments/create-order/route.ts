@@ -28,6 +28,15 @@ export async function POST(request: NextRequest) {
 
     // Check if user is already registered
     if (notes?.userId && notes?.eventId) {
+      // Validate Admin Keys before importing
+      if (!process.env.FIREBASE_ADMIN_PROJECT_ID || !process.env.FIREBASE_ADMIN_CLIENT_EMAIL || !process.env.FIREBASE_ADMIN_PRIVATE_KEY) {
+        console.error('Missing Firebase Admin Keys for duplicate check');
+        return NextResponse.json(
+          { error: 'Server misconfigured: Missing Firebase Admin Keys.' },
+          { status: 500 }
+        );
+      }
+
       const { adminDb } = await import('@/lib/firebaseAdmin');
       const existingReg = await adminDb.collection('event_registrations')
         .where('eventId', '==', notes.eventId)
@@ -70,7 +79,16 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
-    console.error('Razorpay order creation error:', error);
+    console.error('Razorpay/Firebase error in create-order:', error);
+
+    // Check if it's a Firebase Admin initialization error
+    if (String(error).includes('credential')) {
+      return NextResponse.json(
+        { error: 'Server configuration error (Firebase Admin). Please check logs.' },
+        { status: 500 }
+      );
+    }
+
     const errorMessage = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
       { error: 'Failed to create payment order', details: errorMessage },

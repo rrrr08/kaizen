@@ -427,7 +427,9 @@ export default function EventRegistrationForm({
         body: JSON.stringify({
           amount: finalAmount,
           currency: 'INR',
-          receipt: `EVT-${event.id}-${Date.now()}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`,
+          // Receipt max length 40. Date.now() is 13 chars. Random is 4 chars. Prefix 'RCT-'.
+          // Total: 4 + 13 + 1 + 4 = 22 chars. Safe.
+          receipt: `RCT-${Date.now()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`,
           notes: {
             eventId: event.id,
             userId: user.uid, // Add userId to notes for backend check
