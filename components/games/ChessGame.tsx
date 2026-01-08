@@ -161,7 +161,7 @@ const ChessGame: React.FC = () => {
     }
   }, [game, puzzle, moveIndex, userMoves, isWon, alreadyPlayed]);
 
-  const onDrop = ({ sourceSquare, targetSquare }: { sourceSquare: string, targetSquare: string | null }) => {
+  const onDrop = (sourceSquare: string, targetSquare: string) => {
     if (!targetSquare) return false;
     // Attempt move
     const success = makeMove({
@@ -279,14 +279,12 @@ const ChessGame: React.FC = () => {
           <div className="bg-[#2D3436] p-4 rounded-xl border-4 border-black shadow-[8px_8px_0px_#000]">
             <div className="aspect-square w-full">
               <Chessboard
-                options={{
-                  position: game.fen(),
-                  onPieceDrop: onDrop,
-                  boardOrientation: playerColor,
-                  boardStyle: {
-                    borderRadius: '8px',
-                    boxShadow: 'inset 0 0 10px rgba(0,0,0,0.2)'
-                  }
+                position={game.fen()}
+                onPieceDrop={onDrop}
+                boardOrientation={playerColor}
+                customBoardStyle={{
+                  borderRadius: '8px',
+                  boxShadow: 'inset 0 0 10px rgba(0,0,0,0.2)'
                 }}
               />
             </div>
