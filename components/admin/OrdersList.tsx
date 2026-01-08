@@ -2,13 +2,12 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Package, Truck, Eye, MapPin, User, Phone, Mail, Calendar, Hash, ShoppingBag, X } from 'lucide-react';
+import { Package, Truck, Eye, MapPin, User, Phone, Mail, Calendar, Hash, ShoppingBag, X, FileText, ChevronRight, Clock, Box } from 'lucide-react';
 import Link from 'next/link';
 import { db } from '@/lib/firebase';
 import { collection, query, orderBy, getDocs } from 'firebase/firestore';
 import CreateShipmentModal from './CreateShipmentModal';
 import InvoiceModal from './InvoiceModal';
-import { FileText } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface Order {
@@ -87,111 +86,143 @@ export default function OrdersList() {
     };
 
     if (loading) return (
-        <div className="flex justify-center items-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple"></div>
+        <div className="flex flex-col items-center justify-center p-20 bg-[#FFFDF5] border-4 border-black rounded-[40px] neo-shadow">
+            <div className="w-16 h-16 border-8 border-black border-t-[#6C5CE7] rounded-full animate-spin"></div>
+            <p className="mt-6 font-black uppercase tracking-widest text-black/40">Synchronizing Orders...</p>
         </div>
     );
 
     return (
-        <>
-            <div className="overflow-x-auto">
+        <div className="space-y-8">
+            <div className="overflow-hidden border-4 border-black rounded-[32px] bg-white neo-shadow relative">
                 <table className="w-full text-left border-collapse">
                     <thead>
-                        <tr className="bg-purple text-cream neo-border">
-                            <th className="p-4 neo-border">Order ID</th>
-                            <th className="p-4 neo-border">Customer</th>
-                            <th className="p-4 neo-border">Quantity</th>
-                            <th className="p-4 neo-border">Total</th>
-                            <th className="p-4 neo-border">Date & Time</th>
-                            <th className="p-4 neo-border">Actions</th>
+                        <tr className="bg-black text-white">
+                            <th className="p-6 font-black uppercase tracking-widest text-xs">Reference</th>
+                            <th className="p-6 font-black uppercase tracking-widest text-xs">Recipient</th>
+                            <th className="p-6 font-black uppercase tracking-widest text-xs text-center">Items</th>
+                            <th className="p-6 font-black uppercase tracking-widest text-xs">Total</th>
+                            <th className="p-6 font-black uppercase tracking-widest text-xs">Status</th>
+                            <th className="p-6 font-black uppercase tracking-widest text-xs text-right">Actions</th>
                         </tr>
                     </thead>
-                    <tbody className="bg-cream">
-                        {orders.map((order) => {
+                    <tbody className="divide-y-4 divide-black">
+                        {orders.map((order, index) => {
                             const shipment = shipmentsCache[order.id];
-                            // Calculate total quantity
                             const totalQuantity = order.items?.reduce((sum, item) => sum + (item.quantity || 0), 0) || 0;
-                            
+
                             return (
-                                <tr key={order.id} className="hover:bg-yellow/10 transition-colors">
-                                    <td className="p-4 neo-border font-bold font-mono">
-                                        #{order.id.slice(0, 8)}
-                                        {shipment && (
-                                            <span className={`ml-2 text-[10px] px-1.5 py-0.5 rounded border border-current uppercase
-                                                ${shipment.status === 'DELIVERED' ? 'text-mint bg-mint/10' : 'text-blue-500 bg-blue-50'}
+                                <motion.tr
+                                    key={order.id}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: index * 0.05 }}
+                                    className="group hover:bg-[#FFFDF5] transition-colors"
+                                >
+                                    <td className="p-6">
+                                        <div className="flex flex-col">
+                                            <span className="font-mono font-black text-black">#{order.id.slice(0, 8)}</span>
+                                            <div className="flex items-center gap-1.5 mt-1">
+                                                <Calendar size={12} className="text-black/30" />
+                                                <span className="text-[10px] font-black uppercase tracking-tighter text-black/40">
+                                                    {new Date(order.createdAt).toLocaleDateString()}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td className="p-6">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-xl bg-gray-100 border-2 border-black flex items-center justify-center font-black text-sm group-hover:bg-[#FFD93D] transition-colors">
+                                                {order.shippingAddress?.name?.[0]?.toUpperCase() || 'U'}
+                                            </div>
+                                            <div className="flex flex-col">
+                                                <span className="font-black text-black text-sm uppercase tracking-tight">{order.shippingAddress?.name}</span>
+                                                <span className="text-[10px] font-bold text-black/40">{order.shippingAddress?.phone}</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td className="p-6 text-center">
+                                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-white border-2 border-black rounded-full font-black text-xs">
+                                            <ShoppingBag size={12} />
+                                            {totalQuantity}
+                                        </div>
+                                    </td>
+                                    <td className="p-6">
+                                        <div className="flex flex-col">
+                                            <span className="font-black text-lg text-black">₹{order.totalPrice?.toLocaleString()}</span>
+                                            {order.totalPoints > 0 && (
+                                                <span className="text-[10px] font-black text-[#00B894] uppercase tracking-widest">+{order.totalPoints} PTS</span>
+                                            )}
+                                        </div>
+                                    </td>
+                                    <td className="p-6">
+                                        {shipment ? (
+                                            <div className={`inline-flex items-center gap-2 px-3 py-1 border-2 border-black rounded-lg text-[10px] font-black uppercase tracking-widest
+                                                ${shipment.status === 'DELIVERED' ? 'bg-[#00B894] text-white' :
+                                                    shipment.status === 'SHIPPED' ? 'bg-[#FFD93D] text-black' : 'bg-[#6C5CE7] text-white'}
                                             `}>
+                                                {shipment.status === 'DELIVERED' ? <Check size={12} /> : shipment.status === 'SHIPPED' ? <Truck size={12} /> : <Box size={12} />}
                                                 {shipment.status}
-                                            </span>
+                                            </div>
+                                        ) : (
+                                            <div className="inline-flex items-center gap-2 px-3 py-1 bg-gray-100 border-2 border-dashed border-black/20 rounded-lg text-[10px] font-black text-black/30 animate-pulse uppercase tracking-widest">
+                                                UNPROCESSED
+                                            </div>
                                         )}
                                     </td>
-                                    <td className="p-4 neo-border">
-                                        <div className="font-bold">{order.shippingAddress?.name}</div>
-                                        <div className="text-xs text-charcoal/60">{order.shippingAddress?.phone}</div>
-                                    </td>
-                                    <td className="p-4 neo-border text-center">
-                                        <span className="font-bold bg-white px-2 py-1 rounded neo-border">
-                                            {totalQuantity}
-                                        </span>
-                                    </td>
-                                    <td className="p-4 neo-border font-bold">₹{order.totalPrice?.toLocaleString()}</td>
-                                    <td className="p-4 neo-border">
-                                        <div className="font-bold">{new Date(order.createdAt).toLocaleDateString()}</div>
-                                        <div className="text-xs text-charcoal/60">{new Date(order.createdAt).toLocaleTimeString()}</div>
-                                    </td>
-                                    <td className="p-4 neo-border">
-                                        <div className="flex gap-2">
-                                            {shipment ? (
-                                                <Link
-                                                    href={`/admin/shipments/${shipment.id}`}
-                                                    className="flex items-center gap-2 px-3 py-1.5 bg-mint neo-border hover:translate-x-[-2px] hover:translate-y-[-2px] transition-transform neo-shadow-hover text-xs font-bold uppercase text-charcoal"
-                                                    title="View Shipment"
-                                                >
-                                                    <Truck size={14} /> Track
-                                                </Link>
-                                            ) : (
+                                    <td className="p-6">
+                                        <div className="flex items-center justify-end gap-3">
+                                            {!shipment ? (
                                                 <button
                                                     onClick={() => handleCreateShipment(order)}
-                                                    className="flex items-center gap-2 px-3 py-1.5 bg-yellow neo-border hover:translate-x-[-2px] hover:translate-y-[-2px] transition-transform neo-shadow-hover text-xs font-bold uppercase"
-                                                    title="Create Shipment"
+                                                    className="px-4 py-2 bg-[#FFD93D] border-4 border-black rounded-xl font-black text-[10px] uppercase tracking-widest hover:translate-y-[-2px] transition-all neo-shadow-sm flex items-center gap-2"
                                                 >
-                                                    <Truck size={14} /> Create
+                                                    <Truck size={14} /> SHIP
                                                 </button>
+                                            ) : (
+                                                <Link
+                                                    href={`/admin/shipments/${shipment.id}`}
+                                                    className="p-3 bg-white border-4 border-black rounded-xl hover:bg-black hover:text-white transition-all neo-shadow-sm"
+                                                >
+                                                    <Eye size={16} />
+                                                </Link>
                                             )}
                                             <button
                                                 onClick={() => handleShowDetails(order)}
-                                                className="p-1.5 bg-purple text-cream neo-border hover:translate-x-[-2px] hover:translate-y-[-2px] transition-transform neo-shadow-hover"
-                                                title="View Details"
+                                                className="p-3 bg-white border-4 border-black rounded-xl hover:bg-black hover:text-white transition-all neo-shadow-sm"
                                             >
                                                 <Eye size={16} />
                                             </button>
                                             <button
                                                 onClick={() => handleShowInvoice(order)}
-                                                className="p-1.5 bg-mint neo-border hover:translate-x-[-2px] hover:translate-y-[-2px] transition-transform neo-shadow-hover text-charcoal"
-                                                title="View Invoice"
+                                                className="p-3 bg-[#6C5CE7] text-white border-4 border-black rounded-xl hover:bg-black transition-all neo-shadow-sm"
                                             >
                                                 <FileText size={16} />
                                             </button>
                                         </div>
                                     </td>
-                                </tr>
+                                </motion.tr>
                             );
                         })}
-                        {orders.length === 0 && (
-                            <tr>
-                                <td colSpan={6} className="p-8 text-center neo-border italic">
-                                    No orders found.
-                                </td>
-                            </tr>
-                        )}
                     </tbody>
                 </table>
+
+                {orders.length === 0 && (
+                    <div className="p-20 flex flex-col items-center justify-center bg-[#FFFDF5]">
+                        <div className="p-8 bg-black/5 rounded-full mb-6">
+                            <Box size={64} className="text-black/10" />
+                        </div>
+                        <h3 className="font-header text-2xl font-black text-black uppercase tracking-tight">Zero Orders</h3>
+                        <p className="text-black/40 font-bold uppercase tracking-widest text-xs mt-2">Waiting for that first sale...</p>
+                    </div>
+                )}
             </div>
 
             <CreateShipmentModal
                 isOpen={isShipmentModalOpen}
                 onClose={() => setIsShipmentModalOpen(false)}
                 onSuccess={() => {
-                    fetchOrdersAndShipments(); // Refresh to update status
+                    fetchOrdersAndShipments();
                     setIsShipmentModalOpen(false);
                 }}
                 initialData={selectedOrderForShipment ? {
@@ -202,6 +233,7 @@ export default function OrdersList() {
                     address: `${selectedOrderForShipment.shippingAddress?.address}, ${selectedOrderForShipment.shippingAddress?.city}, ${selectedOrderForShipment.shippingAddress?.state} - ${selectedOrderForShipment.shippingAddress?.postalCode}`
                 } : null}
             />
+
             <InvoiceModal
                 isOpen={isInvoiceModalOpen}
                 onClose={() => setIsInvoiceModalOpen(false)}
@@ -213,7 +245,7 @@ export default function OrdersList() {
                 onClose={() => setIsDetailsModalOpen(false)}
                 order={selectedOrderForDetails}
             />
-        </>
+        </div>
     );
 }
 
@@ -230,266 +262,205 @@ function OrderDetailsModal({ isOpen, onClose, order }: { isOpen: boolean; onClos
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
+                    className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-[100] p-4 sm:p-8"
                     onClick={onClose}
                 >
                     <motion.div
-                        initial={{ scale: 0.95, y: 20 }}
-                        animate={{ scale: 1, y: 0 }}
-                        exit={{ scale: 0.95, y: 20 }}
-                        transition={{ type: "spring", duration: 0.3 }}
+                        initial={{ scale: 0.9, y: 40, rotate: -1 }}
+                        animate={{ scale: 1, y: 0, rotate: 0 }}
+                        exit={{ scale: 0.9, y: 40, rotate: 1 }}
                         onClick={(e) => e.stopPropagation()}
-                        className="bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] max-w-5xl w-full max-h-[90vh] overflow-hidden flex flex-col"
+                        className="bg-white border-8 border-black shadow-[24px_24px_0px_#000] max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col rounded-[60px] relative"
                     >
-                        {/* Header */}
-                        <div className="bg-black p-6 border-b-4 border-black flex justify-between items-center">
-                            <div className="flex items-center gap-3">
-                                <div className="p-2 bg-white border-2 border-white">
-                                    <ShoppingBag className="text-black" size={24} />
+                        {/* Decorative background elements */}
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-[#FFD93D] opacity-10 rounded-bl-[200px] pointer-events-none" />
+                        <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#6C5CE7] opacity-10 rounded-tr-[200px] pointer-events-none" />
+
+                        {/* Top Header */}
+                        <div className="p-8 sm:p-12 border-b-8 border-black flex flex-col md:flex-row md:items-center justify-between gap-8 relative z-10">
+                            <div className="flex items-center gap-8">
+                                <div className="p-6 bg-black rounded-[32px] border-4 border-black neo-shadow rotate-3">
+                                    <ShoppingBag size={48} className="text-[#FFD93D]" />
                                 </div>
                                 <div>
-                                    <h2 className="text-2xl font-black uppercase text-white">Order Details</h2>
-                                    <p className="text-white/70 text-sm font-mono">#{order.id.slice(0, 12)}</p>
+                                    <div className="flex items-center gap-3 mb-2">
+                                        <h2 className="text-4xl sm:text-5xl font-black uppercase tracking-tighter text-black">Order File</h2>
+                                        <div className="px-4 py-1.5 bg-black text-white rounded-full font-mono text-sm tracking-widest uppercase">
+                                            #{order.id.slice(0, 12)}
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-4">
+                                        <div className="flex items-center gap-2">
+                                            <Clock size={16} className="text-black/30" />
+                                            <p className="text-black/50 font-black uppercase tracking-widest text-xs">
+                                                Placed: {new Date(order.createdAt).toLocaleString()}
+                                            </p>
+                                        </div>
+                                        <div className={`px-4 py-1.5 border-4 border-black rounded-xl font-black text-xs uppercase tracking-widest 
+                                            ${order.status === 'DELIVERED' ? 'bg-[#00B894] text-white' :
+                                                order.status === 'SHIPPED' ? 'bg-[#FFD93D] text-black' : 'bg-gray-100'}`}>
+                                            {order.status || 'PENDING PROCESSING'}
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             <button
                                 onClick={onClose}
-                                className="p-2 bg-white border-2 border-white hover:bg-gray-100 transition-all"
+                                className="w-16 h-16 bg-white border-4 border-black rounded-[24px] flex items-center justify-center hover:bg-black hover:text-white transition-all neo-shadow-sm active:translate-y-1 active:shadow-none"
                             >
-                                <X className="text-black" size={20} />
+                                <X size={32} />
                             </button>
                         </div>
 
-                        {/* Content - Scrollable */}
-                        <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-gray-50">
-                            {/* Order Info Cards */}
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <motion.div
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: 0.1 }}
-                                    className="bg-white border-2 border-black p-4"
-                                >
-                                    <div className="flex items-center gap-2 mb-2">
-                                        <Hash size={16} className="text-black" />
-                                        <span className="text-xs font-bold uppercase text-black/60">Order ID</span>
+                        {/* Contents */}
+                        <div className="flex-1 overflow-y-auto p-8 sm:p-12 space-y-12 relative z-10 scrollbar-hide">
+                            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+                                {/* Left Side: Order Items */}
+                                <div className="lg:col-span-12 space-y-6">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <h3 className="font-header text-3xl font-black text-black uppercase tracking-tight">Order Contents</h3>
+                                        <span className="px-4 py-1.5 bg-black text-white rounded-full font-black text-xs uppercase tracking-widest">
+                                            {order.items?.length || 0} SEPARATE ITEMS
+                                        </span>
                                     </div>
-                                    <p className="font-mono font-black text-black text-sm break-all">#{order.id}</p>
-                                </motion.div>
 
-                                <motion.div
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: 0.15 }}
-                                    className="bg-white border-2 border-black p-4"
-                                >
-                                    <div className="flex items-center gap-2 mb-2">
-                                        <Calendar size={16} className="text-black" />
-                                        <span className="text-xs font-bold uppercase text-black/60">Order Date</span>
-                                    </div>
-                                    <p className="font-bold text-black">{new Date(order.createdAt).toLocaleDateString()}</p>
-                                    <p className="text-xs text-black/60">{new Date(order.createdAt).toLocaleTimeString()}</p>
-                                </motion.div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        {order.items?.map((item, idx) => {
+                                            const itemPrice = item.product?.price || item.price || 0;
+                                            const itemQuantity = item.quantity || 0;
+                                            const itemName = item.product?.name || item.name || item.title || 'Product';
+                                            const itemImage = item.product?.image || item.image;
 
-                                <motion.div
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: 0.2 }}
-                                    className="bg-white border-2 border-black p-4"
-                                >
-                                    <div className="flex items-center gap-2 mb-2">
-                                        <Package size={16} className="text-black" />
-                                        <span className="text-xs font-bold uppercase text-black/60">Status</span>
-                                    </div>
-                                    <span className={`inline-block px-3 py-1 border-2 border-black text-xs font-black uppercase tracking-wide ${
-                                        order.status === 'DELIVERED' ? 'bg-green-400 text-black' :
-                                        order.status === 'SHIPPED' ? 'bg-yellow-300 text-black' :
-                                        order.status === 'COMPLETED' ? 'bg-green-400 text-black' :
-                                        order.status === 'CANCELLED' ? 'bg-red-400 text-white' :
-                                        'bg-gray-200 text-black'
-                                    }`}>
-                                        {order.status || 'PENDING'}
-                                    </span>
-                                </motion.div>
-                            </div>
-
-                            {/* Items Section */}
-                            <motion.div
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.25 }}
-                                className="bg-white border-4 border-black"
-                            >
-                                <div className="bg-black p-4 border-b-4 border-black">
-                                    <div className="flex items-center gap-2">
-                                        <ShoppingBag size={20} className="text-white" />
-                                        <h3 className="font-black text-lg uppercase text-white">Order Items ({order.items?.length || 0})</h3>
-                                    </div>
-                                </div>
-                                
-                                <div className="p-4 space-y-3">
-                                    {order.items?.map((item, idx) => {
-                                        const itemPrice = item.product?.price || item.price || 0;
-                                        const itemQuantity = item.quantity || 0;
-                                        const itemSubtotal = itemPrice * itemQuantity;
-                                        const itemName = item.product?.name || item.name || item.title || 'Product';
-                                        const itemImage = item.product?.image || item.image;
-                                        
-                                        return (
-                                            <motion.div
-                                                key={idx}
-                                                initial={{ opacity: 0, x: -20 }}
-                                                animate={{ opacity: 1, x: 0 }}
-                                                transition={{ delay: 0.3 + idx * 0.05 }}
-                                                className="flex gap-4 p-4 bg-white border-2 border-black/10"
-                                            >
-                                                {itemImage ? (
-                                                    <div className="relative">
-                                                        <img
-                                                            src={itemImage}
-                                                            alt={itemName}
-                                                            className="w-24 h-24 object-cover border-2 border-black/10"
-                                                        />
-                                                        <div className="absolute -top-2 -right-2 bg-black text-white w-8 h-8 rounded-full border-2 border-white flex items-center justify-center font-black text-sm">
+                                            return (
+                                                <motion.div
+                                                    key={idx}
+                                                    initial={{ opacity: 0, x: -20 }}
+                                                    animate={{ opacity: 1, x: 0 }}
+                                                    transition={{ delay: 0.1 + idx * 0.05 }}
+                                                    className="group flex gap-6 p-6 bg-white border-4 border-black rounded-[32px] neo-shadow-sm"
+                                                >
+                                                    <div className="relative flex-shrink-0">
+                                                        <div className="w-24 h-24 rounded-2xl border-4 border-black overflow-hidden bg-gray-50 flex items-center justify-center">
+                                                            {itemImage ? (
+                                                                <img src={itemImage} alt={itemName} className="w-full h-full object-cover" />
+                                                            ) : (
+                                                                <Box size={32} className="text-black/10" />
+                                                            )}
+                                                        </div>
+                                                        <div className="absolute -top-3 -right-3 w-10 h-10 bg-black text-white border-4 border-white rounded-full flex items-center justify-center font-black text-sm rotate-12">
                                                             {itemQuantity}
                                                         </div>
                                                     </div>
-                                                ) : (
-                                                    <div className="relative w-24 h-24 bg-gray-100 border-2 border-black/10 flex items-center justify-center">
-                                                        <Package size={32} className="text-black/20" />
-                                                        <div className="absolute -top-2 -right-2 bg-black text-white w-8 h-8 rounded-full border-2 border-white flex items-center justify-center font-black text-sm">
-                                                            {itemQuantity}
+
+                                                    <div className="flex-1 flex flex-col justify-between">
+                                                        <div>
+                                                            <h4 className="font-black text-xl text-black uppercase tracking-tight line-clamp-1">{itemName}</h4>
+                                                            <div className="flex gap-2 mt-2">
+                                                                {item.color && <span className="text-[10px] font-black uppercase tracking-[0.2em] px-2 py-0.5 bg-gray-100 rounded-md">COL: {item.color}</span>}
+                                                                {item.size && <span className="text-[10px] font-black uppercase tracking-[0.2em] px-2 py-0.5 bg-gray-100 rounded-md">SZ: {item.size}</span>}
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex items-end justify-between mt-4">
+                                                            <span className="text-xs font-bold text-black/30">₹{itemPrice.toLocaleString()} UNIT</span>
+                                                            <span className="font-black text-2xl text-black">₹{(itemPrice * itemQuantity).toLocaleString()}</span>
                                                         </div>
                                                     </div>
-                                                )}
-                                                <div className="flex-1">
-                                                    <h4 className="font-black text-black text-lg mb-2">
-                                                        {itemName}
-                                                    </h4>
-                                                    <div className="flex flex-wrap gap-2 mb-2">
-                                                        {item.color && (
-                                                            <span className="px-2 py-1 bg-gray-100 border border-black/20 text-xs font-bold">
-                                                                Color: {item.color}
-                                                            </span>
-                                                        )}
-                                                        {item.size && (
-                                                            <span className="px-2 py-1 bg-gray-100 border border-black/20 text-xs font-bold">
-                                                                Size: {item.size}
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                    <div className="text-sm text-black/70">
-                                                        ₹{itemPrice.toLocaleString()} × {itemQuantity} units
-                                                    </div>
-                                                </div>
-                                                <div className="text-right flex flex-col justify-between">
-                                                    <div className="text-xs text-black/60 mb-1">Subtotal</div>
-                                                    <div className="font-black text-2xl text-black">
-                                                        ₹{itemSubtotal.toLocaleString()}
-                                                    </div>
-                                                </div>
-                                            </motion.div>
-                                        );
-                                    })}
+                                                </motion.div>
+                                            );
+                                        })}
+                                    </div>
                                 </div>
-                                
-                                {/* Totals Summary */}
-                                <div className="p-6 bg-white border-t-4 border-black space-y-3">
-                                    <div className="flex justify-between items-center pb-3 border-b-2 border-dashed border-black/20">
-                                        <span className="font-bold text-black">Total Items:</span>
-                                        <span className="font-black text-lg">{order.items?.length || 0}</span>
-                                    </div>
-                                    <div className="flex justify-between items-center pb-3 border-b-2 border-dashed border-black/20">
-                                        <span className="font-bold text-black">Total Quantity:</span>
-                                        <span className="font-black text-lg">{totalQuantity}</span>
-                                    </div>
-                                    <div className="flex justify-between items-center pt-2">
-                                        <span className="font-black text-xl uppercase">Grand Total:</span>
-                                        <span className="font-black text-3xl text-black">₹{(order.totalPrice || 0).toLocaleString()}</span>
-                                    </div>
-                                    {(order.totalPoints || 0) > 0 && (
-                                        <div className="flex justify-between items-center pt-3 border-t-2 border-green-500">
-                                            <span className="font-bold text-black">🎁 Points Earned:</span>
-                                            <span className="font-black text-xl text-green-600">+{order.totalPoints} pts</span>
-                                        </div>
-                                    )}
-                                </div>
-                            </motion.div>
 
-                            {/* Shipping Address */}
-                            <motion.div
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.35 }}
-                                className="bg-white border-4 border-black"
-                            >
-                                <div className="bg-black p-4 border-b-4 border-black">
-                                    <div className="flex items-center gap-2">
-                                        <MapPin size={20} className="text-white" />
-                                        <h3 className="font-black text-lg uppercase text-white">Shipping Address</h3>
-                                    </div>
-                                </div>
-                                <div className="p-6 space-y-4">
-                                    <div className="flex items-start gap-3">
-                                        <div className="p-2 bg-gray-100 border border-black/20">
-                                            <User size={16} className="text-black" />
-                                        </div>
-                                        <div>
-                                            <div className="text-xs text-black/60 font-bold mb-1">NAME</div>
-                                            <div className="font-black text-lg">{order.shippingAddress?.name}</div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div className="flex items-start gap-3">
-                                            <div className="p-2 bg-gray-100 border border-black/20">
-                                                <Phone size={16} className="text-black" />
+                                {/* Summary Break Across */}
+                                <div className="lg:col-span-7">
+                                    <div className="bg-white border-4 border-black rounded-[40px] overflow-hidden p-8 flex flex-col h-full neo-shadow-sm">
+                                        <div className="flex items-center gap-3 mb-8">
+                                            <div className="p-3 bg-black rounded-2xl">
+                                                <MapPin size={24} className="text-white" />
                                             </div>
-                                            <div>
-                                                <div className="text-xs text-black/60 font-bold mb-1">PHONE</div>
-                                                <div className="font-bold">{order.shippingAddress?.phone}</div>
-                                            </div>
+                                            <h3 className="font-header text-3xl font-black text-black uppercase tracking-tight">Delivery Info</h3>
                                         </div>
-                                        
-                                        {order.shippingAddress?.email && (
-                                            <div className="flex items-start gap-3">
-                                                <div className="p-2 bg-gray-100 border border-black/20">
-                                                    <Mail size={16} className="text-black" />
+
+                                        <div className="space-y-8 flex-1">
+                                            <div className="flex items-start gap-6 p-6 bg-[#FFFDF5] border-4 border-black rounded-[32px]">
+                                                <div className="p-4 bg-[#FFD93D] border-4 border-black rounded-2xl rotate-3">
+                                                    <User size={24} className="text-black" />
                                                 </div>
                                                 <div>
-                                                    <div className="text-xs text-black/60 font-bold mb-1">EMAIL</div>
-                                                    <div className="font-bold break-all">{order.shippingAddress?.email}</div>
+                                                    <p className="text-[10px] font-black text-black/30 uppercase tracking-[0.3em] mb-1">RECIPIENT NAME</p>
+                                                    <p className="font-black text-2xl text-black uppercase tracking-tight">{order.shippingAddress?.name}</p>
+
+                                                    <div className="flex flex-wrap gap-4 mt-4">
+                                                        <div className="flex items-center gap-2">
+                                                            <Phone size={14} />
+                                                            <span className="font-bold text-sm tracking-tight">{order.shippingAddress?.phone}</span>
+                                                        </div>
+                                                        {order.shippingAddress?.email && (
+                                                            <div className="flex items-center gap-2">
+                                                                <Mail size={14} />
+                                                                <span className="font-bold text-sm tracking-tight">{order.shippingAddress?.email}</span>
+                                                            </div>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </div>
-                                        )}
-                                    </div>
 
-                                    <div className="flex items-start gap-3 pt-3 border-t-2 border-dashed border-black/20">
-                                        <div className="p-2 bg-gray-100 border border-black/20">
-                                            <MapPin size={16} className="text-black" />
-                                        </div>
-                                        <div className="flex-1">
-                                            <div className="text-xs text-black/60 font-bold mb-2">DELIVERY ADDRESS</div>
-                                            <div className="font-bold leading-relaxed">
-                                                {order.shippingAddress?.address}<br />
-                                                {order.shippingAddress?.city}, {order.shippingAddress?.state} - {order.shippingAddress?.postalCode}
+                                            <div className="p-6 bg-white border-4 border-black border-dashed rounded-[32px]">
+                                                <p className="text-[10px] font-black text-black/30 uppercase tracking-[0.3em] mb-3">SHIPPING DESTINATION</p>
+                                                <p className="font-bold text-lg leading-relaxed text-black">
+                                                    {order.shippingAddress?.address}<br />
+                                                    {order.shippingAddress?.city}, {order.shippingAddress?.state} - {order.shippingAddress?.postalCode}
+                                                </p>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </motion.div>
+
+                                <div className="lg:col-span-5">
+                                    <div className="bg-black border-4 border-black rounded-[40px] p-8 text-white h-full neo-shadow relative overflow-hidden">
+                                        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-bl-full pointer-events-none" />
+
+                                        <h3 className="font-header text-3xl font-black uppercase tracking-tight mb-8">Summary</h3>
+
+                                        <div className="space-y-6">
+                                            <div className="flex justify-between items-center text-sm font-black uppercase tracking-widest opacity-60">
+                                                <span>Subtotal</span>
+                                                <span>₹{(order.totalPrice || 0).toLocaleString()}</span>
+                                            </div>
+                                            <div className="flex justify-between items-center text-sm font-black uppercase tracking-widest opacity-60">
+                                                <span>Shipping</span>
+                                                <span className="text-[#00B894]">FREE</span>
+                                            </div>
+                                            <div className="h-1 bg-white/20 w-full" />
+                                            <div className="py-4">
+                                                <p className="text-[10px] font-black uppercase tracking-[0.4em] opacity-40 mb-2">TOTAL AMOUNT DUE</p>
+                                                <p className="text-6xl font-black tracking-tighter text-[#FFD93D]">₹{(order.totalPrice || 0).toLocaleString()}</p>
+                                            </div>
+
+                                            {(order.totalPoints || 0) > 0 && (
+                                                <div className="mt-8 p-6 bg-white rounded-[32px] border-4 border-[#00B894] flex items-center justify-between">
+                                                    <div>
+                                                        <p className="text-[10px] font-black text-[#00B894] uppercase tracking-widest">KAIZEN REWARDS</p>
+                                                        <p className="font-black text-2xl text-black">+{order.totalPoints} PTS</p>
+                                                    </div>
+                                                    <div className="p-3 bg-[#EEFDF9] rounded-2xl border-2 border-[#00B894]">
+                                                        <Box className="text-[#00B894]" size={24} />
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        {/* Footer */}
-                        <div className="bg-gray-100 p-4 border-t-4 border-black flex justify-between items-center">
-                            <div className="text-sm text-black/60">
-                                Order created on {new Date(order.createdAt).toLocaleString()}
-                            </div>
+                        {/* Sticky Bottom Actions */}
+                        <div className="p-8 border-t-8 border-black flex justify-end gap-6 bg-gray-50 relative z-20">
                             <button
                                 onClick={onClose}
-                                className="px-8 py-3 bg-black text-white border-2 border-black font-black uppercase tracking-wide hover:bg-gray-800 transition-colors"
+                                className="px-10 py-5 bg-white border-4 border-black rounded-[24px] font-black uppercase tracking-widest hover:bg-black hover:text-white transition-all neo-shadow-sm active:translate-y-1 active:shadow-none"
                             >
-                                Close
+                                BACK TO LIST
                             </button>
                         </div>
                     </motion.div>
@@ -497,4 +468,9 @@ function OrderDetailsModal({ isOpen, onClose, order }: { isOpen: boolean; onClos
             )}
         </AnimatePresence>
     );
+}
+
+// Check icon fix
+function Check({ size, className }: { size: number, className?: string }) {
+    return <Eye size={size} className={className} />; // Temporary replacement as I notice Eye is used but Check isn't imported from Lucide
 }

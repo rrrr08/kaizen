@@ -2,7 +2,9 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
+import { Sparkles, Plus, Flame, ChevronRight } from 'lucide-react';
 import Hero from '@/components/ui/Hero';
 import GameDiscoveryCarousel from '@/components/ui/GameDiscoveryCarousel';
 import ProductCard from '@/components/ui/ProductCard';
@@ -330,38 +332,44 @@ export default function Home() {
 
             {/* New Games & Experiences */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="bg-white text-black p-8 rounded-[24px] neo-border-thick neo-shadow"
+              initial={{ opacity: 0, x: 30 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="bg-[#6C5CE7] text-white p-10 md:p-14 rounded-[50px] neo-border-thick neo-shadow-lg relative overflow-hidden group"
             >
-              <div className="flex items-center gap-3 mb-6">
-                <span className="text-4xl">✨</span>
-                <h3 className="text-2xl font-black">New Arrivals</h3>
+              <div className="absolute -left-8 -bottom-8 opacity-10 rotate-12 group-hover:rotate-0 transition-transform duration-1000">
+                <Sparkles size={200} strokeWidth={1} />
               </div>
+
+              <div className="flex items-center gap-4 mb-10 relative z-10">
+                <div className="w-14 h-14 bg-black rounded-2xl neo-border flex items-center justify-center text-2xl shadow-[4px_4px_0px_#FFFDF5]">📦</div>
+                <h3 className="text-3xl md:text-4xl font-header font-black tracking-tighter uppercase">Recent Stock</h3>
+              </div>
+
               {loadingProducts ? (
-                <div className="text-center py-8 font-bold">Loading...</div>
+                <div className="text-center py-10 font-black tracking-widest animate-pulse uppercase">Synchronizing Catalog...</div>
               ) : products.length > 0 ? (
-                <div className="space-y-4">
+                <div className="space-y-6 relative z-10">
                   {products.slice(0, 2).map((product) => (
-                    <div key={product.id} className="border-2 border-black rounded-xl p-4 hover:bg-gray-50 transition-colors">
-                      <h4 className="font-black text-lg mb-1">{product.name}</h4>
-                      <p className="text-sm font-bold text-black/60 mb-2">₹{product.price}</p>
+                    <div key={product.id} className="bg-white/10 neo-border-thick rounded-2xl p-6 hover:bg-white hover:text-black transition-all group/item flex items-center justify-between cursor-pointer">
+                      <div>
+                        <h4 className="font-header text-xl md:text-2xl font-black uppercase tracking-tight mb-1">{product.name}</h4>
+                        <p className="text-sm font-black opacity-60 italic group-hover/item:opacity-40 transition-opacity">Asset Valuation: ₹{product.price}</p>
+                      </div>
                       <Link href={`/shop/${product.id}`}>
-                        <button className="text-[#6C5CE7] font-black text-sm hover:underline">
-                          View Details →
+                        <button className="w-12 h-12 bg-white text-black rounded-full flex items-center justify-center group-hover/item:bg-black group-hover/item:text-white transition-all neo-border">
+                          <Plus size={24} strokeWidth={4} />
                         </button>
                       </Link>
                     </div>
                   ))}
-                  <Link href="/shop">
-                    <button className="w-full bg-[#FF6B6B] text-white font-black py-3 rounded-xl neo-border hover:bg-[#FF5252] transition-colors">
-                      Browse Shop
+                  <Link href="/shop" className="block pt-4">
+                    <button className="w-full bg-white text-black font-black py-5 rounded-2xl neo-border-thick neo-shadow text-sm tracking-[0.2em] uppercase hover:bg-black hover:text-white transition-all">
+                      Browse Full Catalog
                     </button>
                   </Link>
                 </div>
               ) : (
-                <p className="text-center py-8 text-black/60 font-medium">No new games yet</p>
+                <p className="text-center py-10 text-white/40 font-black uppercase tracking-widest italic">Inventory currently undergoing audit...</p>
               )}
             </motion.div>
           </div>
@@ -369,207 +377,227 @@ export default function Home() {
       </section>
 
       {/* Section 4: Proof of Joy */}
-      <section className="px-6 py-20 bg-[#FFD93D]">
+      <section className="px-6 py-32 bg-[#FFD93D] overflow-hidden relative">
+        <div className="absolute top-0 left-0 w-full h-2 bg-black/10" />
         <div className="container mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-5xl font-black mb-4">Proof of Joy</h2>
-            <p className="text-xl font-medium text-black/70">Real moments, real happiness</p>
+          {/* Section Header */}
+          <div className="text-center mb-24 max-w-4xl mx-auto">
+            <div className="text-black font-black text-[10px] md:text-xs tracking-[0.4em] mb-4 uppercase font-display italic">Consensus Metadata</div>
+            <h2 className="font-header text-5xl md:text-8xl font-black uppercase tracking-tighter leading-[0.9]">Proof of <br /><span className="italic font-serif text-[#6C5CE7] drop-shadow-[2px_2px_0px_#000]">Joy</span></h2>
+            <p className="text-black/60 font-medium text-lg md:text-xl mt-8 italic">Verified testimonials from authenticated entities within the Joy Juncture ecosystem.</p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 mb-20">
             {loadingTestimonials ? (
-              <div className="col-span-3 text-center py-12">
-                <p className="text-xl font-bold text-black/60">Loading gallery...</p>
+              <div className="col-span-3 text-center py-20">
+                <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-black border-t-transparent mb-6"></div>
+                <p className="font-black text-xs tracking-[0.4em] uppercase">COLLECTING ENTITY FEEDBACK...</p>
               </div>
             ) : (() => {
               const photosFromTestimonials = testimonials.filter(t => t.image).slice(0, 3);
               return photosFromTestimonials.length > 0 ? (
                 photosFromTestimonials.map((testimonial, i) => {
-                  const gradients = [
-                    'from-[#6C5CE7] to-[#8B7FE8]',
-                    'from-[#FF6B6B] to-[#FF8E8E]',
-                    'from-[#00D9A3] to-[#00F5B8]'
-                  ];
-
                   return (
                     <motion.div
                       key={testimonial.id}
-                      whileHover={{ scale: 1.05 }}
-                      className="relative overflow-hidden rounded-[24px] neo-border-thick neo-shadow bg-white aspect-square"
+                      whileHover={{ scale: 1.02, rotate: i % 2 === 0 ? 1 : -1 }}
+                      className="relative overflow-hidden rounded-[40px] neo-border-thick neo-shadow-lg bg-white aspect-[4/5] group"
                     >
-                      <img
-                        src={testimonial.image}
+                      <Image
+                        src={testimonial.image!}
                         alt={testimonial.name}
-                        className="absolute inset-0 w-full h-full object-cover"
+                        fill
+                        className="absolute inset-0 w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 scale-110 group-hover:scale-100"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex items-end">
-                        <div className="text-white p-8 w-full">
-                          <h4 className="text-2xl font-black mb-2">{testimonial.name}</h4>
-                          <p className="font-medium text-white/90">{testimonial.role}</p>
-                        </div>
+                      <div className="absolute inset-x-0 bottom-0 bg-black text-white p-8 translate-y-full group-hover:translate-y-0 transition-transform duration-500 neo-border-thick flex flex-col items-center">
+                        <h4 className="text-2xl font-header font-black tracking-tighter uppercase mb-2">{testimonial.name}</h4>
+                        <p className="font-black text-[10px] tracking-widest uppercase opacity-60 italic">{testimonial.role}</p>
                       </div>
                     </motion.div>
                   );
                 })
               ) : (
-                <div className="col-span-3 text-center py-12">
-                  <p className="text-xl font-bold text-black/40 italic">Moments of joy coming soon...</p>
+                <div className="col-span-3 text-center py-20 bg-white/40 neo-border-thick rounded-[40px] px-12">
+                  <p className="text-2xl md:text-3xl font-header font-black uppercase tracking-tighter text-black/20">Archive scanning in progress... metadata unavailable.</p>
                 </div>
               );
             })()}
           </div>
 
           {/* Testimonials */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {loadingTestimonials ? (
-              <div className="col-span-3 text-center py-8 font-bold">Loading testimonials...</div>
+              <div className="col-span-3 text-center py-10 font-bold">Synchronizing Entity Voice Box...</div>
             ) : (
-              testimonials.length > 0 ? (
-                testimonials.map((testimonial, i) => {
-                  const colors = ['bg-[#6C5CE7]', 'bg-[#FF6B6B]', 'bg-[#00D9A3]'];
-                  const textColors = [i === 2 ? 'text-black' : 'text-white'];
+              testimonials.slice(0, 3).map((testimonial, i) => {
+                const colors = ['bg-white', 'bg-white', 'bg-white'];
 
-                  return (
-                    <motion.div
-                      key={testimonial.id}
-                      whileHover={{ y: -4 }}
-                      className="bg-white p-6 rounded-[20px] neo-border-thick neo-shadow"
-                    >
-                      <div className="flex gap-1 mb-3">
-                        {[...Array(testimonial.rating || 5)].map((_, idx) => (
-                          <span key={idx} className="text-yellow-400 text-xl">★</span>
-                        ))}
+                return (
+                  <motion.div
+                    key={testimonial.id}
+                    whileHover={{ y: -8 }}
+                    className={`${colors[i % colors.length]} p-10 rounded-[35px] neo-border-thick neo-shadow-lg relative overflow-hidden group h-full flex flex-col`}
+                  >
+                    <div className="absolute -right-4 -top-4 opacity-[0.03] group-hover:opacity-10 transition-opacity">
+                      <Sparkles size={120} strokeWidth={1} />
+                    </div>
+
+                    <div className="flex gap-2 mb-8 items-center bg-[#F7F7F7] w-fit px-4 py-2 rounded-xl neo-border italic">
+                      {[...Array(testimonial.rating || 5)].map((_, idx) => (
+                        <span key={idx} className="text-black text-xs font-black">★</span>
+                      ))}
+                      <span className="text-[10px] font-black uppercase tracking-widest ml-2">Verified</span>
+                    </div>
+
+                    <p className="font-header text-xl md:text-2xl font-black text-black mb-10 leading-tight italic flex-grow">
+                      &quot;{testimonial.quote}&quot;
+                    </p>
+
+                    <div className="flex items-center gap-4 pt-6 border-t-2 border-black/5 mt-auto">
+                      <div className="w-14 h-14 rounded-2xl neo-border bg-black text-[#FFD93D] flex items-center justify-center font-header text-2xl font-black shadow-[4px_4px_0px_#FFD93D]">
+                        {testimonial.name.charAt(0).toUpperCase()}
                       </div>
-                      <p className="font-bold text-black/80 mb-4">
-                        &quot;{testimonial.quote}&quot;
-                      </p>
-                      <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-full ${colors[i % colors.length]} flex items-center justify-center ${textColors[0]} font-black`}>
-                          {testimonial.name.charAt(0).toUpperCase()}
-                        </div>
-                        <div>
-                          <p className="font-black">{testimonial.name}</p>
-                          <p className="text-sm text-black/60 font-medium">{testimonial.role}</p>
-                        </div>
+                      <div>
+                        <p className="font-header text-xl font-black uppercase tracking-tighter leading-none mb-1">{testimonial.name}</p>
+                        <p className="text-[10px] text-black/40 font-black uppercase tracking-[0.2em]">{testimonial.role}</p>
                       </div>
-                    </motion.div>
-                  );
-                })
-              ) : (
-                <div className="col-span-3 text-center py-8 text-black/60 font-medium">
-                  No testimonials yet.
-                </div>
-              )
+                    </div>
+                  </motion.div>
+                );
+              })
             )}
           </div>
         </div>
       </section>
 
       {/* Section 5: Gamification Teaser */}
-      <section className="px-6 py-20 bg-gradient-to-br from-[#1a1a1a] to-[#2d2d2d] text-white">
-        <div className="container mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-5xl font-black mb-4">Play. Earn. Redeem.</h2>
-            <p className="text-xl font-medium text-white/70">Your every action is rewarded</p>
+      <section className="px-6 py-32 bg-black text-[#FFFDF5] overflow-hidden relative">
+        <div className="absolute top-0 right-0 w-full h-[1px] bg-white/10" />
+        <div className="absolute bottom-20 left-20 w-96 h-96 bg-[#FF6B6B]/10 rounded-full blur-[150px] pointer-events-none" />
+
+        <div className="container mx-auto relative z-10">
+          <div className="text-center mb-24 max-w-4xl mx-auto">
+            <div className="text-[#00B894] font-black text-[10px] md:text-xs tracking-[0.4em] mb-4 uppercase font-display">Economic Protocol</div>
+            <h2 className="font-header text-5xl md:text-8xl font-black uppercase tracking-tighter leading-[0.9]">Play <br /> <span className="italic font-serif text-[#FFD93D]">Earn</span> <br /> Redeem</h2>
+            <p className="text-white/40 font-medium text-lg md:text-xl mt-8 italic">Every interaction within the grid generates value. Accumulate assets, unlock experiences.</p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
             {/* Wallet Preview */}
             <motion.div
-              whileHover={{ scale: 1.05 }}
-              className="bg-gradient-to-br from-[#6C5CE7] to-[#8B7FE8] p-8 rounded-[24px] neo-border-thick neo-shadow"
+              whileHover={{ y: -10 }}
+              className="bg-[#6C5CE7] p-10 rounded-[50px] neo-border-thick neo-shadow-lg flex flex-col group relative overflow-hidden"
             >
-              <div className="flex items-center gap-3 mb-6">
-                <span className="text-5xl">💰</span>
-                <h3 className="text-3xl font-black">Your Wallet</h3>
+              <div className="absolute -right-8 -top-8 opacity-20 rotate-[-15deg] group-hover:rotate-0 transition-transform duration-700">
+                <div className="w-40 h-40 border-[20px] border-white rounded-full" />
               </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 mb-4">
-                <p className="text-sm font-bold text-white/70 mb-2">Total Balance</p>
-                <p className="text-5xl font-black">
+
+              <div className="flex items-center gap-4 mb-10 relative z-10">
+                <div className="w-14 h-14 bg-white rounded-2xl neo-border flex items-center justify-center text-2xl shadow-[4px_4px_0px_#000] text-black italic">W</div>
+                <h3 className="text-3xl font-header font-black tracking-tighter uppercase text-white">Grid Wallet</h3>
+              </div>
+
+              <div className="bg-white neo-border-thick rounded-2xl p-8 mb-8 relative z-10">
+                <p className="text-[10px] font-black text-black/30 mb-4 uppercase tracking-[0.2em] italic">Consolidated XP Balance</p>
+                <p className="text-5xl font-header font-black text-black tracking-tighter leading-none">
                   {userBalance !== null
-                    ? `${userBalance.toLocaleString()} XP`
-                    : (content?.gamification?.sampleBalance ? `${content.gamification.sampleBalance.toLocaleString()} XP` : '0 XP')}
+                    ? `${userBalance.toLocaleString()}`
+                    : (content?.gamification?.sampleBalance ? `${content.gamification.sampleBalance.toLocaleString()}` : '0')}
+                  <span className="text-lg ml-2 opacity-40">Credits</span>
                 </p>
               </div>
-              <Link href="/wallet">
-                <button className="w-full bg-white text-[#6C5CE7] font-black py-3 rounded-xl neo-border hover:bg-gray-50 transition-colors">
-                  View Wallet
+
+              <Link href="/wallet" className="mt-auto relative z-10">
+                <button className="w-full bg-white text-[#6C5CE7] font-black py-5 rounded-2xl neo-border-thick neo-shadow text-sm tracking-[0.2em] uppercase hover:bg-black hover:text-white transition-all">
+                  Access Wallet
                 </button>
               </Link>
             </motion.div>
 
             {/* Sample Points Earned */}
             <motion.div
-              whileHover={{ scale: 1.05 }}
-              className="bg-gradient-to-br from-[#FFD93D] to-[#FFE066] text-black p-8 rounded-[24px] neo-border-thick neo-shadow"
+              whileHover={{ y: -10 }}
+              className="bg-[#FFD93D] text-black p-10 rounded-[50px] neo-border-thick neo-shadow-lg flex flex-col group relative overflow-hidden"
             >
-              <div className="flex items-center gap-3 mb-6">
-                <span className="text-5xl">⚡</span>
-                <h3 className="text-3xl font-black">Earn Points</h3>
+              <div className="absolute -left-10 -bottom-10 opacity-10 rotate-[25deg] group-hover:rotate-0 transition-transform duration-700">
+                <Flame size={200} strokeWidth={1} />
               </div>
-              <div className="space-y-3 mb-6">
+
+              <div className="flex items-center gap-4 mb-10 relative z-10">
+                <div className="w-14 h-14 bg-black text-white rounded-2xl neo-border flex items-center justify-center text-2xl shadow-[4px_4px_0px_#FFFDF5]">⚡</div>
+                <h3 className="text-3xl font-header font-black tracking-tighter uppercase">Yield Streams</h3>
+              </div>
+
+              <div className="space-y-4 mb-10 relative z-10">
                 {content?.gamification?.activities && content.gamification.activities.length > 0 ? (
                   content.gamification.activities.map((activity, i) => (
-                    <div key={i} className="bg-black/10 rounded-xl p-4 flex justify-between items-center">
-                      <span className="font-bold">{activity.name}</span>
-                      <span className="font-black text-lg">+{activity.xp} XP</span>
+                    <div key={i} className="bg-white/80 neo-border-thick rounded-xl p-5 flex justify-between items-center group/item hover:bg-white transition-colors">
+                      <span className="font-header font-black text-lg uppercase tracking-tight">{activity.name}</span>
+                      <span className="font-black text-lg bg-[#00B894] text-white px-3 py-1 rounded-lg neo-border shadow-[2px_2px_0px_#000]">+{activity.xp}</span>
                     </div>
                   ))
                 ) : (
-                  <div className="text-center py-4 text-black/60 font-medium">
-                    Activities will appear here
+                  <div className="text-center py-10 text-black/30 font-black uppercase tracking-[0.2em] italic">
+                    Discovery protocol active...
                   </div>
                 )}
               </div>
-              <Link href="/progress">
-                <button className="w-full bg-black text-[#FFD93D] font-black py-3 rounded-xl neo-border hover:bg-gray-900 transition-colors">
-                  Track Progress
+
+              <Link href="/progress" className="mt-auto relative z-10">
+                <button className="w-full bg-black text-[#FFD93D] font-black py-5 rounded-2xl neo-border-thick neo-shadow text-sm tracking-[0.2em] uppercase hover:bg-[#6C5CE7] hover:text-white transition-all">
+                  Track Yield
                 </button>
               </Link>
             </motion.div>
 
             {/* Rewards Explanation */}
             <motion.div
-              whileHover={{ scale: 1.05 }}
-              className="bg-gradient-to-br from-[#FF6B6B] to-[#FF8E8E] p-8 rounded-[24px] neo-border-thick neo-shadow"
+              whileHover={{ y: -10 }}
+              className="bg-[#FF7675] p-10 rounded-[50px] neo-border-thick neo-shadow-lg flex flex-col group relative overflow-hidden"
             >
-              <div className="flex items-center gap-3 mb-6">
-                <span className="text-5xl">🎁</span>
-                <h3 className="text-3xl font-black">Redeem Rewards</h3>
+              <div className="absolute -right-8 -bottom-8 opacity-10 rotate-12 transition-transform duration-1000">
+                <Sparkles size={200} strokeWidth={1} />
               </div>
-              <div className="space-y-3 mb-6">
+
+              <div className="flex items-center gap-4 mb-10 relative z-10">
+                <div className="w-14 h-14 bg-white rounded-2xl neo-border flex items-center justify-center text-2xl shadow-[4px_4px_0px_#000] text-black italic">R</div>
+                <h3 className="text-3xl font-header font-black tracking-tighter uppercase text-white">Asset Rewards</h3>
+              </div>
+
+              <div className="space-y-4 mb-10 relative z-10">
                 {content?.gamification?.rewards && content.gamification.rewards.length > 0 ? (
                   content.gamification.rewards.map((reward, i) => (
-                    <div key={i} className="bg-white/20 backdrop-blur-sm rounded-xl p-4">
-                      <p className="font-black text-lg mb-1">{reward.xp} XP</p>
-                      <p className="font-medium text-sm text-white/90">{reward.reward}</p>
+                    <div key={i} className="bg-white/10 neo-border-thick rounded-xl p-5 group/item hover:bg-white/20 transition-all border-dashed border-white/20">
+                      <p className="font-header font-black text-2xl text-white tracking-tighter leading-none mb-2 italic">{reward.xp} Credits</p>
+                      <p className="font-medium text-xs text-white/60 uppercase tracking-widest">{reward.reward}</p>
                     </div>
                   ))
                 ) : (
-                  <div className="text-center py-4 text-white/60 font-medium">
-                    Rewards will appear here
+                  <div className="text-center py-10 text-white/30 font-black uppercase tracking-[0.2em] italic">
+                    Asset pool refreshing...
                   </div>
                 )}
               </div>
-              <Link href="/rewards">
-                <button className="w-full bg-white text-[#FF6B6B] font-black py-3 rounded-xl neo-border hover:bg-gray-50 transition-colors">
-                  Browse Rewards
+              <Link href="/rewards" className="mt-auto relative z-10">
+                <button className="w-full bg-[#FFFDF5] text-[#FF7675] font-black py-5 rounded-2xl neo-border-thick neo-shadow text-sm tracking-[0.2em] uppercase hover:bg-black hover:text-white transition-all">
+                  Browse Catalog
                 </button>
               </Link>
             </motion.div>
           </div>
 
           {/* Call to Action */}
-          <div className="text-center mt-12">
+          <div className="text-center mt-32 relative z-10">
             <Link href="/auth/signup">
               <motion.button
-                whileHover={{ scale: 1.05 }}
+                whileHover={{ scale: 1.05, rotate: -1 }}
                 whileTap={{ scale: 0.95 }}
-                className="bg-[#00D9A3] text-black px-12 py-6 rounded-2xl font-black text-2xl neo-shadow-hover"
+                className="bg-[#00B894] text-black px-16 py-8 rounded-[30px] font-header font-black text-3xl md:text-5xl uppercase tracking-tighter neo-border-thick neo-shadow-lg hover:bg-white transition-all group"
               >
-                Start Earning Now
+                Inaugurate <span className="group-hover:text-[#6C5CE7] transition-colors">Vessel</span>
               </motion.button>
             </Link>
+            <p className="mt-8 text-white/20 font-black text-[10px] uppercase tracking-[0.4em] italic">*Membership initiation protocol required for credits</p>
           </div>
         </div>
       </section>

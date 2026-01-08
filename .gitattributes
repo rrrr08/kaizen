@@ -1,0 +1,6 @@
+# Handle line endings automatically for files detected as text 
+# and leave all files unchanged that are not detected as text.
+* text=auto
+
+# Force LF for pnpm-lock.yaml to prevent build errors in CI/CD
+pnpm-lock.yaml text eol=lf

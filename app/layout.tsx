@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Outfit, Fredoka } from "next/font/google"; // Import fonts
+import { Outfit, Fredoka, Instrument_Serif } from "next/font/google"; // Import fonts
 import "./globals.css";
 import { CartProvider } from "@/app/context/CartContext";
 import { GamificationProvider } from "@/app/context/GamificationContext";
@@ -12,13 +12,22 @@ import { defaultMetadata } from "@/lib/metadata";
 // Configure fonts
 const outfit = Outfit({
   subsets: ["latin"],
+  weight: ['300', '400', '600', '700', '800', '900'],
   variable: "--font-outfit",
   display: 'swap',
 });
 
 const fredoka = Fredoka({
   subsets: ["latin"],
+  weight: ['400', '500', '600', '700'],
   variable: "--font-fredoka",
+  display: 'swap',
+});
+
+const instrumentSerif = Instrument_Serif({
+  subsets: ["latin"],
+  weight: ['400'],
+  variable: "--font-instrument",
   display: 'swap',
 });
 
@@ -92,7 +101,7 @@ export default function RootLayout({
           defer
         ></script>
       </head>
-      <body className={`${outfit.variable} ${fredoka.variable} antialiased bg-[#FFFDF5] text-[#2D3436] font-sans`}>
+      <body className={`${outfit.variable} ${fredoka.variable} ${instrumentSerif.variable} antialiased bg-[#FFFDF5] text-[#2D3436] font-sans`}>
         <ErrorBoundary>
           <AuthProvider>
             <GamificationProvider>

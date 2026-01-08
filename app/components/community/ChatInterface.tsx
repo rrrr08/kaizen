@@ -123,6 +123,7 @@ export default function ChatInterface({ containerId, containerType, isLocked = f
             {
                 id: user.uid,
                 name: userProfile?.name || 'Anonymous',
+                email: user.email || '',
                 avatar: userProfile?.photoURL || userProfile?.avatar_url || '',
                 role: userProfile?.role,
                 tierName: tier.name // Pass current tier name

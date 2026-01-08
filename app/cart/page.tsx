@@ -2,7 +2,7 @@
 
 import { useCart } from '@/app/context/CartContext';
 import Link from 'next/link';
-import { ShoppingCart, Trash2, Plus, Minus, ArrowLeft, Coins } from 'lucide-react';
+import { ShoppingCart, Trash2, Plus, Minus, ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 
@@ -49,101 +49,101 @@ export default function CartPage() {
   }
 
   return (
-    <div className="min-h-screen pt-24 md:pt-32 pb-16 bg-[#FFFDF5] text-[#2D3436]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12">
+    <div className="min-h-screen pt-32 pb-16 bg-[#FFFDF5] text-[#2D3436]">
+      <div className="max-w-7xl mx-auto px-6 md:px-12">
         {/* Header */}
-        <div className="mb-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-black/5 pb-10">
+        <div className="mb-12 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
           <div>
             <Link
               href="/shop"
-              className="font-black text-[10px] tracking-[0.3em] text-[#6C5CE7] hover:text-black mb-4 inline-flex items-center gap-2 transition-colors uppercase"
+              className="font-black text-xs tracking-[0.3em] text-[#6C5CE7] hover:text-black mb-4 inline-flex items-center gap-2 transition-colors uppercase"
             >
-              <ArrowLeft size={14} /> BACK TO SHOP
+              <ArrowLeft size={16} /> BACK TO SHOP
             </Link>
-            <h1 className="font-header text-4xl sm:text-5xl md:text-7xl font-black tracking-tighter mb-2 text-black leading-none">SHOPPING BAG</h1>
-            <p className="text-sm md:text-xl text-black/40 font-medium italic">
-              Currently holding {getTotalItems()} curiosity{getTotalItems() !== 1 ? 'ies' : ''}
+            <h1 className="font-header text-6xl md:text-7xl font-black tracking-tighter mb-2 text-black leading-none">SHOPPING CART</h1>
+            <p className="text-xl text-black/60 font-bold">
+              You have {getTotalItems()} item{getTotalItems() !== 1 ? 's' : ''} in your cart
             </p>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 md:gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
           {/* Cart Items */}
-          <div className="lg:col-span-2 space-y-4 md:space-y-6">
+          <div className="lg:col-span-2 space-y-6">
             {items.map((item) => (
               <motion.div
                 layout
                 key={item.productId}
-                className="group bg-white/60 backdrop-blur-md border border-black/5 rounded-[2.5rem] p-4 md:p-6 shadow-xl shadow-black/[0.02] hover:shadow-black/[0.05] transition-all"
+                className="group border-2 border-black rounded-[20px] p-6 bg-white neo-shadow hover:-translate-y-1 hover:shadow-[6px_6px_0px_#000] transition-all"
               >
-                <div className="flex gap-4 md:gap-8">
+                <div className="flex gap-6">
                   {/* Product Image */}
                   <div className="flex-shrink-0 relative">
-                    <div className="w-20 md:w-32 h-28 md:h-44 rounded-3xl overflow-hidden border border-black/5 shadow-inner relative">
+                    <div className="w-24 h-32 rounded-xl overflow-hidden border-2 border-black shadow-[2px_2px_0px_#000] relative">
                       <Image
                         src={item.product?.image || '/placeholder-product.png'}
                         alt={item.product?.name || 'Product'}
                         fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-500"
+                        className="object-cover"
                       />
                     </div>
                   </div>
 
                   {/* Product Details */}
-                  <div className="flex-1 flex flex-col justify-between py-1">
+                  <div className="flex-1 flex flex-col justify-between">
                     <div>
-                      <div className="flex justify-between items-start gap-2">
+                      <div className="flex justify-between items-start">
                         <Link
                           href={`/shop/${item.productId}`}
-                          className="font-header text-lg md:text-2xl tracking-tight text-black hover:text-[#6C5CE7] transition leading-tight"
+                          className="font-header text-2xl tracking-tight text-black hover:text-[#6C5CE7] transition"
                         >
                           {item.product?.name || 'Product'}
                         </Link>
-                        <p className="font-black text-base md:text-2xl text-black">
-                          ₹{(item.product?.price || 0).toLocaleString()}
+                        <p className="font-black text-xl text-black">
+                          ₹{item.product?.price || 0}
                         </p>
                       </div>
-                      <p className="text-[10px] md:text-sm text-black/40 mb-4 font-bold uppercase tracking-widest mt-1">
-                        Category: {item.product?.category || 'General'}
+                      <p className="text-sm text-black/60 mb-4 font-medium line-clamp-2 mt-1">
+                        {item.product?.description || ''}
                       </p>
                     </div>
 
-                    <div className="flex flex-wrap gap-4 items-center justify-between mt-auto">
+                    <div className="flex flex-wrap gap-4 items-center justify-between mt-2">
                       {/* Quantity Selector */}
-                      <div className="flex items-center bg-white/80 backdrop-blur-sm border border-black/5 rounded-2xl overflow-hidden shadow-sm">
+                      <div className="flex items-center bg-[#FFFDF5] border-2 border-black rounded-lg overflow-hidden shadow-[2px_2px_0px_#000]">
                         <button
                           onClick={() => updateQuantity(item.productId, item.quantity - 1)}
-                          className="w-10 h-10 flex items-center justify-center hover:bg-red-50 text-black transition-colors"
+                          className="w-10 h-10 flex items-center justify-center hover:bg-[#FF7675] hover:text-white transition-colors"
                         >
-                          <Minus size={14} strokeWidth={3} />
+                          <Minus size={16} strokeWidth={3} />
                         </button>
-                        <span className="w-10 text-center font-black text-sm">
+                        <span className="w-12 text-center font-black text-sm">
                           {item.quantity}
                         </span>
                         <button
                           onClick={() => updateQuantity(item.productId, item.quantity + 1)}
-                          className="w-10 h-10 flex items-center justify-center hover:bg-emerald-50 text-black transition-colors"
+                          className="w-10 h-10 flex items-center justify-center hover:bg-[#00B894] hover:text-white transition-colors"
                         >
-                          <Plus size={14} strokeWidth={3} />
+                          <Plus size={16} strokeWidth={3} />
                         </button>
                       </div>
 
                       {/* Subtotal & Actions */}
-                      <div className="flex items-center gap-4 md:gap-8">
+                      <div className="flex items-center gap-6">
                         <div className="text-right hidden sm:block">
-                          <p className="text-[10px] font-black uppercase tracking-widest text-black/20 leading-none mb-1">Total</p>
-                          <p className="font-black text-xl text-[#6C5CE7]">
-                            ₹{((item.product?.price || 0) * item.quantity).toLocaleString()}
+                          <p className="text-[10px] font-black uppercase tracking-widest text-black/40">Subtotal</p>
+                          <p className="font-black text-lg text-[#6C5CE7]">
+                            ₹{(item.product?.price || 0) * item.quantity}
                           </p>
                         </div>
 
                         {/* Remove */}
                         <button
                           onClick={() => removeFromCart(item.productId)}
-                          className="w-10 h-10 flex items-center justify-center rounded-2xl bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition-all shadow-sm group/btn"
+                          className="w-10 h-10 flex items-center justify-center rounded-lg border-2 border-black bg-white text-black hover:bg-black hover:text-white transition-all shadow-[2px_2px_0px_#000]"
                           title="Remove from cart"
                         >
-                          <Trash2 size={16} strokeWidth={2.5} />
+                          <Trash2 size={18} strokeWidth={2.5} />
                         </button>
                       </div>
                     </div>
@@ -155,71 +155,69 @@ export default function CartPage() {
 
           {/* Order Summary */}
           <div className="lg:col-span-1">
-            <div className="sticky top-32 bg-white/80 backdrop-blur-xl border border-black/5 rounded-[3rem] p-8 shadow-2xl space-y-8">
-              <h2 className="font-header text-xl md:text-2xl tracking-tight font-black text-black">SUMMARY</h2>
+            <div className="sticky top-32 border-2 border-black rounded-[25px] p-8 bg-[#FFD93D] neo-shadow space-y-6">
+              <h2 className="font-header text-2xl tracking-tight font-black text-black">ORDER SUMMARY</h2>
 
-              {/* Items Summary - Hidden on mobile if too many */}
-              <div className="space-y-4 pb-8 border-b border-black/5 max-h-[30vh] overflow-y-auto pr-2 custom-scrollbar">
+              {/* Items */}
+              <div className="space-y-3 pb-6 border-b-2 border-black/10">
                 {items.map((item) => (
-                  <div key={item.productId} className="flex justify-between items-start gap-4">
-                    <span className="text-xs font-bold text-black/60 line-clamp-1 flex-1">
-                      {item.product?.name} <span className="text-black/30 font-black ml-1">x{item.quantity}</span>
+                  <div key={item.productId} className="flex justify-between text-sm font-bold">
+                    <span className="text-black/70">
+                      {item.product?.name || 'Product'} <span className="text-black/40">x{item.quantity}</span>
                     </span>
-                    <span className="text-xs font-black text-black">₹{((item.product?.price || 0) * item.quantity).toLocaleString()}</span>
+                    <span className="text-black">₹{(item.product?.price || 0) * item.quantity}</span>
                   </div>
                 ))}
               </div>
 
               {/* Pricing */}
-              <div className="space-y-4 pb-8 border-b border-black/5">
-                <div className="flex justify-between text-sm md:text-base font-bold">
-                  <span className="text-black/40">Subtotal</span>
-                  <span className="text-black">₹{getTotalPrice().toLocaleString()}</span>
+              <div className="space-y-3 pb-6 border-b-2 border-black/10">
+                <div className="flex justify-between font-bold">
+                  <span className="text-black/70">Subtotal</span>
+                  <span className="text-black">₹{getTotalPrice()}</span>
                 </div>
-                <div className="flex justify-between text-sm md:text-base font-bold">
-                  <span className="text-black/40">Shipping</span>
-                  <span className="text-[#00B894] font-black italic">FREE</span>
+                <div className="flex justify-between font-bold">
+                  <span className="text-black/70">Shipping</span>
+                  <span className="text-[#00B894] font-black text-xs bg-white px-2 py-1 rounded border-2 border-black uppercase">FREE</span>
                 </div>
               </div>
 
-              {/* Points */}
-              <div className="bg-[#6C5CE7] rounded-3xl p-5 flex items-center gap-5 border border-white/20 shadow-xl shadow-purple-200 text-white">
-                <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center border border-white/30 backdrop-blur-md shadow-inner">
-                  <Coins className="text-white w-6 h-6" />
+              {/* Points - Kept as JP to match game changes */}
+              <div className="bg-white/50 border-2 border-black rounded-xl p-4 flex items-center gap-4">
+                <div className="w-10 h-10 bg-[#6C5CE7] rounded-full flex items-center justify-center border-2 border-black text-white font-black">
+                  JP
                 </div>
                 <div>
-                  <p className="text-[10px] font-black uppercase text-white/60 tracking-widest mb-1">Est. Earnings</p>
-                  <p className="font-header text-3xl tracking-tight leading-none font-black">
-                    +{points.toLocaleString()} <span className="text-[10px] opacity-60">JP</span>
+                  <p className="text-[10px] font-black uppercase text-black/60">YOU WILL EARN</p>
+                  <p className="font-header text-2xl tracking-tight text-black leading-none">
+                    +{points} <span className="text-xs font-black">JP</span>
                   </p>
                 </div>
               </div>
 
               {/* Total */}
-              <div className="flex justify-between items-end pb-4 pt-2">
-                <span className="text-xs font-black text-black/30 uppercase tracking-[0.2em] mb-1">Total Due</span>
-                <span className="font-header text-3xl md:text-4xl font-black text-black leading-none tracking-tighter">₹{getTotalPrice().toLocaleString()}</span>
+              <div className="flex justify-between items-end font-header text-3xl tracking-tight pb-2">
+                <span className="text-black text-base font-black tracking-widest uppercase mb-1">Total</span>
+                <span className="text-black">₹{getTotalPrice()}</span>
               </div>
 
               {/* Buttons */}
-              <div className="space-y-3 pt-4">
-                <Link
-                  href="/checkout"
-                  className="flex items-center justify-center w-full py-5 bg-black text-white font-black text-sm tracking-[0.2em] rounded-[2rem] shadow-xl shadow-black/20 hover:scale-[1.02] transition-all uppercase"
-                >
-                  Checkout Now
-                </Link>
-                <Link
-                  href="/shop"
-                  className="flex items-center justify-center w-full py-5 bg-white border border-black/5 text-black font-black text-xs tracking-[0.2em] rounded-[2rem] shadow-sm hover:bg-gray-50 transition-all uppercase"
-                >
-                  Keep Exploring
-                </Link>
-              </div>
+              <Link
+                href="/checkout"
+                className="block w-full py-4 bg-black text-white font-black text-xs tracking-[0.3em] text-center hover:bg-neutral-800 hover:scale-[1.02] transition-all rounded-xl uppercase shadow-[4px_4px_0px_#FFF]"
+              >
+                PROCEED TO CHECKOUT
+              </Link>
+              <Link
+                href="/shop"
+                className="block w-full py-4 bg-white border-2 border-black text-black font-black text-xs tracking-[0.3em] text-center hover:bg-gray-50 hover:scale-[1.02] transition-all rounded-xl uppercase shadow-[4px_4px_0px_rgba(0,0,0,0.1)]"
+              >
+                CONTINUE SHOPPING
+              </Link>
 
               {/* Info */}
-              <p className="text-[10px] text-black/20 font-black text-center uppercase tracking-widest">
-                Safe & Secure Checkout
+              <p className="text-[10px] text-black/50 font-bold text-center uppercase tracking-wider">
+                Points credited after delivery
               </p>
             </div>
           </div>

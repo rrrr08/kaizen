@@ -156,113 +156,172 @@ export default function XPTiersAdmin() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="bg-white border-4 border-black rounded-3xl p-8 mb-8 neo-shadow"
+        className="bg-white border-4 border-black rounded-[40px] p-8 sm:p-12 mb-12 neo-shadow relative overflow-hidden"
       >
-        <div className="flex items-center gap-3 mb-6">
-          <Settings className="w-7 h-7 text-[#6C5CE7]" />
-          <h2 className="font-header text-3xl font-black text-black">TIER CONFIGURATION</h2>
+        <div className="absolute top-0 right-0 w-64 h-64 bg-[#6C5CE7] opacity-5 rounded-full -mr-32 -mt-32" />
+
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 mb-12 relative z-10">
+          <div className="flex items-center gap-4">
+            <div className="p-4 bg-[#6C5CE7] border-4 border-black rounded-2xl neo-shadow rotate-3">
+              <Settings className="w-8 h-8 text-white" />
+            </div>
+            <div>
+              <h2 className="font-header text-4xl font-black text-black tracking-tight">TIER HIERARCHY</h2>
+              <p className="text-black/50 font-bold uppercase tracking-[0.2em] text-xs">Define Progression Levels</p>
+            </div>
+          </div>
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-12">
           {tiers.map((tier, index) => (
             <motion.div
               key={index}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.1 * index }}
-              className="bg-[#FFFDF5] border-4 border-black rounded-2xl p-6 neo-shadow-hover transition-all"
+              className="group relative"
             >
-              <div className="flex items-center gap-4 mb-4">
-                <div className="text-5xl">{tier.icon}</div>
-                <div>
-                  <h3 className="font-header text-2xl font-black text-black">{tier.name}</h3>
-                  <p className="text-sm font-bold text-black/60">{tier.badge}</p>
-                </div>
-              </div>
+              {/* Vertical line between tiers except last */}
+              {index !== tiers.length - 1 && (
+                <div className="absolute left-8 top-full h-12 w-1 bg-black/10 -ml-0.5" />
+              )}
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div>
-                  <label className="block text-xs font-black uppercase tracking-wider text-black/60 mb-2">Tier Name</label>
-                  <input
-                    type="text"
-                    value={tier.name}
-                    onChange={(e) => updateTier(index, 'name', e.target.value)}
-                    className="w-full px-4 py-3 bg-white border-3 border-black rounded-xl font-bold focus:outline-none focus:ring-4 focus:ring-[#FFD93D]"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-black uppercase tracking-wider text-black/60 mb-2">Min XP Required</label>
-                  <input
-                    type="number"
-                    value={tier.minXP}
-                    onChange={(e) => updateTier(index, 'minXP', parseInt(e.target.value))}
-                    className="w-full px-4 py-3 bg-white border-3 border-black rounded-xl font-bold focus:outline-none focus:ring-4 focus:ring-[#FFD93D]"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-black uppercase tracking-wider text-black/60 mb-2">JP Multiplier</label>
-                  <input
-                    type="number"
-                    step="0.1"
-                    value={tier.multiplier}
-                    onChange={(e) => updateTier(index, 'multiplier', parseFloat(e.target.value))}
-                    className="w-full px-4 py-3 bg-white border-3 border-black rounded-xl font-bold focus:outline-none focus:ring-4 focus:ring-[#FFD93D]"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-black uppercase tracking-wider text-black/60 mb-2">Icon Emoji</label>
-                  <input
-                    type="text"
-                    value={tier.icon}
-                    onChange={(e) => updateTier(index, 'icon', e.target.value)}
-                    className="w-full px-4 py-3 bg-white border-3 border-black rounded-xl font-bold text-2xl text-center focus:outline-none focus:ring-4 focus:ring-[#FFD93D]"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-black uppercase tracking-wider text-black/60 mb-2">Badge Name</label>
-                  <input
-                    type="text"
-                    value={tier.badge}
-                    onChange={(e) => updateTier(index, 'badge', e.target.value)}
-                    className="w-full px-4 py-3 bg-white border-3 border-black rounded-xl font-bold focus:outline-none focus:ring-4 focus:ring-[#FFD93D]"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-black uppercase tracking-wider text-black/60 mb-2">Color (Hex)</label>
-                  <div className="flex gap-2">
-                    <input
-                      type="color"
-                      value={tier.color}
-                      onChange={(e) => updateTier(index, 'color', e.target.value)}
-                      className="w-16 h-12 border-3 border-black rounded-xl cursor-pointer"
-                    />
-                    <input
-                      type="text"
-                      value={tier.color}
-                      onChange={(e) => updateTier(index, 'color', e.target.value)}
-                      className="flex-1 px-4 py-3 bg-white border-3 border-black rounded-xl font-bold focus:outline-none focus:ring-4 focus:ring-[#FFD93D]"
-                    />
+              <div className="bg-[#FFFDF5] border-4 border-black rounded-[32px] p-8 neo-shadow-hover transition-all relative overflow-hidden">
+                <div
+                  className="absolute top-0 right-0 w-24 h-24 opacity-10 rounded-bl-[100px] border-l-4 border-b-4 border-black transition-all group-hover:scale-110"
+                  style={{ backgroundColor: tier.color }}
+                />
+
+                <div className="flex flex-col lg:flex-row gap-10">
+                  {/* Left Column: Visual Identity */}
+                  <div className="lg:w-1/4 flex flex-col items-center justify-center p-6 bg-white border-4 border-black rounded-3xl neo-shadow relative">
+                    <div className="text-7xl mb-4 transition-transform group-hover:scale-110 transform duration-300">
+                      {tier.icon}
+                    </div>
+                    <div className="text-center">
+                      <h3 className="font-header text-3xl font-black text-black mb-1 leading-none uppercase tracking-tighter">
+                        {tier.name || 'New Tier'}
+                      </h3>
+                      <div
+                        className="inline-block px-3 py-1 rounded-full border-2 border-black text-[10px] font-black uppercase tracking-widest mt-2"
+                        style={{ backgroundColor: tier.color + '33', color: tier.color }}
+                      >
+                        {tier.badge}
+                      </div>
+                    </div>
                   </div>
-                </div>
-                <div>
-                  <label className="block text-xs font-black uppercase tracking-wider text-black/60 mb-2">Unlock Price (JP)</label>
-                  <input
-                    type="number"
-                    value={tier.unlockPrice || 0}
-                    onChange={(e) => updateTier(index, 'unlockPrice', parseInt(e.target.value))}
-                    className="w-full px-4 py-3 bg-white border-3 border-black rounded-xl font-bold focus:outline-none focus:ring-4 focus:ring-[#FFD93D]"
-                    placeholder="0 = Free"
-                  />
-                  <p className="text-xs text-black/50 font-bold mt-1">0 = Earn only, &gt;0 = Can buy</p>
-                </div>
-                <div className="md:col-span-2 lg:col-span-1">
-                  <label className="block text-xs font-black uppercase tracking-wider text-black/60 mb-2">Tier Perk</label>
-                  <input
-                    type="text"
-                    value={tier.perk}
-                    onChange={(e) => updateTier(index, 'perk', e.target.value)}
-                    className="w-full px-4 py-3 bg-white border-3 border-black rounded-xl font-bold focus:outline-none focus:ring-4 focus:ring-[#FFD93D]"
-                  />
+
+                  {/* Right Column: Configuration Grid */}
+                  <div className="flex-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {/* Basic Info Group */}
+                    <div className="space-y-4 md:col-span-2 lg:col-span-3 pb-4 border-b-2 border-dashed border-black/10 grid grid-cols-1 md:grid-cols-3 gap-6">
+                      <div className="md:col-span-1">
+                        <label className="block text-[10px] font-black uppercase tracking-[0.3em] text-black/40 mb-2 ml-1">Tier Name</label>
+                        <input
+                          type="text"
+                          value={tier.name}
+                          onChange={(e) => updateTier(index, 'name', e.target.value)}
+                          className="w-full px-5 py-3 bg-white border-3 border-black rounded-xl font-bold focus:outline-none focus:ring-4 focus:ring-[#FFD93D] transition-all"
+                        />
+                      </div>
+                      <div className="md:col-span-1">
+                        <label className="block text-[10px] font-black uppercase tracking-[0.3em] text-black/40 mb-2 ml-1">Icon Emoji</label>
+                        <input
+                          type="text"
+                          value={tier.icon}
+                          onChange={(e) => updateTier(index, 'icon', e.target.value)}
+                          className="w-full px-5 py-3 bg-white border-3 border-black rounded-xl font-bold text-2xl text-center focus:outline-none focus:ring-4 focus:ring-[#FFD93D] transition-all"
+                        />
+                      </div>
+                      <div className="md:col-span-1">
+                        <label className="block text-[10px] font-black uppercase tracking-[0.3em] text-black/40 mb-2 ml-1">Min XP Requirement</label>
+                        <div className="relative">
+                          <input
+                            type="number"
+                            value={tier.minXP}
+                            onChange={(e) => updateTier(index, 'minXP', parseInt(e.target.value))}
+                            className="w-full px-5 py-3 bg-white border-3 border-black rounded-xl font-bold focus:outline-none focus:ring-4 focus:ring-[#FFD93D] transition-all pr-12"
+                          />
+                          <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-black/30">XP</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Progression & Rewards Group */}
+                    <div className="space-y-4">
+                      <label className="block text-[10px] font-black uppercase tracking-[0.3em] text-black/40 mb-2 ml-1">JP Multiplier</label>
+                      <div className="relative">
+                        <input
+                          type="number"
+                          step="0.1"
+                          value={tier.multiplier}
+                          onChange={(e) => updateTier(index, 'multiplier', parseFloat(e.target.value))}
+                          className="w-full px-5 py-3 bg-white border-3 border-black rounded-xl font-bold focus:outline-none focus:ring-4 focus:ring-[#60a5fa]/40 transition-all pr-12"
+                        />
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-black text-[#60a5fa]">x</div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <label className="block text-[10px] font-black uppercase tracking-[0.3em] text-black/40 mb-2 ml-1">Unlock Price</label>
+                      <div className="relative">
+                        <input
+                          type="number"
+                          value={tier.unlockPrice || 0}
+                          onChange={(e) => updateTier(index, 'unlockPrice', parseInt(e.target.value))}
+                          className="w-full px-5 py-3 bg-white border-3 border-black rounded-xl font-bold focus:outline-none focus:ring-4 focus:ring-[#fbbf24]/40 transition-all pr-12"
+                          placeholder="0 = Earn only"
+                        />
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-[#fbbf24]">JP</div>
+                      </div>
+                      <p className="text-[9px] text-black/30 font-black uppercase tracking-widest ml-1">{tier.unlockPrice === 0 ? 'EARNABLE ONLY' : 'PURCHASABLE'}</p>
+                    </div>
+
+                    <div className="space-y-4">
+                      <label className="block text-[10px] font-black uppercase tracking-[0.3em] text-black/40 mb-2 ml-1">Visual Theme</label>
+                      <div className="flex gap-3">
+                        <div className="relative w-14 h-12 flex-shrink-0">
+                          <input
+                            type="color"
+                            value={tier.color}
+                            onChange={(e) => updateTier(index, 'color', e.target.value)}
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                          />
+                          <div
+                            className="w-full h-full border-3 border-black rounded-xl neo-shadow-sm"
+                            style={{ backgroundColor: tier.color }}
+                          />
+                        </div>
+                        <input
+                          type="text"
+                          value={tier.color}
+                          onChange={(e) => updateTier(index, 'color', e.target.value)}
+                          className="flex-1 px-4 py-3 bg-white border-3 border-black rounded-xl font-bold text-xs uppercase focus:outline-none focus:ring-4 focus:ring-black/5"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="md:col-span-1 lg:col-span-2">
+                      <label className="block text-[10px] font-black uppercase tracking-[0.3em] text-black/40 mb-2 ml-1">Exclusive Perk</label>
+                      <input
+                        type="text"
+                        value={tier.perk}
+                        onChange={(e) => updateTier(index, 'perk', e.target.value)}
+                        className="w-full px-5 py-3 bg-white border-3 border-black rounded-xl font-bold focus:outline-none focus:ring-4 focus:ring-[#34d399]/40 transition-all"
+                        placeholder="No specific perks defined"
+                      />
+                    </div>
+
+                    <div className="md:col-span-1">
+                      <label className="block text-[10px] font-black uppercase tracking-[0.3em] text-black/40 mb-2 ml-1">Badge Title</label>
+                      <input
+                        type="text"
+                        value={tier.badge}
+                        onChange={(e) => updateTier(index, 'badge', e.target.value)}
+                        className="w-full px-5 py-3 bg-white border-3 border-black rounded-xl font-bold focus:outline-none focus:ring-4 focus:ring-black/5 transition-all"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
             </motion.div>
@@ -275,62 +334,71 @@ export default function XPTiersAdmin() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
-        className="bg-white border-4 border-black rounded-3xl p-8 mb-8 neo-shadow"
+        className="bg-white border-4 border-black rounded-[40px] p-8 sm:p-12 mb-12 neo-shadow relative"
       >
-        <div className="flex items-center gap-3 mb-6">
-          <Zap className="w-7 h-7 text-[#FFD93D]" />
-          <h2 className="font-header text-3xl font-black text-black">XP SOURCES</h2>
+        <div className="flex items-center gap-4 mb-10">
+          <div className="p-4 bg-[#FFD93D] border-4 border-black rounded-2xl neo-shadow -rotate-3">
+            <Zap className="w-8 h-8 text-black" />
+          </div>
+          <div>
+            <h2 className="font-header text-4xl font-black text-black tracking-tight uppercase">XP GENERATORS</h2>
+            <p className="text-black/50 font-bold uppercase tracking-[0.2em] text-xs">Configure Point Earning Rates</p>
+          </div>
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-4">
           {xpSources.map((source, index) => (
             <motion.div
               key={index}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.4 + (0.05 * index) }}
-              className="bg-[#FFFDF5] border-3 border-black rounded-xl p-4 flex items-center gap-4"
+              className={`group transition-all rounded-3xl border-4 border-black p-5 flex flex-col md:flex-row items-center gap-6 ${source.enabled ? 'bg-[#FFFDF5] neo-shadow-sm' : 'bg-gray-100 opacity-60'}`}
             >
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={source.enabled}
-                  onChange={(e) => updateXPSource(index, 'enabled', e.target.checked)}
-                  className="sr-only peer"
-                />
-                <div className="w-14 h-8 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#FFD93D] rounded-full peer border-3 border-black peer-checked:after:translate-x-6 peer-checked:after:border-black after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-black after:border-3 after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-[#00B894]"></div>
-              </label>
+              <div className="flex items-center gap-4 w-full md:w-auto">
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={source.enabled}
+                    onChange={(e) => updateXPSource(index, 'enabled', e.target.checked)}
+                    className="sr-only peer"
+                  />
+                  <div className="w-16 h-9 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#FFD93D] rounded-full peer border-3 border-black peer-checked:after:translate-x-7 peer-checked:after:border-black after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-white after:border-black after:border-3 after:rounded-full after:h-7 after:w-7 after:transition-all peer-checked:bg-[#00B894]"></div>
+                </label>
+                <div className="md:hidden font-black uppercase text-xs tracking-widest">{source.enabled ? 'ENABLED' : 'DISABLED'}</div>
+              </div>
 
-              <div className="flex-1">
+              <div className="flex-1 w-full">
                 <input
                   type="text"
                   value={source.name}
                   onChange={(e) => updateXPSource(index, 'name', e.target.value)}
-                  className="w-full px-4 py-3 bg-white border-3 border-black rounded-xl font-bold focus:outline-none focus:ring-4 focus:ring-[#FFD93D]"
+                  className="w-full px-5 py-3 bg-white border-3 border-black rounded-xl font-bold focus:outline-none focus:ring-4 focus:ring-[#FFD93D] transition-all"
+                  placeholder="Source Name"
                 />
               </div>
 
-              <div className="w-32">
-                <input
-                  type="number"
-                  value={source.baseXP}
-                  onChange={(e) => updateXPSource(index, 'baseXP', parseInt(e.target.value))}
-                  className="w-full px-4 py-3 bg-white border-3 border-black rounded-xl font-bold text-center focus:outline-none focus:ring-4 focus:ring-[#FFD93D]"
-                  placeholder="XP"
-                />
-              </div>
-              <span className="text-sm font-black text-black/60 uppercase">XP</span>
+              <div className="flex items-center gap-4 w-full md:w-auto">
+                <div className="relative flex-1 md:w-32">
+                  <input
+                    type="number"
+                    value={source.baseXP}
+                    onChange={(e) => updateXPSource(index, 'baseXP', parseInt(e.target.value))}
+                    className="w-full px-5 py-3 bg-white border-3 border-black rounded-xl font-black text-center focus:outline-none focus:ring-4 focus:ring-[#FFD93D] transition-all"
+                  />
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-black text-white px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest">BASE XP</div>
+                </div>
 
-              <div className="w-32">
-                <input
-                  type="number"
-                  value={source.baseJP || 0}
-                  onChange={(e) => updateXPSource(index, 'baseJP', parseInt(e.target.value))}
-                  className="w-full px-4 py-3 bg-white border-3 border-black rounded-xl font-bold text-center focus:outline-none focus:ring-4 focus:ring-[#FFD93D]"
-                  placeholder="JP"
-                />
+                <div className="relative flex-1 md:w-32">
+                  <input
+                    type="number"
+                    value={source.baseJP || 0}
+                    onChange={(e) => updateXPSource(index, 'baseJP', parseInt(e.target.value))}
+                    className="w-full px-5 py-3 bg-white border-3 border-black rounded-xl font-black text-center focus:outline-none focus:ring-4 focus:ring-[#6C5CE7] transition-all"
+                  />
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#6C5CE7] text-white px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest">BASE JP</div>
+                </div>
               </div>
-              <span className="text-sm font-black text-[#6C5CE7]/80 uppercase">JP</span>
             </motion.div>
           ))}
         </div>

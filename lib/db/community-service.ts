@@ -17,22 +17,55 @@ import {
 import { db } from '@/lib/firebase';
 import { CommunityThread, EventChatRoom, CommunityMessage } from '@/lib/types';
 
-// Simple bad word list for demo purposes - in prod use a robust library or API
-const PROFANITY_LIST = ['badword', 'abuse', 'spam', 'hate'];
+// Comprehensive bad word list and patterns
+const PROFANITY_LIST = [
+    'badword', 'abuse', 'hate', 'spam', 'fuck', 'shit', 'asshole', 'bitch',
+    'bastard', 'dick', 'pussy', 'slut', 'whore', 'faggot', 'nigger', 'cunt',
+    'chutiya', 'madarchod', 'behenchod', 'gandu', 'bhosadi', 'randi', 'harami'
+];
 
-const censorText = (text: string): { cleanText: string; isFlagged: boolean } => {
+const censorText = (text: string): { cleanText: string; isFlagged: boolean; wordsFound: string[] } => {
     let isFlagged = false;
     let cleanText = text;
+    const wordsFound: string[] = [];
+
+    // Pre-process text to catch leetspeak (f*ck, f.u.c.k, etc)
+    const normalizedText = text.toLowerCase()
+        .replace(/[0o]/g, 'o')
+        .replace(/[1il|]/g, 'i')
+        .replace(/[4a@]/g, 'a')
+        .replace(/[3e]/g, 'e')
+        .replace(/[5s$]/g, 's')
+        .replace(/[7t]/g, 't')
+        .replace(/[^a-z]/g, '');
 
     PROFANITY_LIST.forEach(word => {
-        const regex = new RegExp(`\\b${word}\\b`, 'gi');
-        if (regex.test(cleanText)) {
+        // 1. Check exact word with boundaries
+        const exactRegex = new RegExp(`\\b${word}\\b`, 'gi');
+        if (exactRegex.test(text)) {
             isFlagged = true;
-            cleanText = cleanText.replace(regex, '*'.repeat(word.length));
+            wordsFound.push(word);
+            cleanText = cleanText.replace(exactRegex, '*'.repeat(word.length));
+        }
+
+        // 2. Check for spaced out words (f u c k)
+        const spacedPattern = word.split('').join('[\\s\\W_]*');
+        const hybridRegex = new RegExp(spacedPattern, 'gi');
+        if (hybridRegex.test(text)) {
+            isFlagged = true;
+            if (!wordsFound.includes(word)) wordsFound.push(word);
+            cleanText = cleanText.replace(hybridRegex, (match) => '*'.repeat(match.length));
+        }
+
+        // 3. Check normalized text for hidden words
+        if (normalizedText.includes(word.toLowerCase())) {
+            isFlagged = true;
+            if (!wordsFound.includes(word)) wordsFound.push(word);
+            // If normalized check finds it but regex didn't, we still flag it
         }
     });
 
-    return { cleanText, isFlagged };
+    return { cleanText, isFlagged, wordsFound };
 };
 
 export const CommunityService = {
@@ -85,21 +118,21 @@ export const CommunityService = {
     async sendMessage(
         containerId: string,
         containerType: 'thread' | 'event',
-        user: { id: string; name: string; avatar?: string; role?: string; tierName?: string },
+        user: { id: string; name: string; email?: string; avatar?: string; role?: string; tierName?: string },
         content: string
     ) {
-        const lowerContent = content.toLowerCase();
-        let finalContent = content;
-        let isFlagged = false;
-
-        const BAD_WORDS = ['badword', 'abuse', 'hate', 'spam'];
-        for (const word of BAD_WORDS) {
-            if (lowerContent.includes(word)) {
-                finalContent = '*'.repeat(content.length);
-                isFlagged = true;
-                break;
+        // First check if user is banned
+        try {
+            const userRef = doc(db, 'users', user.id);
+            const userSnap = await getDoc(userRef);
+            if (userSnap.exists() && userSnap.data().isBanned) {
+                return { success: false, error: 'User is banned' };
             }
+        } catch (e) {
+            console.error('Error checking ban status:', e);
         }
+
+        const { cleanText: finalContent, isFlagged, wordsFound } = censorText(content);
 
         try {
             const collectionRef = collection(db, 'community_messages');
@@ -109,16 +142,16 @@ export const CommunityService = {
                 content: finalContent,
                 senderId: user.id,
                 senderName: user.name,
+                senderEmail: user.email || '',
                 senderAvatar: user.avatar,
                 senderRole: user.role || 'member',
-                senderTier: user.tierName || 'Newbie', // Default to Newbie if missing
+                senderTier: user.tierName || 'Newbie',
                 timestamp: serverTimestamp(),
                 isFlagged: isFlagged
             };
 
             const docRef = await addDoc(collectionRef, messageData);
 
-            // Update thread/chatroom metadata (message count, last activity)
             if (containerType === 'thread') {
                 const threadRef = doc(db, 'community_threads', containerId);
                 await updateDoc(threadRef, {
@@ -127,21 +160,20 @@ export const CommunityService = {
                 });
             }
 
-            // --- MODERATION LOGGING ---
             if (isFlagged) {
                 await addDoc(collection(db, 'moderation_logs'), {
                     messageId: docRef.id,
                     userId: user.id,
-                    userName: user.name, // Using name as proxy
+                    userName: user.name,
+                    userEmail: user.email || '',
                     userAvatar: user.avatar,
                     originalContent: content,
-                    reason: 'Profanity detected',
+                    reason: `Profanity detected: ${wordsFound.join(', ')}`,
                     status: 'pending',
                     timestamp: serverTimestamp(),
                     context: `Posted in ${containerType} ${containerId}`
                 });
             }
-            // --------------------------
 
             return { success: true, id: docRef.id };
         } catch (error) {
@@ -207,7 +239,7 @@ export const CommunityService = {
         try {
             const q = query(
                 collection(db, 'moderation_logs'),
-                where('status', '==', 'active'),
+                where('status', '==', 'pending'),
                 orderBy('timestamp', 'desc')
             );
             const snapshot = await getDocs(q);
