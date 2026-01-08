@@ -65,6 +65,7 @@ interface GamificationContextType {
   fetchHistory: (lastDoc?: QueryDocumentSnapshot<DocumentData>) => Promise<void>;
   hasMoreHistory: boolean;
   historyLoading: boolean;
+  refreshConfigs: () => Promise<void>;
 }
 
 const GamificationContext = createContext<GamificationContextType | undefined>(undefined);
@@ -94,7 +95,7 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
   // Load tiers and rewards from Firebase on mount
   useEffect(() => {
     const loadConfigs = async () => {
-      const { fetchStoreSettingsFromFirebase } = await import('@/lib/gamification');
+      const { fetchStoreSettingsFromFirebase, fetchTiersFromFirebase, fetchRewardsConfigFromFirebase } = await import('@/lib/gamification');
       const [tiers, fetchedRewards, storeSettings] = await Promise.all([
         fetchTiersFromFirebase(),
         fetchRewardsConfigFromFirebase(),
@@ -124,8 +125,40 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
         }
       }
     };
+
     loadConfigs();
   }, []);
+
+  const refreshConfigs = async () => {
+    const { fetchStoreSettingsFromFirebase, fetchTiersFromFirebase, fetchRewardsConfigFromFirebase } = await import('@/lib/gamification');
+    const [tiers, fetchedRewards, storeSettings] = await Promise.all([
+      fetchTiersFromFirebase(),
+      fetchRewardsConfigFromFirebase(),
+      fetchStoreSettingsFromFirebase()
+    ]);
+    setAllTiers(tiers);
+    if (fetchedRewards) setRewardsConfig(fetchedRewards);
+
+    if (storeSettings) {
+      if (storeSettings.pointsPerRupee !== undefined) {
+        setRewardsConfig(prev => ({
+          ...prev,
+          SHOP: {
+            ...prev.SHOP,
+            POINTS_PER_RUPEE: storeSettings.pointsPerRupee
+          }
+        }));
+      }
+
+      if (storeSettings.redeemRate !== undefined || storeSettings.maxRedeemPercent !== undefined) {
+        setStoreConfig(prev => ({
+          ...prev,
+          redeemRate: storeSettings.redeemRate ?? prev.redeemRate,
+          maxRedeemPercent: storeSettings.maxRedeemPercent ?? prev.maxRedeemPercent
+        }));
+      }
+    }
+  };
 
   useEffect(() => {
     if (!user) {
@@ -447,7 +480,8 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
       getMaxRedeemableAmount: getMaxRedeemableAmountLocal,
       awardEventAttendancePoints,
       hasEarlyEventAccess, workshopDiscountPercent, hasVIPSeating,
-      history, fetchHistory, hasMoreHistory, historyLoading
+      history, fetchHistory, hasMoreHistory, historyLoading,
+      refreshConfigs
     }}>
       {children}
     </GamificationContext.Provider>

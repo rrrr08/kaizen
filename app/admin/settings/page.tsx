@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/app/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
+import { useGamification } from '@/app/context/GamificationContext';
 
 interface Settings {
   // Gamification
@@ -48,6 +49,7 @@ export default function AdminSettingsPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
   const { addToast } = useToast();
+  const { refreshConfigs } = useGamification();
   const [settings, setSettings] = useState<Settings>(defaultSettings);
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -122,6 +124,9 @@ export default function AdminSettingsPage() {
       });
 
       if (!response.ok) throw new Error('Failed to save');
+
+      // Refresh global gamification configs
+      await refreshConfigs();
 
       addToast({
         title: 'Success',
