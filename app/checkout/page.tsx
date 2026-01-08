@@ -30,6 +30,8 @@ export default function CheckoutPage() {
   const [redeemPoints, setRedeemPoints] = useState(0);
   const [isFirstTime, setIsFirstTime] = useState(false);
   const [gstRate, setGstRate] = useState(18); // Default 18%
+  const [shippingCost, setShippingCost] = useState(50); // Default 50
+  const [freeShippingThreshold, setFreeShippingThreshold] = useState(500); // Default 500
   const [checkoutInfoLoaded, setCheckoutInfoLoaded] = useState(false);
 
   // Debug: Log cart items structure
@@ -156,9 +158,11 @@ export default function CheckoutPage() {
         if (response.ok) {
           const data = await response.json();
           setGstRate(data.gstRate || 18);
+          setShippingCost(data.shippingCost || 0);
+          setFreeShippingThreshold(data.freeShippingThreshold || 0);
         }
       } catch (error) {
-        console.error('Error fetching GST rate:', error);
+        console.error('Error fetching settings:', error);
       }
     };
 
@@ -186,7 +190,10 @@ export default function CheckoutPage() {
 
   const subtotal = subtotalAfterPoints - voucherDiscountAmount;
   const gstAmount = Math.round(subtotal * (gstRate / 100));
-  const finalPrice = subtotal + gstAmount;
+
+  // Calculate shipping
+  const currentShipping = subtotal >= freeShippingThreshold ? 0 : shippingCost;
+  const finalPrice = subtotal + gstAmount + currentShipping;
 
   // Calculate points earned
   let earnedPoints = calculatePoints(finalPrice, isFirstTime);
@@ -403,6 +410,7 @@ export default function CheckoutPage() {
             subtotal: subtotal,
             gst: gstAmount,
             gstRate: gstRate,
+            shipping: currentShipping,
             totalPoints: earnedPoints,
             pointsRedeemed: redeemPoints,
             discount: pointsWorthRupees,

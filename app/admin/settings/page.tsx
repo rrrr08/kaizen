@@ -88,9 +88,21 @@ export default function AdminSettingsPage() {
   }, [user]);
 
   const handleChange = (key: keyof Settings, value: string | number) => {
+    let finalValue: string | number = value;
+
+    // Handle number types
+    if (typeof defaultSettings[key] === 'number') {
+      if (value === '') {
+        finalValue = 0;
+      } else {
+        const parsed = parseFloat(String(value));
+        finalValue = isNaN(parsed) ? 0 : parsed;
+      }
+    }
+
     setSettings((prev) => ({
       ...prev,
-      [key]: typeof defaultSettings[key] === 'number' ? parseFloat(String(value)) : value,
+      [key]: finalValue,
     }));
   };
 

@@ -51,35 +51,35 @@ const DEFAULT_TIERS = [
 
 // Fetch tiers from Firebase
 export const fetchTiersFromFirebase = async () => {
-    try {
-        const db = getFirestore(app);
-        const settingsRef = doc(db, 'settings', 'xpSystem');
-        const snap = await getDoc(settingsRef);
+  try {
+    const db = getFirestore(app);
+    const settingsRef = doc(db, 'settings', 'xpSystem');
+    const snap = await getDoc(settingsRef);
 
-        if (snap.exists() && snap.data()?.tiers) {
-            return snap.data()!.tiers;
-        }
-        return DEFAULT_TIERS;
-    } catch (error) {
-        console.error('Error fetching tiers from Firebase:', error);
-        return DEFAULT_TIERS;
+    if (snap.exists() && snap.data()?.tiers) {
+      return snap.data()!.tiers;
     }
+    return DEFAULT_TIERS;
+  } catch (error) {
+    console.error('Error fetching tiers from Firebase:', error);
+    return DEFAULT_TIERS;
+  }
 };
 
 export const fetchWheelPrizesFromFirebase = async () => {
-    try {
-        const db = getFirestore(app);
-        const settingsRef = doc(db, 'settings', 'wheelPrizes');
-        const snap = await getDoc(settingsRef);
+  try {
+    const db = getFirestore(app);
+    const settingsRef = doc(db, 'settings', 'wheelPrizes');
+    const snap = await getDoc(settingsRef);
 
-        if (snap.exists() && snap.data()?.prizes) {
-            return snap.data()!.prizes;
-        }
-        return WHEEL_PRIZES; // Fallback
-    } catch (error) {
-        console.error('Error fetching wheel prizes from Firebase:', error);
-        return WHEEL_PRIZES;
+    if (snap.exists() && snap.data()?.prizes) {
+      return snap.data()!.prizes;
     }
+    return WHEEL_PRIZES; // Fallback
+  } catch (error) {
+    console.error('Error fetching wheel prizes from Firebase:', error);
+    return WHEEL_PRIZES;
+  }
 }
 
 // Get tier based on XP (requires tiers array)
@@ -90,7 +90,7 @@ export const getTier = (xp: number, tiers: any[]) => {
 // Check if user has specific tier perk
 export const hasTierPerk = (xp: number, perkType: 'earlyAccess' | 'workshopDiscount' | 'vipSeating', tiers: any[]): boolean => {
   const tier = getTier(xp, tiers);
-  
+
   switch (perkType) {
     case 'earlyAccess':
       return tier.minXP >= 500; // Player tier and above
@@ -106,7 +106,7 @@ export const hasTierPerk = (xp: number, perkType: 'earlyAccess' | 'workshopDisco
 // Get discount percentage based on tier
 export const getTierDiscount = (xp: number, tiers: any[]): number => {
   const tier = getTier(xp, tiers);
-  
+
   if (tier.minXP >= 5000) return 10; // Grandmaster: 10% off
   if (tier.minXP >= 2000) return 5;  // Strategist: 5% off
   return 0; // No discount for lower tiers
@@ -139,23 +139,39 @@ export const DEFAULT_REWARDS = {
 export const REWARDS = DEFAULT_REWARDS;
 
 export const fetchRewardsConfigFromFirebase = async () => {
-    try {
-        const db = getFirestore(app);
-        const settingsRef = doc(db, 'settings', 'gamificationRewards');
-        const snap = await getDoc(settingsRef);
+  try {
+    const db = getFirestore(app);
+    const settingsRef = doc(db, 'settings', 'gamificationRewards');
+    const snap = await getDoc(settingsRef);
 
-        if (snap.exists() && snap.data()) {
-            // merge with defaults to ensure structure
-            return {
-                ...DEFAULT_REWARDS,
-                ...snap.data()
-            };
-        }
-        return DEFAULT_REWARDS;
-    } catch (error) {
-        console.error('Error fetching rewards config:', error);
-        return DEFAULT_REWARDS;
+    if (snap.exists() && snap.data()) {
+      // merge with defaults to ensure structure
+      return {
+        ...DEFAULT_REWARDS,
+        ...snap.data()
+      };
     }
+    return DEFAULT_REWARDS;
+  } catch (error) {
+    console.error('Error fetching rewards config:', error);
+    return DEFAULT_REWARDS;
+  }
+};
+
+export const fetchStoreSettingsFromFirebase = async () => {
+  try {
+    const db = getFirestore(app);
+    const settingsRef = doc(db, 'settings', 'store');
+    const snap = await getDoc(settingsRef);
+
+    if (snap.exists()) {
+      return snap.data();
+    }
+    return null;
+  } catch (error) {
+    console.error('Error fetching store settings:', error);
+    return null;
+  }
 };
 
 // ------------------------------------------------------------------
@@ -235,7 +251,7 @@ export const logTransaction = async (
   try {
     const db = getFirestore(app);
     const transactionsRef = collection(db, 'users', userId, 'transactions');
-    
+
     await addDoc(transactionsRef, {
       type,
       amount,
@@ -244,7 +260,7 @@ export const logTransaction = async (
       metadata,
       timestamp: serverTimestamp() // Server timestamp for accurate ordering
     });
-    
+
     console.log(`[Transaction] ${type} ${amount} JP logged for ${userId}`);
     return true;
   } catch (error) {
