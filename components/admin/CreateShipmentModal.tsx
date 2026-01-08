@@ -156,13 +156,29 @@ export default function CreateShipmentModal({ isOpen, onClose, onSuccess, initia
 
                             <div className="space-y-2">
                                 <label className="font-bold text-sm">AWB Code</label>
-                                <input
-                                    name="awbCode"
-                                    value={formData.awbCode}
-                                    onChange={handleChange}
-                                    className="w-full p-3 bg-white neo-border focus:outline-none focus:ring-2 focus:ring-purple"
-                                    placeholder="Tracking Number"
-                                />
+                                <div className="flex gap-2">
+                                    <input
+                                        name="awbCode"
+                                        value={formData.awbCode}
+                                        onChange={handleChange}
+                                        className="flex-1 p-3 bg-white neo-border focus:outline-none focus:ring-2 focus:ring-purple"
+                                        placeholder="Tracking Number"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            const randomId = Math.floor(100000 + Math.random() * 900000);
+                                            setFormData(prev => ({
+                                                ...prev,
+                                                awbCode: `KZN-${randomId}`,
+                                                courierName: prev.courierName || 'Kaizen Express'
+                                            }));
+                                        }}
+                                        className="px-3 bg-mint neo-border text-xs font-bold uppercase hover:brightness-95"
+                                    >
+                                        Auto-Gen
+                                    </button>
+                                </div>
                             </div>
 
                             <div className="space-y-2">
