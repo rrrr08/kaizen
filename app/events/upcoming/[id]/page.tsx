@@ -8,6 +8,7 @@ import { splitDateTime } from '@/lib/utils';
 import EventRegistrationForm from '@/components/EventRegistrationForm';
 import { useGamification } from '@/app/context/GamificationContext';
 import { ArrowLeft, Zap } from 'lucide-react';
+import ChatInterface from '@/app/components/community/ChatInterface';
 
 export const dynamic = 'force-dynamic';
 
@@ -196,6 +197,31 @@ export default function UpcomingEventDetail() {
               <p className="text-black/60 font-bold text-sm mt-2">
                 {availableSlots !== null ? availableSlots : event.capacity - event.registered} spots remaining
               </p>
+            </div>
+
+            {/* Event Chat */}
+            <div className="mt-16 pt-16 border-t-2 border-black/10">
+              <div className="flex items-center gap-3 mb-8">
+                <h2 className="font-header text-3xl text-black">Event Chatroom</h2>
+                <div className="px-3 py-1 bg-[#6C5CE7] text-white text-[10px] font-black uppercase tracking-widest rounded-full">
+                  Members Only
+                </div>
+              </div>
+
+              {isRegistered ? (
+                <div className="h-[600px] border-2 border-black rounded-[30px] overflow-hidden neo-shadow bg-white">
+                  <ChatInterface containerId={id} containerType="event" />
+                </div>
+              ) : (
+                <div className="bg-gray-50 border-2 border-black border-dashed rounded-[30px] p-12 text-center">
+                  <p className="font-bold text-black/40 text-lg mb-4">
+                    Join this event to access the community chat!
+                  </p>
+                  <p className="text-xs font-black uppercase tracking-widest text-black/20">
+                    Register above to unlock
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 

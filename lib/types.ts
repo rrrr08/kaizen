@@ -160,6 +160,7 @@ export interface UserProfile {
   avatar_url?: string | null;
   avatarSeed?: string;
   role?: string;
+  isBanned?: boolean;
   onboardingCompleted?: boolean;
   likedBlogs?: string[];
   activity?: any[];
@@ -417,4 +418,42 @@ export enum Page {
   Community = 'community',
   ProductDetail = 'product-detail',
   About = 'about'
+}
+
+// Community & Chat Types
+export interface CommunityThread {
+  id: string;
+  title: string;
+  description: string;
+  category: 'general' | 'announcement' | 'qna';
+  createdBy: string; // Admin ID
+  isLocked: boolean;
+  createdAt: any; // Firestore Timestamp
+  updatedAt: any;
+  lastMessageAt?: any;
+  messageCount: number;
+}
+
+export interface EventChatRoom {
+  id: string; // Could be same as eventId or unique
+  eventId: string;
+  eventTitle: string;
+  isActive: boolean;
+  createdAt: any;
+}
+
+// Unified Message Type
+export interface CommunityMessage {
+  id: string;
+  threadId?: string;
+  chatRoomId?: string;
+  content: string;
+  senderId: string;
+  senderName: string;
+  senderAvatar?: string;
+  senderRole?: 'admin' | 'member';
+  senderTier?: string; // e.g. 'Gold Crown', 'Strategist'
+  timestamp: any; // Firestore Timestamp
+  replyToId?: string;
+  isFlagged?: boolean; // For censorship
 }

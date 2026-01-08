@@ -129,11 +129,13 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
     
-    // Notifications (standalone) - users can read their own notifications
+    // Notifications (standalone but linked to users) - strict check
+    // The previous rule [users/{userId}/notifications] handles nested.
+    // This handles root-level queries if any.
     match /notifications/{notificationId} {
-      allow read: if request.auth != null && 
-        (resource.data.userId == request.auth.uid || isAdmin());
-      allow write: if isAdmin();
+      allow read: if request.auth != null && (resource.data.userId == request.auth.uid || isAdmin());
+      // Admin write only? Or allow system?
+      allow write: if isAdmin(); 
     }
     
     // Campaigns - read by admins, write by admins
@@ -223,7 +225,27 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
     
-    // Community collection
+    // Community collection (threads)
+    match /community_threads/{threadId} {
+      allow read: if true;
+      allow create: if isAdmin();
+      allow update: if request.auth != null; // Allow update to metadata (messageCount, lastMessageAt) by auth users (via client, but ideally securely via cloud function) - let's allow auth users for now to update counts.
+    }
+
+    // Community Messages (threads & event chat)
+    match /community_messages/{messageId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null;
+      allow update, delete: if isAdmin() || (request.auth != null && resource.data.senderId == request.auth.uid);
+    }
+    
+    // Moderation Logs
+    match /moderation_logs/{logId} {
+      allow create: if request.auth != null; 
+      allow read, write: if isAdmin();
+    }
+
+    // Community collection (Legacy/Other)
     match /community/{document=**} {
       allow read: if true;
       allow write: if isAdmin();
@@ -237,27 +259,14 @@ service cloud.firestore {
     
     // Experience Enquiries - read/write by admins, create by authenticated users
     match /experience_enquiries/{enquiryId} {
-      allow read: if isAdmin();
-      allow write: if isAdmin();
-      allow create: if request.auth != null;
+      allow read, write: if isAdmin(); // Admin management
+      allow create: if true; // Allow public submissions
     }
     
     // Experience Case Studies - read by all, write by admins
     match /experience_case_studies/{caseStudyId} {
       allow read: if true;
       allow write: if isAdmin();
-    }
-    
-    // Experience categories - read by all (public), write by admins only
-    match /experience_categories/{categoryId} {
-      allow read: if true; // Public read access
-      allow write: if isAdmin();
-    }
-    
-    // Experience enquiries - write by anyone (public submissions), read/write by admins
-    match /experience_enquiries/{enquiryId} {
-      allow read, write: if isAdmin(); // Admin management
-      allow create: if true; // Allow public submissions
     }
     
     // Catch-all for any other collections - read by authenticated users
