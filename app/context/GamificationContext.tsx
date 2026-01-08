@@ -65,6 +65,7 @@ interface GamificationContextType {
   fetchHistory: (lastDoc?: QueryDocumentSnapshot<DocumentData>) => Promise<void>;
   hasMoreHistory: boolean;
   historyLoading: boolean;
+  refreshConfigs: () => Promise<void>;
 }
 
 const GamificationContext = createContext<GamificationContextType | undefined>(undefined);
@@ -81,6 +82,7 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
   const [rewardsConfig, setRewardsConfig] = useState(DEFAULT_REWARDS);
   const [streak, setStreak] = useState({ count: 0, lastActiveDate: null as string | null, freezeCount: 0 });
   const [dailyStats, setDailyStats] = useState({ lastSpinDate: null as string | null, eggsFound: 0 });
+  const [storeConfig, setStoreConfig] = useState(CONFIG);
 
   // History State
   const [history, setHistory] = useState<Transaction[]>([]);
@@ -93,15 +95,70 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
   // Load tiers and rewards from Firebase on mount
   useEffect(() => {
     const loadConfigs = async () => {
-      const [tiers, fetchedRewards] = await Promise.all([
+      const { fetchStoreSettingsFromFirebase, fetchTiersFromFirebase, fetchRewardsConfigFromFirebase } = await import('@/lib/gamification');
+      const [tiers, fetchedRewards, storeSettings] = await Promise.all([
         fetchTiersFromFirebase(),
-        fetchRewardsConfigFromFirebase()
+        fetchRewardsConfigFromFirebase(),
+        fetchStoreSettingsFromFirebase()
       ]);
       setAllTiers(tiers);
       if (fetchedRewards) setRewardsConfig(fetchedRewards);
+
+      if (storeSettings) {
+        // Apply store settings to local config/rewards if they match
+        if (storeSettings.pointsPerRupee !== undefined) {
+          setRewardsConfig(prev => ({
+            ...prev,
+            SHOP: {
+              ...prev.SHOP,
+              POINTS_PER_RUPEE: storeSettings.pointsPerRupee
+            }
+          }));
+        }
+
+        if (storeSettings.redeemRate !== undefined || storeSettings.maxRedeemPercent !== undefined) {
+          setStoreConfig(prev => ({
+            ...prev,
+            redeemRate: storeSettings.redeemRate ?? prev.redeemRate,
+            maxRedeemPercent: storeSettings.maxRedeemPercent ?? prev.maxRedeemPercent
+          }));
+        }
+      }
     };
+
     loadConfigs();
   }, []);
+
+  const refreshConfigs = async () => {
+    const { fetchStoreSettingsFromFirebase, fetchTiersFromFirebase, fetchRewardsConfigFromFirebase } = await import('@/lib/gamification');
+    const [tiers, fetchedRewards, storeSettings] = await Promise.all([
+      fetchTiersFromFirebase(),
+      fetchRewardsConfigFromFirebase(),
+      fetchStoreSettingsFromFirebase()
+    ]);
+    setAllTiers(tiers);
+    if (fetchedRewards) setRewardsConfig(fetchedRewards);
+
+    if (storeSettings) {
+      if (storeSettings.pointsPerRupee !== undefined) {
+        setRewardsConfig(prev => ({
+          ...prev,
+          SHOP: {
+            ...prev.SHOP,
+            POINTS_PER_RUPEE: storeSettings.pointsPerRupee
+          }
+        }));
+      }
+
+      if (storeSettings.redeemRate !== undefined || storeSettings.maxRedeemPercent !== undefined) {
+        setStoreConfig(prev => ({
+          ...prev,
+          redeemRate: storeSettings.redeemRate ?? prev.redeemRate,
+          maxRedeemPercent: storeSettings.maxRedeemPercent ?? prev.maxRedeemPercent
+        }));
+      }
+    }
+  };
 
   useEffect(() => {
     if (!user) {
@@ -394,13 +451,37 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
     await awardPoints(points, `Attended: ${eventName}`);
   };
 
+  // Dynamic calculation functions
+  const calculatePointsLocal = (price: number, isFirstTime: boolean = false) => {
+    let points = Math.floor(price * rewardsConfig.SHOP.POINTS_PER_RUPEE);
+    if (isFirstTime) {
+      points += 100; // Bonus
+    }
+    return points;
+  };
+
+  const calculatePointWorthLocal = (points: number) => {
+    return points * storeConfig.redeemRate;
+  };
+
+  const getMaxRedeemableAmountLocal = (totalPrice: number, userPoints: number) => {
+    const maxAllowedByPolicy = totalPrice * (storeConfig.maxRedeemPercent / 100);
+    const maxUserCanPay = userPoints * storeConfig.redeemRate;
+    return Math.min(maxAllowedByPolicy, maxUserCanPay);
+  };
+
   return (
     <GamificationContext.Provider value={{
       xp, game_xp, balance, tier, nextTier, allTiers, rewardsConfig, streak, dailyStats, loading,
       awardPoints, spendPoints, spinWheel, updateStreak, buyStreakFreeze, foundEasterEgg,
-      config: CONFIG, calculatePoints, calculatePointWorth, getMaxRedeemableAmount, awardEventAttendancePoints,
+      config: storeConfig,
+      calculatePoints: calculatePointsLocal,
+      calculatePointWorth: calculatePointWorthLocal,
+      getMaxRedeemableAmount: getMaxRedeemableAmountLocal,
+      awardEventAttendancePoints,
       hasEarlyEventAccess, workshopDiscountPercent, hasVIPSeating,
-      history, fetchHistory, hasMoreHistory, historyLoading
+      history, fetchHistory, hasMoreHistory, historyLoading,
+      refreshConfigs
     }}>
       {children}
     </GamificationContext.Provider>

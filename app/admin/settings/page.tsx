@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/app/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
+import { useGamification } from '@/app/context/GamificationContext';
 
 interface Settings {
   // Gamification
@@ -48,6 +49,7 @@ export default function AdminSettingsPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
   const { addToast } = useToast();
+  const { refreshConfigs } = useGamification();
   const [settings, setSettings] = useState<Settings>(defaultSettings);
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -88,9 +90,21 @@ export default function AdminSettingsPage() {
   }, [user]);
 
   const handleChange = (key: keyof Settings, value: string | number) => {
+    let finalValue: string | number = value;
+
+    // Handle number types
+    if (typeof defaultSettings[key] === 'number') {
+      if (value === '') {
+        finalValue = 0;
+      } else {
+        const parsed = parseFloat(String(value));
+        finalValue = isNaN(parsed) ? 0 : parsed;
+      }
+    }
+
     setSettings((prev) => ({
       ...prev,
-      [key]: typeof defaultSettings[key] === 'number' ? parseFloat(String(value)) : value,
+      [key]: finalValue,
     }));
   };
 
@@ -110,6 +124,9 @@ export default function AdminSettingsPage() {
       });
 
       if (!response.ok) throw new Error('Failed to save');
+
+      // Refresh global gamification configs
+      await refreshConfigs();
 
       addToast({
         title: 'Success',

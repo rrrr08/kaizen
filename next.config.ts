@@ -2,6 +2,18 @@ import type { NextConfig } from "next";
 
 
 const nextConfig: NextConfig = {
+  reactStrictMode: true,
+  // Suppress hydration warnings during build
+  logging: {
+    fetches: {
+      fullUrl: false,
+    },
+  },
+  serverExternalPackages: ['firebase', 'firebase-admin'],
+  experimental: {
+    // Optimize for Netlify builds
+    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
+  },
   images: {
     remotePatterns: [
       {

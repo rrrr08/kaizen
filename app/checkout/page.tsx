@@ -30,6 +30,8 @@ export default function CheckoutPage() {
   const [redeemPoints, setRedeemPoints] = useState(0);
   const [isFirstTime, setIsFirstTime] = useState(false);
   const [gstRate, setGstRate] = useState(18); // Default 18%
+  const [shippingCost, setShippingCost] = useState(50); // Default 50
+  const [freeShippingThreshold, setFreeShippingThreshold] = useState(500); // Default 500
   const [checkoutInfoLoaded, setCheckoutInfoLoaded] = useState(false);
 
   // Debug: Log cart items structure
@@ -156,9 +158,11 @@ export default function CheckoutPage() {
         if (response.ok) {
           const data = await response.json();
           setGstRate(data.gstRate || 18);
+          setShippingCost(data.shippingCost || 0);
+          setFreeShippingThreshold(data.freeShippingThreshold || 0);
         }
       } catch (error) {
-        console.error('Error fetching GST rate:', error);
+        console.error('Error fetching settings:', error);
       }
     };
 
@@ -186,7 +190,10 @@ export default function CheckoutPage() {
 
   const subtotal = subtotalAfterPoints - voucherDiscountAmount;
   const gstAmount = Math.round(subtotal * (gstRate / 100));
-  const finalPrice = subtotal + gstAmount;
+
+  // Calculate shipping
+  const currentShipping = subtotal >= freeShippingThreshold ? 0 : shippingCost;
+  const finalPrice = subtotal + gstAmount + currentShipping;
 
   // Calculate points earned
   let earnedPoints = calculatePoints(finalPrice, isFirstTime);
@@ -403,6 +410,7 @@ export default function CheckoutPage() {
             subtotal: subtotal,
             gst: gstAmount,
             gstRate: gstRate,
+            shipping: currentShipping,
             totalPoints: earnedPoints,
             pointsRedeemed: redeemPoints,
             discount: pointsWorthRupees,
@@ -657,26 +665,26 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="min-h-screen pt-28 pb-16 bg-[#FFFDF5] text-[#2D3436]">
-      <div className="max-w-7xl mx-auto px-6 md:px-12">
+    <div className="min-h-screen pt-20 md:pt-28 pb-16 bg-[#FFFDF5] text-[#2D3436]">
+      <div className="max-w-7xl mx-auto px-4 md:px-12">
         {/* Header */}
-        <div className="mb-16">
-          <Link href="/shop" className="font-black text-xs uppercase tracking-[0.3em] text-[#6C5CE7] hover:text-black mb-8 inline-flex items-center gap-2 transition-colors">
-            <ArrowLeft size={16} /> BACK TO SHOP
+        <div className="mb-8 md:mb-16">
+          <Link href="/shop" className="font-black text-[10px] md:text-xs uppercase tracking-[0.3em] text-[#6C5CE7] hover:text-black mb-4 md:mb-8 inline-flex items-center gap-2 transition-colors">
+            <ArrowLeft size={14} /> BACK TO SHOP
           </Link>
-          <h1 className="font-header text-6xl md:text-7xl font-black tracking-tighter mb-6 text-black">CHECKOUT</h1>
-          <p className="text-xl text-black/60 font-medium">Complete your order and earn amazing rewards points</p>
+          <h1 className="font-header text-4xl md:text-7xl font-black tracking-tighter mb-4 md:mb-6 text-black leading-none">CHECKOUT</h1>
+          <p className="text-sm md:text-xl text-black/60 font-medium">Complete your order and earn amazing rewards points</p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 md:gap-12">
           {/* Checkout Form */}
-          <div className="lg:col-span-2">
-            <form onSubmit={handlePlaceOrder} className="space-y-8">
+          <div className="lg:col-span-2 space-y-6 md:space-y-8">
+            <form onSubmit={handlePlaceOrder} className="space-y-6 md:space-y-8">
               {/* Shipping Information */}
-              <div className="bg-white border-2 border-black rounded-[20px] p-8 neo-shadow">
-                <h2 className="font-header text-3xl font-black mb-8 text-black">SHIPPING INFORMATION</h2>
+              <div className="bg-white/80 backdrop-blur-md border border-black/5 rounded-[2.5rem] p-6 md:p-8 shadow-xl shadow-black/5">
+                <h2 className="font-header text-2xl md:text-3xl font-black mb-6 md:mb-8 text-black">SHIPPING DETAILS</h2>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <input
                     type="text"
                     name="name"
@@ -800,75 +808,77 @@ export default function CheckoutPage() {
 
           {/* Order Summary */}
           <div className="lg:col-span-1">
-            <div className="sticky top-32 bg-[#FFD93D] border-2 border-black p-8 rounded-[25px] neo-shadow">
-              <h2 className="font-header text-2xl font-black mb-6 text-black">ORDER SUMMARY</h2>
+            <div className="sticky top-32 bg-white/80 backdrop-blur-xl border border-black/5 p-6 md:p-8 rounded-[2.5rem] shadow-xl shadow-black/5">
+              <h2 className="font-header text-xl md:text-2xl font-black mb-6 text-black tracking-tight">ORDER SUMMARY</h2>
 
               {/* Items */}
-              <div className="space-y-4 mb-6 pb-6 border-b-2 border-black/10">
+              <div className="space-y-4 mb-6 pb-6 border-b border-black/5">
                 {items.map((item) => (
-                  <div key={item.productId} className="flex justify-between items-start">
-                    <div>
-                      <p className="font-header text-sm font-bold text-black line-clamp-2">
+                  <div key={item.productId} className="flex justify-between items-start gap-4">
+                    <div className="flex-1">
+                      <p className="font-bold text-xs md:text-sm text-black line-clamp-2 leading-tight">
                         {item.product.name}
                       </p>
-                      <p className="text-xs text-black/60 font-bold">x{item.quantity}</p>
+                      <p className="text-[10px] text-black/40 font-black uppercase mt-1">Quantity: {item.quantity}</p>
                     </div>
-                    <p className="text-right font-black text-black">
-                      ₹{(item.product.price * item.quantity).toFixed(2)}
+                    <p className="text-right font-black text-black text-xs md:text-sm">
+                      ₹{(item.product.price * item.quantity).toLocaleString()}
                     </p>
                   </div>
                 ))}
               </div>
 
               {/* Pricing */}
-              <div className="space-y-3 mb-6 pb-6 border-b-2 border-black/10">
-                <div className="flex justify-between text-sm font-bold">
-                  <span className="text-black/70">Subtotal</span>
-                  <span className="text-black">₹{totalPrice.toFixed(2)}</span>
+              <div className="space-y-3 mb-6 pb-6 border-b border-black/5">
+                <div className="flex justify-between text-xs md:text-sm font-bold">
+                  <span className="text-black/40">Subtotal</span>
+                  <span className="text-black">₹{totalPrice.toLocaleString()}</span>
                 </div>
                 {redeemPoints > 0 && (
-                  <div className="flex justify-between text-sm font-bold text-[#00B894]">
+                  <div className="flex justify-between text-xs md:text-sm font-bold text-[#00B894]">
                     <span>Points Discount</span>
-                    <span>-₹{pointsWorthRupees.toFixed(2)}</span>
+                    <span>-₹{pointsWorthRupees.toLocaleString()}</span>
                   </div>
                 )}
                 {appliedVoucher && voucherDiscountAmount > 0 && (
-                  <div className="flex justify-between text-sm font-bold text-[#6C5CE7]">
+                  <div className="flex justify-between text-xs md:text-sm font-bold text-[#6C5CE7]">
                     <span>Voucher Discount</span>
-                    <span>-₹{voucherDiscountAmount.toFixed(2)}</span>
+                    <span>-₹{voucherDiscountAmount.toLocaleString()}</span>
                   </div>
                 )}
-                <div className="flex justify-between text-sm font-bold">
-                  <span className="text-black/70">Shipping</span>
-                  <span className="text-black bg-white border border-black px-1 rounded text-[10px] uppercase">FREE</span>
+                <div className="flex justify-between text-xs md:text-sm font-bold">
+                  <span className="text-black/40">Shipping</span>
+                  <span className="text-[#00B894] font-black italic">FREE</span>
                 </div>
-                <div className="flex justify-between text-sm font-bold">
-                  <span className="text-black/70">GST ({gstRate}%)</span>
-                  <span className="text-black">₹{gstAmount.toFixed(2)}</span>
+                <div className="flex justify-between text-xs md:text-sm font-bold">
+                  <span className="text-black/40">GST ({gstRate}%)</span>
+                  <span className="text-black">₹{gstAmount.toLocaleString()}</span>
                 </div>
               </div>
 
               {/* Points to Earn */}
-              <div className="bg-white border-2 border-black rounded-xl p-4 mb-8 flex items-center gap-3 shadow-[2px_2px_0px_rgba(0,0,0,0.1)]">
-                <div className="w-8 h-8 rounded-full bg-[#6C5CE7] text-white flex items-center justify-center font-black border border-black">P</div>
+              <div className="bg-[#6C5CE7] rounded-3xl p-4 md:p-5 mb-8 flex items-center gap-4 border border-white/20 shadow-lg shadow-purple-200">
+                <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center border border-white/30 backdrop-blur-sm shadow-inner flex-shrink-0">
+                  <Coins className="text-white w-5 h-5" />
+                </div>
                 <div>
-                  <p className="text-[10px] text-black/50 font-black uppercase">YOU WILL EARN</p>
-                  <p className="font-header text-xl font-black text-black leading-none">
-                    +{earnedPoints.toLocaleString()} <span className="text-xs text-black/60">PTS</span>
+                  <p className="text-[10px] text-white/60 font-black uppercase tracking-wider">You'll Earn</p>
+                  <p className="font-header text-xl md:text-2xl font-black text-white leading-none">
+                    +{earnedPoints.toLocaleString()} <span className="text-[10px] opacity-70">JP</span>
                   </p>
                 </div>
               </div>
 
               {/* Total */}
               <div className="space-y-4">
-                <div className="flex justify-between items-end font-header">
-                  <span className="text-xl font-black text-black">TOTAL</span>
-                  <span className="text-black font-black text-3xl">₹{finalPrice.toFixed(2)}</span>
+                <div className="flex justify-between items-end">
+                  <span className="text-sm font-black text-black/40 uppercase tracking-widest">Total</span>
+                  <span className="text-black font-black text-3xl md:text-4xl tracking-tighter leading-none">₹{finalPrice.toLocaleString()}</span>
                 </div>
 
                 {/* Terms */}
-                <p className="text-[10px] text-black/50 font-bold text-center leading-tight">
-                  By placing this order, you agree to our terms and conditions. Points will be credited upon order confirmation.
+                <p className="text-[10px] text-black/30 font-bold leading-relaxed">
+                  By completing this purchase, you agree to our Terms of Service. Rewards points will be credited to your account instantly.
                 </p>
               </div>
             </div>
