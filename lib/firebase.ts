@@ -305,13 +305,13 @@ export const createUserProfile = async (userId: string, data: UserProfile) => {
 
 export const checkUserExists = async (userId: string) => {
   try {
-    if (!db) return false;
+    if (!db) throw new Error("Database not initialized");
     const userRef = doc(db, "users", userId);
     const userSnap = await getDoc(userRef);
     return userSnap.exists();
   } catch (error) {
     console.error('Error checking user exists:', error);
-    return false;
+    throw error; // Re-throw to prevent "not exists" assumption
   }
 };
 
