@@ -1,8 +1,8 @@
 {
-  "_crons_disabled": [
+  "crons": [
     {
       "path": "/api/cron/process-scheduled-notifications",
-      "schedule": "* *"
+      "schedule": "*"
     }
   ]
 }
