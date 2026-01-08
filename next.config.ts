@@ -9,8 +9,8 @@ const nextConfig: NextConfig = {
       fullUrl: false,
     },
   },
+  serverExternalPackages: ['firebase', 'firebase-admin'],
   experimental: {
-    serverComponentsExternalPackages: ['firebase', 'firebase-admin'],
     // Optimize for Netlify builds
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
   },

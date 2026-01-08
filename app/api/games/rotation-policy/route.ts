@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebaseAdmin';
 
 const FALLBACK_GAMES = [
-  'sudoku', 'riddle', 'puzzles', 'wordle', 'chess', 
-  'trivia', '2048', 'hangman', 'wordsearch', 'mathquiz'
+  'sudoku', 'riddle', 'puzzles', 'wordle', 'chess',
+  'trivia', '2048', 'hangman', 'wordsearch', 'mathquiz',
+  'snake', 'minesweeper', 'tango'
 ];
 
 // GET /api/games/rotation-policy - Get current rotation policy
@@ -11,7 +12,7 @@ export async function GET() {
   try {
     const policyRef = adminDb.doc('settings/rotationPolicy');
     const policySnap = await policyRef.get();
-    
+
     // Default policy structural skeleton 
     let policy: any = policySnap.exists ? policySnap.data() : {
       enabled: true,
@@ -25,33 +26,33 @@ export async function GET() {
     // Date check
     const today = new Date().toISOString().slice(0, 10);
     const schedule = policy.rotationSchedule || {};
-    
+
     // Check if we need to generate a rotation for today
     // We explicitly check if it's missing OR if the list is empty for some reason
     if (policy.enabled && (!schedule[today] || schedule[today].length === 0)) {
-       // Need to generate rotation for today via Lazy Loading
-       
-       // 1. Get available games
-       const settingsSnap = await adminDb.doc('settings/gamePoints').get();
-       let allGames = settingsSnap.exists ? Object.keys(settingsSnap.data() || {}) : [];
-       
-       // Use fallback if DB is empty to ensure we have content
-       if (allGames.length === 0) {
-         allGames = FALLBACK_GAMES;
-       }
+      // Need to generate rotation for today via Lazy Loading
 
-       // 2. Determine pool to rotate
-       // If policy has specific selectedGames, use them, otherwise use all
-       const gamesToRotate = (policy.selectedGames && policy.selectedGames.length > 0) 
-          ? policy.selectedGames 
-          : allGames;
-          
-       // 3. Shuffle and Pick 3
-       const validGamesPerDay = 3;
-       const shuffled = [...gamesToRotate].sort(() => Math.random() - 0.5);
-       const todaysGames = shuffled.slice(0, Math.min(validGamesPerDay, shuffled.length));
-       
-       // Select Game of the Day (randomly from today's games)
+      // 1. Get available games
+      const settingsSnap = await adminDb.doc('settings/gamePoints').get();
+      let allGames = settingsSnap.exists ? Object.keys(settingsSnap.data() || {}) : [];
+
+      // Use fallback if DB is empty to ensure we have content
+      if (allGames.length === 0) {
+        allGames = FALLBACK_GAMES;
+      }
+
+      // 2. Determine pool to rotate
+      // If policy has specific selectedGames, use them, otherwise use all
+      const gamesToRotate = (policy.selectedGames && policy.selectedGames.length > 0)
+        ? policy.selectedGames
+        : allGames;
+
+      // 3. Shuffle and Pick 3
+      const validGamesPerDay = 3;
+      const shuffled = [...gamesToRotate].sort(() => Math.random() - 0.5);
+      const todaysGames = shuffled.slice(0, Math.min(validGamesPerDay, shuffled.length));
+
+      // Select Game of the Day (randomly from today's games)
       const gameOfTheDay = todaysGames.length > 0 ? todaysGames[0] : null;
 
       // Update policy in DB
@@ -68,16 +69,16 @@ export async function GET() {
 
       // SYNC: Also update the standalone gameOfTheDay setting for API consistency
       if (gameOfTheDay) {
-          const gameSettingsSnap = await adminDb.doc('settings/gamePoints').get();
-          const gameSettings = gameSettingsSnap.data();
-          const gameName = gameSettings?.[gameOfTheDay]?.name || gameOfTheDay;
-          
-          await adminDb.doc('settings/gameOfTheDay').set({
-              gameId: gameOfTheDay,
-              date: today,
-              gameName: gameName,
-              autoSelected: true
-          });
+        const gameSettingsSnap = await adminDb.doc('settings/gamePoints').get();
+        const gameSettings = gameSettingsSnap.data();
+        const gameName = gameSettings?.[gameOfTheDay]?.name || gameOfTheDay;
+
+        await adminDb.doc('settings/gameOfTheDay').set({
+          gameId: gameOfTheDay,
+          date: today,
+          gameName: gameName,
+          autoSelected: true
+        });
       }
 
       // Update local object to return
@@ -90,7 +91,7 @@ export async function GET() {
         updatedAt: new Date().toISOString()
       };
     }
-    
+
     return NextResponse.json(policy);
   } catch (error: any) {
     console.error('Error fetching rotation policy:', error);
@@ -103,14 +104,14 @@ export async function POST(req: NextRequest) {
   try {
     // Get Firebase Auth token from Authorization header
     const authorization = req.headers.get('authorization');
-    
+
     if (!authorization?.startsWith('Bearer ')) {
       return NextResponse.json({ error: 'Unauthorized - No token provided' }, { status: 401 });
     }
 
     const token = authorization.split('Bearer ')[1];
     let decodedToken;
-    
+
     try {
       const { adminAuth } = await import('@/lib/firebaseAdmin');
       decodedToken = await adminAuth.verifyIdToken(token);
@@ -123,34 +124,34 @@ export async function POST(req: NextRequest) {
     const userRef = adminDb.collection('users').doc(decodedToken.uid);
     const userSnap = await userRef.get();
     const userData = userSnap.data();
-    
+
     if (!userData?.isAdmin && userData?.role !== 'admin') {
       return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
     }
-    
+
     const body = await req.json();
     const { enabled, gamesPerDay, selectedGames } = body;
-    
+
     if (gamesPerDay < 1 || gamesPerDay > 20) {
       return NextResponse.json({ error: 'gamesPerDay must be between 1 and 20' }, { status: 400 });
     }
-    
+
     const today = new Date().toISOString().slice(0, 10);
-    
+
     // Get all available games
     const settingsSnap = await adminDb.doc('settings/gamePoints').get();
     const allGames = settingsSnap.exists ? Object.keys(settingsSnap.data() || {}) : [];
-    
+
     // If no specific games selected, use all games
     const gamesToRotate = selectedGames && selectedGames.length > 0 ? selectedGames : allGames;
-    
+
     // Enforce 3 games if not specified or invalid. User wanted strict 3.
-    const validGamesPerDay = 3; 
+    const validGamesPerDay = 3;
 
     // Generate today's rotation
     const shuffled = [...gamesToRotate].sort(() => Math.random() - 0.5);
     const todaysGames = shuffled.slice(0, Math.min(validGamesPerDay, shuffled.length));
-    
+
     // First game is "Game of the Day"
     const gameOfTheDay = todaysGames.length > 0 ? todaysGames[0] : null;
 
@@ -165,23 +166,23 @@ export async function POST(req: NextRequest) {
       lastRotation: today,
       updatedAt: new Date().toISOString()
     };
-    
+
     await adminDb.doc('settings/rotationPolicy').set(policy);
-    
+
     // SYNC: Also update the standalone gameOfTheDay setting for API consistency
     if (gameOfTheDay) {
-        const gameSettingsSnap = await adminDb.doc('settings/gamePoints').get();
-        const gameSettings = gameSettingsSnap.data();
-        const gameName = gameSettings?.[gameOfTheDay]?.name || gameOfTheDay;
-        
-        await adminDb.doc('settings/gameOfTheDay').set({
-            gameId: gameOfTheDay,
-            date: today,
-            gameName: gameName,
-            autoSelected: true
-        });
+      const gameSettingsSnap = await adminDb.doc('settings/gamePoints').get();
+      const gameSettings = gameSettingsSnap.data();
+      const gameName = gameSettings?.[gameOfTheDay]?.name || gameOfTheDay;
+
+      await adminDb.doc('settings/gameOfTheDay').set({
+        gameId: gameOfTheDay,
+        date: today,
+        gameName: gameName,
+        autoSelected: true
+      });
     }
-    
+
     return NextResponse.json({ success: true, policy });
   } catch (error: any) {
     console.error('Error updating rotation policy:', error);
@@ -194,14 +195,14 @@ export async function PUT(req: NextRequest) {
   try {
     // Get Firebase Auth token from Authorization header
     const authorization = req.headers.get('authorization');
-    
+
     if (!authorization?.startsWith('Bearer ')) {
       return NextResponse.json({ error: 'Unauthorized - No token provided' }, { status: 401 });
     }
 
     const token = authorization.split('Bearer ')[1];
     let decodedToken;
-    
+
     try {
       const { adminAuth } = await import('@/lib/firebaseAdmin');
       decodedToken = await adminAuth.verifyIdToken(token);
@@ -214,31 +215,31 @@ export async function PUT(req: NextRequest) {
     const userRef = adminDb.collection('users').doc(decodedToken.uid);
     const userSnap = await userRef.get();
     const userData = userSnap.data();
-    
+
     if (!userData?.isAdmin && userData?.role !== 'admin') {
       return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
     }
-    
+
     const policySnap = await adminDb.doc('settings/rotationPolicy').get();
     if (!policySnap.exists) {
       return NextResponse.json({ error: 'No rotation policy configured' }, { status: 404 });
     }
-    
+
     const policy = policySnap.data();
-    
+
     if (!policy) {
       return NextResponse.json({ error: 'Policy data is missing' }, { status: 500 });
     }
-    
+
     const today = new Date().toISOString().slice(0, 10);
-    
+
     // Generate new rotation
     const shuffled = [...policy.selectedGames].sort(() => Math.random() - 0.5);
     // Enforce 3 games logic here too, or trust policy. Let's enforce 3 to be safe as per user req.
     const targetCount = 3;
     const todaysGames = shuffled.slice(0, Math.min(targetCount, shuffled.length));
     const gameOfTheDay = todaysGames.length > 0 ? todaysGames[0] : null;
-    
+
     const updatedPolicy = {
       ...policy,
       gamesPerDay: targetCount, // Update policy to reflect 3
@@ -250,23 +251,23 @@ export async function PUT(req: NextRequest) {
       lastRotation: today,
       updatedAt: new Date().toISOString()
     };
-    
+
     await adminDb.doc('settings/rotationPolicy').set(updatedPolicy);
 
     // SYNC: Also update the standalone gameOfTheDay setting for API consistency
     if (gameOfTheDay) {
-        const gameSettingsSnap = await adminDb.doc('settings/gamePoints').get();
-        const gameSettings = gameSettingsSnap.data();
-        const gameName = gameSettings?.[gameOfTheDay]?.name || gameOfTheDay;
-        
-        await adminDb.doc('settings/gameOfTheDay').set({
-            gameId: gameOfTheDay,
-            date: today,
-            gameName: gameName,
-            autoSelected: true
-        });
+      const gameSettingsSnap = await adminDb.doc('settings/gamePoints').get();
+      const gameSettings = gameSettingsSnap.data();
+      const gameName = gameSettings?.[gameOfTheDay]?.name || gameOfTheDay;
+
+      await adminDb.doc('settings/gameOfTheDay').set({
+        gameId: gameOfTheDay,
+        date: today,
+        gameName: gameName,
+        autoSelected: true
+      });
     }
-    
+
     return NextResponse.json({ success: true, todaysGames });
   } catch (error: any) {
     console.error('Error rotating games:', error);

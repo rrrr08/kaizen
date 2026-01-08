@@ -300,6 +300,63 @@ export default function Play() {
               </Link>
             </div>
           )}
+
+          {/* Snake */}
+          {(!rotationPolicy?.enabled || todaysGames.includes('snake')) && (
+            <div className="bg-white border-2 border-black p-8 rounded-[30px] neo-shadow hover:scale-[1.02] transition-transform group relative overflow-hidden">
+              {rotationPolicy?.gameOfTheDay === 'snake' && (
+                <div className="absolute top-0 right-0 bg-[#FFD93D] text-black text-xs font-black px-4 py-2 border-b-2 border-l-2 border-black rounded-bl-xl z-10 shadow-sm">
+                  GAME OF THE DAY
+                </div>
+              )}
+              <h3 className="font-black text-sm tracking-[0.2em] text-[#00B894] mb-4 uppercase">Snake</h3>
+              <p className="text-black font-black text-2xl mb-4">Retro Arcade</p>
+              <p className="text-black/70 font-medium text-sm mb-6 leading-relaxed">
+                Classic snake game with modern rewards.
+              </p>
+              <Link href="/play/snake" className="block w-full text-center px-6 py-4 bg-[#00B894] text-black font-black text-xs tracking-[0.2em] border-2 border-black shadow-[4px_4px_0px_#000] hover:translate-y-1 hover:shadow-none transition-all rounded-xl">
+                PLAY NOW
+              </Link>
+            </div>
+          )}
+
+          {/* Minesweeper */}
+          {(!rotationPolicy?.enabled || todaysGames.includes('minesweeper')) && (
+            <div className="bg-white border-2 border-black p-8 rounded-[30px] neo-shadow hover:scale-[1.02] transition-transform group relative overflow-hidden">
+              {rotationPolicy?.gameOfTheDay === 'minesweeper' && (
+                <div className="absolute top-0 right-0 bg-[#FFD93D] text-black text-xs font-black px-4 py-2 border-b-2 border-l-2 border-black rounded-bl-xl z-10 shadow-sm">
+                  GAME OF THE DAY
+                </div>
+              )}
+              <h3 className="font-black text-sm tracking-[0.2em] text-[#6C5CE7] mb-4 uppercase">Minesweeper</h3>
+              <p className="text-black font-black text-2xl mb-4">Masterclass</p>
+              <p className="text-black/70 font-medium text-sm mb-6 leading-relaxed">
+                Clear the grid and sweep the rewards.
+              </p>
+              <Link href="/play/minesweeper" className="block w-full text-center px-6 py-4 bg-[#6C5CE7] text-black font-black text-xs tracking-[0.2em] border-2 border-black shadow-[4px_4px_0px_#000] hover:translate-y-1 hover:shadow-none transition-all rounded-xl">
+                PLAY NOW
+              </Link>
+            </div>
+          )}
+
+          {/* Tango */}
+          {(!rotationPolicy?.enabled || todaysGames.includes('tango')) && (
+            <div className="bg-white border-2 border-black p-8 rounded-[30px] neo-shadow hover:scale-[1.02] transition-transform group relative overflow-hidden">
+              {rotationPolicy?.gameOfTheDay === 'tango' && (
+                <div className="absolute top-0 right-0 bg-[#FFD93D] text-black text-xs font-black px-4 py-2 border-b-2 border-l-2 border-black rounded-bl-xl z-10 shadow-sm">
+                  GAME OF THE DAY
+                </div>
+              )}
+              <h3 className="font-black text-sm tracking-[0.2em] text-[#FF7675] mb-4 uppercase">Tango</h3>
+              <p className="text-black font-black text-2xl mb-4">Breakout Battle</p>
+              <p className="text-black/70 font-medium text-sm mb-6 leading-relaxed">
+                Classic brick-breaking action for JP points.
+              </p>
+              <Link href="/play/tango" className="block w-full text-center px-6 py-4 bg-[#FF7675] text-black font-black text-xs tracking-[0.2em] border-2 border-black shadow-[4px_4px_0px_#000] hover:translate-y-1 hover:shadow-none transition-all rounded-xl">
+                PLAY NOW
+              </Link>
+            </div>
+          )}
         </div>
 
         {/* Loading State */}
