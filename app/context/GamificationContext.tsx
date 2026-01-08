@@ -28,6 +28,15 @@ interface GamificationContextType {
   updateStreak: () => Promise<void>;
   buyStreakFreeze: () => Promise<boolean>;
   foundEasterEgg: () => Promise<boolean>;
+
+  // Checkout Helpers
+  config: {
+    redeemRate: number; // Rupees per point (e.g. 0.5)
+    maxRedeemPercent: number; // Max % of order total payable with points (e.g. 50)
+  };
+  calculatePoints: (price: number, isFirstTime: boolean) => number;
+  calculatePointWorth: (points: number) => number;
+  getMaxRedeemableAmount: (totalPrice: number, walletPoints: number) => number;
 }
 
 const GamificationContext = createContext<GamificationContextType | undefined>(undefined);
@@ -219,10 +228,38 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
     return true;
   }
 
+  // Helper Functions for Checkout
+  const config = {
+    redeemRate: 0.50, // 1 Point = ₹0.50
+    maxRedeemPercent: 50, // Max 50% of order value
+    pointsPer100Rupees: 5, // Earn 5 points per ₹100 spent
+    firstTimeBonus: 500 // Bonus points for first order
+  };
+
+  const calculatePoints = (price: number, isFirstTime: boolean) => {
+    const basePoints = Math.floor((price / 100) * config.pointsPer100Rupees);
+    // Apply Tier Multiplier to earnings
+    const tierMultiplier = tier.multiplier || 1;
+    const totalPoints = Math.floor(basePoints * tierMultiplier);
+
+    return isFirstTime ? totalPoints + config.firstTimeBonus : totalPoints;
+  };
+
+  const calculatePointWorth = (points: number) => {
+    return points * config.redeemRate;
+  };
+
+  const getMaxRedeemableAmount = (totalPrice: number, walletPoints: number) => {
+    const maxAllowedByPolicy = totalPrice * (config.maxRedeemPercent / 100);
+    const maxWalletValue = walletPoints * config.redeemRate;
+    return Math.min(maxAllowedByPolicy, maxWalletValue);
+  };
+
   return (
     <GamificationContext.Provider value={{
       xp, balance, tier, nextTier, streak, dailyStats, loading,
-      awardPoints, spendPoints, spinWheel, updateStreak, buyStreakFreeze, foundEasterEgg
+      awardPoints, spendPoints, spinWheel, updateStreak, buyStreakFreeze, foundEasterEgg,
+      config, calculatePoints, calculatePointWorth, getMaxRedeemableAmount
     }}>
       {children}
     </GamificationContext.Provider>

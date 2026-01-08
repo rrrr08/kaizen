@@ -103,10 +103,10 @@ function ensureFirebaseInit() {
 // Helper to get initialized Firestore instance
 export async function getFirebaseDb() {
   if (db) return db;
-  
+
   const firebase = await import('@/lib/firebase');
   if (firebase.db) return firebase.db;
-  
+
   throw new Error('Firebase Firestore not initialized');
 }
 
@@ -154,6 +154,8 @@ export const signIn = async (email: string, password: string) => {
           email: user.email || '',
           name: user.displayName || user.email || 'User',
           role: "member",
+          balance: 0,
+          xp: 0,
           created_at: serverTimestamp(),
           updated_at: serverTimestamp(),
           last_sign_in_at: serverTimestamp(),
@@ -180,16 +182,16 @@ export const signInWithGoogle = async () => {
     if (!auth) {
       throw new Error('Firebase authentication is not initialized');
     }
-    
+
     // Try popup first
     try {
       const userCredential = await signInWithPopup(auth, googleProvider);
       const { user } = userCredential;
-      
+
       // Important: Google provides a verified email by default, but we check anyway
       if (user.email) {
         const userExists = await checkUserExists(user.uid);
-        
+
         // For brand new users, we need to create their profile
         if (!userExists) {
           const profileData = {
@@ -200,6 +202,8 @@ export const signInWithGoogle = async () => {
             photoURL: user.photoURL,
             avatar_url: user.photoURL, // Keep both for compatibility
             role: "member",
+            balance: 0,
+            xp: 0,
             likedBlogs: [],
             activity: [],
             blogCount: 0,
@@ -217,25 +221,25 @@ export const signInWithGoogle = async () => {
           });
         }
       }
-      
+
       return userCredential;
     } catch (popupError: any) {
       // If popup is blocked, fallback to redirect-based auth
       if (popupError.code === 'auth/popup-blocked') {
         console.warn('Popup blocked, using redirect-based authentication instead');
-        
+
         // Store the redirect path in sessionStorage to retrieve after auth
         if (typeof window !== 'undefined') {
           sessionStorage.setItem('authRedirectSource', 'google');
         }
-        
+
         // Use redirect instead
         await signInWithRedirect(auth, googleProvider);
-        
+
         // This won't return immediately as the page will redirect
         return null;
       }
-      
+
       // Re-throw other errors
       throw popupError;
     }
@@ -291,8 +295,8 @@ export const createUserProfile = async (userId: string, data: UserProfile) => {
     ...avatarData, // Add multiavatar data if generated
     created_at:
       data.created_at &&
-      (data.created_at instanceof Timestamp ||
-        typeof data.created_at === "string")
+        (data.created_at instanceof Timestamp ||
+          typeof data.created_at === "string")
         ? data.created_at
         : data.created_at || serverTimestamp(),
     updated_at: serverTimestamp(),
@@ -382,6 +386,8 @@ if (typeof window !== "undefined" && auth) {
             photoURL: user.photoURL,
             avatar_url: user.photoURL, // Keep both for compatibility
             role: "member",
+            balance: 0,
+            xp: 0,
             likedBlogs: [],
             activity: [],
             blogCount: 0,
@@ -393,7 +399,7 @@ if (typeof window !== "undefined" && auth) {
             user.uid,
             profileData
           );
-          
+
           // For new users who signed in with Google but haven't verified email yet
           if (user.email && !user.emailVerified && user.providerData.some(p => p.providerId === 'google.com')) {
             console.log('New Google user, auto-redirecting to verification flow');
@@ -437,14 +443,14 @@ export async function updateProduct(productId: string, product: Partial<Product>
   if (!productId || typeof productId !== 'string') {
     throw new Error(`Invalid productId: ${productId}. Must be a non-empty string.`);
   }
-  
+
   // Validate product data
   if (!product || typeof product !== 'object') {
     throw new Error('Invalid product data. Must be an object.');
   }
-  
+
   console.log('updateProduct called with:', { productId, product });
-  
+
   try {
     const productRef = doc(db, 'products', productId);
     const productData = {
@@ -453,7 +459,7 @@ export async function updateProduct(productId: string, product: Partial<Product>
       stock: parseInt(String(product.stock), 10) || 0,
       updatedAt: serverTimestamp(),
     };
-    
+
     console.log('Updating product with data:', productData);
     await updateDoc(productRef, productData);
     console.log('Product updated successfully');
@@ -494,10 +500,10 @@ export function subscribeToRealtimeOrders(update: (orders: any[]) => void) {
   });
 }
 
-export { 
-  app, 
-  auth, 
-  db, 
+export {
+  app,
+  auth,
+  db,
   storage,
   // Firestore functions
   collection,
@@ -698,7 +704,7 @@ export async function updateUserWallet(userId: string, pointsToAdd: number) {
   const firebaseDb = await getFirebaseDb();
   const userRef = doc(firebaseDb, 'users', userId);
   const userDoc = await getDoc(userRef);
-  
+
   if (!userDoc.exists()) {
     throw new Error('User not found');
   }
@@ -718,7 +724,7 @@ export async function getUserWallet(userId: string) {
   const firebaseDb = await getFirebaseDb();
   const userRef = doc(firebaseDb, 'users', userId);
   const userDoc = await getDoc(userRef);
-  
+
   if (!userDoc.exists()) {
     return { points: 0, history: [] };
   }
@@ -763,7 +769,7 @@ export async function createOrder(
   }
 ) {
   const orderId = Date.now().toString();
-  
+
   const order = {
     id: orderId,
     userId,
@@ -801,7 +807,7 @@ export async function getUserOrders(userId: string) {
     createdAt: doc.data().createdAt?.toDate?.() || new Date(),
     paymentStatus: doc.data().paymentStatus || 'pending',
   } as any));
-  
+
   // Sort by createdAt on the client side instead
   return orders.sort((a, b) => {
     const dateA = a.createdAt instanceof Date ? a.createdAt : new Date(a.createdAt);
@@ -814,7 +820,7 @@ export async function getOrderById(orderId: string) {
   const firebaseDb = await getFirebaseDb();
   const orderRef = doc(firebaseDb, 'orders', orderId);
   const orderDoc = await getDoc(orderRef);
-  
+
   if (!orderDoc.exists()) {
     return null;
   }
@@ -831,7 +837,7 @@ export async function getOrderById(orderId: string) {
 export async function updateUserCart(userId: string, cartItems: any[]) {
   const firebaseDb = await getFirebaseDb();
   const userRef = doc(firebaseDb, 'users', userId);
-  
+
   await updateDoc(userRef, {
     cart: cartItems,
     cartUpdatedAt: serverTimestamp(),
@@ -843,7 +849,7 @@ export async function getUserCart(userId: string) {
   const firebaseDb = await getFirebaseDb();
   const userRef = doc(firebaseDb, 'users', userId);
   const userDoc = await getDoc(userRef);
-  
+
   if (!userDoc.exists()) {
     return [];
   }
@@ -854,7 +860,7 @@ export async function getUserCart(userId: string) {
 export async function clearUserCart(userId: string) {
   const firebaseDb = await getFirebaseDb();
   const userRef = doc(firebaseDb, 'users', userId);
-  
+
   await updateDoc(userRef, {
     cart: [],
     cartUpdatedAt: serverTimestamp(),
@@ -958,7 +964,7 @@ export async function getGamificationConfig(): Promise<GamificationConfig> {
     }
     const configRef = doc(firebaseDb, 'settings', 'gamification');
     const configDoc = await getDoc(configRef);
-    
+
     if (configDoc.exists()) {
       return configDoc.data() as GamificationConfig;
     }
@@ -1189,16 +1195,16 @@ export async function handleGoogleSignInRedirect() {
       console.warn('Firebase auth not initialized, skipping Google redirect result check');
       return null;
     }
-    
+
     const result = await getRedirectResult(auth);
-    
+
     if (result) {
       const { user } = result;
-      
+
       // Create user profile if new user
       if (user.email) {
         const userExists = await checkUserExists(user.uid);
-        
+
         if (!userExists) {
           const profileData = {
             email: user.email,
@@ -1208,6 +1214,8 @@ export async function handleGoogleSignInRedirect() {
             photoURL: user.photoURL,
             avatar_url: user.photoURL,
             role: "member",
+            balance: 0,
+            xp: 0,
             likedBlogs: [],
             activity: [],
             blogCount: 0,
@@ -1225,7 +1233,7 @@ export async function handleGoogleSignInRedirect() {
           });
         }
       }
-      
+
       return result;
     }
     return null;

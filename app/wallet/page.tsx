@@ -1,5 +1,6 @@
 'use client';
 
+import { useAuth } from '@/app/context/AuthContext';
 import { useGamification } from '@/app/context/GamificationContext';
 import Link from 'next/link';
 import { Wallet as WalletIcon, TrendingUp, Gift, Zap, Crown } from 'lucide-react';
@@ -9,7 +10,8 @@ import WheelOfJoy from '@/components/gamification/WheelOfJoy';
 export const dynamic = 'force-dynamic';
 
 export default function WalletPage() {
-  const { xp, balance, tier, nextTier, user, loading, streak, buyStreakFreeze } = useGamification();
+  const { user } = useAuth();
+  const { xp, balance, tier, nextTier, loading, streak, buyStreakFreeze } = useGamification();
 
   if (loading) {
     return (
