@@ -5,6 +5,7 @@ import { User } from 'firebase/auth';
 
 interface AuthContextType {
   user: User | null;
+  userProfile: any | null; // Typed loosely here or import UserProfile
   loading: boolean;
   role: string | null;
   isAdmin: boolean;
@@ -14,13 +15,14 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [userProfile, setUserProfile] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [role, setRole] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     console.log('[AuthContext] Mounting - initializing auth listener');
-    
+
     // Lazy load Firebase
     import('@/lib/firebase').then(({ auth, db }) => {
       // Check if Firebase is initialized
@@ -29,7 +31,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setLoading(false);
         return;
       }
-      
+
       import('firebase/auth').then(({ onAuthStateChanged }) => {
         import('firebase/firestore').then(({ doc, getDoc }) => {
           const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -38,9 +40,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               uid: currentUser?.uid,
               timestamp: new Date().toLocaleTimeString()
             });
-            
+
             setUser(currentUser);
-            
+
             if (currentUser) {
               // Fetch user role from Firestore
               try {
@@ -48,37 +50,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                   console.warn('[AuthContext] Firebase db not initialized');
                   setRole(null);
                   setIsAdmin(false);
+                  setUserProfile(null);
                   setLoading(false);
                   return;
                 }
-                
+
                 const userDocRef = doc(db, 'users', currentUser.uid);
                 const userDocSnap = await getDoc(userDocRef);
-                
+
                 if (userDocSnap.exists()) {
                   const userData = userDocSnap.data();
                   const userRole = userData?.role || null;
+                  setUserProfile(userData);
                   setRole(userRole);
                   setIsAdmin(userRole === 'admin');
                   console.log('[AuthContext] User role:', userRole);
                 } else {
+                  setUserProfile(null);
                   setRole(null);
                   setIsAdmin(false);
                 }
               } catch (error) {
                 console.error('[AuthContext] Error fetching user role:', error);
+                setUserProfile(null);
                 setRole(null);
                 setIsAdmin(false);
               }
             } else {
+              setUserProfile(null);
               setRole(null);
               setIsAdmin(false);
             }
-            
+
             setLoading(false);
           }, (error) => {
             console.error('[AuthContext] Auth error:', error);
             setUser(null);
+            setUserProfile(null);
             setRole(null);
             setIsAdmin(false);
             setLoading(false);
@@ -94,7 +102,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, role, isAdmin }}>
+    <AuthContext.Provider value={{ user, userProfile, loading, role, isAdmin }}>
       {children}
     </AuthContext.Provider>
   );

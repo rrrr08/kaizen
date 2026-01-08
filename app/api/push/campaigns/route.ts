@@ -36,6 +36,7 @@ export async function POST(request: Request) {
       customFilters,
       scheduledFor,
       priority = 'normal',
+      channels = ['push', 'in-app'], // Default channels if not provided
     } = body;
 
     // Validate required fields
@@ -108,10 +109,13 @@ export async function POST(request: Request) {
       actionType,
       recipientSegment,
       customFilters: customFilters || null,
+      // scheduledFor comes as datetime-local string (local time), convert to UTC Timestamp
+      // The datetime-local input provides local time, which is correctly converted to UTC by Timestamp.fromDate
       scheduledFor: scheduledFor ? Timestamp.fromDate(new Date(scheduledFor)) : null,
       status: scheduledFor ? 'scheduled' : 'sent',
       sentAt: scheduledFor ? null : Timestamp.now(),
       priority,
+      channels: channels || ['push', 'in-app'], // Store channels for scheduled notifications
       ttl: body.ttl || 86400, // 24 hours default
       recipientCount,
       deliveredCount: 0,

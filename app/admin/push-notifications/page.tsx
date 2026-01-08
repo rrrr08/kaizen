@@ -41,6 +41,13 @@ export default function PushNotificationsPage() {
   useEffect(() => {
     loadCampaigns();
     loadUserCount();
+    
+    // Auto-refresh campaigns every 30 seconds to catch status changes
+    const interval = setInterval(() => {
+      loadCampaigns();
+    }, 30000);
+    
+    return () => clearInterval(interval);
   }, []);
 
   async function loadCampaigns() {
@@ -130,6 +137,20 @@ export default function PushNotificationsPage() {
         description: 'Message must be 240 characters or less',
       });
       return;
+    }
+
+    // Validate scheduled time is in the future
+    if (formData.scheduledFor) {
+      const scheduledDate = new Date(formData.scheduledFor);
+      const now = new Date();
+      
+      if (scheduledDate <= now) {
+        addToast({
+          title: 'Validation Error',
+          description: 'Scheduled time must be in the future',
+        });
+        return;
+      }
     }
 
     setLoading(true);
@@ -561,8 +582,17 @@ export default function PushNotificationsPage() {
                     name="scheduledFor"
                     value={formData.scheduledFor}
                     onChange={handleInputChange}
+                    min={new Date().toISOString().slice(0, 16)}
                     className="w-full bg-[#FFFDF5] border-2 border-black rounded-xl px-4 py-3 text-black font-bold focus:outline-none focus:neo-shadow-sm transition-all"
                   />
+                  {formData.scheduledFor && (
+                    <p className="text-xs text-black/60 font-bold mt-2 uppercase tracking-wide">
+                      ⏰ Will be sent automatically on {new Date(formData.scheduledFor).toLocaleString()}
+                    </p>
+                  )}
+                  <p className="text-xs text-black/40 font-bold mt-1 uppercase tracking-wide">
+                    Notifications are processed automatically every minute via cron job
+                  </p>
                 </div>
 
                 {/* Recipient Preview */}
@@ -756,6 +786,62 @@ export default function PushNotificationsPage() {
           {/* Scheduled Tab */}
           <TabsContent value="scheduled">
             <div>
+              {/* Manual Process Button for Development */}
+              <div className="mb-6 flex justify-between items-center">
+                <div>
+                  <h2 className="font-header text-2xl font-black text-black uppercase tracking-tight">Scheduled Campaigns</h2>
+                  <p className="text-sm text-black/60 font-bold mt-1">
+                    Campaigns are processed automatically every minute. Use the button below to process manually.
+                  </p>
+                </div>
+                <button
+                  onClick={async () => {
+                    setLoading(true);
+                    try {
+                      const { auth } = await import('@/lib/firebase');
+                      const currentUser = auth.currentUser;
+                      if (!currentUser) {
+                        throw new Error('Not authenticated');
+                      }
+                      const token = await currentUser.getIdToken();
+                      
+                      const response = await fetch('/api/cron/process-scheduled-notifications', {
+                        headers: {
+                          'Authorization': `Bearer ${token}`
+                        }
+                      });
+                      
+                      const result = await response.json();
+                      
+                      if (response.ok) {
+                        addToast({
+                          title: 'Success',
+                          description: result.processed > 0 
+                            ? `Processed ${result.processed} scheduled notification(s)` 
+                            : 'No scheduled notifications were due',
+                        });
+                        // Reload campaigns to see status changes
+                        await loadCampaigns();
+                      } else {
+                        throw new Error(result.error || 'Failed to process');
+                      }
+                    } catch (error) {
+                      console.error('Error processing scheduled notifications:', error);
+                      addToast({
+                        title: 'Error',
+                        description: error instanceof Error ? error.message : 'Failed to process scheduled notifications',
+                      });
+                    } finally {
+                      setLoading(false);
+                    }
+                  }}
+                  disabled={loading}
+                  className="px-6 py-3 bg-[#6C5CE7] text-white font-black uppercase tracking-widest rounded-xl border-2 border-black shadow-[4px_4px_0px_#000] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                >
+                  {loading ? 'Processing...' : 'Process Scheduled Now'}
+                </button>
+              </div>
+
               {campaigns.filter(c => c.status === 'scheduled').length === 0 ? (
                 <div className="bg-white border-2 border-black rounded-[25px] p-12 text-center neo-shadow">
                   <Clock className="w-16 h-16 text-black/20 mx-auto mb-4" />
@@ -768,33 +854,54 @@ export default function PushNotificationsPage() {
                 <div className="space-y-4">
                   {campaigns
                     .filter(c => c.status === 'scheduled')
-                    .map((campaign) => (
-                      <div
-                        key={campaign.id}
-                        className="bg-white border-2 border-black rounded-xl p-6 flex justify-between items-start hover:neo-shadow transition-all"
-                      >
-                        <div className="flex-1">
-                          <h3 className="font-header text-xl font-black text-black uppercase tracking-tight">{campaign.title}</h3>
-                          <p className="text-sm text-black/60 font-bold mt-2 line-clamp-2">
-                            {campaign.message}
-                          </p>
-                          <div className="flex gap-6 mt-4 text-xs font-black text-black/40 uppercase tracking-widest">
-                            <span>📧 {campaign.recipientCount} recipients</span>
-                            <span>⏰ Scheduled for: {campaign.scheduledFor ? new Date(campaign.scheduledFor).toLocaleString() : 'N/A'}</span>
+                    .sort((a, b) => {
+                      const aTime = a.scheduledFor ? new Date(a.scheduledFor).getTime() : 0;
+                      const bTime = b.scheduledFor ? new Date(b.scheduledFor).getTime() : 0;
+                      return aTime - bTime; // Sort by scheduled time (earliest first)
+                    })
+                    .map((campaign) => {
+                      const scheduledTime = campaign.scheduledFor ? new Date(campaign.scheduledFor) : null;
+                      const now = new Date();
+                      const isOverdue = scheduledTime && scheduledTime < now;
+                      
+                      return (
+                        <div
+                          key={campaign.id}
+                          className={`bg-white border-2 border-black rounded-xl p-6 flex justify-between items-start hover:neo-shadow transition-all ${isOverdue ? 'bg-yellow-50' : ''}`}
+                        >
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                              <h3 className="font-header text-xl font-black text-black uppercase tracking-tight">{campaign.title}</h3>
+                              {isOverdue && (
+                                <span className="px-2 py-1 bg-red-500 text-white text-xs font-black uppercase rounded border border-black">
+                                  OVERDUE
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-sm text-black/60 font-bold mt-2 line-clamp-2">
+                              {campaign.message}
+                            </p>
+                            <div className="flex gap-6 mt-4 text-xs font-black text-black/40 uppercase tracking-widest">
+                              <span>📧 {campaign.recipientCount} recipients</span>
+                              <span>⏰ Scheduled for: {scheduledTime ? scheduledTime.toLocaleString() : 'N/A'}</span>
+                              {isOverdue && (
+                                <span className="text-red-500">⚠️ Should have been sent already</span>
+                              )}
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <span
+                              className="inline-block px-3 py-1 rounded-lg border-2 border-black text-xs font-black uppercase tracking-wider bg-[#FFD93D] text-black"
+                            >
+                              Scheduled
+                            </span>
+                            <p className="text-xs text-black/40 font-bold mt-2 uppercase tracking-wide">
+                              Created: {new Date(campaign.createdAt).toLocaleDateString()}
+                            </p>
                           </div>
                         </div>
-                        <div className="text-right">
-                          <span
-                            className="inline-block px-3 py-1 rounded-lg border-2 border-black text-xs font-black uppercase tracking-wider bg-[#FFD93D] text-black"
-                          >
-                            Scheduled
-                          </span>
-                          <p className="text-xs text-black/40 font-bold mt-2 uppercase tracking-wide">
-                            Created: {new Date(campaign.createdAt).toLocaleDateString()}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                 </div>
               )}
             </div>
