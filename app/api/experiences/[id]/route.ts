@@ -95,13 +95,22 @@ export async function PATCH(
     }
 
     // Filter out empty array items if arrays are being updated
-    const cleanedUpdates = {
+    const cleanedUpdates: any = {
       ...updates,
-      problemsSolved: updates.problemsSolved?.filter((item: string) => item.trim()),
-      gamesFormats: updates.gamesFormats?.filter((item: string) => item.trim()),
-      imageGallery: updates.imageGallery?.filter((item: string) => item.trim()),
       updatedAt: new Date(),
     };
+
+    if (Array.isArray(updates.problemsSolved)) {
+      cleanedUpdates.problemsSolved = updates.problemsSolved.filter((item: string) => item.trim());
+    }
+
+    if (Array.isArray(updates.gamesFormats)) {
+      cleanedUpdates.gamesFormats = updates.gamesFormats.filter((item: string) => item.trim());
+    }
+
+    if (Array.isArray(updates.imageGallery)) {
+      cleanedUpdates.imageGallery = updates.imageGallery.filter((item: string) => item.trim());
+    }
 
     await db.collection('experience_categories').doc(id).update(cleanedUpdates);
 
