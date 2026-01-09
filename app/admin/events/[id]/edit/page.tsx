@@ -278,6 +278,7 @@ export default function EditEventPage() {
               <Field
                 label="Date & Time"
                 name="datetime"
+                disabled={new Date(form.datetime).getTime() < Date.now()}
                 type="datetime-local"
                 value={form.datetime}
                 onChange={handleChange}

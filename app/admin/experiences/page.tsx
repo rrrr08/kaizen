@@ -75,7 +75,10 @@ export default function AdminExperiencesPage() {
     try {
       const auth = getAuth();
       const user = auth.currentUser;
-      if (!user) return;
+      if (!user) {
+        setError('Not authenticated');
+        return;
+      }
 
       const token = await user.getIdToken();
 
@@ -98,6 +101,9 @@ export default function AdminExperiencesPage() {
       setCategories(prev => prev.map(c =>
         c.id === category.id ? data.category : c
       ));
+
+      // Clear any previous errors
+      setError(null);
     } catch (err) {
       console.error('Error updating category:', err);
       setError('Failed to update category');
