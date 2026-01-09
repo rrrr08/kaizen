@@ -298,7 +298,7 @@ export default function EventDetail() {
                             {[1, 2, 3, 4, 5].map(n => (
                               <span
                                 key={n}
-                                className={`text-sm ${n <= t.rating ? 'text-[#FFD93D]' : 'text-black/20'}`}
+                                className={`text-sm ${t.rating && (n <= t.rating ? 'text-[#FFD93D]' : 'text-black/20')}`}
                               >
                                 ★
                               </span>

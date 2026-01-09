@@ -192,7 +192,7 @@ export default function EventTestimonials() {
                           <div className="space-y-3">
                             {event.testimonials.slice(0, 2).map((t, i) => (
                               <blockquote key={i} className="bg-[#FFFDF5] border-2 border-black rounded-lg p-4 text-black/70 font-medium italic text-sm">
-                                "{t.comment.length > 100 ? t.comment.substring(0, 100) + '...' : t.comment}"
+                                "{t.comment && t.comment.length > 100 ? t.comment.substring(0, 100) + '...' : t.comment}"
                                 <footer className="mt-2 text-black/40 text-xs not-italic font-black uppercase tracking-widest">
                                   — {t.name}
                                 </footer>
