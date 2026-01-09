@@ -8,6 +8,17 @@ import { USER_ROLES } from '@/lib/roles';
 import { format } from 'date-fns';
 import { usePopup } from '@/app/context/PopupContext';
 
+// Helper to safely parse dates
+const getValidDate = (date: any): Date | null => {
+    if (!date) return null;
+    try {
+        const d = new Date(date);
+        return isNaN(d.getTime()) ? null : d;
+    } catch {
+        return null;
+    }
+};
+
 interface Inquiry {
     id: string;
     name: string;
@@ -182,7 +193,10 @@ export default function AdminInquiriesPage() {
                                                     <td className="p-4 font-bold text-sm">
                                                         <div className="flex items-center gap-2">
                                                             <Calendar size={14} className="text-black/40" />
-                                                            {iq.createdAt ? format(new Date(iq.createdAt), 'MMM dd, HH:mm') : 'N/A'}
+                                                            {(() => {
+                                                                const d = getValidDate(iq.createdAt);
+                                                                return d ? format(d, 'MMM dd, HH:mm') : 'N/A';
+                                                            })()}
                                                         </div>
                                                     </td>
                                                     <td className="p-4">
@@ -298,11 +312,14 @@ export default function AdminInquiriesPage() {
                                     <div className="space-y-2">
                                         <div className="flex justify-between items-center">
                                             <p className="text-[10px] font-black uppercase tracking-widest text-[#6C5CE7]">Dispatch Admin Protocol</p>
-                                            {selectedInquiry.repliedAt && (
-                                                <span className="text-[8px] font-black text-black/40 uppercase">
-                                                    Replied: {format(new Date(selectedInquiry.repliedAt), 'MMM dd, HH:mm')}
-                                                </span>
-                                            )}
+                                            {selectedInquiry.repliedAt && (() => {
+                                                const d = getValidDate(selectedInquiry.repliedAt);
+                                                return d ? (
+                                                    <span className="text-[8px] font-black text-black/40 uppercase">
+                                                        Replied: {format(d, 'MMM dd, HH:mm')}
+                                                    </span>
+                                                ) : null;
+                                            })()}
                                         </div>
                                         <textarea
                                             value={replyText}
@@ -315,8 +332,8 @@ export default function AdminInquiriesPage() {
                                             disabled={saving}
                                             id="send-reply-button"
                                             className={`w-full py-5 rounded-xl font-black uppercase tracking-[0.2em] text-xs flex items-center justify-center gap-3 transition-all ${saving
-                                                    ? 'bg-gray-100 text-black/20'
-                                                    : 'bg-[#FFD93D] text-black border-2 border-black neo-shadow hover:translate-y-[-2px]'
+                                                ? 'bg-gray-100 text-black/20'
+                                                : 'bg-[#FFD93D] text-black border-2 border-black neo-shadow hover:translate-y-[-2px]'
                                                 }`}
                                         >
                                             {saving ? 'TRANSMITTING...' : (

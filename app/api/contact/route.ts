@@ -22,53 +22,19 @@ export async function POST(req: NextRequest) {
     });
 
     // 2. Send Acknowledgement Email
-    const emailUser = process.env.EMAIL_USER;
-    const emailPass = process.env.EMAIL_APP_PASSWORD;
+    const { sendEmail } = await import('@/lib/email-service');
+    const { getBaseEmailTemplate } = await import('@/lib/email-templates');
 
-    console.log('Email Debug:', {
-      hasUser: !!emailUser,
-      hasPass: !!emailPass,
-      userPrefix: emailUser?.split('@')[0]
+    const acknowledgementHtml = getBaseEmailTemplate(
+      `We've received your inquiry: ${subject}`,
+      `Hello ${name},<br><br>Thank you for reaching out to us! We've received your message and our team will get back to you shortly.<br><br><div style="background:white; border:2px solid black; padding:15px; box-shadow:4px 4px 0px black;"><strong>Your Message:</strong><br><br><i>${message}</i></div>`
+    );
+
+    await sendEmail({
+      to: email,
+      subject: `We've received your inquiry: ${subject}`,
+      html: acknowledgementHtml,
     });
-
-    if (emailUser && emailPass) {
-      const transporter = nodemailer.createTransport({
-        host: 'smtp.gmail.com',
-        port: 587,
-        secure: false, // Use STARTTLS
-        auth: {
-          user: emailUser,
-          pass: emailPass,
-        },
-        logger: true,
-        debug: true,
-        tls: {
-          rejectUnauthorized: false
-        }
-      });
-
-      const { getBaseEmailTemplate } = await import('@/lib/email-templates');
-      const acknowledgementHtml = getBaseEmailTemplate(
-        `We've received your inquiry: ${subject}`,
-        `Hello ${name},<br><br>Thank you for reaching out to us! We've received your message and our team will get back to you shortly.<br><br><div style="background:white; border:2px solid black; padding:15px; box-shadow:4px 4px 0px black;"><strong>Your Message:</strong><br><br><i>${message}</i></div>`
-      );
-
-      try {
-        console.log('Attempting to send email to:', email);
-        const info = await transporter.sendMail({
-          from: `"Joy Juncture Support" <${emailUser}>`,
-          to: email,
-          subject: `We've received your inquiry: ${subject}`,
-          html: acknowledgementHtml,
-        });
-        console.log('Email sent successfully:', info.messageId);
-      } catch (emailError) {
-        console.error('Nodemailer Error:', emailError);
-        // We still return success since the info was saved to DB
-      }
-    } else {
-      console.warn('Email skipped: Missing credentials in .env');
-    }
 
     return NextResponse.json({
       success: true,

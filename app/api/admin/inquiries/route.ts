@@ -23,7 +23,8 @@ export async function GET(req: NextRequest) {
         const inquiries = snapshot.docs.map(doc => ({
             id: doc.id,
             ...doc.data(),
-            createdAt: doc.data().createdAt?.toDate ? doc.data().createdAt.toDate() : doc.data().createdAt
+            createdAt: doc.data().createdAt?.toDate ? doc.data().createdAt.toDate() : doc.data().createdAt,
+            repliedAt: doc.data().repliedAt?.toDate ? doc.data().repliedAt.toDate() : doc.data().repliedAt
         }));
 
         return NextResponse.json({ inquiries });

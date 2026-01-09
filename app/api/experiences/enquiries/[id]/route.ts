@@ -99,6 +99,39 @@ export async function PATCH(
       updatedAt: new Date(),
     };
 
+    // If updating adminReply, fetch the doc first to get email and send notification
+    if (updates.adminReply) {
+      const enquiryDoc = await db.collection('experience_enquiries').doc(id).get();
+      const enquiryData = enquiryDoc.data();
+
+      if (enquiryData?.email) {
+        console.log(`Attempting to send experience reply email to ${enquiryData.email}`);
+
+        const { sendEmail } = await import('@/lib/email-service');
+        const emailSent = await sendEmail({
+          to: enquiryData.email,
+          subject: `Re: Your ${enquiryData.categoryName || 'Experience'} Enquiry`,
+          text: updates.adminReply,
+          html: `
+                <div style="font-family: sans-serif; color: #2D3436;">
+                    <h1 style="color: #6C5CE7;">Update on your Experience Enquiry</h1>
+                    <p>Hi ${enquiryData.name || 'Explorer'},</p>
+                    <p>We have an update regarding your enquiry for <strong>${enquiryData.categoryName}</strong>.</p>
+                    <blockquote style="border-left: 4px solid #FFD93D; padding-left: 1rem; margin: 1rem 0; color: #555;">
+                        ${updates.adminReply.replace(/\n/g, '<br>')}
+                    </blockquote>
+                    <p>You can view the full status in your <a href="${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/profile/enquiries">Profile Dashboard</a>.</p>
+                    <p>Stay Playful,<br>The Joy Juncture Team</p>
+                </div>
+            `
+        });
+
+        if (emailSent) {
+          console.log(`Experience reply sent successfully to ${enquiryData.email}`);
+        }
+      }
+    }
+
     await db.collection('experience_enquiries').doc(id).update(cleanedUpdates);
 
     // Get updated enquiry

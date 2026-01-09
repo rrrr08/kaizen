@@ -28,32 +28,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Subject and message are required' }, { status: 400 });
     }
 
-    // Check email configuration
-    const emailUser = process.env.EMAIL_USER;
-    const emailPass = process.env.EMAIL_APP_PASSWORD;
-
-    if (!emailUser || !emailPass) {
+    // Check email configuration (Basic check, though sendEmail handles it too)
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_APP_PASSWORD) {
       console.error('Email credentials not configured');
       return NextResponse.json({
         error: 'Email service not configured. Please add EMAIL_USER and EMAIL_APP_PASSWORD to environment variables.'
       }, { status: 500 });
     }
-
-    // Create transporter using Gmail service with debugging
-    const transporter = nodemailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 587,
-      secure: false,
-      auth: {
-        user: emailUser,
-        pass: emailPass,
-      },
-      logger: true,
-      debug: true,
-      tls: {
-        rejectUnauthorized: false
-      }
-    });
 
     // Get users based on segment
     let usersSnapshot;
@@ -78,6 +59,7 @@ export async function POST(req: NextRequest) {
 
     // Prepare email content
     const { getBaseEmailTemplate } = await import('@/lib/email-templates');
+    const { sendEmail } = await import('@/lib/email-service');
     const emailHtml = htmlContent || getBaseEmailTemplate(subject, message);
 
     // Send emails (batch sending)
@@ -85,17 +67,16 @@ export async function POST(req: NextRequest) {
     let failedCount = 0;
 
     for (const user of users) {
-      try {
-        await transporter.sendMail({
-          from: `"GWOC" <${emailUser}>`,
-          to: user.email,
-          subject: subject,
-          text: message,
-          html: emailHtml,
-        });
+      const success = await sendEmail({
+        to: user.email,
+        subject: subject,
+        text: message,
+        html: emailHtml,
+      });
+
+      if (success) {
         sentCount++;
-      } catch (emailError) {
-        console.error(`Failed to send email to ${user.email}:`, emailError);
+      } else {
         failedCount++;
       }
     }

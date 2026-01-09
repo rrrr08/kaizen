@@ -7,6 +7,17 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
+// Helper to safely parse dates from any source (string, number, Firestore Timestamp)
+const getValidDate = (date: any): Date | null => {
+  if (!date) return null;
+  try {
+    const d = new Date(date);
+    return isNaN(d.getTime()) ? null : d;
+  } catch {
+    return null;
+  }
+};
+
 const STATUS_COLORS = {
   new: 'bg-blue-100 text-blue-800 border-blue-500',
   contacted: 'bg-yellow-100 text-yellow-800 border-yellow-500',
@@ -325,13 +336,19 @@ export default function AdminEnquiriesPage() {
 
                   <div className="mt-4 flex items-center justify-between text-[10px] font-bold uppercase tracking-widest text-black/40">
                     <span>
-                      {enquiry.createdAt ? new Date(enquiry.createdAt).toLocaleDateString() : 'N/A'}
+                      {(() => {
+                        const d = getValidDate(enquiry.createdAt);
+                        return d ? d.toLocaleDateString() : 'N/A';
+                      })()}
                     </span>
-                    {enquiry.repliedAt && (
-                      <span className="text-green-600">
-                        Replied: {new Date(enquiry.repliedAt).toLocaleDateString()}
-                      </span>
-                    )}
+                    {enquiry.repliedAt && (() => {
+                      const d = getValidDate(enquiry.repliedAt);
+                      return d ? (
+                        <span className="text-green-600">
+                          Replied: {d.toLocaleDateString()}
+                        </span>
+                      ) : null;
+                    })()}
                   </div>
                 </div>
               ))}
@@ -421,7 +438,10 @@ export default function AdminEnquiriesPage() {
                       <h4 className="text-xs font-black text-black/40 uppercase tracking-widest">Public Reply (Visible to User)</h4>
                       {selectedEnquiry.adminReply && (
                         <span className="text-[10px] font-black text-green-600 uppercase tracking-widest">
-                          Last Saved: {selectedEnquiry.repliedAt ? new Date(selectedEnquiry.repliedAt).toLocaleString() : 'Recently'}
+                          Last Saved: {(() => {
+                            const d = getValidDate(selectedEnquiry.repliedAt);
+                            return d ? d.toLocaleString() : 'Recently';
+                          })()}
                         </span>
                       )}
                     </div>
