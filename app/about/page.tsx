@@ -143,7 +143,7 @@ export default function About() {
               </div>
 
               {/* Center Marker */}
-              <div className="absolute left-[20px] md:left-1/2 -translate-x-1/2 w-20 h-20 bg-white border-4 border-black rounded-full z-20 hidden md:flex items-center justify-center shadow-[6px_6px_0px_#FFD93D] group-hover:scale-110 transition-transform md:top-0">
+              <div className="absolute left-[20px] md:left-1/2 -translate-x-1/2 w-20 h-20 bg-white border-4 border-black rounded-full z-10 hidden md:flex items-center justify-center shadow-[6px_6px_0px_#FFD93D] group-hover:scale-110 transition-transform">
                 <span className="text-4xl">💡</span>
               </div>
 
@@ -165,7 +165,7 @@ export default function About() {
                   <div className="bg-white rounded-2xl h-48 flex items-center justify-center relative overflow-hidden text-center p-4">
                     <div className="absolute inset-0 opacity-10 bg-[linear-gradient(45deg,#FF7675_25%,transparent_25%,transparent_50%,#FF7675_50%,#FF7675_75%,transparent_75%,transparent)] [background-size:20px_20px]"></div>
                     <div className="relative z-10 flex flex-col items-center">
-                      <span className="font-header text-black text-6xl block leading-none mb-2">⚠️</span>
+                      {/* Emoji Removed */}
                       <span className="font-header text-white text-5xl bg-black px-4 py-1 -rotate-3 inline-block shadow-[4px_4px_0px_rgba(0,0,0,0.1)]">FAIL?</span>
                     </div>
                   </div>
@@ -173,7 +173,7 @@ export default function About() {
               </div>
 
               {/* Center Marker aligned with path curve roughly */}
-              <div className="absolute left-[20px] md:left-1/2 -translate-x-1/2 w-20 h-20 bg-white border-4 border-black rounded-full z-20 hidden md:flex items-center justify-center shadow-[6px_6px_0px_#FF7675] group-hover:scale-110 transition-transform md:top-[-80px]">
+              <div className="absolute left-[20px] md:left-[20%] -translate-x-1/2 w-20 h-20 bg-white border-4 border-black rounded-full z-10 hidden md:flex items-center justify-center shadow-[6px_6px_0px_#FF7675] group-hover:scale-110 transition-transform">
                 <span className="text-4xl">🧪</span>
               </div>
 
@@ -203,7 +203,7 @@ export default function About() {
               </div>
 
               {/* Center Marker */}
-              <div className="absolute left-[20px] md:left-1/2 -translate-x-1/2 w-20 h-20 bg-white border-4 border-black rounded-full z-20 hidden md:flex items-center justify-center shadow-[6px_6px_0px_#6C5CE7] group-hover:scale-110 transition-transform md:top-[-80px]">
+              <div className="absolute left-[20px] md:left-[80%] -translate-x-1/2 w-20 h-20 bg-white border-4 border-black rounded-full z-10 hidden md:flex items-center justify-center shadow-[6px_6px_0px_#6C5CE7] group-hover:scale-110 transition-transform">
                 <span className="text-4xl">🚀</span>
               </div>
 
@@ -233,7 +233,7 @@ export default function About() {
               </div>
 
               {/* Center Marker aligned with path curve roughly */}
-              <div className="absolute left-[20px] md:left-1/2 -translate-x-1/2 w-20 h-20 bg-white border-4 border-black rounded-full z-20 hidden md:flex items-center justify-center shadow-[6px_6px_0px_#00B894] group-hover:scale-110 transition-transform md:top-[-80px]">
+              <div className="absolute left-[20px] md:left-[20%] -translate-x-1/2 w-20 h-20 bg-white border-4 border-black rounded-full z-10 hidden md:flex items-center justify-center shadow-[6px_6px_0px_#00B894] group-hover:scale-110 transition-transform">
                 <span className="text-4xl">🌍</span>
               </div>
 

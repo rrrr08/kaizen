@@ -29,6 +29,8 @@ export default function CheckoutPage() {
   const [redeemPoints, setRedeemPoints] = useState(0);
   const [isFirstTime, setIsFirstTime] = useState(false);
   const [gstRate, setGstRate] = useState(18); // Default 18%
+  const [shippingCost, setShippingCost] = useState(50);
+  const [freeShippingThreshold, setFreeShippingThreshold] = useState(500);
   const [checkoutInfoLoaded, setCheckoutInfoLoaded] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -129,7 +131,9 @@ export default function CheckoutPage() {
         const response = await fetch('/api/admin/settings/get');
         if (response.ok) {
           const data = await response.json();
-          setGstRate(data.gstRate || 18);
+          setGstRate(data.gstRate ?? 18);
+          setShippingCost(data.shippingCost ?? 50);
+          setFreeShippingThreshold(data.freeShippingThreshold ?? 500);
         }
       } catch (error) {
         console.error('Error fetching GST rate:', error);
@@ -159,7 +163,12 @@ export default function CheckoutPage() {
 
   const subtotal = currentSubtotal - voucherDiscountAmount;
   const gstAmount = Math.round(subtotal * (gstRate / 100));
-  const finalPrice = subtotal + gstAmount;
+
+  // Shipping Calculation
+  const needsShipping = subtotal < freeShippingThreshold && subtotal > 0;
+  const shippingAmount = needsShipping ? shippingCost : 0;
+
+  const finalPrice = subtotal + gstAmount + shippingAmount;
   const earnedPoints = calculatePoints(finalPrice, isFirstTime);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -353,6 +362,10 @@ export default function CheckoutPage() {
                 {/* JP Discount removed */}
                 {voucherDiscountAmount > 0 && <div className="flex justify-between text-[#6C5CE7]"><span>Voucher</span><span>-₹{voucherDiscountAmount}</span></div>}
                 <div className="flex justify-between"><span>GST ({gstRate}%)</span><span>₹{gstAmount}</span></div>
+                <div className="flex justify-between">
+                  <span>Shipping</span>
+                  {shippingAmount === 0 ? <span className="text-green-600">FREE</span> : <span>₹{shippingAmount}</span>}
+                </div>
               </div>
               <div className="flex justify-between items-end font-header mb-8">
                 <span className="text-xl font-black uppercase">Total</span>

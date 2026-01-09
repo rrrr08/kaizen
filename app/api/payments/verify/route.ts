@@ -56,144 +56,129 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 5. Check if this is a Shop Order (Inventory Management)
-    // We look for an order with this Razorpay Order ID
-    const ordersRef = adminDb.collection('orders');
-    const orderQuery = await ordersRef.where('paymentOrderId', '==', razorpay_order_id).limit(1).get();
+    // --- XP & JP CALCULATION ---
+    let purchaseXP = 0;
+    let purchaseJP = 0;
+    let xpSettings: any = null;
+    let userData: any = null;
 
-    if (!orderQuery.empty) {
-        const orderDoc = orderQuery.docs[0];
-        const orderData = orderDoc.data();
-        
-        // Only process if not already completed/paid to avoid double decrement
-        if (orderData.status !== 'completed' && orderData.status !== 'paid') {
-             try {
-                await adminDb.runTransaction(async (t) => {
-                    const items = orderData.items || [];
-                    
-                    // Reads must come before writes
-                    const productReads = items.map((item: any) => {
-                        const ref = adminDb.collection('products').doc(item.productId);
-                        return t.get(ref);
-                    });
-
-                    const productDocs = await Promise.all(productReads);
-
-                    // Perform updates
-                    items.forEach((item: any, index: number) => {
-                        const doc = productDocs[index];
-                        if (doc.exists) {
-                            const currentSales = doc.data()?.sales || 0;
-                            const currentStock = doc.data()?.stock || 0;
-                            
-                            t.update(doc.ref, {
-                                stock: currentStock - item.quantity,
-                                sales: currentSales + item.quantity
-                            });
-                        }
-                    });
-
-                    // Update Order Status
-                    t.update(orderDoc.ref, {
-                        status: 'completed',
-                        paymentStatus: 'paid',
-                        paymentId: razorpay_payment_id,
-                        updatedAt: FieldValue.serverTimestamp(),
-                        inventory_deducted: true
-                    });
-                });
-                console.log(`[Order] Successfully processed order ${orderDoc.id} and updated stock.`);
-
-                // Send order confirmation email with invoice
-                try {
-                    const customerEmail = orderData.shippingAddress?.email;
-                    const customerName = orderData.shippingAddress?.name;
-                    
-                    if (customerEmail) {
-                        const { getOrderInvoiceTemplate } = await import('@/lib/email-templates');
-                        const { sendEmail } = await import('@/lib/email-service');
-
-                        const invoiceHtml = getOrderInvoiceTemplate({
-                            id: orderDoc.id,
-                            createdAt: orderData.createdAt?.toDate() || new Date(),
-                            items: orderData.items || [],
-                            subtotal: orderData.subtotal || orderData.totalPrice,
-                            gst: orderData.gst || 0,
-                            gstRate: orderData.gstRate || 0,
-                            totalPrice: orderData.totalPrice,
-                            shippingAddress: orderData.shippingAddress
-                        });
-
-                        await sendEmail({
-                            to: customerEmail,
-                            subject: `Order Confirmation - ${orderDoc.id}`,
-                            html: invoiceHtml,
-                        });
-
-                        console.log(`[Order] Confirmation email sent to ${customerEmail}`);
-                    }
-                } catch (emailError) {
-                    console.error('[Order] Error sending confirmation email:', emailError);
-                }
-             } catch (err) {
-                 console.error('[Order] Transaction failed:', err);
-             }
-        }
-    }
-
-    // Award XP for purchase
-    if (userId && amount) {
+    if (userId && amount && !eventId) {
       try {
+        // Fetch User
         const userRef = adminDb.collection('users').doc(userId);
         const userSnap = await userRef.get();
-        const userData = userSnap.exists ? userSnap.data() : {};
-        const currentXP = userData?.xp || 0;
-        const currentPoints = userData?.points || 0;
+        userData = userSnap.exists ? userSnap.data() : {};
 
-        // Get XP settings
-        const db = getFirestore(app);
-        const xpSettingsRef = doc(db, 'settings', 'xpSystem');
-        const xpSettingsSnap = await getDoc(xpSettingsRef);
-        const xpSettings = xpSettingsSnap.exists() ? xpSettingsSnap.data() : null;
+        // Fetch Settings
+        const xpSettingsRef = adminDb.collection('settings').doc('xpSystem');
+        const xpSettingsSnap = await xpSettingsRef.get();
+        xpSettings = xpSettingsSnap.exists ? xpSettingsSnap.data() : null;
 
-        // Calculate XP for purchase (default: 10 XP per ₹100)
+        // Calculate Base XP
         const shopXPSource = xpSettings?.xpSources?.find((s: any) => s.name.includes('Shop Purchase'));
         const xpPer100 = shopXPSource?.baseXP || 10;
-        const purchaseXP = Math.floor((amount / 100) * xpPer100);
+        purchaseXP = Math.floor((amount / 100) * xpPer100);
 
-        // Get tier multiplier
+        // Calculate JP with Tier Multiplier
         const TIERS = xpSettings?.tiers || [
           { name: 'Newbie', minXP: 0, multiplier: 1.0 },
           { name: 'Player', minXP: 500, multiplier: 1.1 },
           { name: 'Strategist', minXP: 2000, multiplier: 1.25 },
           { name: 'Grandmaster', minXP: 5000, multiplier: 1.5 }
         ];
+        const currentXP = userData?.xp || 0;
         const currentTier = [...TIERS].reverse().find((tier: any) => currentXP >= tier.minXP) || TIERS[0];
 
-        // Award JP based on purchase (customizable via Firebase, default: 10 JP per ₹100)
         const jpPer100 = shopXPSource?.baseJP || 10;
-        const purchaseJP = Math.floor((amount / 100) * jpPer100 * currentTier.multiplier);
+        purchaseJP = Math.floor((amount / 100) * jpPer100 * currentTier.multiplier);
+
+        console.log(`Calculated for Purchase: ${purchaseXP} XP, ${purchaseJP} JP (Tier: ${currentTier.name} x${currentTier.multiplier})`);
+
+      } catch (calcError) {
+        console.error('Error calculating points:', calcError);
+      }
+    }
+
+    // 5. UPDATE SHOP ORDER (Inventory & Status & Points)
+    const ordersRef = adminDb.collection('orders');
+    const orderQuery = await ordersRef.where('paymentOrderId', '==', razorpay_order_id).limit(1).get();
+
+    if (!orderQuery.empty) {
+      const orderDoc = orderQuery.docs[0];
+      const orderData = orderDoc.data();
+
+      // Only process if not already completed/paid
+      if (orderData.status !== 'completed' && orderData.status !== 'paid') {
+        try {
+          await adminDb.runTransaction(async (t) => {
+            const items = orderData.items || [];
+
+            // Reads
+            const productReads = items.map((item: any) => {
+              const ref = adminDb.collection('products').doc(item.productId);
+              return t.get(ref);
+            });
+
+            const productDocs = await Promise.all(productReads);
+
+            // Writes: Stock Update
+            items.forEach((item: any, index: number) => {
+              const doc = productDocs[index];
+              if (doc.exists) {
+                const currentSales = doc.data()?.sales || 0;
+                const currentStock = doc.data()?.stock || 0;
+
+                t.update(doc.ref, {
+                  stock: currentStock - item.quantity,
+                  sales: currentSales + item.quantity
+                });
+              }
+            });
+
+            // Writes: Order Status & POINTS
+            t.update(orderDoc.ref, {
+              status: 'completed',
+              paymentStatus: 'paid',
+              paymentId: razorpay_payment_id,
+              totalPoints: purchaseJP, // SAVE JP TO ORDER!
+              xpEarned: purchaseXP,    // Save XP too for record
+              updatedAt: FieldValue.serverTimestamp(),
+              inventory_deducted: true
+            });
+          });
+          console.log(`[Order] Successfully processed order ${orderDoc.id}, stock deducted, points recorded.`);
+        } catch (err) {
+          console.error('[Order] Transaction failed:', err);
+        }
+      }
+    }
+
+    // 6. UPDATE USER WALLET
+    if (userId && (purchaseXP > 0 || purchaseJP > 0)) {
+      try {
+        const userRef = adminDb.collection('users').doc(userId);
+        const currentXP = userData?.xp || 0;
+        const currentPoints = userData?.points || 0;
 
         await userRef.set({
           xp: currentXP + purchaseXP,
           points: currentPoints + purchaseJP
         }, { merge: true });
 
-        console.log(`Awarded ${purchaseXP} XP and ${purchaseJP} JP for purchase of ₹${amount}`);
+        console.log(`Awarded ${purchaseXP} XP and ${purchaseJP} JP to user ${userId}`);
 
-        // Log transaction
-        const { FieldValue } = await import('firebase-admin/firestore');
+        // Log Transaction
         await adminDb.collection('users').doc(userId).collection('transactions').add({
           type: 'EARN',
           amount: purchaseJP,
           source: 'SHOP_PURCHASE',
           description: 'Shop Purchase Reward',
-          metadata: { orderId, purchaseAmount: amount, xpEarned: purchaseXP },
+          metadata: { orderId: orderId || razorpay_order_id, purchaseAmount: amount, xpEarned: purchaseXP },
           timestamp: FieldValue.serverTimestamp()
         });
 
       } catch (xpError) {
-        console.error('Error awarding XP for purchase:', xpError);
+        console.error('Error updating user wallet:', xpError);
       }
     }
 
@@ -324,26 +309,19 @@ export async function POST(request: NextRequest) {
           const currentXP = userData?.xp || 0;
           const currentPoints = userData?.points || 0;
 
-          // Get XP settings
-          const db = getFirestore(app);
-          const xpSettingsRef = doc(db, 'settings', 'xpSystem');
-          const xpSettingsSnap = await getDoc(xpSettingsRef);
-          const xpSettings = xpSettingsSnap.exists() ? xpSettingsSnap.data() : null;
+          // Get XP settings using adminDb (Server Side)
+          const xpSettingsRef = adminDb.collection('settings').doc('xpSystem');
+          const xpSettingsSnap = await xpSettingsRef.get();
+          const xpSettings = xpSettingsSnap.exists ? xpSettingsSnap.data() : null;
 
           // Base registration bonus
           const eventXPSource = xpSettings?.xpSources?.find((s: any) => s.name.includes('Event Registration'));
           const baseEventXP = eventXPSource?.baseXP || 50;
           const baseEventJP = eventXPSource?.baseJP || 50;
 
-          // Additional XP/JP based on event price (similar to shop purchase: 10 XP per ₹100)
-          const shopXPSource = xpSettings?.xpSources?.find((s: any) => s.name.includes('Shop Purchase'));
-          const xpPer100 = shopXPSource?.baseXP || 10;
-          const jpPer100 = shopXPSource?.baseJP || 10;
-          const priceBasedXP = Math.floor((amount / 100) * xpPer100);
-          const priceBasedJP = Math.floor((amount / 100) * jpPer100);
-
-          // Total XP and JP
-          const totalXP = baseEventXP + priceBasedXP;
+          // Total XP - STRICTLY use the configured amount (User Request)
+          // Removed the price-based calculation to prevent confusion vs the admin UI settings
+          const totalXP = baseEventXP;
 
           // Get tier multiplier for JP
           const TIERS = xpSettings?.tiers || [
@@ -354,7 +332,7 @@ export async function POST(request: NextRequest) {
           ];
           const currentTier = [...TIERS].reverse().find((tier: any) => currentXP >= tier.minXP) || TIERS[0];
 
-          const totalJP = Math.floor((baseEventJP + priceBasedJP) * currentTier.multiplier);
+          const totalJP = Math.floor(baseEventJP * currentTier.multiplier);
 
           await userRef.set({
             xp: currentXP + totalXP,

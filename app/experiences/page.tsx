@@ -115,9 +115,9 @@ export default function Experiences() {
           <p className="text-black/70 font-bold text-lg mb-8 max-w-2xl mx-auto">
             We create bespoke experiences tailored to your specific needs and budget.
           </p>
-          <button className="px-10 py-5 bg-[#00B894] text-black font-black text-xs tracking-[0.2em] neo-border neo-shadow hover:scale-105 transition-all rounded-xl">
+          <Link href="/contact" className="px-10 py-5 bg-[#00B894] text-black font-black text-xs tracking-[0.2em] neo-border neo-shadow hover:scale-105 transition-all rounded-xl inline-block">
             CONTACT OUR TEAM
-          </button>
+          </Link>
         </div>
       </div>
     </div>

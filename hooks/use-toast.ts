@@ -1,92 +1,110 @@
-import { useState, useCallback } from "react";
+"use client"
+
+// Inspired by shadcn/ui toast implementation
+// Simplified for this project
+
+import * as React from "react"
 
 export interface ToastConfig {
-  title?: string;
-  description?: string;
-  variant?: 'default' | 'destructive' | 'success';
-  duration?: number;
+  id?: string
+  title?: string
+  description?: string
+  variant?: "default" | "destructive" | "success"
+  duration?: number
 }
 
-export interface Toast extends ToastConfig {
-  id: number;
+// Global State
+let count = 0
+function genId() {
+  count = (count + 1) % Number.MAX_SAFE_INTEGER
+  return count.toString()
 }
 
+type ToastAction =
+  | { type: "ADD_TOAST"; toast: ToastConfig }
+  | { type: "DISMISS_TOAST"; toastId?: string }
+  | { type: "REMOVE_TOAST"; toastId?: string }
+
+interface State {
+  toasts: ToastConfig[]
+}
+
+let memoryState: State = { toasts: [] }
+const listeners: Array<(state: State) => void> = []
+
+function dispatch(action: ToastAction) {
+  switch (action.type) {
+    case "ADD_TOAST":
+      memoryState = {
+        ...memoryState,
+        toasts: [action.toast, ...memoryState.toasts].slice(0, 5), // Limit to 5 toasts
+      }
+      break
+    case "DISMISS_TOAST":
+      // In this simple implementation, dismiss just removes. 
+      // Full implementation might have an 'open' state.
+      memoryState = {
+        ...memoryState,
+        toasts: memoryState.toasts.filter((t) => t.id !== action.toastId),
+      }
+      break
+    case "REMOVE_TOAST":
+      if (action.toastId === undefined) {
+        memoryState = { ...memoryState, toasts: [] }
+      } else {
+        memoryState = {
+          ...memoryState,
+          toasts: memoryState.toasts.filter((t) => t.id !== action.toastId),
+        }
+      }
+      break
+  }
+
+  listeners.forEach((listener) => {
+    listener(memoryState)
+  })
+}
+
+// Usage in Components
 export function useToast() {
-  const [toasts, setToasts] = useState<Toast[]>([]);
+  const [state, setState] = React.useState<State>(memoryState)
 
-  const addToast = useCallback((toast: ToastConfig) => {
-    const id = Date.now() + Math.random();
-    const newToast: Toast = {
-      id,
-      title: toast.title || '',
-      description: toast.description || '',
-      variant: toast.variant || 'default',
-      duration: toast.duration || 5000,
-    };
-
-    setToasts((prev) => [...prev, newToast]);
-
-    // Auto-remove toast after duration
-    if (newToast.duration && newToast.duration > 0) {
-      setTimeout(() => {
-        setToasts((prev) => prev.filter((t) => t.id !== id));
-      }, newToast.duration);
+  React.useEffect(() => {
+    listeners.push(setState)
+    return () => {
+      const index = listeners.indexOf(setState)
+      if (index > -1) {
+        listeners.splice(index, 1)
+      }
     }
-
-    return id;
-  }, []);
-
-  const removeToast = useCallback((id: number) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
-  }, []);
-
-  const clearToasts = useCallback(() => {
-    setToasts([]);
-  }, []);
+  }, [state])
 
   return {
-    toasts,
-    addToast,
-    removeToast,
-    clearToasts,
-  };
-}
+    toasts: state.toasts,
+    addToast: (props: Omit<ToastConfig, "id">) => {
+      const id = genId()
+      const newToast = { ...props, id }
+      dispatch({ type: "ADD_TOAST", toast: newToast })
 
-/**
- * Simple toast function for quick notifications
- * @param {Object} options - Toast options
- * @param {string} options.title - Toast title
- * @param {string} options.description - Toast description
- * @param {string} options.variant - Toast variant (default, destructive, success)
- * @param {number} options.duration - Toast duration in ms
- */
-export const toast = (options: ToastConfig) => {
-  // For now, we'll use console logging as a fallback
-  // In a real app, you'd want to use a global toast context
-  const variant = options.variant || 'default';
-  const title = options.title || '';
-  const description = options.description || '';
-  
-  const message = title ? `${title}: ${description}` : description;
-  
-  switch (variant) {
-    case 'destructive':
-      console.error(`🚨 ${message}`);
-      break;
-    case 'success':
-      console.log(`✅ ${message}`);
-      break;
-    default:
-      console.info(`ℹ️ ${message}`);
-  }
-  
-  // Show browser notification if available
-  if (typeof window !== 'undefined' && window.Notification) {
-    if (Notification.permission === 'granted') {
-      new Notification(title, {
-        body: description,
-        icon: '/favicon.ico',
-      });
+      if (props.duration !== Infinity) {
+        setTimeout(() => {
+          dispatch({ type: "DISMISS_TOAST", toastId: id })
+        }, props.duration || 5000)
+      }
+      return id
+    },
+    dismiss: (toastId?: string) => dispatch({ type: "DISMISS_TOAST", toastId }),
+    toast: (props: Omit<ToastConfig, "id">) => {
+      const id = genId()
+      dispatch({ type: "ADD_TOAST", toast: { ...props, id } })
+      return id
     }
   }
-};
+}
+
+// Standalone function if needed outside hooks
+export const toast = (props: Omit<ToastConfig, "id">) => {
+  const id = genId()
+  dispatch({ type: "ADD_TOAST", toast: { ...props, id } })
+  return id
+}

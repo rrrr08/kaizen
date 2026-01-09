@@ -244,7 +244,9 @@ export default function WalletPage() {
                   <div className="text-[10px] uppercase font-bold text-black/40">JP Multiplier</div>
                 </div>
                 <div className="p-4 bg-[#F5F5F5] border-2 border-black rounded-2xl">
-                  <div className="text-sm font-black text-black truncate">{tier.perk}</div>
+                  <div className="text-sm font-black text-black truncate">
+                    {(!tier.perk || tier.perk === 'None') ? 'Basic Game Access' : tier.perk}
+                  </div>
                   <div className="text-[10px] uppercase font-bold text-black/40">Tier Benefit</div>
                 </div>
               </div>

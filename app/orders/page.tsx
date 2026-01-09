@@ -275,69 +275,6 @@ export default function OrdersPage() {
                 Your complete purchase and event registration history
               </p>
             </div>
-            <div className="flex gap-2">
-              <button
-                onClick={async () => {
-                  try {
-                    const token = await user.getIdToken();
-                    const res = await fetch('/api/debug/check-registrations', {
-                      headers: { 'Authorization': `Bearer ${token}` }
-                    });
-                    const data = await res.json();
-                    console.log('Debug Registrations:', data);
-                    await showAlert(`Found ${data.count} registrations in DB. Check console for details.`, 'info', 'Debug Info');
-                  } catch (e) {
-                    console.error(e);
-                    await showAlert('Debug check failed', 'error');
-                  }
-                }}
-                className="px-6 py-3 bg-gray-800 text-white border-2 border-black rounded-xl neo-shadow font-black text-xs tracking-widest hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all uppercase"
-              >
-                🐞 DEBUG
-              </button>
-              <button
-                onClick={async () => {
-                  const confirmed = await showConfirm('Are you sure you want to clear your entire order history? This cannot be undone.', 'Clear History');
-                  if (!confirmed) return;
-                  try {
-                    setLoading(true);
-                    const token = await user.getIdToken();
-                    const res = await fetch('/api/debug/clear-history', {
-                      method: 'POST',
-                      headers: {
-                        'Authorization': `Bearer ${token}`
-                      }
-                    });
-                    if (res.ok) {
-                      setOrders([]);
-                      setEventRegistrations([]);
-                      await showAlert('History cleared successfully', 'success');
-                    } else {
-                      const data = await res.json();
-                      await showAlert('Failed to clear history: ' + data.error, 'error');
-                    }
-                  } catch (err) {
-                    console.error(err);
-                    await showAlert('Error clearing history', 'error');
-                  } finally {
-                    setLoading(false);
-                  }
-                }}
-                className="px-6 py-3 bg-[#FF7675] text-white border-2 border-black rounded-xl neo-shadow font-black text-xs tracking-widest hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all uppercase"
-              >
-                🗑️ CLEAR HISTORY
-              </button>
-              <button
-                onClick={() => {
-                  console.log('Manual refresh triggered');
-                  loadOrders();
-                  loadEventRegistrations();
-                }}
-                className="px-6 py-3 bg-[#6C5CE7] text-white border-2 border-black rounded-xl neo-shadow font-black text-xs tracking-widest hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all uppercase"
-              >
-                🔄 REFRESH
-              </button>
-            </div>
           </div>
         </div>
 
@@ -381,8 +318,8 @@ export default function OrdersPage() {
           <button
             onClick={() => setActiveTab('shop')}
             className={`flex items-center gap-2 px-6 py-3 font-black text-sm uppercase tracking-widest rounded-xl border-2 border-black transition-all neo-shadow ${activeTab === 'shop'
-                ? 'bg-black text-white'
-                : 'bg-white text-black hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none'
+              ? 'bg-black text-white'
+              : 'bg-white text-black hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none'
               }`}
           >
             <ShoppingBag size={20} strokeWidth={2.5} />
@@ -392,8 +329,8 @@ export default function OrdersPage() {
           <button
             onClick={() => setActiveTab('events')}
             className={`flex items-center gap-2 px-6 py-3 font-black text-sm uppercase tracking-widest rounded-xl border-2 border-black transition-all neo-shadow ${activeTab === 'events'
-                ? 'bg-black text-white'
-                : 'bg-white text-black hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none'
+              ? 'bg-black text-white'
+              : 'bg-white text-black hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none'
               }`}
           >
             <Ticket size={20} strokeWidth={2.5} />
@@ -642,13 +579,14 @@ export default function OrdersPage() {
                                 >
                                   View Receipt
                                 </Link>
-                                <button
-                                  onClick={() => window.print()}
-                                  className="px-6 py-3 bg-white text-black font-black text-xs uppercase tracking-widest rounded-lg border-2 border-black hover:bg-gray-100 transition-all"
+                                <Link
+                                  href={`/order-confirmation/${order.id}?autoPrint=true`}
+                                  target="_blank"
+                                  className="px-6 py-3 bg-white text-black font-black text-xs uppercase tracking-widest rounded-lg border-2 border-black hover:bg-gray-100 transition-all flex items-center justify-center gap-2"
                                 >
-                                  <Download className="w-4 h-4 inline mr-2" />
-                                  Download
-                                </button>
+                                  <Download className="w-4 h-4" />
+                                  Download Bill
+                                </Link>
                               </div>
                             </div>
                           </motion.div>
@@ -764,8 +702,8 @@ export default function OrdersPage() {
                               <div>
                                 <p className="text-black/40 text-[10px] font-black uppercase tracking-[0.2em] mb-1">Status</p>
                                 <span className={`inline-flex items-center px-2 py-1 border border-black rounded-md text-[10px] font-black uppercase ${registration.status === 'registered' ? 'bg-[#00B894] text-white' :
-                                    registration.status === 'waitlisted' ? 'bg-[#FFD93D] text-black' :
-                                      'bg-[#FF7675] text-white'
+                                  registration.status === 'waitlisted' ? 'bg-[#FFD93D] text-black' :
+                                    'bg-[#FF7675] text-white'
                                   }`}>
                                   {registration.status === 'registered' ? '✓ Confirmed' :
                                     registration.status === 'waitlisted' ? '⏳ Waitlist' :

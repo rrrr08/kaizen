@@ -16,7 +16,8 @@ import {
     WHEEL_PRIZES,
     REWARDS,
     fetchWheelPrizesFromFirebase,
-    fetchRewardsConfigFromFirebase
+    fetchRewardsConfigFromFirebase,
+    fetchStoreSettingsFromFirebase
 } from '@/lib/gamification';
 
 // --- Types ---
@@ -78,6 +79,12 @@ export default function GameSettingsDashboard() {
     // Rewards (Gamification) Settings
     const [prizes, setPrizes] = useState(WHEEL_PRIZES);
     const [rewards, setRewards] = useState(REWARDS);
+    const [storeSettings, setStoreSettings] = useState({
+        pointsPerRupee: 1,
+        redeemRate: 0.5,
+        maxRedeemPercent: 50,
+        firstTimeBonusPoints: 100
+    });
 
     // XP & Tiers Settings
     const [tiers, setTiers] = useState<Tier[]>([]);
@@ -145,12 +152,14 @@ export default function GameSettingsDashboard() {
     };
 
     const loadGamificationData = async () => {
-        const [fetchedPrizes, fetchedRewards] = await Promise.all([
+        const [fetchedPrizes, fetchedRewards, fetchedStore] = await Promise.all([
             fetchWheelPrizesFromFirebase(),
-            fetchRewardsConfigFromFirebase()
+            fetchRewardsConfigFromFirebase(),
+            fetchStoreSettingsFromFirebase()
         ]);
         if (fetchedPrizes) setPrizes(fetchedPrizes);
         if (fetchedRewards) setRewards(fetchedRewards);
+        if (fetchedStore) setStoreSettings(prev => ({ ...prev, ...fetchedStore }));
     };
 
     const loadXPSettings = async () => {
@@ -224,9 +233,13 @@ export default function GameSettingsDashboard() {
                 }))
             });
             await setDoc(doc(db, 'settings', 'gamificationRewards'), rewards);
-            showAlert("Rewards settings saved!", 'success');
+
+            // Save Store/Economy Settings
+            await setDoc(doc(db, 'settings', 'store'), storeSettings, { merge: true });
+
+            showAlert("Rewards & Economy settings saved!", 'success');
         } catch (error) {
-            showAlert("Error saving rewards", 'error');
+            showAlert("Error saving settings", 'error');
         } finally {
             setSaving(false);
         }
@@ -630,35 +643,61 @@ export default function GameSettingsDashboard() {
                                     </div>
                                 </div>
 
-                                <div className="space-y-6">
-                                    <div className="bg-white border-2 border-black p-8 rounded-[40px] neo-shadow">
-                                        <h2 className="font-header text-3xl mb-6 italic text-[#6C5CE7]">💰 ECONOMY</h2>
-                                        <div className="grid gap-6">
-                                            {['SUDOKU', 'RIDDLE', 'TREASURE_HUNT'].map(key => (
-                                                <div key={key}>
-                                                    <span className="text-[10px] font-black text-black/30 tracking-[.2em] mb-2 block">{key} SETTINGS</span>
-                                                    {key === 'SUDOKU' ? (
-                                                        <div className="grid grid-cols-3 gap-2">
-                                                            {(['EASY', 'MEDIUM', 'HARD'] as const).map(l => (
-                                                                <input key={l} type="number" value={rewards.SUDOKU[l]} onChange={e => setRewards({ ...rewards, SUDOKU: { ...rewards.SUDOKU, [l]: +e.target.value } })} className="w-full p-3 border-2 border-black/10 rounded-xl font-bold text-sm" placeholder={l} />
-                                                            ))}
-                                                        </div>
-                                                    ) : key === 'RIDDLE' ? (
-                                                        <input type="number" value={rewards.RIDDLE.SOLVE} onChange={e => setRewards({ ...rewards, RIDDLE: { ...rewards.RIDDLE, SOLVE: +e.target.value } })} className="w-full p-3 border-2 border-black/10 rounded-xl font-bold text-sm" />
-                                                    ) : (
-                                                        <div className="grid grid-cols-2 gap-2">
-                                                            <input type="number" step="0.01" value={rewards.TREASURE_HUNT.SPAWN_CHANCE} onChange={e => setRewards({ ...rewards, TREASURE_HUNT: { ...rewards.TREASURE_HUNT, SPAWN_CHANCE: +e.target.value } })} className="w-full p-3 border-2 border-black/10 rounded-xl font-bold text-sm" placeholder="Chance" />
-                                                            <input type="number" value={rewards.TREASURE_HUNT.MAX} onChange={e => setRewards({ ...rewards, TREASURE_HUNT: { ...rewards.TREASURE_HUNT, MAX: +e.target.value } })} className="w-full p-3 border-2 border-black/10 rounded-xl font-bold text-sm" placeholder="Max" />
-                                                        </div>
-                                                    )}
+                                <div className="bg-white border-2 border-black p-8 rounded-[40px] neo-shadow">
+                                    <h2 className="font-header text-3xl mb-6 italic text-[#6C5CE7]">💰 ECONOMY & POINTS</h2>
+
+                                    {/* Store Economy Settings */}
+                                    <div className="grid gap-6 mb-8 pb-8 border-b-2 border-dashed border-black/10">
+                                        <div className="bg-[#FFFDF5] p-6 rounded-2xl border-2 border-black/5">
+                                            <h4 className="font-black text-xs uppercase text-black/40 tracking-widest mb-4">GLOBAL STORE</h4>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <div>
+                                                    <label className="block text-[10px] font-black uppercase tracking-wider mb-2">Points Per ₹1 Spent</label>
+                                                    <input
+                                                        type="number"
+                                                        step="0.1"
+                                                        value={storeSettings.pointsPerRupee}
+                                                        onChange={e => setStoreSettings({ ...storeSettings, pointsPerRupee: +e.target.value })}
+                                                        className="w-full p-3 border-2 border-black/10 rounded-xl font-bold text-sm bg-white"
+                                                    />
                                                 </div>
-                                            ))}
+                                                <div>
+                                                    <label className="block text-[10px] font-black uppercase tracking-wider mb-2">Redeem Rate (₹ per point)</label>
+                                                    <input
+                                                        type="number"
+                                                        step="0.01"
+                                                        value={storeSettings.redeemRate}
+                                                        onChange={e => setStoreSettings({ ...storeSettings, redeemRate: +e.target.value })}
+                                                        className="w-full p-3 border-2 border-black/10 rounded-xl font-bold text-sm bg-white"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-[10px] font-black uppercase tracking-wider mb-2">Max Redeem %</label>
+                                                    <input
+                                                        type="number"
+                                                        value={storeSettings.maxRedeemPercent}
+                                                        onChange={e => setStoreSettings({ ...storeSettings, maxRedeemPercent: +e.target.value })}
+                                                        className="w-full p-3 border-2 border-black/10 rounded-xl font-bold text-sm bg-white"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-[10px] font-black uppercase tracking-wider mb-2">First Time Bonus</label>
+                                                    <input
+                                                        type="number"
+                                                        value={storeSettings.firstTimeBonusPoints}
+                                                        onChange={e => setStoreSettings({ ...storeSettings, firstTimeBonusPoints: +e.target.value })}
+                                                        className="w-full p-3 border-2 border-black/10 rounded-xl font-bold text-sm bg-white"
+                                                    />
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-                                    <button onClick={handleSaveRewards} className="w-full py-4 bg-[#6C5CE7] text-white font-black text-xl rounded-[30px] border-4 border-black neo-shadow-hover transition-all">
-                                        SAVE REWARDS CONFIG
-                                    </button>
+
+
                                 </div>
+                                <button onClick={handleSaveRewards} className="w-full py-4 bg-[#6C5CE7] text-white font-black text-xl rounded-[30px] border-4 border-black neo-shadow-hover transition-all">
+                                    SAVE ECONOMY & REWARDS
+                                </button>
                             </div>
                         )}
 
@@ -800,6 +839,6 @@ export default function GameSettingsDashboard() {
                     </motion.div>
                 </AnimatePresence>
             </div>
-        </div>
+        </div >
     );
 }

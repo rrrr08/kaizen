@@ -8,14 +8,14 @@ export async function POST(req: NextRequest) {
     // Get Firebase Auth token from Authorization header
     const headersList = await headers();
     const authorization = headersList.get('authorization');
-    
+
     if (!authorization?.startsWith('Bearer ')) {
       return NextResponse.json({ error: 'Unauthorized - No token provided' }, { status: 401 });
     }
 
     const token = authorization.split('Bearer ')[1];
     let decodedToken;
-    
+
     try {
       decodedToken = await adminAuth.verifyIdToken(token);
     } catch (error) {
@@ -47,11 +47,31 @@ export async function POST(req: NextRequest) {
     const gameSettings = settingsSnap.exists ? settingsSnap.data()?.[gameId] : null;
 
     // Calculate points
-    let basePoints = customPoints || gameSettings?.basePoints || 10;
+    const MAX_POINTS_LIMIT = 200; // Safety cap
+    let basePoints = gameSettings?.basePoints || customPoints || 10;
+
+    // Level Multipliers
+    const LEVEL_MULTIPLIERS: Record<string, number> = {
+      'easy': 1,
+      'medium': 1.5,
+      'hard': 2,
+      'expert': 3
+    };
+
+    const multiplier = LEVEL_MULTIPLIERS[level?.toLowerCase()] || 1;
+
+    // Apply multiplier to base points
+    basePoints = Math.round(basePoints * multiplier);
+
+    // Validate and cap
+    if (basePoints > MAX_POINTS_LIMIT) {
+      basePoints = MAX_POINTS_LIMIT;
+    }
+
     const retryPenalty = gameSettings?.retryPenalty || 0;
     let finalPoints = Math.max(basePoints - (retry * retryPenalty), 1);
-    
-    console.log(`[Award API] Calculated points: ${finalPoints} (Base: ${basePoints}, Penalty: ${retryPenalty} * ${retry})`);
+
+    console.log(`[Award API] Calculated points: ${finalPoints} (Base: ${basePoints}, Level: ${level}, Multiplier: ${multiplier})`);
 
     // Check if this is Game of the Day
     const gotdSnap = await adminDb.doc('settings/gameOfTheDay').get();
@@ -67,18 +87,18 @@ export async function POST(req: NextRequest) {
 
     // Record the play (overwrite or update)
     if (alreadyPlayed) {
-       // If already played, we might want to just update the 'lastPlayed' or keep the original 'playedAt'
-       // For now, let's update the record to show the latest activity, but distinct from first play if needed.
-       // Actually, requirements say "played other time it should give the same rewards".
-       // We'll just update the record to reflect the latest play stats.
-       await playRecordRef.update({
-         lastPlayedAt: new Date().toISOString(),
-         retry,
-         level: level || 'default',
-         latestPoints: finalPoints // tracking latest points just in case
-       });
+      // If already played, we might want to just update the 'lastPlayed' or keep the original 'playedAt'
+      // For now, let's update the record to show the latest activity, but distinct from first play if needed.
+      // Actually, requirements say "played other time it should give the same rewards".
+      // We'll just update the record to reflect the latest play stats.
+      await playRecordRef.update({
+        lastPlayedAt: new Date().toISOString(),
+        retry,
+        level: level || 'default',
+        latestPoints: finalPoints // tracking latest points just in case
+      });
     } else {
-       await playRecordRef.set({
+      await playRecordRef.set({
         gameId,
         playedAt: new Date().toISOString(),
         date: today,
@@ -96,7 +116,7 @@ export async function POST(req: NextRequest) {
     const currentPoints = userData?.points || userData?.balance || 0;
     const currentXP = userData?.xp || 0;
     const currentGameXP = userData?.game_xp || 0;
-    
+
     // Get user's current tier from Firebase settings
     const xpSettingsSnap = await adminDb.doc('settings/xpSystem').get();
     const TIERS = xpSettingsSnap.exists && xpSettingsSnap.data()?.tiers ? xpSettingsSnap.data()!.tiers : [
@@ -106,11 +126,11 @@ export async function POST(req: NextRequest) {
       { name: 'Grandmaster', minXP: 5000, multiplier: 1.5 }
     ];
     const currentTier = [...TIERS].reverse().find((tier: any) => currentXP >= tier.minXP) || TIERS[0];
-    
+
     // XP increases by base amount, JP increases by amount × tier multiplier
     const xpEarned = finalPoints;
     const jpEarned = Math.round(finalPoints * currentTier.multiplier);
-    
+
     await userRef.set(
       {
         points: currentPoints + jpEarned,
@@ -140,10 +160,10 @@ export async function POST(req: NextRequest) {
     const leaderboardRef = adminDb.collection('leaderboards').doc(gameId);
     const leaderboardSnap = await leaderboardRef.get();
     const leaderboardData = leaderboardSnap.exists ? leaderboardSnap.data() : { entries: [] };
-    
+
     const entries = (leaderboardData?.entries || []) as any[];
     const existingEntryIndex = entries.findIndex((e: any) => e.uid === userUid);
-    
+
     if (existingEntryIndex >= 0) {
       entries[existingEntryIndex].totalPoints += finalPoints;
       entries[existingEntryIndex].plays += 1;

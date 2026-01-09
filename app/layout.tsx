@@ -10,6 +10,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import ClientLayout from "@/components/ClientLayout";
 import UserActivityTracker from "@/components/analytics/UserActivityTracker";
 import { defaultMetadata } from "@/lib/metadata";
+import { Toaster } from "@/components/ui/toaster";
 
 // Configure fonts
 const outfit = Outfit({
@@ -116,6 +117,7 @@ export default function RootLayout({
                   <ClientLayout>
                     {children}
                   </ClientLayout>
+                  <Toaster />
                 </PopupProvider>
 
                 {/* SVG Definition for Blob Mask */}

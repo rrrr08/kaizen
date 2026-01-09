@@ -3,19 +3,10 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/app/context/AuthContext';
 import { useRouter } from 'next/navigation';
-import { useToast } from '@/hooks/use-toast';
+import { usePopup } from '@/app/context/PopupContext';
 import { useGamification } from '@/app/context/GamificationContext';
 
 interface Settings {
-  // Gamification
-  pointsPerRupee: number;
-  firstTimeBonusPoints: number;
-  firstTimeThreshold: number;
-  redeemRate: number;
-  maxRedeemPercent: number;
-  referralBonus: number;
-  birthdayBonus: number;
-
   // Payment
   gstRate: number;
   shippingCost: number;
@@ -29,13 +20,6 @@ interface Settings {
 }
 
 const defaultSettings: Settings = {
-  pointsPerRupee: 1,
-  firstTimeBonusPoints: 100,
-  firstTimeThreshold: 500,
-  redeemRate: 0.5,
-  maxRedeemPercent: 50,
-  referralBonus: 50,
-  birthdayBonus: 100,
   gstRate: 18,
   shippingCost: 50,
   freeShippingThreshold: 500,
@@ -48,7 +32,8 @@ const defaultSettings: Settings = {
 export default function AdminSettingsPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
-  const { addToast } = useToast();
+
+  const { showAlert, showConfirm } = usePopup();
   const { refreshConfigs } = useGamification();
   const [settings, setSettings] = useState<Settings>(defaultSettings);
   const [isSaving, setIsSaving] = useState(false);
@@ -128,17 +113,23 @@ export default function AdminSettingsPage() {
       // Refresh global gamification configs
       await refreshConfigs();
 
-      addToast({
-        title: 'Success',
-        description: 'Settings updated successfully!',
-      });
+      await showAlert('Settings updated successfully!', 'success', 'Success');
     } catch (error) {
-      addToast({
-        title: 'Error',
-        description: 'Failed to save settings',
-      });
+      await showAlert('Failed to save settings', 'error', 'Error');
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleReset = async () => {
+    const confirmed = await showConfirm(
+      'Are you sure you want to reset all settings to their defaults? This cannot be undone.',
+      'Reset Settings'
+    );
+
+    if (confirmed) {
+      setSettings(defaultSettings);
+      await showAlert('Settings reset to defaults. Remember to save!', 'info', 'Reset');
     }
   };
 
@@ -163,109 +154,8 @@ export default function AdminSettingsPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Gamification Settings */}
-          <div className="bg-white border-2 border-black rounded-[25px] p-8 neo-shadow">
-            <h2 className="font-header text-2xl mb-8 text-black font-black uppercase tracking-tight flex items-center gap-3">
-              <span className="w-3 h-8 bg-[#FFD93D] border-2 border-black rounded-full"></span>
-              Gamification
-            </h2>
-            <div className="space-y-6">
-              <div>
-                <label className="block text-black font-black text-xs uppercase tracking-widest mb-2">
-                  Points Per Rupee Spent
-                </label>
-                <div className="relative">
-                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-black/40 font-black">₹ 1 =</div>
-                  <input
-                    type="number"
-                    step="0.1"
-                    value={settings.pointsPerRupee}
-                    onChange={(e) => handleChange('pointsPerRupee', e.target.value)}
-                    className="w-full bg-[#FFFDF5] border-2 border-black rounded-xl pl-16 pr-4 py-3 text-black font-black focus:outline-none focus:neo-shadow-sm transition-all"
-                  />
-                </div>
-                <p className="text-black/40 font-bold text-xs mt-2 uppercase tracking-wide">User gets 1 point for every ₹{(1 / settings.pointsPerRupee).toFixed(2)} spent</p>
-              </div>
-
-              <div>
-                <label className="block text-black font-black text-xs uppercase tracking-widest mb-2">
-                  First Time Bonus Points
-                </label>
-                <input
-                  type="number"
-                  value={settings.firstTimeBonusPoints}
-                  onChange={(e) => handleChange('firstTimeBonusPoints', e.target.value)}
-                  className="w-full bg-[#FFFDF5] border-2 border-black rounded-xl px-4 py-3 text-black font-black focus:outline-none focus:neo-shadow-sm transition-all"
-                />
-              </div>
-
-              <div>
-                <label className="block text-black font-black text-xs uppercase tracking-widest mb-2">
-                  First Time Purchase Threshold (₹)
-                </label>
-                <input
-                  type="number"
-                  value={settings.firstTimeThreshold}
-                  onChange={(e) => handleChange('firstTimeThreshold', e.target.value)}
-                  className="w-full bg-[#FFFDF5] border-2 border-black rounded-xl px-4 py-3 text-black font-black focus:outline-none focus:neo-shadow-sm transition-all"
-                />
-              </div>
-
-              <div>
-                <label className="block text-black font-black text-xs uppercase tracking-widest mb-2">
-                  Redeem Rate (₹ per point)
-                </label>
-                <input
-                  type="number"
-                  step="0.01"
-                  value={settings.redeemRate}
-                  onChange={(e) => handleChange('redeemRate', e.target.value)}
-                  className="w-full bg-[#FFFDF5] border-2 border-black rounded-xl px-4 py-3 text-black font-black focus:outline-none focus:neo-shadow-sm transition-all"
-                />
-                <p className="text-black/40 font-bold text-xs mt-2 uppercase tracking-wide">1 point = ₹{settings.redeemRate}</p>
-              </div>
-
-              <div>
-                <label className="block text-black font-black text-xs uppercase tracking-widest mb-2">
-                  Max Redeem Percentage (%)
-                </label>
-                <input
-                  type="number"
-                  value={settings.maxRedeemPercent}
-                  onChange={(e) => handleChange('maxRedeemPercent', e.target.value)}
-                  className="w-full bg-[#FFFDF5] border-2 border-black rounded-xl px-4 py-3 text-black font-black focus:outline-none focus:neo-shadow-sm transition-all"
-                />
-                <p className="text-black/40 font-bold text-xs mt-2 uppercase tracking-wide">Max {settings.maxRedeemPercent}% of order can be paid with points</p>
-              </div>
-
-              <div>
-                <label className="block text-black font-black text-xs uppercase tracking-widest mb-2">
-                  Referral Bonus Points
-                </label>
-                <input
-                  type="number"
-                  value={settings.referralBonus}
-                  onChange={(e) => handleChange('referralBonus', e.target.value)}
-                  className="w-full bg-[#FFFDF5] border-2 border-black rounded-xl px-4 py-3 text-black font-black focus:outline-none focus:neo-shadow-sm transition-all"
-                />
-              </div>
-
-              <div>
-                <label className="block text-black font-black text-xs uppercase tracking-widest mb-2">
-                  Birthday Bonus Points
-                </label>
-                <input
-                  type="number"
-                  value={settings.birthdayBonus}
-                  onChange={(e) => handleChange('birthdayBonus', e.target.value)}
-                  className="w-full bg-[#FFFDF5] border-2 border-black rounded-xl px-4 py-3 text-black font-black focus:outline-none focus:neo-shadow-sm transition-all"
-                />
-              </div>
-            </div>
-          </div>
-
           {/* Payment Settings */}
-          <div className="bg-white border-2 border-black rounded-[25px] p-8 neo-shadow">
+          <div className="bg-white border-2 border-black rounded-[25px] p-8 lg:col-span-2 neo-shadow">
             <h2 className="font-header text-2xl mb-8 text-black font-black uppercase tracking-tight flex items-center gap-3">
               <span className="w-3 h-8 bg-[#00B894] border-2 border-black rounded-full"></span>
               Payment & Shipping
@@ -373,7 +263,7 @@ export default function AdminSettingsPage() {
         {/* Save Button */}
         <div className="mt-12 flex gap-6 justify-end">
           <button
-            onClick={() => setSettings(defaultSettings)}
+            onClick={handleReset}
             className="px-8 py-4 bg-white border-2 border-black text-black font-black uppercase tracking-widest rounded-xl hover:bg-gray-100 transition-all text-sm"
           >
             Reset to Default

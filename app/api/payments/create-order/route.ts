@@ -56,26 +56,31 @@ export async function POST(request: NextRequest) {
       const productRefs = items.map((item: any) => adminDb.collection('products').doc(item.productId));
       const productDocs = await adminDb.getAll(...productRefs);
 
+      const unavailableItems: string[] = [];
+
       for (let i = 0; i < productDocs.length; i++) {
         const doc = productDocs[i];
         const item = items[i];
-        
+
         if (!doc.exists) {
-          return NextResponse.json(
-            { error: `Product not found: ${item.name || 'Unknown Item'}` },
-            { status: 400 }
-          );
+          unavailableItems.push(`${item.name || 'Item'} (Not Found)`);
+          continue;
         }
 
         const productData = doc.data();
         const currentStock = productData?.stock || 0;
 
         if (currentStock < item.quantity) {
-          return NextResponse.json(
-            { error: `Insufficient stock for ${productData?.name || 'Item'}. Only ${currentStock} left.` },
-            { status: 400 }
-          );
+          const reason = currentStock === 0 ? 'Out of Stock' : `Only ${currentStock} left`;
+          unavailableItems.push(`${productData?.name || 'Item'} (${reason})`);
         }
+      }
+
+      if (unavailableItems.length > 0) {
+        return NextResponse.json(
+          { error: `Availability Update: ${unavailableItems.join(', ')}` },
+          { status: 400 }
+        );
       }
     }
 
@@ -97,22 +102,22 @@ export async function POST(request: NextRequest) {
     let firestoreOrderId = null;
 
     if (items && items.length > 0) {
-        const orderRef = adminDb.collection('orders').doc();
-        firestoreOrderId = orderRef.id;
+      const orderRef = adminDb.collection('orders').doc();
+      firestoreOrderId = orderRef.id;
 
-        await orderRef.set({
-            id: firestoreOrderId,
-            userId: userId || notes?.userId || 'guest',
-            items: items,
-            shippingAddress: shippingAddress || {},
-            totalPrice: amount, // Storing in Rupees as per existing schema
-            status: 'PENDING',
-            paymentStatus: 'initiated',
-            paymentGateway: 'razorpay',
-            paymentOrderId: order.id, // Link to Razorpay Order ID
-            createdAt: FieldValue.serverTimestamp(),
-            updatedAt: FieldValue.serverTimestamp()
-        });
+      await orderRef.set({
+        id: firestoreOrderId,
+        userId: userId || notes?.userId || 'guest',
+        items: items,
+        shippingAddress: shippingAddress || {},
+        totalPrice: amount, // Storing in Rupees as per existing schema
+        status: 'PENDING',
+        paymentStatus: 'initiated',
+        paymentGateway: 'razorpay',
+        paymentOrderId: order.id, // Link to Razorpay Order ID
+        createdAt: FieldValue.serverTimestamp(),
+        updatedAt: FieldValue.serverTimestamp()
+      });
     }
 
     return NextResponse.json(

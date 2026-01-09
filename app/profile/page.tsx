@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useAuth } from '@/app/context/AuthContext';
 import { useGamification } from '@/app/context/GamificationContext';
 import Link from 'next/link';
@@ -31,8 +32,12 @@ export const dynamic = 'force-dynamic';
 
 export default function ProfilePage() {
   const { user, loading: authLoading } = useAuth();
-  const { xp, balance, tier, nextTier, loading: gamificationLoading, history, streak } = useGamification();
+  const { xp, balance, tier, nextTier, loading: gamificationLoading, history, streak, fetchHistory } = useGamification();
   const router = useRouter();
+
+  useEffect(() => {
+    fetchHistory();
+  }, []);
 
   if (authLoading || gamificationLoading) {
     return (

@@ -65,7 +65,7 @@ const SudokuGame: React.FC = () => {
     // Initialize notes grid
     useEffect(() => {
         if (puzzle.length > 0) {
-            const newNotes = Array(9).fill(null).map(() => 
+            const newNotes = Array(9).fill(null).map(() =>
                 Array(9).fill(null).map(() => new Set<number>())
             );
             setNotes(newNotes);
@@ -76,12 +76,12 @@ const SudokuGame: React.FC = () => {
     useEffect(() => {
         if (board.length === 0) return;
         const newConflicts = new Set<string>();
-        
+
         for (let r = 0; r < 9; r++) {
             for (let c = 0; c < 9; c++) {
                 const val = board[r][c];
                 if (val === 0) continue;
-                
+
                 // Check row
                 for (let cc = 0; cc < 9; cc++) {
                     if (cc !== c && board[r][cc] === val) {
@@ -89,7 +89,7 @@ const SudokuGame: React.FC = () => {
                         newConflicts.add(`${r}-${cc}`);
                     }
                 }
-                
+
                 // Check column
                 for (let rr = 0; rr < 9; rr++) {
                     if (rr !== r && board[rr][c] === val) {
@@ -97,7 +97,7 @@ const SudokuGame: React.FC = () => {
                         newConflicts.add(`${rr}-${c}`);
                     }
                 }
-                
+
                 // Check 3x3 box
                 const boxR = Math.floor(r / 3) * 3;
                 const boxC = Math.floor(c / 3) * 3;
@@ -111,7 +111,7 @@ const SudokuGame: React.FC = () => {
                 }
             }
         }
-        
+
         setConflicts(newConflicts);
     }, [board]);
 
@@ -160,7 +160,7 @@ const SudokuGame: React.FC = () => {
                     const response = await fetch(`/api/games/history?gameId=${SUDOKU_GAME_ID}`, {
                         headers: { 'Authorization': `Bearer ${token}` }
                     });
-                    
+
                     if (response.ok) {
                         const data = await response.json();
                         setHistory(data.history || []);
@@ -226,14 +226,14 @@ const SudokuGame: React.FC = () => {
         if (hints === 0 || !selectedCell) return;
         const { row, col } = selectedCell;
         if (puzzle[row][col] !== 0) return;
-        
+
         saveState();
         const newBoard = [...board];
         newBoard[row] = [...newBoard[row]];
         newBoard[row][col] = solution[row][col];
         setBoard(newBoard);
         setHints(h => h - 1);
-        
+
         confetti({ particleCount: 50, spread: 30, origin: { y: 0.7 } });
     };
 
@@ -241,13 +241,13 @@ const SudokuGame: React.FC = () => {
         if (!selectedCell) return;
         const { row, col } = selectedCell;
         if (puzzle[row][col] !== 0) return;
-        
+
         saveState();
         const newBoard = [...board];
         newBoard[row] = [...newBoard[row]];
         newBoard[row][col] = 0;
         setBoard(newBoard);
-        
+
         // Clear notes too
         if (notes.length > 0) {
             const newNotes = notes.map(r => r.map(c => new Set<number>(c)));
@@ -273,12 +273,12 @@ const SudokuGame: React.FC = () => {
         } else {
             // Check if number is wrong
             const isWrong = solution[row][col] !== num;
-            
+
             if (isWrong) {
                 // Increment mistakes
                 const newMistakes = mistakes + 1;
                 setMistakes(newMistakes);
-                
+
                 // Check for game over
                 if (newMistakes >= maxMistakes) {
                     setIsActive(false);
@@ -286,21 +286,21 @@ const SudokuGame: React.FC = () => {
                     return;
                 }
             }
-            
+
             // Place number
             saveState();
             const newBoard = [...board];
             newBoard[row] = [...newBoard[row]];
             newBoard[row][col] = num;
             setBoard(newBoard);
-            
+
             // Clear notes when number is placed
             if (notes.length > 0) {
                 const newNotes = notes.map(r => r.map(c => new Set<number>(c)));
                 newNotes[row][col].clear();
                 setNotes(newNotes);
             }
-            
+
             // Auto-check on every move
             if (!isWrong && checkWin(newBoard)) {
                 setTimeout(() => handleWin(), 500);
@@ -324,8 +324,7 @@ const SudokuGame: React.FC = () => {
             const result = await awardGamePoints({
                 gameId: SUDOKU_GAME_ID,
                 retry,
-                level,
-                points: Math.max(100 - mistakes * 10 - Math.floor(timer / 60) * 5, 10)
+                level
             });
 
             if (result.success) {
@@ -398,7 +397,7 @@ const SudokuGame: React.FC = () => {
         const isHighlighted = highlightNumber !== null && cell === highlightNumber && cell !== 0;
         const isSameRow = selectedCell?.row === rIndex;
         const isSameCol = selectedCell?.col === cIndex;
-        const isSameBox = selectedCell && 
+        const isSameBox = selectedCell &&
             Math.floor(selectedCell.row / 3) === Math.floor(rIndex / 3) &&
             Math.floor(selectedCell.col / 3) === Math.floor(cIndex / 3);
         const hasConflict = conflicts.has(`${rIndex}-${cIndex}`);
@@ -427,7 +426,7 @@ const SudokuGame: React.FC = () => {
             {isGameOfDay && (
                 <div className="mb-2">
                     <div className="inline-flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-[#FFD93D] text-black rounded-full font-black tracking-widest text-xs sm:text-sm border-2 border-black shadow-[4px_4px_0px_#000]">
-                        <Star size={14} className="fill-black sm:w-4 sm:h-4" /> 
+                        <Star size={14} className="fill-black sm:w-4 sm:h-4" />
                         <span className="hidden sm:inline">GAME OF THE DAY - 2X POINTS!</span>
                         <span className="sm:hidden">2X POINTS!</span>
                     </div>
@@ -441,7 +440,7 @@ const SudokuGame: React.FC = () => {
                     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowRules(false)}>
                         <div className="bg-white border-4 border-black rounded-[20px] p-6 sm:p-8 max-w-2xl max-h-[80vh] overflow-y-auto neo-shadow" onClick={e => e.stopPropagation()}>
                             <h2 className="text-2xl sm:text-3xl font-black mb-6 uppercase">📋 How to Play Sudoku</h2>
-                            
+
                             <div className="space-y-4 text-left">
                                 <div>
                                     <h3 className="font-black text-lg mb-2 text-[#6C5CE7]">🎯 Objective</h3>
@@ -664,7 +663,7 @@ const SudokuGame: React.FC = () => {
                                     const borderRight = (cIndex + 1) % 3 === 0 && cIndex !== 8 ? 'border-r-4 border-black' : 'border-r border-black/20';
                                     const borderBottom = (rIndex + 1) % 3 === 0 && rIndex !== 8 ? 'border-b-4 border-black' : 'border-b border-black/20';
                                     const cellNotes = notes[rIndex]?.[cIndex];
-                                    
+
                                     return (
                                         <div
                                             key={`${rIndex}-${cIndex}`}
@@ -677,18 +676,18 @@ const SudokuGame: React.FC = () => {
                                                 select-none
                                             `}
                                         >
-                                        {cell !== 0 ? (
-                                            <span className="text-xl sm:text-2xl md:text-3xl font-bold">{cell}</span>
-                                        ) : cellNotes && cellNotes.size > 0 ? (
-                                            <div className="grid grid-cols-3 gap-0 w-full h-full p-0.5 sm:p-1">
-                                                {[1,2,3,4,5,6,7,8,9].map(n => (
-                                                    <span key={n} className="text-[7px] sm:text-[8px] md:text-[9px] text-gray-400 flex items-center justify-center font-medium">
-                                                        {cellNotes.has(n) ? n : ''}
-                                                    </span>
-                                                ))}
-                                            </div>
-                                        ) : null}
-                                    </div>
+                                            {cell !== 0 ? (
+                                                <span className="text-xl sm:text-2xl md:text-3xl font-bold">{cell}</span>
+                                            ) : cellNotes && cellNotes.size > 0 ? (
+                                                <div className="grid grid-cols-3 gap-0 w-full h-full p-0.5 sm:p-1">
+                                                    {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => (
+                                                        <span key={n} className="text-[7px] sm:text-[8px] md:text-[9px] text-gray-400 flex items-center justify-center font-medium">
+                                                            {cellNotes.has(n) ? n : ''}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            ) : null}
+                                        </div>
                                     );
                                 })
                             ))}
