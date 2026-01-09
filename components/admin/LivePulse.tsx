@@ -30,7 +30,7 @@ export default function LivePulse() {
                     newEvents.push({
                         id: doc.id,
                         time: getTimeAgo(date),
-                        msg: `New Order #${doc.id.substring(0, 5)} confirmed ($${data.totalPrice})`,
+                        msg: `New Order #...${doc.id.slice(-6).toUpperCase()} confirmed (₹${(data.totalPrice || 0).toLocaleString()})`,
                         type: 'success',
                         timestamp: date.getTime()
                     });

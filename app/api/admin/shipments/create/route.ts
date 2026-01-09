@@ -36,7 +36,29 @@ export async function POST(req: Request) {
             const orderData = orderDoc.data();
             const shipmentRef = adminDb.collection('shipments').doc();
             
-            // 1. Create Shipment
+            // 2. Prepare Order Updates
+            const orderUpdates: any = {
+                shipmentId: shipmentRef.id,
+                shipmentStatus: status,
+                status: 'SHIPPED', // Explicitly mark order as SHIPPED
+                updatedAt: FieldValue.serverTimestamp()
+            };
+
+            // 3. Conditional Stock Deduction Logic (READS FIRST)
+            let productDocs: any[] = [];
+            const items = orderData?.items || [];
+            
+            // If inventory was NOT deducted yet, we need to read products first
+            if (!orderData?.inventory_deducted && items.length > 0) {
+                 const productReads = items.map((item: any) => {
+                    return t.get(adminDb.collection('products').doc(item.productId));
+                });
+                productDocs = await Promise.all(productReads);
+            }
+
+            // --- ALL READS DONE HERE ---
+
+            // 1. Create Shipment (WRITE)
             t.set(shipmentRef, {
                 orderId,
                 customerName,
@@ -51,52 +73,29 @@ export async function POST(req: Request) {
                 updatedAt: FieldValue.serverTimestamp()
             });
 
-            // 2. Prepare Order Updates
-            const orderUpdates: any = {
-                shipmentId: shipmentRef.id,
-                shipmentStatus: status,
-                status: 'SHIPPED', // Explicitly mark order as SHIPPED
-                updatedAt: FieldValue.serverTimestamp()
-            };
+            // 3b. Apply Stock Deduction (WRITES)
+            if (!orderData?.inventory_deducted && items.length > 0) {
+                items.forEach((item: any, index: number) => {
+                    const productDoc = productDocs[index];
+                    if (productDoc && productDoc.exists) {
+                        const currentSales = productDoc.data()?.sales || 0;
+                        const currentStock = productDoc.data()?.stock || 0;
+                        
+                        t.update(productDoc.ref, {
+                            stock: currentStock - item.quantity,
+                            sales: currentSales + item.quantity
+                        });
+                    }
+                });
 
-            // 3. Conditional Stock Deduction
-            // If inventory was NOT deducted yet (e.g. manual order, COD, or legacy), do it now.
-            if (!orderData?.inventory_deducted) {
-                const items = orderData?.items || [];
-                if (items.length > 0) {
-                    // Read product docs to check stock
-                    const productReads = items.map((item: any) => {
-                        return t.get(adminDb.collection('products').doc(item.productId));
-                    });
-                    
-                    const productDocs = await Promise.all(productReads);
-                    
-                    // Update Products
-                    items.forEach((item: any, index: number) => {
-                        const productDoc = productDocs[index];
-                        if (productDoc.exists) {
-                            const currentSales = productDoc.data()?.sales || 0;
-                            const currentStock = productDoc.data()?.stock || 0;
-                            
-                            // Check for negative stock if you want strict enforcement, 
-                            // but usually for shipment we force it or log warning.
-                            // Here we just decrement.
-                            t.update(productDoc.ref, {
-                                stock: currentStock - item.quantity,
-                                sales: currentSales + item.quantity
-                            });
-                        }
-                    });
-
-                    // Mark as deducted
-                    orderUpdates.inventory_deducted = true;
-                    console.log(`[Shipment API] Deducting stock for Order ${orderId} on shipment.`);
-                }
+                // Mark as deducted
+                orderUpdates.inventory_deducted = true;
+                console.log(`[Shipment API] Deducting stock for Order ${orderId} on shipment.`);
             } else {
                 console.log(`[Shipment API] Stock already deducted for Order ${orderId}, skipping.`);
             }
 
-            // 4. Update Order
+            // 4. Update Order (WRITE)
             t.update(orderRef, orderUpdates);
 
             return shipmentRef.id;

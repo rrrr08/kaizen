@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { collection, getDocs, getDoc, doc, orderBy, query, limit, where, Timestamp } from 'firebase/firestore';
+import { collection, getDocs, getDoc, doc, orderBy, query, limit, where, Timestamp, collectionGroup } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import { useAuth } from '@/app/context/AuthContext';
 import { Gamepad2, ShoppingCart, Clock, Trophy, Loader2 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
@@ -25,15 +26,27 @@ export default function DeepAnalytics() {
     const [topGames, setTopGames] = useState<TopItem[]>([]);
     const [loading, setLoading] = useState(true);
 
+    const { user } = useAuth();
+
     useEffect(() => {
-        fetchDeepAnalytics();
-    }, []);
+        if (user) {
+            fetchDeepAnalytics();
+        }
+    }, [user]);
 
     const fetchDeepAnalytics = async () => {
         try {
             setLoading(true);
 
-            // 1. Most Played Game (Aggregate from gamePlays or use Settings fallback)
+            // Scoped variables for metrics
+            let mostPlayedGame = 'No Data';
+            let maxPlays = 0;
+            let bestSeller = 'N/A';
+            let maxSales = 0;
+            let avgTime = "0m";
+            let activeUsersLabel = "No active users";
+            let topEvent = 'No Events';
+            let topEventCount = 0;
             // Strategy: 
             // 1. Fetch `settings/gamePoints` to get all available games (definitions).
             // 2. Fetch `games` collection for stats (if it exists).
@@ -62,17 +75,25 @@ export default function DeepAnalytics() {
                 Object.entries(defaults).forEach(([key, name]) => gamesMap.set(key, { name, plays: 0 }));
             }
 
-            // Load play counts from 'games' collection if available
-            if (!gamesCollectionSnap.empty) {
-                gamesCollectionSnap.docs.forEach(doc => {
+            // Load play counts from 'leaderboards' collection (Source of Truth)
+            // Each doc in 'leaderboards' is a gameId, containing 'entries' array
+            const leaderboardsSnap = await getDocs(collection(db, 'leaderboards'));
+
+            if (!leaderboardsSnap.empty) {
+                leaderboardsSnap.docs.forEach(doc => {
+                    const gameId = doc.id;
                     const data = doc.data();
-                    const key = doc.id;
-                    const plays = data.playCount || data.plays || 0;
-                    if (gamesMap.has(key)) {
-                        const entry = gamesMap.get(key)!;
-                        entry.plays = plays;
+                    const entries = (data.entries || []) as any[];
+                    // Sum plays from all users in the leaderboard
+                    const totalPlays = entries.reduce((acc, entry) => acc + (entry.plays || 0), 0);
+
+                    if (gamesMap.has(gameId)) {
+                        const entry = gamesMap.get(gameId)!;
+                        entry.plays = totalPlays;
                     } else {
-                        gamesMap.set(key, { name: data.title || data.name || key, plays });
+                        // Attempt to pretty print name if not in settings
+                        const name = gameId.charAt(0).toUpperCase() + gameId.slice(1);
+                        gamesMap.set(gameId, { name, plays: totalPlays });
                     }
                 });
             }
@@ -83,8 +104,6 @@ export default function DeepAnalytics() {
             gameStats.sort((a, b) => b.count - a.count);
             setTopGames(gameStats.slice(0, 5));
 
-            let mostPlayedGame = 'No Data';
-            let maxPlays = 0;
             // Set Most Played Game text
             if (gameStats.length > 0) {
                 // If all zero, default to "Chess Puzzle" or first item but show "No plays yet"
@@ -128,9 +147,7 @@ export default function DeepAnalytics() {
                 }
             });
 
-            let bestSeller = 'N/A';
-            let maxSales = 0;
-            // Find max
+            // 2. Best Selling Product (Updated logic)
             const sortedProducts = Object.entries(productSales).sort(([, a], [, b]) => b - a);
             if (sortedProducts.length > 0) {
                 bestSeller = sortedProducts[0][0];
@@ -143,47 +160,75 @@ export default function DeepAnalytics() {
             }
 
 
-            // 3. Average Active Time (Real Calculation with Fallback)
-            // Query 50 recent users
-            const usersSnapshot = await getDocs(query(collection(db, 'users'), orderBy('createdAt', 'desc'), limit(50)));
-            let totalMinutes = 0;
-            let usersWithStats = 0;
-
-            if (!usersSnapshot.empty) {
-                const statsPromises = usersSnapshot.docs.map(u =>
-                    getDoc(doc(db, 'users', u.id, 'stats', 'timeOnline'))
+            // 3. Average Active Time (Accurate Global Calculation)
+            // Query 'stats' subcollections across all users where totalMinutes > 0
+            // We use collectionGroup to find all 'timeOnline' docs within 'stats' collections
+            try {
+                // Note: collectionGroup requires an index on totalMinutes if used with filters like > 0.
+                // For now, we fetch a reasonable sample without complex filters to avoid index errors immediately,
+                // or just filter client side if dataset is small.
+                // But efficient way:
+                const statsQuery = query(
+                    collectionGroup(db, 'stats'),
+                    // where('totalMinutes', '>', 0), // Explicitly need index for this? often yes.
+                    // Let's just fetch 'stats' docs and filter for id 'timeOnline' client side 
+                    // or rely on the field existence.
+                    limit(1000)
                 );
 
-                const statsSnapshots = await Promise.all(statsPromises);
+                const statsSnapshot = await getDocs(statsQuery);
+                let totalMinutes = 0;
+                let usersWithStats = 0;
 
-                statsSnapshots.forEach(snap => {
-                    if (snap.exists()) {
-                        const data = snap.data();
+                statsSnapshot.forEach(doc => {
+                    // Only process 'timeOnline' documents
+                    if (doc.id === 'timeOnline') {
+                        const data = doc.data();
                         if (data.totalMinutes) {
-                            totalMinutes += data.totalMinutes;
+                            totalMinutes += Number(data.totalMinutes);
                             usersWithStats++;
                         }
                     }
                 });
-            }
 
-            let avgTime = "0m";
-            if (usersWithStats > 0) {
-                const avgMins = Math.floor(totalMinutes / usersWithStats);
-                const hrs = Math.floor(avgMins / 60);
-                const mins = avgMins % 60;
-                avgTime = hrs > 0 ? `${hrs}h ${mins}m` : `${mins}m`;
-            } else {
-                // Fallback if no specific stats found. Show a default or "0m" is fine if true.
-                // To avoid looking "broken", we can say "0m (No activity)"
-                avgTime = "0m";
+                let avgTime = "0m";
+                let activeUsersText = "No active users";
+
+                if (usersWithStats > 0) {
+                    const avgMins = Math.floor(totalMinutes / usersWithStats);
+                    const hrs = Math.floor(avgMins / 60);
+                    const mins = avgMins % 60;
+                    avgTime = hrs > 0 ? `${hrs}h ${mins}m` : `${mins}m`;
+                    activeUsersText = `Based on ${usersWithStats} active users`;
+                }
+
+                // Update the metrics state inside the logic block or store values for later
+                // (We do it at the end, so just updating variables here)
+                // We need to pass this new subtitle to the metrics array
+
+                // Hack: We can't update 'metrics' directly here, so we'll rely on the final setMetrics call.
+                // We need to ensure the variables are accessible.
+                // Refactoring: I'll move this variable declaration up or return it.
+
+                // For now, I'm replacing the block, so I will define the string here 
+                // and use it in the setMetrics call below matching the scope.
+
+                // ... logic continues ...
+
+                if (usersWithStats > 0) {
+                    const avgMins = Math.floor(totalMinutes / usersWithStats);
+                    const hrs = Math.floor(avgMins / 60);
+                    const mins = avgMins % 60;
+                    avgTime = hrs > 0 ? `${hrs}h ${mins}m` : `${mins}m`;
+                    activeUsersLabel = `Based on ${usersWithStats} active users`;
+                }
+            } catch (err) {
+                console.error("Error fetching global stats:", err);
             }
 
 
             // 4. Top Event
             const eventsSnapshot = await getDocs(query(collection(db, 'events'), orderBy('registered', 'desc'), limit(1)));
-            let topEvent = 'No Events';
-            let topEventCount = 0;
             if (!eventsSnapshot.empty) {
                 const evt = eventsSnapshot.docs[0].data();
                 topEvent = evt.title;
@@ -211,7 +256,7 @@ export default function DeepAnalytics() {
                 {
                     title: 'Avg. Session Time',
                     value: avgTime,
-                    subValue: `Based on active users`,
+                    subValue: activeUsersLabel || 'Based on active users',
                     icon: Clock,
                     color: '#FFD93D',
                     bg: '#FFFBF0'
