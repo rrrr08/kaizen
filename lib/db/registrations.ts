@@ -11,6 +11,15 @@ import {
 } from "firebase/firestore";
 import { getFirebaseDb } from "@/lib/firebase";
 
+export interface EventRegistration {
+  id: string;
+  userId: string;
+  eventId: string;
+  status: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export async function registerForEvent(eventId: string, userId: string) {
   try {
     const database = await getFirebaseDb();
@@ -93,28 +102,29 @@ export async function registerForEvent(eventId: string, userId: string) {
   }
 }
 
-export async function getEventRegistrations(eventId: string) {
-  try {
-    const database = await getFirebaseDb();
-    const registrationsCollection = collection(database, 'event_registrations');
-    const q = query(
-      registrationsCollection,
-      where('eventId', '==', eventId)
-    );
+export async function getEventRegistrations(
+  eventId: string
+): Promise<EventRegistration[]> {
+  const database = await getFirebaseDb();
+  const registrationsCollection = collection(database, 'event_registrations');
+  const q = query(registrationsCollection, where('eventId', '==', eventId));
 
-    const snapshot = await getDocs(q);
+  const snapshot = await getDocs(q);
 
-    return snapshot.docs.map(doc => ({
+  return snapshot.docs.map(doc => {
+    const data = doc.data() as any;
+
+    return {
       id: doc.id,
-      ...doc.data(),
-      createdAt: (doc.data() as any).createdAt?.toDate(),
-      updatedAt: (doc.data() as any).updatedAt?.toDate(),
-    }));
-  } catch (error) {
-    console.error('Error getting event registrations:', error);
-    throw error;
-  }
+      userId: data.userId,
+      eventId: data.eventId,
+      status: data.status,
+      createdAt: data.createdAt?.toDate(),
+      updatedAt: data.updatedAt?.toDate(),
+    };
+  });
 }
+
 
 export async function getUserEventRegistrations(userId: string) {
   try {
