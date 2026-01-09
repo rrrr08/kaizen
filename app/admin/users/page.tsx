@@ -212,10 +212,10 @@ const UserManagementPage = () => {
                 <Users className="w-8 h-8 text-white" />
               </div>
             </div>
-            <h1 className="text-5xl font-header font-black text-black mb-2 tracking-tighter uppercase">
+            <h1 className="text-5xl font-header font-black text-[#2D3436] mb-2 tracking-tighter uppercase">
               User Management
             </h1>
-            <p className="text-lg text-black/60 max-w-2xl mx-auto font-medium">
+            <p className="text-lg text-[#2D3436]/60 max-w-2xl mx-auto font-medium">
               Manage user accounts, roles, and permissions across the platform.
             </p>
           </motion.div>
@@ -228,13 +228,13 @@ const UserManagementPage = () => {
             className="mb-8"
           >
             <div className="relative max-w-md mx-auto lg:mx-0">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-black/40 w-5 h-5" />
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[#2D3436]/40 w-5 h-5" />
               <input
                 type="text"
                 placeholder="Search users..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 border-2 border-black rounded-xl bg-white text-black placeholder-black/40 focus:outline-none focus:ring-0 neo-shadow transition-all duration-300 font-bold"
+                className="w-full pl-12 pr-4 py-3 border-2 border-black rounded-xl bg-white text-[#2D3436] placeholder-[#2D3436]/40 focus:outline-none focus:ring-0 neo-shadow transition-all duration-300 font-bold"
               />
             </div>
           </motion.div>
@@ -272,18 +272,18 @@ const UserManagementPage = () => {
                     >
                       <TableCell className="py-4">
                         <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 bg-[#FFD93D] rounded-full border-2 border-black flex items-center justify-center text-black font-black shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+                          <div className="w-10 h-10 bg-[#FFD93D] rounded-full border-2 border-black flex items-center justify-center text-[#2D3436] font-black shadow-[2px_2px_0px_rgba(0,0,0,1)]">
                             {user.name?.charAt(0)?.toUpperCase() || '?'}
                           </div>
                           <div>
-                            <div className="font-bold text-black">{user.name || 'No Name'}</div>
-                            <div className="text-xs text-black/60 font-medium uppercase tracking-wide">
+                            <div className="font-bold text-[#2D3436]">{user.name || 'No Name'}</div>
+                            <div className="text-xs text-[#2D3436]/60 font-medium uppercase tracking-wide">
                               Joined {user.created_at ? new Date(user.created_at.toDate()).toLocaleDateString() : 'N/A'}
                             </div>
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell className="text-black font-medium">{user.email}</TableCell>
+                      <TableCell className="text-[#2D3436] font-medium">{user.email}</TableCell>
                       <TableCell>
                         <span className={`inline-flex items-center px-3 py-1 rounded-lg text-xs font-black uppercase tracking-wider border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,0.1)] ${user.role === 'admin' ? 'bg-[#FF7675] text-black' : 'bg-gray-100 text-black/60'
                           }`}>

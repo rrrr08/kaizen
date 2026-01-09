@@ -129,24 +129,24 @@ export default function TestimonialsPage() {
             {/* Header */}
             <div className="flex items-center justify-between mb-8 border-b-2 border-black pb-8">
                 <div>
-                    <h1 className="font-header text-5xl font-black text-black mb-2 uppercase tracking-tighter">Testimonials</h1>
-                    <p className="text-black/60 font-bold text-lg">Manage community stories and reviews</p>
+                    <h1 className="font-header text-5xl font-black text-[#2D3436] mb-2 uppercase tracking-tighter">Testimonials</h1>
+                    <p className="text-[#2D3436]/60 font-bold text-lg">Manage community stories and reviews</p>
                 </div>
             </div>
 
             {/* Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
                 <div className="bg-[#FFD93D] border-2 border-black rounded-[20px] p-6 neo-shadow hover:-translate-y-1 transition-transform">
-                    <p className="text-black text-xs font-black uppercase tracking-widest mb-2">Total Stories</p>
-                    <p className="font-header text-5xl font-black text-black">{testimonials.length}</p>
+                    <p className="text-[#2D3436] text-xs font-black uppercase tracking-widest mb-2">Total Stories</p>
+                    <p className="font-header text-5xl font-black text-[#2D3436]">{testimonials.length}</p>
                 </div>
                 <div className="bg-[#FF7675] border-2 border-black rounded-[20px] p-6 neo-shadow hover:-translate-y-1 transition-transform">
-                    <p className="text-black text-xs font-black uppercase tracking-widest mb-2">Pending Review</p>
-                    <p className="font-header text-5xl font-black text-black">{pendingCount}</p>
+                    <p className="text-[#2D3436] text-xs font-black uppercase tracking-widest mb-2">Pending Review</p>
+                    <p className="font-header text-5xl font-black text-[#2D3436]">{pendingCount}</p>
                 </div>
                 <div className="bg-[#00B894] border-2 border-black rounded-[20px] p-6 neo-shadow hover:-translate-y-1 transition-transform">
-                    <p className="text-black text-xs font-black uppercase tracking-widest mb-2">Approved</p>
-                    <p className="font-header text-5xl font-black text-black">{approvedCount}</p>
+                    <p className="text-[#2D3436] text-xs font-black uppercase tracking-widest mb-2">Approved</p>
+                    <p className="font-header text-5xl font-black text-[#2D3436]">{approvedCount}</p>
                 </div>
             </div>
 
@@ -158,7 +158,7 @@ export default function TestimonialsPage() {
                         onClick={() => setFilter(f)}
                         className={`px-4 py-2 rounded-lg font-black uppercase text-xs tracking-widest border-2 transition-all ${filter === f
                             ? 'bg-black text-white border-black'
-                            : 'bg-white text-black border-transparent hover:bg-gray-100'
+                            : 'bg-white text-[#2D3436] border-transparent hover:bg-gray-100'
                             }`}
                     >
                         {f}
@@ -226,8 +226,8 @@ export default function TestimonialsPage() {
                                 </div>
                             </div>
                             <div className="flex-1">
-                                <p className="font-black text-lg text-black leading-tight">{t.name}</p>
-                                <p className="text-black/50 text-xs font-bold uppercase tracking-wider">{t.role}</p>
+                                <p className="font-black text-lg text-[#2D3436] leading-tight">{t.name}</p>
+                                <p className="text-[#2D3436]/50 text-xs font-bold uppercase tracking-wider">{t.role}</p>
                                 {t.image && t.image.startsWith('http') && (
                                     <div className="flex items-center gap-1 mt-1">
                                         <ImageIcon size={12} className="text-green-600" />
@@ -238,10 +238,10 @@ export default function TestimonialsPage() {
                         </div>
 
                         <div className="bg-gray-50 border-2 border-black/5 rounded-xl p-4 flex-1">
-                            <p className="italic font-medium text-black/80">&quot;{t.quote}&quot;</p>
+                            <p className="italic font-medium text-[#2D3436]/80">&quot;{t.quote}&quot;</p>
                         </div>
 
-                        <p className="text-black/30 text-[10px] font-black uppercase text-right">
+                        <p className="text-[#2D3436]/30 text-[10px] font-black uppercase text-right">
                             {new Date(t.createdAt).toLocaleDateString()}
                         </p>
 
@@ -285,8 +285,8 @@ export default function TestimonialsPage() {
 
             {filteredTestimonials.length === 0 && (
                 <div className="text-center py-20 bg-white border-2 border-black rounded-[30px] border-dashed">
-                    <MessageSquare className="w-12 h-12 text-black/20 mx-auto mb-4" />
-                    <p className="text-black/40 font-black uppercase">No testimonials found</p>
+                    <MessageSquare className="w-12 h-12 text-[#2D3436]/20 mx-auto mb-4" />
+                    <p className="text-[#2D3436]/40 font-black uppercase">No testimonials found</p>
                 </div>
             )}
         </div>

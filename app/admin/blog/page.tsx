@@ -219,8 +219,8 @@ export default function AdminBlogPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-8 border-b-2 border-black pb-8">
         <div>
-          <h1 className="font-header text-5xl font-black text-black mb-2 uppercase tracking-tighter">Blog Management</h1>
-          <p className="text-black/60 font-bold text-lg">Create, edit, and manage blog posts</p>
+          <h1 className="font-header text-5xl font-black text-[#2D3436] mb-2 uppercase tracking-tighter">Blog Management</h1>
+          <p className="text-[#2D3436]/60 font-bold text-lg">Create, edit, and manage blog posts</p>
         </div>
         <button
           onClick={onAdd}
@@ -235,7 +235,7 @@ export default function AdminBlogPage() {
       <div className="bg-white border-2 border-black rounded-xl p-6 mb-8 neo-shadow">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-black font-black text-xs uppercase tracking-widest mb-2">
+            <label className="block text-[#2D3436] font-black text-xs uppercase tracking-widest mb-2">
               <Search className="w-4 h-4 inline mr-2" />
               Search
             </label>
@@ -244,16 +244,16 @@ export default function AdminBlogPage() {
               placeholder="Title, excerpt, category..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-[#FFFDF5] border-2 border-black rounded-xl px-4 py-3 text-black placeholder-black/30 focus:outline-none focus:ring-0 font-bold transition-all"
+              className="w-full bg-[#FFFDF5] border-2 border-black rounded-xl px-4 py-3 text-[#2D3436] placeholder-[#2D3436]/30 focus:outline-none focus:ring-0 font-bold transition-all"
             />
           </div>
           <div>
-            <label className="block text-black font-black text-xs uppercase tracking-widest mb-2">Category</label>
+            <label className="block text-[#2D3436] font-black text-xs uppercase tracking-widest mb-2">Category</label>
             <div className="relative">
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full bg-[#FFFDF5] border-2 border-black rounded-xl px-4 py-3 text-black focus:outline-none font-bold appearance-none cursor-pointer"
+                className="w-full bg-[#FFFDF5] border-2 border-black rounded-xl px-4 py-3 text-[#2D3436] focus:outline-none font-bold appearance-none cursor-pointer"
               >
                 <option value="all">All</option>
                 {CATEGORIES.map((c) => (
@@ -296,10 +296,10 @@ export default function AdminBlogPage() {
               </div>
             </div>
             <div className="p-8">
-              <h3 className="font-header text-2xl font-black text-black mb-3 line-clamp-2 uppercase tracking-tight leading-none">{post.title}</h3>
-              <p className="text-black/60 text-sm font-bold mb-6 line-clamp-2">{post.excerpt}</p>
+              <h3 className="font-header text-2xl font-black text-[#2D3436] mb-3 line-clamp-2 uppercase tracking-tight leading-none">{post.title}</h3>
+              <p className="text-[#2D3436]/60 text-sm font-bold mb-6 line-clamp-2">{post.excerpt}</p>
 
-              <div className="flex items-center justify-between text-xs font-black uppercase tracking-widest text-black/40 mb-6 pb-6 border-b-2 border-black/5">
+              <div className="flex items-center justify-between text-xs font-black uppercase tracking-widest text-[#2D3436]/40 mb-6 pb-6 border-b-2 border-black/5">
                 <span>By {post.author ? post.author.split('@')[0] : 'Admin'}</span>
                 <span>{post.updatedAt ? `Updated ${new Date(post.updatedAt).toLocaleDateString()}` : ''}</span>
               </div>

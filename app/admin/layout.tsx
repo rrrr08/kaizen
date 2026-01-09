@@ -72,7 +72,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   ];
 
   return (
-    <div className="flex min-h-screen bg-[#FFFDF5] text-black font-sans">
+    <div className="flex min-h-screen bg-[#FFFDF5] text-[#2D3436] font-sans">
 
       {/* Mobile Header */}
       <div className="md:hidden fixed top-0 w-full bg-white border-b-2 border-black z-50 p-4 flex justify-between items-center">
@@ -116,8 +116,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <span className="font-header text-2xl font-black">J</span>
             ) : (
               <>
-                <h2 className="font-header text-3xl font-black text-black leading-none">JOY</h2>
-                <p className="font-black text-[10px] text-black/40 tracking-[0.2em] uppercase">ADMIN PANEL</p>
+                <h2 className="font-header text-3xl font-black text-[#2D3436] leading-none">JOY</h2>
+                <p className="font-black text-[10px] text-[#2D3436]/40 tracking-[0.2em] uppercase">ADMIN PANEL</p>
               </>
             )}
           </Link>
@@ -135,14 +135,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     flex items-center gap-3 px-3 py-3 rounded-[12px] transition-all duration-200 
                     font-black uppercase tracking-wide border-2 group
                     ${isActive
-                      ? 'bg-[#FFD93D] text-black border-black neo-shadow-sm'
-                      : 'text-black/60 border-transparent hover:bg-black/5 hover:text-black'
+                      ? 'bg-[#FFD93D] text-[#2D3436] border-black neo-shadow-sm'
+                      : 'text-[#2D3436]/60 border-transparent hover:bg-black/5 hover:text-[#2D3436]'
                     }
                     ${isCollapsed ? 'justify-center' : ''}
                   `}
                 >
                   <Icon size={20} strokeWidth={2.5} className="flex-shrink-0" />
-                  {!isCollapsed && <span className="text-sm truncate">{item.label}</span>}
+                  {!isCollapsed && <span className="text-sm truncate font-bold">{item.label}</span>}
 
                   {/* Tooltip for collapsed state */}
                   {isCollapsed && (

@@ -277,12 +277,12 @@ export default function ProductsPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-8 border-b-2 border-black pb-8">
         <div>
-          <h1 className="font-header text-5xl font-black text-black mb-2 uppercase tracking-tighter">Products</h1>
-          <p className="text-black/60 font-bold text-lg">Manage all products in your shop</p>
+          <h1 className="font-header text-5xl font-black text-[#2D3436] mb-2 uppercase tracking-tighter">Products</h1>
+          <p className="text-[#2D3436]/60 font-bold text-lg">Manage all products in your shop</p>
         </div>
         <button
           onClick={handleAdd}
-          className="px-6 py-3 bg-[#FFD93D] text-black font-black uppercase tracking-wide rounded-xl border-2 border-black neo-shadow hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all flex items-center gap-2"
+          className="px-6 py-3 bg-[#FFD93D] text-[#2D3436] font-black uppercase tracking-wide rounded-xl border-2 border-black neo-shadow hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all flex items-center gap-2"
         >
           <Plus className="w-5 h-5" strokeWidth={3} />
           Add Product
@@ -296,16 +296,16 @@ export default function ProductsPage() {
           <p className="font-header text-5xl font-black text-white">{filteredProducts.length}</p>
         </div>
         <div className="bg-[#FF7675] border-2 border-black rounded-[20px] p-6 neo-shadow hover:-translate-y-1 transition-transform">
-          <p className="text-black text-xs font-black uppercase tracking-widest mb-2">Out of Stock</p>
-          <p className="font-header text-5xl font-black text-black">{outOfStock}</p>
+          <p className="text-[#2D3436] text-xs font-black uppercase tracking-widest mb-2">Out of Stock</p>
+          <p className="font-header text-5xl font-black text-[#2D3436]">{outOfStock}</p>
         </div>
         <div className="bg-[#74B9FF] border-2 border-black rounded-[20px] p-6 neo-shadow hover:-translate-y-1 transition-transform">
-          <p className="text-black text-xs font-black uppercase tracking-widest mb-2">Total Value</p>
-          <p className="font-header text-3xl font-black text-black">₹{(totalValue / 100000).toFixed(2)}L</p>
+          <p className="text-[#2D3436] text-xs font-black uppercase tracking-widest mb-2">Total Value</p>
+          <p className="font-header text-3xl font-black text-[#2D3436]">₹{(totalValue / 100000).toFixed(2)}L</p>
         </div>
         <div className="bg-[#00B894] border-2 border-black rounded-[20px] p-6 neo-shadow hover:-translate-y-1 transition-transform">
-          <p className="text-black text-xs font-black uppercase tracking-widest mb-2">Total Profit</p>
-          <p className="font-header text-3xl font-black text-black">₹{(totalProfit / 100000).toFixed(2)}L</p>
+          <p className="text-[#2D3436] text-xs font-black uppercase tracking-widest mb-2">Total Profit</p>
+          <p className="font-header text-3xl font-black text-[#2D3436]">₹{(totalProfit / 100000).toFixed(2)}L</p>
         </div>
       </div>
 
@@ -313,7 +313,7 @@ export default function ProductsPage() {
       <div className="bg-white border-2 border-black rounded-xl p-6 mb-8 neo-shadow">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label className="block text-black font-black text-xs uppercase tracking-widest mb-2">
+            <label className="block text-[#2D3436] font-black text-xs uppercase tracking-widest mb-2">
               <Search className="w-4 h-4 inline mr-2" />
               Search Products
             </label>
@@ -322,11 +322,11 @@ export default function ProductsPage() {
               placeholder="Product name..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-[#FFFDF5] border-2 border-black rounded-xl px-4 py-3 text-black placeholder-black/30 focus:outline-none focus:ring-0 font-bold transition-all"
+              className="w-full bg-[#FFFDF5] border-2 border-black rounded-xl px-4 py-3 text-[#2D3436] placeholder-[#2D3436]/30 focus:outline-none focus:ring-0 font-bold transition-all"
             />
           </div>
           <div>
-            <label className="block text-black font-black text-xs uppercase tracking-widest mb-2">
+            <label className="block text-[#2D3436] font-black text-xs uppercase tracking-widest mb-2">
               <Filter className="w-4 h-4 inline mr-2" />
               Category
             </label>
@@ -334,7 +334,7 @@ export default function ProductsPage() {
               <select
                 value={categoryFilter}
                 onChange={(e) => setCategoryFilter(e.target.value as any)}
-                className="w-full bg-[#FFFDF5] border-2 border-black rounded-xl px-4 py-3 text-black focus:outline-none font-bold appearance-none cursor-pointer"
+                className="w-full bg-[#FFFDF5] border-2 border-black rounded-xl px-4 py-3 text-[#2D3436] focus:outline-none font-bold appearance-none cursor-pointer"
               >
                 <option value="all">All Categories</option>
                 <option value="apparel">Apparel</option>
@@ -417,16 +417,16 @@ export default function ProductsPage() {
             {/* Details */}
             <div className="p-6 flex-1 flex flex-col justify-between">
               <div>
-                <h3 className="font-header text-2xl font-black text-black mb-1 line-clamp-1">{product.name}</h3>
-                <p className="text-black/50 text-xs font-black uppercase tracking-widest mb-4">{product.category}</p>
+                <h3 className="font-header text-2xl font-black text-[#2D3436] mb-1 line-clamp-1">{product.name}</h3>
+                <p className="text-[#2D3436]/50 text-xs font-black uppercase tracking-widest mb-4">{product.category}</p>
 
                 <div className="flex items-center justify-between mb-6">
                   <div>
                     <p className="text-[#6C5CE7] font-black text-2xl">₹{product.price.toLocaleString()}</p>
-                    <p className="text-black/40 text-xs font-bold">Cost: ₹{product.cost}</p>
+                    <p className="text-[#2D3436]/40 text-xs font-bold">Cost: ₹{product.cost}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-black/60 text-xs font-black uppercase tracking-wide">Sales</p>
+                    <p className="text-[#2D3436]/60 text-xs font-black uppercase tracking-wide">Sales</p>
                     <p className="text-[#00B894] font-black text-xl">{product.sales}</p>
                   </div>
                 </div>
@@ -434,7 +434,7 @@ export default function ProductsPage() {
                 {/* Stock Bar */}
                 <div className="mb-4">
                   <div className="flex items-center justify-between mb-2">
-                    <p className="text-black/60 text-xs font-black uppercase tracking-wide">Stock Level</p>
+                    <p className="text-[#2D3436]/60 text-xs font-black uppercase tracking-wide">Stock Level</p>
                     <p className={`font-black text-sm ${product.stock <= 10 ? 'text-[#FF7675]' : 'text-[#00B894]'}`}>
                       {product.stock} units
                     </p>
@@ -452,7 +452,7 @@ export default function ProductsPage() {
               <div className="flex gap-3 mt-4 pt-4 border-t-2 border-black/5">
                 <button
                   onClick={() => handleEdit(product)}
-                  className="flex-1 px-4 py-2 bg-white border-2 border-black rounded-xl text-black text-sm font-black uppercase tracking-wide hover:bg-black hover:text-white transition-all flex items-center justify-center gap-2 neo-shadow-sm active:translate-y-[1px] active:shadow-none"
+                  className="flex-1 px-4 py-2 bg-white border-2 border-black rounded-xl text-[#2D3436] text-sm font-black uppercase tracking-wide hover:bg-[#2D3436] hover:text-white transition-all flex items-center justify-center gap-2 neo-shadow-sm active:translate-y-[1px] active:shadow-none"
                 >
                   <Edit2 className="w-4 h-4" />
                   Edit
@@ -473,10 +473,10 @@ export default function ProductsPage() {
       {filteredProducts.length === 0 && (
         <div className="text-center py-20 bg-white border-2 border-black rounded-[30px] border-dashed">
           <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6 border-2 border-black">
-            <LayoutGrid className="w-10 h-10 text-black/20" />
+            <LayoutGrid className="w-10 h-10 text-[#2D3436]/20" />
           </div>
-          <p className="text-black font-black uppercase tracking-widest text-lg">No products found</p>
-          <p className="text-black/40 font-bold mt-2">Try adjusting your search or filters</p>
+          <p className="text-[#2D3436] font-black uppercase tracking-widest text-lg">No products found</p>
+          <p className="text-[#2D3436]/40 font-bold mt-2">Try adjusting your search or filters</p>
         </div>
       )}
 
@@ -486,7 +486,7 @@ export default function ProductsPage() {
           <div className="bg-[#FFFDF5] border-4 border-black rounded-[20px] max-w-2xl w-full max-h-[90vh] overflow-y-auto neo-shadow-lg">
             {/* Header */}
             <div className="flex items-center justify-between p-6 border-b-4 border-black bg-[#FFD93D] sticky top-0 z-30">
-              <h2 className="font-header text-3xl font-black text-black uppercase tracking-tighter">
+              <h2 className="font-header text-3xl font-black text-[#2D3436] uppercase tracking-tighter">
                 {editingId ? 'Edit Product' : 'Add New Product'}
               </h2>
               <button

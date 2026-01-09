@@ -28,6 +28,15 @@ interface UserData {
   id: string;
   role?: string;
   created_at?: Timestamp | Date | string;
+  createdAt?: Timestamp | Date | string;
+  [key: string]: any;
+}
+
+interface OrderData {
+  id: string;
+  totalPrice?: number;
+  totalPoints?: number;
+  pointsRedeemed?: number;
   [key: string]: any;
 }
 
@@ -64,27 +73,45 @@ const AdminAnalyticsPage: React.FC = () => {
       setLoading(true);
 
       // Fetch users data
-      const usersSnapshot = await getDocs(collection(db, 'users'));
-      const users = usersSnapshot.docs.map(doc => ({
+      const [usersSnap, ordersSnap] = await Promise.all([
+        getDocs(collection(db, 'users')),
+        getDocs(collection(db, 'orders'))
+      ]);
+
+      const users = usersSnap.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       })) as UserData[];
 
-      // Count users by role (only valid roles)
+      const orders = ordersSnap.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as OrderData[];
+
+      // Calculate totals
+      let totalRevenue = 0;
+      let totalPointsIssued = 0;
+      let totalPointsRedeemed = 0;
+
+      orders.forEach(order => {
+        totalRevenue += order.totalPrice || 0;
+        totalPointsIssued += order.totalPoints || 0;
+        totalPointsRedeemed += order.pointsRedeemed || 0;
+      });
+
+      // Count users by role
       const usersByRole = users.reduce((acc: Record<string, number>, user: UserData) => {
         const role = user.role || 'member';
-        // Only count valid roles defined in USER_ROLES
-        // Validate role and set 'member' as default
         const validRole = Object.values(USER_ROLES).includes(role) ? role : 'member';
         acc[validRole] = (acc[validRole] || 0) + 1;
         return acc;
       }, {} as Record<string, number>);
 
-      // Get user creation dates for growth analysis
+      // Get creation dates for growth
       const userCreationDates: UserCreationDate[] = users
-        .filter((user: UserData) => user.created_at)
+        .filter((user: UserData) => user.created_at || user.createdAt)
         .map((user: UserData) => {
-          const createdAt = user.created_at as Timestamp | Date | string;
+          const createdAt = user.created_at || user.createdAt;
           const date = (createdAt as Timestamp).toDate ? (createdAt as Timestamp).toDate() : new Date(createdAt as Date | string);
           return {
             date,
@@ -96,8 +123,12 @@ const AdminAnalyticsPage: React.FC = () => {
       setAnalytics({
         totalUsers: users.length,
         usersByRole,
-        userCreationDates
-      });
+        userCreationDates,
+        totalOrders: orders.length,
+        totalRevenue,
+        totalPointsIssued,
+        totalPointsRedeemed
+      } as any);
     } catch (error) {
       console.error('Error fetching analytics:', error);
     } finally {
@@ -162,10 +193,10 @@ const AdminAnalyticsPage: React.FC = () => {
                 <BarChart3 className="w-10 h-10 text-black" />
               </div>
             </div>
-            <h1 className="text-6xl font-header font-black text-black mb-4 tracking-tighter uppercase">
+            <h1 className="text-6xl font-header font-black text-[#2D3436] mb-4 tracking-tighter uppercase">
               ANALYTICS & REPORTS
             </h1>
-            <p className="text-xl text-black/60 max-w-2xl mx-auto font-bold">
+            <p className="text-xl text-[#2D3436]/60 max-w-2xl mx-auto font-bold">
               Monitor platform performance and user engagement metrics.
             </p>
           </motion.div>
@@ -196,10 +227,10 @@ const AdminAnalyticsPage: React.FC = () => {
                       {stat.change}
                     </span>
                   </div>
-                  <h3 className="text-4xl font-black text-black mb-2 font-header">
+                  <h3 className="text-4xl font-black text-[#2D3436] mb-2 font-header">
                     {typeof stat.value === 'number' ? stat.value.toLocaleString() : stat.value}
                   </h3>
-                  <p className="text-sm font-black text-black/40 uppercase tracking-widest">{stat.title}</p>
+                  <p className="text-sm font-black text-[#2D3436]/40 uppercase tracking-widest">{stat.title}</p>
                 </motion.div>
               );
             })}
@@ -216,7 +247,7 @@ const AdminAnalyticsPage: React.FC = () => {
               <div className="p-3 bg-[#FF7675] border-2 border-black rounded-xl mr-4">
                 <Users className="w-6 h-6 text-black" />
               </div>
-              <h3 className="text-3xl font-black text-black font-header uppercase tracking-tight">User Distribution by Role</h3>
+              <h3 className="text-3xl font-black text-[#2D3436] font-header uppercase tracking-tight">User Distribution by Role</h3>
             </div>
             {roleCards.length > 0 ? (
               <div className="flex flex-col items-center justify-center gap-12">
@@ -264,8 +295,8 @@ const AdminAnalyticsPage: React.FC = () => {
                   </svg>
                   {/* Center text */}
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <div className="text-5xl font-black text-black font-header">{analytics.totalUsers}</div>
-                    <div className="text-sm font-bold text-black/40 uppercase tracking-widest">Total Users</div>
+                    <div className="text-5xl font-black text-[#2D3436] font-header">{analytics.totalUsers}</div>
+                    <div className="text-sm font-bold text-[#2D3436]/40 uppercase tracking-widest">Total Users</div>
                   </div>
                 </div>
 
@@ -280,13 +311,13 @@ const AdminAnalyticsPage: React.FC = () => {
                             className="w-4 h-4 rounded-full mr-3 border-2 border-black"
                             style={{ backgroundColor: colors[index % colors.length] }}
                           ></div>
-                          <span className="font-black text-black text-sm uppercase tracking-wider">
+                          <span className="font-black text-[#2D3436] text-sm uppercase tracking-wider">
                             {ROLE_LABELS[roleData.role] || roleData.role}
                           </span>
                         </div>
                         <div className="text-center">
-                          <div className="text-3xl font-black text-black mb-1">{roleData.count}</div>
-                          <div className="text-xs font-bold text-black/60 uppercase tracking-wide">{roleData.percentage}% of users</div>
+                          <div className="text-3xl font-black text-[#2D3436] mb-1">{roleData.count}</div>
+                          <div className="text-xs font-bold text-[#2D3436]/60 uppercase tracking-wide">{roleData.percentage}% of users</div>
                         </div>
                       </div>
                     );
@@ -308,7 +339,7 @@ const AdminAnalyticsPage: React.FC = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.6 }}
-            className="mt-12 text-center text-black/40 text-xs font-bold uppercase tracking-widest"
+            className="mt-12 text-center text-[#2D3436]/40 text-xs font-bold uppercase tracking-widest"
           >
             <p>Analytics data is updated in real-time. Last updated: {new Date().toLocaleString()}</p>
           </motion.div>

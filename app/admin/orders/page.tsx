@@ -18,8 +18,8 @@ export default function AdminOrdersPage() {
             <ShoppingBag className="text-[#FFD93D]" size={40} />
           </div>
           <div>
-            <h1 className="font-header text-6xl font-black text-black mb-2 uppercase tracking-tighter">Order Ledger</h1>
-            <p className="text-xl text-black/40 font-black uppercase tracking-widest">Global Order Status & Fulfilment</p>
+            <h1 className="font-header text-6xl font-black text-[#2D3436] mb-2 uppercase tracking-tighter">Order Ledger</h1>
+            <p className="text-xl text-[#2D3436]/40 font-black uppercase tracking-widest">Global Order Status & Fulfilment</p>
           </div>
         </div>
       </div>

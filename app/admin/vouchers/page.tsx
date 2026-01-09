@@ -212,8 +212,8 @@ export default function AdminVouchersPage() {
             <Ticket className="w-8 h-8 text-black" />
           </div>
           <div>
-            <h1 className="font-header text-5xl font-black text-black tracking-tight">VOUCHER MANAGEMENT</h1>
-            <p className="text-black/60 font-bold uppercase tracking-wider text-sm">Create & Manage Reward Vouchers</p>
+            <h1 className="font-header text-5xl font-black text-[#2D3436] tracking-tight">VOUCHER MANAGEMENT</h1>
+            <p className="text-[#2D3436]/60 font-bold uppercase tracking-wider text-sm">Create & Manage Reward Vouchers</p>
           </div>
         </div>
       </motion.div>
@@ -265,7 +265,7 @@ export default function AdminVouchersPage() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-8 bg-white border-4 border-black p-8 rounded-3xl neo-shadow"
         >
-          <h2 className="font-header text-3xl font-black text-black mb-6">CREATE NEW VOUCHER</h2>
+          <h2 className="font-header text-3xl font-black text-[#2D3436] mb-6">CREATE NEW VOUCHER</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-xs font-black uppercase tracking-wider text-black/60 mb-2">Voucher Name</label>
@@ -426,11 +426,11 @@ export default function AdminVouchersPage() {
                 <div className="text-5xl">{voucher.icon}</div>
                 <div>
                   <div className="flex items-center gap-2 mb-1">
-                    <h3 className="font-header text-2xl font-black text-black">{voucher.name}</h3>
+                    <h3 className="font-header text-2xl font-black text-[#2D3436]">{voucher.name}</h3>
                     <span className={`px-2 py-0.5 rounded-lg text-xs font-black uppercase border-2 border-black ${voucher.category === 'shop' ? 'bg-[#FFD93D] text-black' :
-                        voucher.category === 'events' ? 'bg-[#6C5CE7] text-white' :
-                          voucher.category === 'experiences' ? 'bg-[#00B894] text-white' :
-                            'bg-gradient-to-r from-[#FFD93D] via-[#6C5CE7] to-[#00B894] text-white'
+                      voucher.category === 'events' ? 'bg-[#6C5CE7] text-white' :
+                        voucher.category === 'experiences' ? 'bg-[#00B894] text-white' :
+                          'bg-gradient-to-r from-[#FFD93D] via-[#6C5CE7] to-[#00B894] text-white'
                       }`}>
                       {voucher.category === 'shop' ? '🛍️ SHOP' :
                         voucher.category === 'events' ? '🎫 EVENTS' :
@@ -438,7 +438,7 @@ export default function AdminVouchersPage() {
                             '🌟 ALL'}
                     </span>
                   </div>
-                  <p className="text-black/60 font-bold text-sm">{voucher.description}</p>
+                  <p className="text-[#2D3436]/60 font-bold text-sm">{voucher.description}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -454,7 +454,7 @@ export default function AdminVouchersPage() {
                     />
                     <div className="w-14 h-8 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#FFD93D] rounded-full peer border-3 border-black peer-checked:after:translate-x-6 peer-checked:after:border-black after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-black after:border-3 after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-[#00B894]"></div>
                   </label>
-                  <span className="text-xs font-bold mt-1 text-black/60">{voucher.enabled ? 'ON' : 'OFF'}</span>
+                  <span className="text-xs font-bold mt-1 text-[#2D3436]/60">{voucher.enabled ? 'ON' : 'OFF'}</span>
                 </div>
                 {/* Delete Button */}
                 <button
@@ -470,25 +470,25 @@ export default function AdminVouchersPage() {
 
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
               <div className="bg-[#FFFDF5] border-3 border-black rounded-xl p-3">
-                <p className="text-black/40 font-black uppercase text-xs mb-1">Cost</p>
-                <p className="text-black font-black text-lg">{voucher.pointsCost} JP</p>
+                <p className="text-[#2D3436]/40 font-black uppercase text-xs mb-1">Cost</p>
+                <p className="text-[#2D3436] font-black text-lg">{voucher.pointsCost} JP</p>
               </div>
               <div className="bg-[#FFFDF5] border-3 border-black rounded-xl p-3">
-                <p className="text-black/40 font-black uppercase text-xs mb-1">Discount</p>
-                <p className="text-black font-black text-lg">
+                <p className="text-[#2D3436]/40 font-black uppercase text-xs mb-1">Discount</p>
+                <p className="text-[#2D3436] font-black text-lg">
                   {voucher.discountType === 'percentage' ? `${voucher.discountValue}%` : `₹${voucher.discountValue}`}
                 </p>
               </div>
               <div className="bg-[#FFFDF5] border-3 border-black rounded-xl p-3">
-                <p className="text-black/40 font-black uppercase text-xs mb-1">Min Purchase</p>
-                <p className="text-black font-black text-lg">₹{voucher.minPurchase}</p>
+                <p className="text-[#2D3436]/40 font-black uppercase text-xs mb-1">Min Purchase</p>
+                <p className="text-[#2D3436] font-black text-lg">₹{voucher.minPurchase}</p>
               </div>
               <div className="bg-[#FFFDF5] border-3 border-black rounded-xl p-3">
-                <p className="text-black/40 font-black uppercase text-xs mb-1">Expiry</p>
-                <p className="text-black font-black text-lg">{voucher.expiryDays}d</p>
+                <p className="text-[#2D3436]/40 font-black uppercase text-xs mb-1">Expiry</p>
+                <p className="text-[#2D3436] font-black text-lg">{voucher.expiryDays}d</p>
               </div>
               <div className="bg-[#FFFDF5] border-3 border-black rounded-xl p-3">
-                <p className="text-black/40 font-black uppercase text-xs mb-1">Status</p>
+                <p className="text-[#2D3436]/40 font-black uppercase text-xs mb-1">Status</p>
                 <span className={`inline-block px-3 py-1 rounded-full text-xs font-black uppercase ${voucher.enabled ? 'bg-[#00B894] text-white' : 'bg-gray-400 text-white'}`}>
                   {voucher.enabled ? 'ACTIVE' : 'DISABLED'}
                 </span>
@@ -500,8 +500,8 @@ export default function AdminVouchersPage() {
 
       {vouchers.length === 0 && !showAddForm && (
         <div className="text-center py-16 bg-white border-4 border-black rounded-3xl neo-shadow">
-          <p className="text-black/40 font-black text-2xl mb-2">NO VOUCHERS YET</p>
-          <p className="text-black/60 font-bold text-sm">Click &quot;Add New Voucher&quot; to create your first reward</p>
+          <p className="text-[#2D3436]/40 font-black text-2xl mb-2">NO VOUCHERS YET</p>
+          <p className="text-[#2D3436]/60 font-bold text-sm">Click &quot;Add New Voucher&quot; to create your first reward</p>
         </div>
       )}
     </div>

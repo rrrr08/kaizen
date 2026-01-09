@@ -28,8 +28,8 @@ export default function AdminShipmentsPage() {
                         <Truck className="text-[#00B894]" size={40} />
                     </div>
                     <div>
-                        <h1 className="font-header text-6xl font-black text-black mb-2 uppercase tracking-tighter">Logistic Hub</h1>
-                        <p className="text-xl text-black/40 font-black uppercase tracking-widest">Cargo Manifest & Distribution Control</p>
+                        <h1 className="font-header text-6xl font-black text-[#2D3436] mb-2 uppercase tracking-tighter">Logistic Hub</h1>
+                        <p className="text-xl text-[#2D3436]/40 font-black uppercase tracking-widest">Cargo Manifest & Distribution Control</p>
                     </div>
                 </div>
 
@@ -52,11 +52,11 @@ export default function AdminShipmentsPage() {
                         <Package size={80} />
                     </div>
                     <div className="flex items-center gap-2 mb-4">
-                        <BarChart3 size={18} className="text-black/40" />
-                        <h3 className="text-xs font-black uppercase tracking-[0.2em] text-black/60">Fleet Volume</h3>
+                        <BarChart3 size={18} className="text-[#2D3436]/40" />
+                        <h3 className="text-xs font-black uppercase tracking-[0.2em] text-[#2D3436]/60">Fleet Volume</h3>
                     </div>
-                    <p className="text-6xl font-black text-black mb-2">324</p>
-                    <div className="flex items-center gap-1 text-[10px] font-black text-black/40 uppercase">
+                    <p className="text-6xl font-header font-black text-[#2D3436] mb-2">324</p>
+                    <div className="flex items-center gap-1 text-[10px] font-black text-[#2D3436]/40 uppercase">
                         <TrendingUp size={12} /> +12% vs last month
                     </div>
                 </motion.div>
@@ -72,7 +72,7 @@ export default function AdminShipmentsPage() {
                         <CheckCircle size={18} className="text-white/40" />
                         <h3 className="text-xs font-black uppercase tracking-[0.2em] text-white/60">Successful Drops</h3>
                     </div>
-                    <p className="text-6xl font-black mb-2">48</p>
+                    <p className="text-6xl font-header font-black mb-2">48</p>
                     <div className="text-[10px] font-black text-white/40 uppercase">Today's Deliveries</div>
                 </motion.div>
 
@@ -87,7 +87,7 @@ export default function AdminShipmentsPage() {
                         <Clock size={18} className="text-white/40" />
                         <h3 className="text-xs font-black uppercase tracking-[0.2em] text-white/60">In Transit</h3>
                     </div>
-                    <p className="text-6xl font-black text-[#FFD93D] mb-2">15</p>
+                    <p className="text-6xl font-header font-black text-[#FFD93D] mb-2">15</p>
                     <div className="text-[10px] font-black text-white/40 uppercase">Pending Fulfilment</div>
                 </motion.div>
             </div>
@@ -97,7 +97,7 @@ export default function AdminShipmentsPage() {
                 <div className="flex items-center justify-between px-4">
                     <div className="flex items-center gap-3">
                         <div className="w-3 h-3 bg-[#6C5CE7] rounded-full animate-pulse" />
-                        <h2 className="text-3xl font-black uppercase tracking-tight">Active Dispatches</h2>
+                        <h2 className="text-3xl font-header font-black uppercase tracking-tight text-[#2D3436]">Active Dispatches</h2>
                     </div>
                     <div className="flex gap-4">
                         <button className="px-6 py-3 bg-white border-4 border-black rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-black hover:text-white transition-all neo-shadow-sm flex items-center gap-2">

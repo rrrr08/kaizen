@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/app/context/AuthContext';
 import { useRouter } from 'next/navigation';
-import { Settings, Plus, Star, Save, Zap, Info, ShieldAlert, Gift, RotateCcw } from 'lucide-react';
+import { Settings, Plus, Star, Save, Zap, Info, ShieldAlert, Gift, RotateCcw, X } from 'lucide-react';
 
 interface GameSettings {
   name: string;
@@ -38,6 +38,9 @@ export default function AdminGamesPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
+  const [editingDropsGameId, setEditingDropsGameId] = useState<string | null>(null);
+  const [tempDrops, setTempDrops] = useState<Array<{ prob: number; points: number; label?: string }>>([]);
+  const [isDropsModalOpen, setIsDropsModalOpen] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -266,12 +269,12 @@ export default function AdminGamesPage() {
               <div className="bg-[#6C5CE7] p-2 rounded-lg border-2 border-black shadow-[2px_2px_0px_#000]">
                 <Settings className="text-white" size={24} />
               </div>
-              <span className="font-bold text-xs uppercase tracking-[0.4em] text-black/40">Admin Dashboard</span>
+              <span className="font-bold text-xs uppercase tracking-[0.4em] text-[#2D3436]/40">Admin Dashboard</span>
             </div>
             <h1 className="font-header text-6xl md:text-8xl tracking-tighter text-[#2D3436]">
               GAME <span className="text-[#6C5CE7]">MATRIX</span>
             </h1>
-            <p className="text-black/50 font-bold text-xl mt-4 max-w-xl">
+            <p className="text-[#2D3436]/50 font-bold text-xl mt-4 max-w-xl">
               Precision control over point economies, daily rotations, and reward distributions.
             </p>
           </div>
@@ -302,21 +305,21 @@ export default function AdminGamesPage() {
                 <div className="bg-black text-white p-1 rounded">
                   <Star size={16} fill="white" />
                 </div>
-                <h2 className="font-black text-xs uppercase tracking-[0.3em] text-black">Active Multiplier</h2>
+                <h2 className="font-black text-xs uppercase tracking-[0.3em] text-[#2D3436]">Active Multiplier</h2>
               </div>
 
               {gameOfTheDay ? (
                 <>
-                  <h3 className="text-5xl font-black text-black uppercase tracking-tighter mb-2">
+                  <h3 className="text-5xl font-black text-[#2D3436] uppercase tracking-tighter mb-2">
                     {gameOfTheDay.gameName || gameOfTheDay.gameId}
                   </h3>
                   <div className="inline-flex items-center gap-2 px-4 py-2 bg-black text-white rounded-xl font-black text-xs tracking-widest uppercase mb-6">
                     2X EARNINGS ACTIVE
                   </div>
-                  <p className="text-black/60 font-bold text-sm">Scheduled since: {gameOfTheDay.date}</p>
+                  <p className="text-[#2D3436]/60 font-bold text-sm">Scheduled since: {gameOfTheDay.date}</p>
                 </>
               ) : (
-                <h3 className="text-4xl font-black text-black/40 uppercase tracking-tighter mb-8">NO ACTIVE MULTIPLIER</h3>
+                <h3 className="text-4xl font-black text-[#2D3436]/40 uppercase tracking-tighter mb-8">NO ACTIVE MULTIPLIER</h3>
               )}
             </div>
 
@@ -386,7 +389,7 @@ export default function AdminGamesPage() {
 
         {/* Quick Add Section */}
         <div className="mb-16">
-          <h2 className="font-black text-xs uppercase tracking-[0.4em] text-black/40 mb-6 flex items-center gap-3">
+          <h2 className="font-black text-xs uppercase tracking-[0.4em] text-[#2D3436]/40 mb-6 flex items-center gap-3">
             <Plus size={16} /> Quick Integrate Support
           </h2>
           <div className="flex flex-wrap gap-4">
@@ -396,8 +399,8 @@ export default function AdminGamesPage() {
                 onClick={() => addNewGameById(g.id, g.name)}
                 disabled={!!settings[g.id]}
                 className={`px-6 py-4 rounded-2xl border-4 font-black text-sm tracking-widest transition-all flex items-center gap-3 ${settings[g.id]
-                    ? 'bg-black/5 border-black/10 text-black/20 cursor-not-allowed'
-                    : 'bg-white border-black text-black hover:translate-y-[-4px] hover:shadow-[6px_6px_0px_#000] active:translate-y-0'
+                  ? 'bg-black/5 border-black/10 text-black/20 cursor-not-allowed'
+                  : 'bg-white border-black text-black hover:translate-y-[-4px] hover:shadow-[6px_6px_0px_#000] active:translate-y-0'
                   }`}
               >
                 {settings[g.id] ? 'ACTIVE' : `ADD ${g.name.toUpperCase()}`}
@@ -424,7 +427,7 @@ export default function AdminGamesPage() {
                   <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#6C5CE7]/10 text-[#6C5CE7] rounded-lg font-black text-[10px] tracking-widest uppercase mb-4 mb-2">
                     Engine ID: {gameId}
                   </div>
-                  <h3 className="text-5xl font-black text-black uppercase tracking-tighter leading-none">{config.name || gameId}</h3>
+                  <h3 className="text-5xl font-black text-[#2D3436] uppercase tracking-tighter leading-none">{config.name || gameId}</h3>
                 </div>
 
                 <div className="flex flex-wrap gap-4">
@@ -450,7 +453,7 @@ export default function AdminGamesPage() {
                 <div className="space-y-6 md:col-span-2">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div className="bg-[#FFFDF5] p-6 rounded-3xl border-2 border-black/10">
-                      <label className="block text-black/40 font-black text-[10px] tracking-widest mb-3 uppercase">Display Label</label>
+                      <label className="block text-[#2D3436]/40 font-black text-[10px] tracking-widest mb-3 uppercase">Display Label</label>
                       <input
                         type="text"
                         value={config.name || ''}
@@ -460,7 +463,7 @@ export default function AdminGamesPage() {
                     </div>
 
                     <div className="bg-[#FFFDF5] p-6 rounded-3xl border-2 border-black/10">
-                      <label className="block text-black/40 font-black text-[10px] tracking-widest mb-3 uppercase">Yield Efficiency (Base Points)</label>
+                      <label className="block text-[#2D3436]/40 font-black text-[10px] tracking-widest mb-3 uppercase">Yield Efficiency (Base Points)</label>
                       <div className="flex items-center gap-3">
                         <Zap size={20} className="text-[#00B894]" />
                         <input
@@ -473,7 +476,7 @@ export default function AdminGamesPage() {
                     </div>
 
                     <div className="bg-[#FFFDF5] p-6 rounded-3xl border-2 border-black/10">
-                      <label className="block text-black/40 font-black text-[10px] tracking-widest mb-3 uppercase">Friction Coeff (Penalty)</label>
+                      <label className="block text-[#2D3436]/40 font-black text-[10px] tracking-widest mb-3 uppercase">Friction Coeff (Penalty)</label>
                       <input
                         type="number"
                         value={config.retryPenalty || 0}
@@ -483,7 +486,7 @@ export default function AdminGamesPage() {
                     </div>
 
                     <div className="bg-[#FFFDF5] p-6 rounded-3xl border-2 border-black/10">
-                      <label className="block text-black/40 font-black text-[10px] tracking-widest mb-3 uppercase">Saturation Limit (Max Retries)</label>
+                      <label className="block text-[#2D3436]/40 font-black text-[10px] tracking-widest mb-3 uppercase">Saturation Limit (Max Retries)</label>
                       <input
                         type="number"
                         value={config.maxRetries || 0}
@@ -529,7 +532,11 @@ export default function AdminGamesPage() {
                       </div>
 
                       <button
-                        onClick={() => alert('Visual matrix editor coming soon! For now, settings are hardcoded in integration.')}
+                        onClick={() => {
+                          setEditingDropsGameId(gameId);
+                          setTempDrops(config.scratcher?.drops || []);
+                          setIsDropsModalOpen(true);
+                        }}
                         className="w-full py-3 bg-white/10 border-2 border-white/20 rounded-xl font-black text-[10px] tracking-[0.2em] transition-all hover:bg-white/20"
                       >
                         CONFIGURE MATRIX
@@ -559,6 +566,98 @@ export default function AdminGamesPage() {
           </div>
         )}
       </div>
+      {/* Matrix Editor Modal */}
+      {isDropsModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setIsDropsModalOpen(false)} />
+          <div className="relative bg-white border-8 border-black p-8 rounded-[40px] shadow-[24px_24px_0px_#000] w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <h2 className="text-4xl font-black uppercase tracking-tighter mb-8 bg-black text-white inline-block px-4 py-1">Loot Matrix: {editingDropsGameId}</h2>
+
+            <div className="space-y-4 mb-8">
+              {tempDrops.map((drop, idx) => (
+                <div key={idx} className="flex gap-4 items-end bg-gray-50 p-6 rounded-3xl border-2 border-black/5">
+                  <div className="flex-1">
+                    <label className="block text-[10px] font-black uppercase mb-2">Label</label>
+                    <input
+                      type="text"
+                      value={drop.label || ''}
+                      onChange={(e) => {
+                        const newDrops = [...tempDrops];
+                        newDrops[idx].label = e.target.value;
+                        setTempDrops(newDrops);
+                      }}
+                      className="w-full border-b-2 border-black bg-transparent font-bold"
+                    />
+                  </div>
+                  <div className="w-24">
+                    <label className="block text-[10px] font-black uppercase mb-2">Prob (0-1)</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={drop.prob}
+                      onChange={(e) => {
+                        const newDrops = [...tempDrops];
+                        newDrops[idx].prob = parseFloat(e.target.value);
+                        setTempDrops(newDrops);
+                      }}
+                      className="w-full border-b-2 border-black bg-transparent font-bold"
+                    />
+                  </div>
+                  <div className="w-24">
+                    <label className="block text-[10px] font-black uppercase mb-2">Points</label>
+                    <input
+                      type="number"
+                      value={drop.points}
+                      onChange={(e) => {
+                        const newDrops = [...tempDrops];
+                        newDrops[idx].points = parseInt(e.target.value);
+                        setTempDrops(newDrops);
+                      }}
+                      className="w-full border-b-2 border-black bg-transparent font-bold"
+                    />
+                  </div>
+                  <button
+                    onClick={() => setTempDrops(tempDrops.filter((_, i) => i !== idx))}
+                    className="p-2 bg-red-500 text-white rounded-lg border-2 border-black"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+              ))}
+
+              <button
+                onClick={() => setTempDrops([...tempDrops, { prob: 0.1, points: 100, label: 'New Drop' }])}
+                className="w-full py-4 border-4 border-black border-dashed rounded-3xl font-black uppercase tracking-widest text-[#6C5CE7] hover:bg-[#6C5CE7]/5 transition-colors"
+              >
+                + ADD NEW ITEM TO MATRIX
+              </button>
+            </div>
+
+            <div className="flex gap-4">
+              <button
+                onClick={() => {
+                  if (editingDropsGameId) {
+                    updateGameSetting(editingDropsGameId, 'scratcher', {
+                      ...settings[editingDropsGameId].scratcher,
+                      drops: tempDrops
+                    });
+                  }
+                  setIsDropsModalOpen(false);
+                }}
+                className="flex-1 py-4 bg-[#00B894] text-white border-4 border-black rounded-2xl font-black uppercase tracking-widest shadow-[4px_4px_0px_#000] hover:translate-y-[-2px] transition-all"
+              >
+                APPLY TO ENGINE
+              </button>
+              <button
+                onClick={() => setIsDropsModalOpen(false)}
+                className="px-8 py-4 bg-gray-200 border-4 border-black rounded-2xl font-black uppercase tracking-widest"
+              >
+                CANCEL
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

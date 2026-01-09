@@ -125,8 +125,8 @@ export default function ShipmentList() {
                                 <td className="p-6">
                                     <div className="flex flex-col gap-1">
                                         <div className="flex items-center gap-2">
-                                            <Hash size={14} className="text-black/30" />
-                                            <Link href={`/admin/shipments/${shipment.id}`} className="font-mono font-black text-black hover:underline underline-offset-4">
+                                            <Hash size={14} className="text-[#2D3436]/30" />
+                                            <Link href={`/admin/shipments/${shipment.id}`} className="font-mono font-black text-[#2D3436] hover:underline underline-offset-4">
                                                 {shipment.orderId.slice(0, 12)}
                                             </Link>
                                         </div>
@@ -143,7 +143,7 @@ export default function ShipmentList() {
                                         <div className="w-10 h-10 rounded-xl bg-gray-100 border-2 border-black flex items-center justify-center font-black text-sm group-hover:bg-[#00B894] group-hover:text-white transition-colors">
                                             <User size={18} />
                                         </div>
-                                        <span className="font-black text-black text-sm uppercase tracking-tight">{shipment.customerName}</span>
+                                        <span className="font-black text-[#2D3436] text-sm uppercase tracking-tight">{shipment.customerName}</span>
                                     </div>
                                 </td>
                                 <td className="p-6">
@@ -151,7 +151,7 @@ export default function ShipmentList() {
                                         <div className="font-mono text-xs font-black px-3 py-1.5 bg-gray-100 rounded-lg border-2 border-black/5 select-all inline-block w-fit">
                                             {shipment.awbCode || 'PENDING_AWB'}
                                         </div>
-                                        <span className="text-[10px] font-black uppercase tracking-widest text-black/30 ml-1">
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-[#2D3436]/30 ml-1">
                                             {shipment.courierName || 'Unassigned Courier'}
                                         </span>
                                     </div>

@@ -121,10 +121,10 @@ export default function OrdersList() {
                                 >
                                     <td className="p-6">
                                         <div className="flex flex-col">
-                                            <span className="font-mono font-black text-black">#{order.id.slice(0, 8)}</span>
+                                            <span className="font-mono font-black text-[#2D3436]">#{order.id.slice(0, 8)}</span>
                                             <div className="flex items-center gap-1.5 mt-1">
-                                                <Calendar size={12} className="text-black/30" />
-                                                <span className="text-[10px] font-black uppercase tracking-tighter text-black/40">
+                                                <Calendar size={12} className="text-[#2D3436]/30" />
+                                                <span className="text-[10px] font-black uppercase tracking-tighter text-[#2D3436]/40">
                                                     {new Date(order.createdAt).toLocaleDateString()}
                                                 </span>
                                             </div>
@@ -132,24 +132,24 @@ export default function OrdersList() {
                                     </td>
                                     <td className="p-6">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-xl bg-gray-100 border-2 border-black flex items-center justify-center font-black text-sm group-hover:bg-[#FFD93D] transition-colors">
+                                            <div className="w-10 h-10 rounded-xl bg-gray-100 border-2 border-black flex items-center justify-center font-black text-sm group-hover:bg-[#FFD93D] transition-colors text-[#2D3436]">
                                                 {order.shippingAddress?.name?.[0]?.toUpperCase() || 'U'}
                                             </div>
                                             <div className="flex flex-col">
-                                                <span className="font-black text-black text-sm uppercase tracking-tight">{order.shippingAddress?.name}</span>
-                                                <span className="text-[10px] font-bold text-black/40">{order.shippingAddress?.phone}</span>
+                                                <span className="font-black text-[#2D3436] text-sm uppercase tracking-tight">{order.shippingAddress?.name}</span>
+                                                <span className="text-[10px] font-bold text-[#2D3436]/40">{order.shippingAddress?.phone}</span>
                                             </div>
                                         </div>
                                     </td>
                                     <td className="p-6 text-center">
-                                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-white border-2 border-black rounded-full font-black text-xs">
+                                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-white border-2 border-black rounded-full font-black text-xs text-[#2D3436]">
                                             <ShoppingBag size={12} />
                                             {totalQuantity}
                                         </div>
                                     </td>
                                     <td className="p-6">
                                         <div className="flex flex-col">
-                                            <span className="font-black text-lg text-black">₹{order.totalPrice?.toLocaleString()}</span>
+                                            <span className="font-black text-lg text-[#2D3436]">₹{order.totalPrice?.toLocaleString()}</span>
                                             {order.totalPoints > 0 && (
                                                 <span className="text-[10px] font-black text-[#00B894] uppercase tracking-widest">+{order.totalPoints} PTS</span>
                                             )}
@@ -159,13 +159,13 @@ export default function OrdersList() {
                                         {shipment ? (
                                             <div className={`inline-flex items-center gap-2 px-3 py-1 border-2 border-black rounded-lg text-[10px] font-black uppercase tracking-widest
                                                 ${shipment.status === 'DELIVERED' ? 'bg-[#00B894] text-white' :
-                                                    shipment.status === 'SHIPPED' ? 'bg-[#FFD93D] text-black' : 'bg-[#6C5CE7] text-white'}
+                                                    shipment.status === 'SHIPPED' ? 'bg-[#FFD93D] text-[#2D3436]' : 'bg-[#6C5CE7] text-white'}
                                             `}>
                                                 {shipment.status === 'DELIVERED' ? <Check size={12} /> : shipment.status === 'SHIPPED' ? <Truck size={12} /> : <Box size={12} />}
                                                 {shipment.status}
                                             </div>
                                         ) : (
-                                            <div className="inline-flex items-center gap-2 px-3 py-1 bg-gray-100 border-2 border-dashed border-black/20 rounded-lg text-[10px] font-black text-black/30 animate-pulse uppercase tracking-widest">
+                                            <div className="inline-flex items-center gap-2 px-3 py-1 bg-gray-100 border-2 border-dashed border-black/20 rounded-lg text-[10px] font-black text-[#2D3436]/30 animate-pulse uppercase tracking-widest">
                                                 UNPROCESSED
                                             </div>
                                         )}

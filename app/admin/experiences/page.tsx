@@ -160,15 +160,15 @@ export default function AdminExperiencesPage() {
   }
 
   return (
-    <div className="p-8">
-      <div className="flex items-center justify-between mb-8">
+    <div className="p-8 pb-32 min-h-screen bg-[#FFFDF5]">
+      <div className="flex items-center justify-between mb-8 border-b-2 border-black pb-8">
         <div>
-          <h1 className="text-3xl font-bold text-black mb-2">Experience Categories</h1>
-          <p className="text-black/60">Manage your custom experience offerings</p>
+          <h1 className="font-header text-5xl font-black text-[#2D3436] mb-2 uppercase tracking-tighter">Experience Categories</h1>
+          <p className="text-[#2D3436]/60 font-bold text-lg">Manage your custom experience offerings</p>
         </div>
         <Link
           href="/admin/experiences/new"
-          className="inline-flex items-center gap-2 px-6 py-3 bg-[#6C5CE7] text-white font-bold neo-border neo-shadow hover:scale-105 transition-all rounded-lg"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-[#6C5CE7] text-white font-black uppercase tracking-wider border-2 border-black neo-shadow hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all rounded-xl"
         >
           <Plus size={20} />
           Add Category
@@ -186,15 +186,15 @@ export default function AdminExperiencesPage() {
           <table className="w-full">
             <thead className="bg-black text-white">
               <tr>
-                <th className="px-6 py-4 text-left font-bold text-sm tracking-[0.2em] uppercase">Category</th>
-                <th className="px-6 py-4 text-left font-bold text-sm tracking-[0.2em] uppercase">Status</th>
-                <th className="px-6 py-4 text-left font-bold text-sm tracking-[0.2em] uppercase">Created</th>
-                <th className="px-6 py-4 text-center font-bold text-sm tracking-[0.2em] uppercase">Actions</th>
+                <th className="px-6 py-4 text-left font-black text-xs tracking-[0.2em] uppercase">Category</th>
+                <th className="px-6 py-4 text-left font-black text-xs tracking-[0.2em] uppercase">Status</th>
+                <th className="px-6 py-4 text-left font-black text-xs tracking-[0.2em] uppercase">Created</th>
+                <th className="px-6 py-4 text-center font-black text-xs tracking-[0.2em] uppercase">Actions</th>
               </tr>
             </thead>
             <tbody>
               {categories.map((category) => (
-                <tr key={category.id} className="border-b border-black/10 hover:bg-black/5">
+                <tr key={category.id} className="border-b-2 border-black/5 hover:bg-[#FFFDF5] transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-4">
                       <img
@@ -203,23 +203,22 @@ export default function AdminExperiencesPage() {
                         className="w-12 h-12 rounded-lg border-2 border-black object-cover"
                       />
                       <div>
-                        <p className="font-bold text-black">{category.name}</p>
-                        <p className="text-black/60 text-sm">{category.slug}</p>
+                        <p className="font-black text-[#2D3436] uppercase">{category.name}</p>
+                        <p className="text-[#2D3436]/60 text-xs font-bold">{category.slug}</p>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold tracking-[0.1em] uppercase ${
-                      category.published
-                        ? 'bg-green-100 text-green-800 border-2 border-green-500'
-                        : 'bg-gray-100 text-gray-800 border-2 border-gray-500'
-                    }`}>
+                    <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-lg text-xs font-black tracking-[0.1em] uppercase border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,0.1)] ${category.published
+                      ? 'bg-[#00B894] text-black'
+                      : 'bg-gray-100 text-black/60'
+                      }`}>
                       {category.published ? <Eye size={12} /> : <EyeOff size={12} />}
                       {category.published ? 'Published' : 'Draft'}
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    <p className="text-black/80 font-medium">
+                    <p className="text-[#2D3436]/80 font-black text-xs uppercase tracking-wider">
                       {category.createdAt ? new Date(category.createdAt).toLocaleDateString() : 'N/A'}
                     </p>
                   </td>
@@ -227,25 +226,24 @@ export default function AdminExperiencesPage() {
                     <div className="flex items-center justify-center gap-2">
                       <Link
                         href={`/admin/experiences/${category.id}/edit`}
-                        className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
+                        className="p-2 bg-[#74B9FF] text-black border-2 border-black rounded-lg hover:bg-[#5CA0E5] transition-colors neo-shadow-sm active:translate-y-[1px] active:shadow-none"
                         title="Edit"
                       >
                         <Edit size={16} />
                       </Link>
                       <button
                         onClick={() => togglePublished(category)}
-                        className={`p-2 rounded-lg transition-colors ${
-                          category.published
-                            ? 'text-gray-600 hover:bg-gray-100'
-                            : 'text-green-600 hover:bg-green-100'
-                        }`}
+                        className={`p-2 rounded-lg border-2 border-black transition-colors neo-shadow-sm active:translate-y-[1px] active:shadow-none ${category.published
+                          ? 'bg-gray-200 text-black hover:bg-gray-300'
+                          : 'bg-[#00B894] text-black hover:bg-[#00A383]'
+                          }`}
                         title={category.published ? 'Unpublish' : 'Publish'}
                       >
                         {category.published ? <EyeOff size={16} /> : <Eye size={16} />}
                       </button>
                       <button
                         onClick={() => deleteCategory(category.id)}
-                        className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-colors"
+                        className="p-2 bg-[#FF7675] text-black border-2 border-black rounded-lg hover:bg-[#FF5F5E] transition-colors neo-shadow-sm active:translate-y-[1px] active:shadow-none"
                         title="Delete"
                       >
                         <Trash2 size={16} />
@@ -259,9 +257,12 @@ export default function AdminExperiencesPage() {
         </div>
 
         {categories.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-black/60 font-bold text-lg">No experience categories found</p>
-            <p className="text-black/40 text-sm mt-2">Create your first category to get started</p>
+          <div className="text-center py-16 bg-[#FFFDF5]">
+            <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-black border-dashed">
+              <Plus size={32} className="text-black/20" />
+            </div>
+            <p className="text-[#2D3436] font-black uppercase tracking-widest text-lg">No experience categories found</p>
+            <p className="text-[#2D3436]/40 font-bold text-sm mt-2">Create your first category to get started</p>
           </div>
         )}
       </div>
