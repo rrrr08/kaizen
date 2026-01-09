@@ -134,6 +134,13 @@ service cloud.firestore {
       allow read: if true;
       allow write: if isAdmin();
     }
+
+    // Proof of Joys (Testimonials) - read/create by all, write by admins only
+    match /proofofjoys/{joyId} {
+      allow read: if true;
+      allow create: if true;
+      allow write: if isAdmin();
+    }
     
     // Notifications (standalone but linked to users) - strict check
     // The previous rule [users/{userId}/notifications] handles nested.

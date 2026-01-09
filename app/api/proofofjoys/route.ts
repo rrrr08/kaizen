@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db as adminDb } from '@/lib/firebase-admin'; // Using admin SDK for API routes
+import { adminDb } from '@/lib/firebaseAdmin'; // Correct import
 import { Testimonial } from '@/lib/types';
 import { Timestamp } from 'firebase-admin/firestore'; // Admin SDK types
 
