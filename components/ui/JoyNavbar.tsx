@@ -19,7 +19,7 @@ const navItems = [
   { name: 'Experiences', path: '/experiences' },
   { name: 'Play', path: '/play' },
   { name: 'Events', path: '/events' },
-  { name: 'Event Testimonials', path: '/eventestimonial' },
+  // { name: 'Event Testimonials', path: '/eventestimonial' },
   { name: 'Community', path: '/community' },
   { name: 'Blog', path: '/blog' },
   { name: 'About', path: '/about' },

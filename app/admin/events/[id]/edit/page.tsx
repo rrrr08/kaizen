@@ -19,7 +19,17 @@ export default function EditEventPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<{
+    title: string;
+    datetime: string;
+    location: string;
+    price: string;
+    description: string;
+    image: string;
+    capacity: string;
+    highlights: string[];
+    gallery: string[];
+  }>({
     title: '',
     datetime: '',
     location: '',
@@ -27,8 +37,8 @@ export default function EditEventPage() {
     description: '',
     image: '',
     capacity: '',
-    highlights: '',
-    gallery: '',
+    highlights: [''],
+    gallery: [],
   });
 
   const isPast =
@@ -87,8 +97,8 @@ export default function EditEventPage() {
             : '',
           price: e.price?.toString() ?? '',
           capacity: e.capacity?.toString() ?? '',
-          highlights: e.highlights?.map((h: any) => h.text).join('\n') ?? '',
-          gallery: e.gallery?.join('\n') ?? '',
+          highlights: e.highlights?.map((h: any) => h.text) ?? [''],
+          gallery: e.gallery ?? [],
         });
       } catch (err) {
         console.error(err);
@@ -107,11 +117,41 @@ export default function EditEventPage() {
     setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const nonEmpty = (v: string) => v.trim().length > 0;
+  const handleArrayChange = (field: 'highlights', index: number, value: string) => {
+    setForm(prev => ({
+      ...prev,
+      [field]: prev[field].map((item, i) => i === index ? value : item)
+    }));
+  };
+
+  const addArrayItem = (field: 'highlights') => {
+    setForm(prev => ({
+      ...prev,
+      [field]: [...prev[field], '']
+    }));
+  };
+
+  const removeArrayItem = (field: 'highlights', index: number) => {
+    setForm(prev => ({
+      ...prev,
+      [field]: prev[field].filter((_, i) => i !== index)
+    }));
+  };
+
+  const handleGalleryChange = (urls: string[]) => {
+    setForm(prev => ({ ...prev, gallery: urls }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
+
+    // Validate that the event datetime is not in the past
+    if (form.datetime && new Date(form.datetime).getTime() < Date.now()) {
+      await showAlert('Cannot set event date and time to a past date/time', 'error');
+      setSaving(false);
+      return;
+    }
 
     const payload: any = {
       title: form.title,
@@ -124,15 +164,14 @@ export default function EditEventPage() {
     if (form.image) payload.image = form.image;
     if (form.price) payload.price = Number(form.price);
 
-    if (isPast) {
+    // Only add highlights and gallery for past events
+    const eventIsPast = new Date(form.datetime).getTime() < Date.now();
+    if (eventIsPast) {
       payload.highlights = form.highlights
-        .split('\n')
-        .filter(nonEmpty)
-        .map(text => ({ text }));
+        .filter((text: string) => text.trim().length > 0)
+        .map((text: string) => ({ text }));
 
-      payload.gallery = form.gallery.split('\n').filter(nonEmpty);
-
-
+      payload.gallery = form.gallery.filter((url: string) => url.trim().length > 0);
     }
 
     try {
@@ -280,23 +319,47 @@ export default function EditEventPage() {
                 </p>
               </div>
 
-              <Field
-                label="Highlights (one per line)"
-                name="highlights"
-                textarea
-                rows={4}
-                value={form.highlights}
-                onChange={handleChange}
-              />
-              <Field
-                label="Gallery Image URLs (one per line)"
-                name="gallery"
-                textarea
-                rows={4}
-                value={form.gallery}
-                onChange={handleChange}
-              />
-              
+              <div>
+                <label className="font-black text-xs tracking-widest text-black/40 mb-3 uppercase pl-1 block">Highlights</label>
+                <div className="space-y-4">
+                  {form.highlights.map((highlight, index) => (
+                    <div key={index} className="flex gap-4 items-start">
+                      <textarea
+                        value={highlight}
+                        onChange={(e) => handleArrayChange('highlights', index, e.target.value)}
+                        className="flex-1 px-4 py-3 bg-white border-2 border-black rounded-xl text-black placeholder:text-black/30 focus:outline-none focus:shadow-[4px_4px_0px_#000] transition-all font-medium min-h-20 resize-y"
+                        placeholder="Event highlight..."
+                      />
+                      {form.highlights.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => removeArrayItem('highlights', index)}
+                          className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-colors font-bold text-lg mt-2"
+                        >
+                          ×
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => addArrayItem('highlights')}
+                    className="px-4 py-2 bg-[#FFD93D] text-black font-bold border-2 border-black rounded-lg text-xs tracking-widest uppercase hover:translate-y-0.5 hover:shadow-none transition-all shadow-[2px_2px_0px_#000]"
+                  >
+                    + Add Highlight
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="font-black text-xs tracking-widest text-black/40 mb-3 uppercase pl-1 block">Gallery Images</label>
+                <ImageUpload
+                  value={form.gallery}
+                  onChange={(url) => handleGalleryChange([...form.gallery, url])}
+                  onRemove={(url) => handleGalleryChange(form.gallery.filter(u => u !== url))}
+                  uploadId="event-gallery-edit"
+                />
+              </div>
             </Section>
           )}
 

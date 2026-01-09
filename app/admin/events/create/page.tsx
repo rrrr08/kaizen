@@ -23,9 +23,8 @@ export default function CreateEventPage() {
     description: '',
     image: '',
     capacity: '',
-    highlights: '',
-    gallery: '',
-    testimonials: ''
+    highlights: [''],
+    gallery: [] as string[],
   });
 
   useEffect(() => {
@@ -52,7 +51,30 @@ export default function CreateEventPage() {
     setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const nonEmpty = (v: string): v is string => v.trim().length > 0;
+  const handleArrayChange = (field: 'highlights', index: number, value: string) => {
+    setForm(prev => ({
+      ...prev,
+      [field]: prev[field].map((item, i) => i === index ? value : item)
+    }));
+  };
+
+  const addArrayItem = (field: 'highlights') => {
+    setForm(prev => ({
+      ...prev,
+      [field]: [...prev[field], '']
+    }));
+  };
+
+  const removeArrayItem = (field: 'highlights', index: number) => {
+    setForm(prev => ({
+      ...prev,
+      [field]: prev[field].filter((_, i) => i !== index)
+    }));
+  };
+
+  const handleGalleryChange = (urls: string[]) => {
+    setForm(prev => ({ ...prev, gallery: urls }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,18 +94,10 @@ export default function CreateEventPage() {
 
     if (isPast) {
       payload.highlights = form.highlights
-        .split('\n')
-        .filter(nonEmpty)
-        .map(text => ({ text }));
+        .filter((text: string) => text.trim().length > 0)
+        .map((text: string) => ({ text }));
 
-      payload.gallery = form.gallery
-        .split('\n')
-        .filter(nonEmpty);
-
-      payload.testimonials = form.testimonials
-        .split('\n')
-        .filter(nonEmpty)
-        .map(text => ({ text }));
+      payload.gallery = form.gallery.filter((url: string) => url.trim().length > 0);
     }
 
     const auth = getAuth();
@@ -201,34 +215,51 @@ export default function CreateEventPage() {
             <Section title="Past Event Enhancements" accent>
               <div className="p-4 bg-[#6C5CE7]/10 border-2 border-[#6C5CE7] rounded-xl mb-6">
                 <p className="text-[#6C5CE7] font-bold text-sm">
-                  This event is in the past. You can add highlights, gallery images, and testimonials below.
+                  This event is in the past. You can add highlights and gallery images below.
                 </p>
               </div>
 
-              <Field
-                label="Highlights (one per line)"
-                name="highlights"
-                textarea
-                rows={4}
-                value={form.highlights}
-                onChange={handleChange}
-              />
-              <Field
-                label="Gallery Image URLs (one per line)"
-                name="gallery"
-                textarea
-                rows={4}
-                value={form.gallery}
-                onChange={handleChange}
-              />
-              <Field
-                label="Testimonials (one per line)"
-                name="testimonials"
-                textarea
-                rows={4}
-                value={form.testimonials}
-                onChange={handleChange}
-              />
+              <div>
+                <label className="font-black text-xs tracking-widest text-black/40 mb-3 uppercase pl-1 block">Highlights</label>
+                <div className="space-y-4">
+                  {form.highlights.map((highlight, index) => (
+                    <div key={index} className="flex gap-4 items-start">
+                      <textarea
+                        value={highlight}
+                        onChange={(e) => handleArrayChange('highlights', index, e.target.value)}
+                        className="flex-1 px-4 py-3 bg-white border-2 border-black rounded-xl text-black placeholder:text-black/30 focus:outline-none focus:shadow-[4px_4px_0px_#000] transition-all font-medium min-h-20 resize-y"
+                        placeholder="Event highlight..."
+                      />
+                      {form.highlights.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => removeArrayItem('highlights', index)}
+                          className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-colors font-bold text-lg mt-2"
+                        >
+                          ×
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => addArrayItem('highlights')}
+                    className="px-4 py-2 bg-[#FFD93D] text-black font-bold border-2 border-black rounded-lg text-xs tracking-widest uppercase hover:translate-y-0.5 hover:shadow-none transition-all shadow-[2px_2px_0px_#000]"
+                  >
+                    + Add Highlight
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="font-black text-xs tracking-widest text-black/40 mb-3 uppercase pl-1 block">Gallery Images</label>
+                <ImageUpload
+                  value={form.gallery}
+                  onChange={(url) => handleGalleryChange([...form.gallery, url])}
+                  onRemove={(url) => handleGalleryChange(form.gallery.filter(u => u !== url))}
+                  uploadId="event-gallery"
+                />
+              </div>
             </Section>
           )}
 
