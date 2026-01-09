@@ -33,8 +33,11 @@ function VerifyPageContent() {
     }, [router]);
 
     useEffect(() => {
-        // Lazy load Firebase
+        let interval: NodeJS.Timeout;
+
+        // Lazy load Firebase and start polling
         import('@/lib/firebase').then(({ auth }) => {
+            // Initial check
             import('firebase/auth').then(({ onAuthStateChanged }) => {
                 const unsubscribe = onAuthStateChanged(auth, (user) => {
                     setSessionChecking(true);
@@ -47,22 +50,49 @@ function VerifyPageContent() {
                                 router.push(decodeURIComponent(redirectUrl) || '/');
                             }, 2000);
                         } else {
-                            setMessage("Please verify your email. If you received a code, enter it below, or request a new verification email.");
+                            if (!message && !error) { // Only set if no other message
+                                setMessage("Please verify your email. If you received a code, enter it below, or request a new verification email.");
+                            }
                         }
                     } else {
                         setCurrentUserEmail(null);
                         setEmailVerified(false);
                         if (!emailFromQuery) {
                             setError("No user session found. Please log in or ensure you have an email in the link to verify.");
-                        } else {
+                        } else if (!message) {
                             setMessage(`Attempting to verify for ${emailFromQuery}. If you received a code, enter it below.`);
                         }
                     }
                     setSessionChecking(false);
                 });
-                return () => unsubscribe();
+
+                // Set up polling interval to check for verification every 3 seconds
+                // This helps if the user verifies in another tab/window
+                interval = setInterval(async () => {
+                    if (auth.currentUser) {
+                        await auth.currentUser.reload();
+                        if (auth.currentUser.emailVerified) {
+                            setEmailVerified(true);
+                            setMessage("Email verification detected! Redirecting...");
+                            clearInterval(interval);
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 1000);
+                        }
+                    }
+                }, 3000);
+
+                return () => {
+                    unsubscribe();
+                    if (interval) clearInterval(interval);
+                };
             });
         });
+
+        // Cleanup function for the effect itself (in case component unmounts before firebase loads)
+        return () => {
+            if (interval) clearInterval(interval);
+        };
     }, [router, redirectUrl, emailFromQuery]);
 
     const handleResendOTP = async () => {

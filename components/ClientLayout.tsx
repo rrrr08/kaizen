@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import SplashScreen from '@/components/ui/SplashScreen';
 import Navbar from '@/components/ui/JoyNavbar';
 import Footer from '@/components/ui/Footer';
@@ -17,8 +17,34 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
     const [showSplash, setShowSplash] = useState(isHomePage);
     const [isClient, setIsClient] = useState(false);
     const [hasShownInitialSplash, setHasShownInitialSplash] = useState(false);
-    const [previousAuthState, setPreviousAuthState] = useState<boolean | null>(null);
+
     const { user, loading } = useAuth();
+    const router = useRouter();
+
+    useEffect(() => {
+        if (!loading && user && !user.emailVerified) {
+            // Paths that unverified users are ALLOWED to visit
+            const allowedPaths = [
+                '/auth/verify',
+                '/auth/action',
+                '/auth/signout',
+                '/auth/login', // Just in case
+                '/terms',
+                '/privacy',
+                '/contact'
+            ];
+
+            // Check if current path is allowed
+            // We use startsWith to allow for sub-paths (e.g. /auth/action?mode=...)
+            const isAllowed = allowedPaths.some(path => pathname === path || pathname?.startsWith(path + '/'));
+
+            if (!isAllowed) {
+                // If they are on home page, we might want to let them see it, but user asked to prevent entering pages.
+                // Redirect to verify page
+                router.push(`/auth/verify?email=${encodeURIComponent(user.email || '')}&redirect=${encodeURIComponent(pathname || '/')}`);
+            }
+        }
+    }, [user, loading, pathname, router]);
 
     useEffect(() => {
         setIsClient(true);
@@ -31,28 +57,11 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
         if (!hasShownInitialSplash && pathname === '/') {
             setShowSplash(true);
             setHasShownInitialSplash(true);
-            // Initialize the auth state after initial splash
-            setPreviousAuthState(!!user);
         } else if (!hasShownInitialSplash) {
             // If not on home page, just mark as shown without displaying
             setHasShownInitialSplash(true);
-            setPreviousAuthState(!!user);
         }
-    }, [isClient, loading, hasShownInitialSplash, user, pathname]);
-
-    // Show splash when user authenticates (not on initial load)
-    useEffect(() => {
-        if (!isClient || loading || !hasShownInitialSplash || previousAuthState === null) return;
-
-        const isAuthenticated = !!user;
-
-        // Show splash when transitioning from unauthenticated to authenticated
-        if (previousAuthState === false && isAuthenticated) {
-            setShowSplash(true);
-        }
-
-        setPreviousAuthState(isAuthenticated);
-    }, [user, loading, isClient, hasShownInitialSplash, previousAuthState]);
+    }, [isClient, loading, hasShownInitialSplash, pathname]);
 
     const handleSplashComplete = () => {
         setShowSplash(false);
