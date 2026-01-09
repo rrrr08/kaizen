@@ -55,11 +55,24 @@ export default function ShipmentList() {
 
     const handleStatusUpdate = async (id: string, newStatus: string) => {
         try {
+            // Optimistic update
             setShipments(shipments.map(s => s.id === id ? { ...s, status: newStatus } : s));
-            await updateShipmentStatus(id, newStatus);
+
+            const response = await fetch('/api/admin/shipments/update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ shipmentId: id, status: newStatus })
+            });
+
+            if (!response.ok) {
+                const data = await response.json();
+                throw new Error(data.error || 'Failed to update status');
+            }
+
             setEditingId(null);
         } catch (err) {
             console.error('Failed to update status:', err);
+            // Revert on failure
             fetchShipments();
         }
     };

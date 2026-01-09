@@ -52,7 +52,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: '/admin/users', label: 'Users', icon: Users },
     { href: '/admin/game-settings', label: 'Game Settings', icon: Gamepad2 },
     { href: '/admin/vouchers', label: 'Vouchers', icon: Ticket },
-    { href: '/admin/api-test', label: 'API Test', icon: Zap },
     { href: '/admin/orders', label: 'Orders', icon: ShoppingBag },
     { href: '/admin/shipments', label: 'Shipments', icon: Truck },
     { href: '/admin/products', label: 'Products', icon: LayoutGrid },
