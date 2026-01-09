@@ -3,8 +3,9 @@
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { CheckCircle, ShoppingBag, ArrowRight, Printer, Download, MapPin, Mail, Phone } from 'lucide-react';
+import { CheckCircle, ShoppingBag, ArrowRight, Printer, Download, MapPin, Mail, Phone, Eye } from 'lucide-react';
 import { motion } from 'framer-motion';
+import InvoiceModal from '@/components/ui/InvoiceModal';
 
 export const dynamic = 'force-dynamic';
 
@@ -49,6 +50,7 @@ export default function OrderConfirmationPage() {
   const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showInvoice, setShowInvoice] = useState(false);
 
   useEffect(() => {
     const loadOrder = async () => {
@@ -124,13 +126,19 @@ export default function OrderConfirmationPage() {
           </p>
 
           <button
-            onClick={() => window.print()}
-            className="inline-flex items-center gap-2 px-8 py-4 bg-black text-white font-black text-sm tracking-widest rounded-[15px] border-2 border-transparent hover:bg-[#6C5CE7] hover:-translate-y-1 transition-all neo-shadow shadow-black/20 uppercase"
+            onClick={() => setShowInvoice(true)}
+            className="inline-flex items-center gap-2 px-8 py-4 bg-[#6C5CE7] text-white font-black text-sm tracking-widest rounded-[15px] border-2 border-black hover:-translate-y-1 transition-all neo-shadow shadow-black/20 uppercase"
           >
-            <Printer className="w-5 h-5" />
-            Download / Print Invoice
+            <Eye className="w-5 h-5" />
+            View / Download Invoice
           </button>
         </div>
+
+        <InvoiceModal
+          order={order}
+          isOpen={showInvoice}
+          onClose={() => setShowInvoice(false)}
+        />
 
         <div className="bg-white border-2 border-black rounded-[25px] p-8 neo-shadow mb-8 relative overflow-hidden">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8 relative z-10">

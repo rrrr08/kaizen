@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { CommunityService } from '@/lib/db/community-service';
 import { useAuth } from '@/app/context/AuthContext';
 import { X, Loader2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 interface Props {
     isOpen: boolean;
@@ -13,6 +14,7 @@ interface Props {
 
 export default function CreateThreadModal({ isOpen, onClose, onSuccess }: Props) {
     const { user } = useAuth();
+    const { addToast } = useToast();
     const [loading, setLoading] = useState(false);
     const [form, setForm] = useState({
         title: '',
@@ -39,7 +41,11 @@ export default function CreateThreadModal({ isOpen, onClose, onSuccess }: Props)
             setForm({ title: '', description: '', category: 'general' });
             onSuccess();
         } else {
-            alert('Failed to create thread');
+            addToast({
+                title: 'Error',
+                description: 'Failed to create thread. Please try again.',
+                variant: 'destructive'
+            });
         }
     };
 

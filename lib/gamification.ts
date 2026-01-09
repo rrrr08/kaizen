@@ -49,21 +49,26 @@ const DEFAULT_TIERS = [
   }
 ];
 
-// Fetch tiers from Firebase
-export const fetchTiersFromFirebase = async () => {
+// Fetch tiers and XP settings from Firebase
+export const fetchXPSettings = async () => {
   try {
     const db = getFirestore(app);
     const settingsRef = doc(db, 'settings', 'xpSystem');
     const snap = await getDoc(settingsRef);
 
-    if (snap.exists() && snap.data()?.tiers) {
-      return snap.data()!.tiers;
+    if (snap.exists()) {
+      return snap.data();
     }
-    return DEFAULT_TIERS;
+    return { tiers: DEFAULT_TIERS, xpSources: [] };
   } catch (error) {
-    console.error('Error fetching tiers from Firebase:', error);
-    return DEFAULT_TIERS;
+    console.error('Error fetching XP settings:', error);
+    return { tiers: DEFAULT_TIERS, xpSources: [] };
   }
+};
+
+export const fetchTiersFromFirebase = async () => {
+  const settings = await fetchXPSettings();
+  return settings?.tiers || DEFAULT_TIERS;
 };
 
 export const fetchWheelPrizesFromFirebase = async () => {
@@ -215,8 +220,9 @@ export const CONFIG = {
   maxRedeemPercent: 50, // Can only pay 50% of total by points
 };
 
-export const calculatePoints = (price: number, isFirstTime: boolean = false) => {
-  let points = Math.floor(price * REWARDS.SHOP.POINTS_PER_RUPEE);
+export const calculatePoints = (price: number, isFirstTime: boolean = false, baseJP: number = 10, multiplier: number = 1.0) => {
+  const basePoints = Math.floor((price / 100) * baseJP);
+  let points = Math.floor(basePoints * multiplier);
   if (isFirstTime) {
     points += 100; // Bonus
   }

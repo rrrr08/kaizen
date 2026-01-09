@@ -21,11 +21,10 @@ declare global {
 export default function CheckoutPage() {
   const { items, getTotalPrice, clearCart, appliedPointsDiscount, setAppliedPointsDiscount, getFinalPrice, mergeLocalCartWithFirebase, isLoading } = useCart();
   const { user, loading: authLoading } = useAuth();
-  const { config, calculatePoints, calculatePointWorth, getMaxRedeemableAmount } = useGamification();
+  const { balance, config, calculatePoints, calculatePointWorth, getMaxRedeemableAmount } = useGamification();
   const router = useRouter();
   const { addToast } = useToast();
   const [isProcessing, setIsProcessing] = useState(false);
-  const [walletPoints, setWalletPoints] = useState(0);
   const [redeemPoints, setRedeemPoints] = useState(0);
   const [isFirstTime, setIsFirstTime] = useState(false);
   const [gstRate, setGstRate] = useState(18); // Default 18%
@@ -112,19 +111,19 @@ export default function CheckoutPage() {
   }, [user?.uid, authLoading, mergeLocalCartWithFirebase]);
 
   useEffect(() => {
-    const loadWalletData = async () => {
+    const loadFirstTimeStatus = async () => {
       try {
-        const { auth, getUserWallet } = await import('@/lib/firebase');
+        const { auth, getUserOrders } = await import('@/lib/firebase');
         if (!auth || !auth.currentUser) return;
         const currentUser = auth.currentUser;
-        const firebaseWallet = await getUserWallet(currentUser.uid);
-        setWalletPoints(firebaseWallet.points || 0);
+        const userOrders = await getUserOrders(currentUser.uid);
+        setIsFirstTime(userOrders.length === 0);
       } catch (error) {
-        console.error('Error loading wallet from Firebase:', error);
+        console.error('Error checking first-time status:', error);
       }
     };
 
-    loadWalletData();
+    loadFirstTimeStatus();
 
     const fetchSettings = async () => {
       try {
@@ -144,6 +143,7 @@ export default function CheckoutPage() {
   }, [user]);
 
   const totalPrice = getTotalPrice();
+  const walletPoints = balance || 0;
   const maxRedeemable = getMaxRedeemableAmount(totalPrice, walletPoints);
   const pointsWorthRupees = calculatePointWorth(redeemPoints);
 
@@ -371,11 +371,20 @@ export default function CheckoutPage() {
                 <span className="text-xl font-black uppercase">Total</span>
                 <span className="text-3xl font-black">₹{finalPrice}</span>
               </div>
-              <div className="bg-white border-2 border-black rounded-xl p-4 flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-[#6C5CE7] text-white flex items-center justify-center font-black border border-black">JP</div>
-                <div>
-                  <p className="text-[10px] text-black/50 font-black uppercase">Earnings</p>
-                  <p className="font-header text-xl font-black">+{earnedPoints} JP</p>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-white border-2 border-black rounded-xl p-4 flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-[#6C5CE7] text-white flex items-center justify-center font-black border border-black text-xs">JP</div>
+                  <div>
+                    <p className="text-[10px] text-black/50 font-black uppercase">Earnings</p>
+                    <p className="font-header text-lg font-black">+{earnedPoints} JP</p>
+                  </div>
+                </div>
+                <div className="bg-white border-2 border-black rounded-xl p-4 flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-[#00B894] text-white flex items-center justify-center font-black border border-black text-xs">W</div>
+                  <div>
+                    <p className="text-[10px] text-black/50 font-black uppercase">Wallet</p>
+                    <p className="font-header text-lg font-black">{balance} JP</p>
+                  </div>
                 </div>
               </div>
             </div>

@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { db } from '@/lib/firebase';
 import { collection, query, orderBy, getDocs } from 'firebase/firestore';
 import CreateShipmentModal from './CreateShipmentModal';
-import InvoiceModal from './InvoiceModal';
+import InvoiceModal from '@/components/ui/InvoiceModal';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface Order {
