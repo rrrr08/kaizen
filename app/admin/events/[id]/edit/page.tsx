@@ -29,7 +29,6 @@ export default function EditEventPage() {
     capacity: '',
     highlights: '',
     gallery: '',
-    testimonials: '',
   });
 
   const isPast =
@@ -90,7 +89,6 @@ export default function EditEventPage() {
           capacity: e.capacity?.toString() ?? '',
           highlights: e.highlights?.map((h: any) => h.text).join('\n') ?? '',
           gallery: e.gallery?.join('\n') ?? '',
-          testimonials: e.testimonials?.map((t: any) => t.text).join('\n') ?? '',
         });
       } catch (err) {
         console.error(err);
@@ -134,10 +132,7 @@ export default function EditEventPage() {
 
       payload.gallery = form.gallery.split('\n').filter(nonEmpty);
 
-      payload.testimonials = form.testimonials
-        .split('\n')
-        .filter(nonEmpty)
-        .map(text => ({ text }));
+
     }
 
     try {
@@ -281,7 +276,7 @@ export default function EditEventPage() {
             <Section title="Past Event Enhancements" accent>
               <div className="p-4 bg-[#6C5CE7]/10 border-2 border-[#6C5CE7] rounded-xl mb-6">
                 <p className="text-[#6C5CE7] font-bold text-sm">
-                  This event has passed. You can add highlights, gallery images, and testimonials below.
+                  This event has passed. You can add highlights and gallery images below.
                 </p>
               </div>
 
@@ -301,14 +296,7 @@ export default function EditEventPage() {
                 value={form.gallery}
                 onChange={handleChange}
               />
-              <Field
-                label="Testimonials (one per line)"
-                name="testimonials"
-                textarea
-                rows={4}
-                value={form.testimonials}
-                onChange={handleChange}
-              />
+              
             </Section>
           )}
 
