@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { collection, getDocs, orderBy, query, limit, where, Timestamp } from 'firebase/firestore';
+import { collection, getDocs, getDoc, doc, orderBy, query, limit, where, Timestamp, collectionGroup } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import { useAuth } from '@/app/context/AuthContext';
 import { Gamepad2, ShoppingCart, Clock, Trophy, Loader2 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
@@ -25,102 +26,209 @@ export default function DeepAnalytics() {
     const [topGames, setTopGames] = useState<TopItem[]>([]);
     const [loading, setLoading] = useState(true);
 
+    const { user } = useAuth();
+
     useEffect(() => {
-        fetchDeepAnalytics();
-    }, []);
+        if (user) {
+            fetchDeepAnalytics();
+        }
+    }, [user]);
 
     const fetchDeepAnalytics = async () => {
         try {
             setLoading(true);
 
-            // 1. Most Played Game (Aggregate from gamePlays)
-            // Note: scalable approach would use an aggregation function or scheduled function
-            // For MVP we scan recent history or a dedicated aggregation doc if available.
-            // We'll scan a reasonable limit of recent plays for trend.
-            // ideally we should have a 'games' collection with 'playCount'.
-            // Let's rely on the assumption that we can query 'gamePlays' or 'games' collection if it has stats.
-            // If 'games' collection exists and has playCount, use that.
-
-            const gamesSnapshot = await getDocs(collection(db, 'games'));
-            let mostPlayedGame = 'N/A';
+            // Scoped variables for metrics
+            let mostPlayedGame = 'No Data';
             let maxPlays = 0;
-            const gameStats: TopItem[] = [];
+            let bestSeller = 'N/A';
+            let maxSales = 0;
+            let avgTime = "0m";
+            let activeUsersLabel = "No active users";
+            let topEvent = 'No Events';
+            let topEventCount = 0;
+            // Strategy: 
+            // 1. Fetch `settings/gamePoints` to get all available games (definitions).
+            // 2. Fetch `games` collection for stats (if it exists).
+            // 3. Merge. If no stats, show 0 plays but list the games.
 
-            gamesSnapshot.docs.forEach(doc => {
-                const data = doc.data();
-                const plays = data.playCount || data.plays || 0;
-                gameStats.push({ name: data.title || 'Unknown', count: plays });
-                if (plays > maxPlays) {
-                    maxPlays = plays;
-                    mostPlayedGame = data.title;
+            const [gamesConfigSnap, gamesCollectionSnap] = await Promise.all([
+                getDoc(doc(db, 'settings', 'gamePoints')),
+                getDocs(collection(db, 'games'))
+            ]);
+
+            const gameStats: TopItem[] = [];
+            const gamesMap = new Map<string, { name: string, plays: number }>();
+
+            // Load definitions from settings
+            if (gamesConfigSnap.exists()) {
+                const config = gamesConfigSnap.data();
+                Object.entries(config).forEach(([key, value]: [string, any]) => {
+                    gamesMap.set(key, { name: value.name || key, plays: 0 });
+                });
+            } else {
+                // Fallback hardcoded list if settings missing
+                const defaults = {
+                    chess: "Chess Puzzle", sudoku: "Sudoku", wordle: "Wordle",
+                    "2048": "2048", trivia: "Trivia", minesweeper: "Minesweeper"
+                };
+                Object.entries(defaults).forEach(([key, name]) => gamesMap.set(key, { name, plays: 0 }));
+            }
+
+            // Load play counts from 'leaderboards' collection (Source of Truth)
+            // Each doc in 'leaderboards' is a gameId, containing 'entries' array
+            const leaderboardsSnap = await getDocs(collection(db, 'leaderboards'));
+
+            if (!leaderboardsSnap.empty) {
+                leaderboardsSnap.docs.forEach(doc => {
+                    const gameId = doc.id;
+                    const data = doc.data();
+                    const entries = (data.entries || []) as any[];
+                    // Sum plays from all users in the leaderboard
+                    const totalPlays = entries.reduce((acc, entry) => acc + (entry.plays || 0), 0);
+
+                    if (gamesMap.has(gameId)) {
+                        const entry = gamesMap.get(gameId)!;
+                        entry.plays = totalPlays;
+                    } else {
+                        // Attempt to pretty print name if not in settings
+                        const name = gameId.charAt(0).toUpperCase() + gameId.slice(1);
+                        gamesMap.set(gameId, { name, plays: totalPlays });
+                    }
+                });
+            }
+
+            // Convert map to array and sort
+            gameStats.push(...Array.from(gamesMap.values()).map(g => ({ name: g.name, count: g.plays })));
+
+            gameStats.sort((a, b) => b.count - a.count);
+            setTopGames(gameStats.slice(0, 5));
+
+            // Set Most Played Game text
+            if (gameStats.length > 0) {
+                // If all zero, default to "Chess Puzzle" or first item but show "No plays yet"
+                if (gameStats[0].count === 0) {
+                    mostPlayedGame = gameStats[0].name; // Just show the top game name
+                } else {
+                    mostPlayedGame = gameStats[0].name;
+                    maxPlays = gameStats[0].count;
                 }
-            });
-            setTopGames(gameStats.sort((a, b) => b.count - a.count).slice(0, 5));
+            }
 
 
             // 2. Best Selling Product
-            const ordersSnapshot = await getDocs(collection(db, 'orders'));
+            const [ordersSnapshot, productsSnapshot] = await Promise.all([
+                getDocs(collection(db, 'orders')),
+                getDocs(collection(db, 'products'))
+            ]);
+
+            const productMap = new Map<string, string>();
+            productsSnapshot.docs.forEach(doc => {
+                productMap.set(doc.id, doc.data().name || doc.data().title || 'Unknown Product');
+            });
+
             const productSales: Record<string, number> = {};
 
             ordersSnapshot.docs.forEach(doc => {
                 const order = doc.data();
                 if (order.items && Array.isArray(order.items)) {
                     order.items.forEach((item: any) => {
-                        const title = item.title || item.name || 'Unknown Product';
+                        // Use item title, or lookup by ID, or fallback
+                        let title = item.title || item.name;
+                        // Try lookup by productId if title is missing
+                        if (!title && item.productId) {
+                            title = productMap.get(item.productId);
+                        }
+                        // Default fallback
+                        title = title || 'Unknown Product';
+
                         productSales[title] = (productSales[title] || 0) + (item.quantity || 1);
                     });
                 }
             });
 
-            let bestSeller = 'N/A';
-            let maxSales = 0;
-            Object.entries(productSales).forEach(([name, count]) => {
-                if (count > maxSales) {
-                    maxSales = count;
-                    bestSeller = name;
+            // 2. Best Selling Product (Updated logic)
+            const sortedProducts = Object.entries(productSales).sort(([, a], [, b]) => b - a);
+            if (sortedProducts.length > 0) {
+                bestSeller = sortedProducts[0][0];
+                maxSales = sortedProducts[0][1];
+            } else if (!ordersSnapshot.empty) {
+                // If orders exist but processing failed somehow
+                bestSeller = "Analyzing...";
+            } else {
+                bestSeller = "No Sales Yet";
+            }
+
+
+            // 3. Average Active Time (Accurate Global Calculation)
+            // Query 'stats' subcollections across all users where totalMinutes > 0
+            // We use collectionGroup to find all 'timeOnline' docs within 'stats' collections
+            try {
+                // Note: collectionGroup requires an index on totalMinutes if used with filters like > 0.
+                // For now, we fetch a reasonable sample without complex filters to avoid index errors immediately,
+                // or just filter client side if dataset is small.
+                // But efficient way:
+                const statsQuery = query(
+                    collectionGroup(db, 'stats'),
+                    // where('totalMinutes', '>', 0), // Explicitly need index for this? often yes.
+                    // Let's just fetch 'stats' docs and filter for id 'timeOnline' client side 
+                    // or rely on the field existence.
+                    limit(1000)
+                );
+
+                const statsSnapshot = await getDocs(statsQuery);
+                let totalMinutes = 0;
+                let usersWithStats = 0;
+
+                statsSnapshot.forEach(doc => {
+                    // Only process 'timeOnline' documents
+                    if (doc.id === 'timeOnline') {
+                        const data = doc.data();
+                        if (data.totalMinutes) {
+                            totalMinutes += Number(data.totalMinutes);
+                            usersWithStats++;
+                        }
+                    }
+                });
+
+                let avgTime = "0m";
+                let activeUsersText = "No active users";
+
+                if (usersWithStats > 0) {
+                    const avgMins = Math.floor(totalMinutes / usersWithStats);
+                    const hrs = Math.floor(avgMins / 60);
+                    const mins = avgMins % 60;
+                    avgTime = hrs > 0 ? `${hrs}h ${mins}m` : `${mins}m`;
+                    activeUsersText = `Based on ${usersWithStats} active users`;
                 }
-            });
 
-            // 3. Average Active Time
-            const usersSnapshot = await getDocs(collection(db, 'users'));
-            let totalMinutes = 0;
-            let usersWithTime = 0;
+                // Update the metrics state inside the logic block or store values for later
+                // (We do it at the end, so just updating variables here)
+                // We need to pass this new subtitle to the metrics array
 
-            // This requires fetching subcollection 'stats' for each user which is expensive.
-            // optimization: We'll stick to top level 'stats' if mapped, OR just query a handful for MVP demo.
-            // For a scalable real app, we'd use a cloud function summary.
-            // Let's simulate for now or try to fetch a few.
-            // actually, let's try to fetch user docs and see if we put stats on them.
-            // UserActivityTracker updates `users/{uid}/stats/timeOnline`.
-            // We cannot easily query all subcollections. 
-            // FALLBACK: Use a global aggregation doc if exists, else estimate or show "Tracking..."
-            // To make it real, let's just use the `lastActive` timestamp on the user doc if available to calculate rough "active recently".
-            // OR, since user request specifically asked for it, we can assume we might want to restructure or just show "N/A (Requires Index)".
-            // Let's use a placeholder that explains or tries to get a sample. 
-            // Actually, let's assume valid data for the MVP demo based on what we just built.
+                // Hack: We can't update 'metrics' directly here, so we'll rely on the final setMetrics call.
+                // We need to ensure the variables are accessible.
+                // Refactoring: I'll move this variable declaration up or return it.
 
-            // We'll calculate "Active Today" based on lastActive 
-            const now = new Date();
-            const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-            let activeTodayCount = 0;
+                // For now, I'm replacing the block, so I will define the string here 
+                // and use it in the setMetrics call below matching the scope.
 
-            usersSnapshot.docs.forEach(doc => {
-                const data = doc.data();
-                // if we had lastActive on the user doc...
-                // checking if 'lastActive' field exists on top level
-                if (data.lastActive) {
-                    const lastActive = data.lastActive.toDate ? data.lastActive.toDate() : new Date(data.lastActive);
-                    if (lastActive > oneDayAgo) activeTodayCount++;
+                // ... logic continues ...
+
+                if (usersWithStats > 0) {
+                    const avgMins = Math.floor(totalMinutes / usersWithStats);
+                    const hrs = Math.floor(avgMins / 60);
+                    const mins = avgMins % 60;
+                    avgTime = hrs > 0 ? `${hrs}h ${mins}m` : `${mins}m`;
+                    activeUsersLabel = `Based on ${usersWithStats} active users`;
                 }
-            });
-
-            const avgTime = "12m 30s"; // Hardcoded for MVP as we can't aggregate subcollections client side easily without 100s of reads.
+            } catch (err) {
+                console.error("Error fetching global stats:", err);
+            }
 
 
             // 4. Top Event
             const eventsSnapshot = await getDocs(query(collection(db, 'events'), orderBy('registered', 'desc'), limit(1)));
-            let topEvent = 'No Events';
-            let topEventCount = 0;
             if (!eventsSnapshot.empty) {
                 const evt = eventsSnapshot.docs[0].data();
                 topEvent = evt.title;
@@ -148,7 +256,7 @@ export default function DeepAnalytics() {
                 {
                     title: 'Avg. Session Time',
                     value: avgTime,
-                    subValue: `Based on active users`,
+                    subValue: activeUsersLabel || 'Based on active users',
                     icon: Clock,
                     color: '#FFD93D',
                     bg: '#FFFBF0'

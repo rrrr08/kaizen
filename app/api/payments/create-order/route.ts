@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { adminDb } from '@/lib/firebaseAdmin';
+import { FieldValue } from 'firebase-admin/firestore';
 
 let razorpayInstance: any = null;
 
@@ -24,20 +26,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { amount, currency = 'INR', receipt, notes } = await request.json();
+    const body = await request.json();
+    const { amount, currency = 'INR', receipt, notes, items, shippingAddress, userId } = body;
 
-    // Check if user is already registered
+    // Check if user is already registered (event logic)
     if (notes?.userId && notes?.eventId) {
-      // Validate Admin Keys before importing
-      if (!process.env.FIREBASE_ADMIN_PROJECT_ID || !process.env.FIREBASE_ADMIN_CLIENT_EMAIL || !process.env.FIREBASE_ADMIN_PRIVATE_KEY) {
-        console.error('Missing Firebase Admin Keys for duplicate check');
-        return NextResponse.json(
-          { error: 'Server misconfigured: Missing Firebase Admin Keys.' },
-          { status: 500 }
-        );
-      }
-
-      const { adminDb } = await import('@/lib/firebaseAdmin');
       const existingReg = await adminDb.collection('event_registrations')
         .where('eventId', '==', notes.eventId)
         .where('userId', '==', notes.userId)
@@ -58,6 +51,34 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check for stock availability before creating order
+    if (items && items.length > 0) {
+      const productRefs = items.map((item: any) => adminDb.collection('products').doc(item.productId));
+      const productDocs = await adminDb.getAll(...productRefs);
+
+      for (let i = 0; i < productDocs.length; i++) {
+        const doc = productDocs[i];
+        const item = items[i];
+        
+        if (!doc.exists) {
+          return NextResponse.json(
+            { error: `Product not found: ${item.name || 'Unknown Item'}` },
+            { status: 400 }
+          );
+        }
+
+        const productData = doc.data();
+        const currentStock = productData?.stock || 0;
+
+        if (currentStock < item.quantity) {
+          return NextResponse.json(
+            { error: `Insufficient stock for ${productData?.name || 'Item'}. Only ${currentStock} left.` },
+            { status: 400 }
+          );
+        }
+      }
+    }
+
     // Amount should be in paise (multiply by 100)
     const razorpayAmount = Math.round(amount * 100);
 
@@ -69,10 +90,36 @@ export async function POST(request: NextRequest) {
       notes,
     });
 
+    // Create a PENDING order in Firestore if items are present (Shop Purchase)
+    // For Events, we don't necessarily need an 'orders' doc, but standardizing is good.
+    // Current flow: Event registration handles its own logic in verify.
+    // We will only create 'orders' doc if this is a Shop purchase (has items).
+    let firestoreOrderId = null;
+
+    if (items && items.length > 0) {
+        const orderRef = adminDb.collection('orders').doc();
+        firestoreOrderId = orderRef.id;
+
+        await orderRef.set({
+            id: firestoreOrderId,
+            userId: userId || notes?.userId || 'guest',
+            items: items,
+            shippingAddress: shippingAddress || {},
+            totalPrice: amount, // Storing in Rupees as per existing schema
+            status: 'PENDING',
+            paymentStatus: 'initiated',
+            paymentGateway: 'razorpay',
+            paymentOrderId: order.id, // Link to Razorpay Order ID
+            createdAt: FieldValue.serverTimestamp(),
+            updatedAt: FieldValue.serverTimestamp()
+        });
+    }
+
     return NextResponse.json(
       {
         success: true,
-        orderId: order.id,
+        orderId: order.id, // Razorpay Order ID
+        dbOrderId: firestoreOrderId, // Our internal DB Order ID
         amount: order.amount,
         currency: order.currency,
       },

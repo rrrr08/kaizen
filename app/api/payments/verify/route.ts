@@ -56,6 +56,59 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // 5. Check if this is a Shop Order (Inventory Management)
+    // We look for an order with this Razorpay Order ID
+    const ordersRef = adminDb.collection('orders');
+    const orderQuery = await ordersRef.where('paymentOrderId', '==', razorpay_order_id).limit(1).get();
+
+    if (!orderQuery.empty) {
+        const orderDoc = orderQuery.docs[0];
+        const orderData = orderDoc.data();
+        
+        // Only process if not already completed/paid to avoid double decrement
+        if (orderData.status !== 'completed' && orderData.status !== 'paid') {
+             try {
+                await adminDb.runTransaction(async (t) => {
+                    const items = orderData.items || [];
+                    
+                    // Reads must come before writes
+                    const productReads = items.map((item: any) => {
+                        const ref = adminDb.collection('products').doc(item.productId);
+                        return t.get(ref);
+                    });
+
+                    const productDocs = await Promise.all(productReads);
+
+                    // Perform updates
+                    items.forEach((item: any, index: number) => {
+                        const doc = productDocs[index];
+                        if (doc.exists) {
+                            const currentSales = doc.data()?.sales || 0;
+                            const currentStock = doc.data()?.stock || 0;
+                            
+                            t.update(doc.ref, {
+                                stock: currentStock - item.quantity,
+                                sales: currentSales + item.quantity
+                            });
+                        }
+                    });
+
+                    // Update Order Status
+                    t.update(orderDoc.ref, {
+                        status: 'completed',
+                        paymentStatus: 'paid',
+                        paymentId: razorpay_payment_id,
+                        updatedAt: FieldValue.serverTimestamp(),
+                        inventory_deducted: true
+                    });
+                });
+                console.log(`[Order] Successfully processed order ${orderDoc.id} and updated stock.`);
+             } catch (err) {
+                 console.error('[Order] Transaction failed:', err);
+             }
+        }
+    }
+
     // Award XP for purchase
     if (userId && amount) {
       try {
@@ -154,10 +207,10 @@ export async function POST(request: NextRequest) {
           amountPaid: amount,
           walletPointsUsed: walletPointsUsed || 0,
           status: waitlisted ? 'waitlisted' : 'registered',
-          createdAt: new Date(), // Use server date
-          updatedAt: new Date(),
+          createdAt: FieldValue.serverTimestamp(), // Use server timestamp
+          updatedAt: FieldValue.serverTimestamp(),
           paymentStatus: 'completed',
-          paymentOrderId: orderId
+          paymentOrderId: razorpay_order_id // Link to Razorpay order ID
         };
 
         const regRef = await registrationsRef.add(registrationData);

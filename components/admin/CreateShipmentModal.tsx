@@ -52,17 +52,28 @@ export default function CreateShipmentModal({ isOpen, onClose, onSuccess, initia
         setLoading(true);
 
         try {
-            await saveShipment({
-                orderId: formData.orderId,
-                customerName: formData.customerName,
-                customerEmail: formData.customerEmail,
-                customerPhone: formData.customerPhone,
-                courierName: formData.courierName || null,
-                awbCode: formData.awbCode || null,
-                address: formData.address,
-                weight: formData.weight ? parseFloat(formData.weight) : null,
-                status: 'NEW'
+            const response = await fetch('/api/admin/shipments/create', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    orderId: formData.orderId,
+                    customerName: formData.customerName,
+                    customerEmail: formData.customerEmail,
+                    customerPhone: formData.customerPhone,
+                    courierName: formData.courierName || null,
+                    awbCode: formData.awbCode || null,
+                    address: formData.address,
+                    weight: formData.weight ? parseFloat(formData.weight) : null,
+                    status: 'NEW'
+                })
             });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to create shipment');
+            }
+
             onSuccess();
             onClose();
         } catch (error) {

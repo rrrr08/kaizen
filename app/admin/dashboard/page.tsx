@@ -10,7 +10,6 @@ import { USER_ROLES, ROLE_LABELS } from '@/lib/roles';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
-import PredictiveInsights from '@/components/admin/PredictiveInsights';
 import LivePulse from '@/components/admin/LivePulse';
 import DeepAnalytics from '@/components/admin/DeepAnalytics';
 
@@ -209,9 +208,6 @@ export default function AdminDashboard() {
           detail="Estimated active"
         />
       </div>
-
-      {/* Predictive Analytics Section */}
-      <PredictiveInsights />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 h-[400px]">
         {/* User Distribution Chart */}

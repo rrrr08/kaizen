@@ -236,7 +236,7 @@ export default function CheckoutPage() {
       });
 
       if (!response.ok) throw new Error('Failed to create payment order');
-      const { orderId, amount } = await response.json();
+      const { orderId, amount, dbOrderId } = await response.json();
 
       const RazorpayOptions = {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
@@ -245,45 +245,33 @@ export default function CheckoutPage() {
         name: 'Joy Juncture',
         order_id: orderId,
         handler: async function (response: any) {
-          const verifyResponse = await fetch('/api/payments/verify', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_signature: response.razorpay_signature,
-            }),
-          });
+          try {
+            const verifyResponse = await fetch('/api/payments/verify', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_signature: response.razorpay_signature,
+              }),
+            });
 
-          if (!verifyResponse.ok) throw new Error('Payment verification failed');
+            if (!verifyResponse.ok) throw new Error('Payment verification failed');
 
-          const { auth, createOrder, updateUserWallet, addPointHistory } = await import('@/lib/firebase');
-          const currentUser = auth.currentUser;
-          if (!currentUser) throw new Error('User not authenticated');
+            // Order creation and stock deduction is now handled server-side in 'verify'
+            // We just need to clear local state and redirect.
 
-          const orderData = {
-            items,
-            totalPrice: finalPrice,
-            subtotal,
-            gst: gstAmount,
-            gstRate,
-            totalPoints: earnedPoints,
-            pointsRedeemed: redeemPoints,
-            discount: pointsWorthRupees + voucherDiscountAmount,
-            shippingAddress: formData,
-            paymentId: response.razorpay_payment_id,
-          };
+            await clearCart();
 
-          const newOrderId = await createOrder(currentUser.uid, orderData);
-          await updateUserWallet(currentUser.uid, earnedPoints - redeemPoints);
-
-          if (redeemPoints > 0) {
-            await addPointHistory(currentUser.uid, -redeemPoints, 'Points redeemed for purchase', newOrderId);
+            // Use the internal DB Order ID for the confirmation page
+            window.location.replace(`/order-confirmation/${dbOrderId}`);
+          } catch (error) {
+            console.error('Checkout Error:', error);
+            addToast({ title: 'Order Placed', description: 'Payment successful, but there was an issue finalizing. Please contact support.' });
+            // Still redirect to home or order history if possible? 
+            // If we have dbOrderId, we can still try to go there.
+            if (dbOrderId) window.location.replace(`/order-confirmation/${dbOrderId}`);
           }
-          await addPointHistory(currentUser.uid, earnedPoints, 'Purchase points earned', newOrderId);
-
-          await clearCart();
-          window.location.replace(`/order-confirmation/${newOrderId}`);
         },
         prefill: { name: formData.name, email: formData.email, contact: formData.phone },
         theme: { color: '#000000' },

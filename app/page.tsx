@@ -5,8 +5,6 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Sparkles, Plus, Flame, ChevronRight } from 'lucide-react';
-// Hero is replaced by ContextAwareLayout
-// import Hero from '@/components/ui/Hero';
 import GameDiscoveryCarousel from '@/components/ui/GameDiscoveryCarousel';
 import SocialPulseTicker from '@/components/home/SocialPulseTicker';
 import ContextAwareLayout from '@/components/home/ContextAwareLayout';
@@ -22,16 +20,7 @@ import { db, getUserWallet } from '@/lib/firebase';
 
 // Product interface is already imported from @/lib/types
 
-interface Testimonial {
-  image?: string;
-  id: string;
-  name: string;
-  role: string;
-  quote: string;
-  rating: number;
-  status: 'pending' | 'approved' | 'rejected';
-}
-
+import ProofOfJoyGrid from '@/components/community/ProofOfJoyGrid';
 
 interface PuzzleItem {
   id: string;
@@ -75,8 +64,6 @@ export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [content, setContent] = useState<HomepageContent | null>(null);
-  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
-  const [loadingTestimonials, setLoadingTestimonials] = useState(true);
   const [userBalance, setUserBalance] = useState<number | null>(null);
 
   useEffect(() => {
@@ -115,22 +102,6 @@ export default function Home() {
         console.error(err);
       } finally {
         setLoadingEvents(false);
-      }
-
-      // Fetch Testimonials
-      try {
-        setLoadingTestimonials(true);
-        const testimonialsRef = collection(db, 'testimonials');
-        const snapshot = await getDocs(testimonialsRef);
-        const testimonialsList = snapshot.docs
-          .map(doc => ({ id: doc.id, ...doc.data() } as any))
-          .filter(t => t.status === 'approved')
-          .slice(0, 6); // Get 6 testimonials: 3 with photos for gallery, 3 for testimonial cards
-        setTestimonials(testimonialsList);
-      } catch (err) {
-        console.error('Error fetching testimonials:', err);
-      } finally {
-        setLoadingTestimonials(false);
       }
     }
     fetchData();
@@ -404,96 +375,11 @@ export default function Home() {
       </section>
 
       {/* Section 4: Proof of Joy */}
-      <section className="px-6 py-32 bg-[#FFD93D] overflow-hidden relative">
+      <section className="px-6 py-10 bg-[#FFD93D] overflow-hidden relative">
         <div className="absolute top-0 left-0 w-full h-2 bg-black/10" />
         <div className="container mx-auto">
-          {/* Section Header */}
-          <div className="text-center mb-24 max-w-4xl mx-auto">
-            <div className="text-black font-black text-[10px] md:text-xs tracking-[0.4em] mb-4 uppercase font-display italic">Consensus Metadata</div>
-            <h2 className="font-header text-5xl md:text-8xl font-black uppercase tracking-tighter leading-[0.9]">Proof of <br /><span className="italic font-serif text-[#6C5CE7] drop-shadow-[2px_2px_0px_#000]">Joy</span></h2>
-            <p className="text-black/60 font-medium text-lg md:text-xl mt-8 italic">Verified testimonials from authenticated entities within the Joy Juncture ecosystem.</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 mb-20">
-            {loadingTestimonials ? (
-              <div className="col-span-3 text-center py-20">
-                <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-black border-t-transparent mb-6"></div>
-                <p className="font-black text-xs tracking-[0.4em] uppercase">COLLECTING ENTITY FEEDBACK...</p>
-              </div>
-            ) : (() => {
-              const photosFromTestimonials = testimonials.filter(t => t.image).slice(0, 3);
-              return photosFromTestimonials.length > 0 ? (
-                photosFromTestimonials.map((testimonial, i) => {
-                  return (
-                    <motion.div
-                      key={testimonial.id}
-                      whileHover={{ scale: 1.02, rotate: i % 2 === 0 ? 1 : -1 }}
-                      className="relative overflow-hidden rounded-[40px] neo-border-thick neo-shadow-lg bg-white aspect-[4/5] group"
-                    >
-                      <Image
-                        src={testimonial.image!}
-                        alt={testimonial.name}
-                        fill
-                        className="absolute inset-0 w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 scale-110 group-hover:scale-100"
-                      />
-                      <div className="absolute inset-x-0 bottom-0 bg-black text-white p-8 translate-y-full group-hover:translate-y-0 transition-transform duration-500 neo-border-thick flex flex-col items-center">
-                        <h4 className="text-2xl font-header font-black tracking-tighter uppercase mb-2">{testimonial.name}</h4>
-                        <p className="font-black text-[10px] tracking-widest uppercase opacity-60 italic">{testimonial.role}</p>
-                      </div>
-                    </motion.div>
-                  );
-                })
-              ) : (
-                <div className="col-span-3 text-center py-20 bg-white/40 neo-border-thick rounded-[40px] px-12">
-                  <p className="text-2xl md:text-3xl font-header font-black uppercase tracking-tighter text-black/20">Archive scanning in progress... metadata unavailable.</p>
-                </div>
-              );
-            })()}
-          </div>
-
-          {/* Testimonials */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {loadingTestimonials ? (
-              <div className="col-span-3 text-center py-10 font-bold">Synchronizing Entity Voice Box...</div>
-            ) : (
-              testimonials.slice(0, 3).map((testimonial, i) => {
-                const colors = ['bg-white', 'bg-white', 'bg-white'];
-
-                return (
-                  <motion.div
-                    key={testimonial.id}
-                    whileHover={{ y: -8 }}
-                    className={`${colors[i % colors.length]} p-10 rounded-[35px] neo-border-thick neo-shadow-lg relative overflow-hidden group h-full flex flex-col`}
-                  >
-                    <div className="absolute -right-4 -top-4 opacity-[0.03] group-hover:opacity-10 transition-opacity">
-                      <Sparkles size={120} strokeWidth={1} />
-                    </div>
-
-                    <div className="flex gap-2 mb-8 items-center bg-[#F7F7F7] w-fit px-4 py-2 rounded-xl neo-border italic">
-                      {[...Array(testimonial.rating || 5)].map((_, idx) => (
-                        <span key={idx} className="text-black text-xs font-black">★</span>
-                      ))}
-                      <span className="text-[10px] font-black uppercase tracking-widest ml-2">Verified</span>
-                    </div>
-
-                    <p className="font-header text-xl md:text-2xl font-black text-black mb-10 leading-tight italic flex-grow">
-                      &quot;{testimonial.quote}&quot;
-                    </p>
-
-                    <div className="flex items-center gap-4 pt-6 border-t-2 border-black/5 mt-auto">
-                      <div className="w-14 h-14 rounded-2xl neo-border bg-black text-[#FFD93D] flex items-center justify-center font-header text-2xl font-black shadow-[4px_4px_0px_#FFD93D]">
-                        {testimonial.name.charAt(0).toUpperCase()}
-                      </div>
-                      <div>
-                        <p className="font-header text-xl font-black uppercase tracking-tighter leading-none mb-1">{testimonial.name}</p>
-                        <p className="text-[10px] text-black/40 font-black uppercase tracking-[0.2em]">{testimonial.role}</p>
-                      </div>
-                    </div>
-                  </motion.div>
-                );
-              })
-            )}
-          </div>
+          {/* Replaced with standardized ProofOfJoyGrid to sync content across site */}
+          <ProofOfJoyGrid limit={3} />
         </div>
       </section>
 

@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePopup } from '@/app/context/PopupContext';
 import CommunityThreadList from '@/app/components/community/ThreadList';
+import ProofOfJoyGrid from '@/components/community/ProofOfJoyGrid';
 
 export default function Community() {
   const { showAlert } = usePopup();
@@ -32,6 +33,11 @@ export default function Community() {
           <div className="w-full">
             <CommunityThreadList />
           </div>
+        </section>
+
+        {/* --- PROOF OF JOY SECTION --- */}
+        <section className="mb-32">
+          <ProofOfJoyGrid />
         </section>
 
 
