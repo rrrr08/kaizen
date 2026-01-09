@@ -45,7 +45,13 @@ interface EventRegistration {
 
 interface Purchase {
   id: string;
-  items: Array<{ name: string; quantity: number; price: number; image?: string }>;
+  items: Array<{
+    name?: string;
+    quantity: number;
+    price?: number;
+    product?: { name?: string; price?: number };
+    image?: string;
+  }>;
   totalAmount: number;
   status: string;
   createdAt: string;
@@ -56,7 +62,9 @@ interface Purchase {
     address: string;
     city: string;
     state: string;
-    pincode: string;
+    pincode?: string;
+    postalCode?: string;
+    zipCode?: string;
   };
   pointsRedeemed?: number;
   totalPoints?: number;
@@ -171,18 +179,23 @@ const UserManagementPage = () => {
       const ordersSnapshot = await getDocs(ordersQuery);
       const purchases = ordersSnapshot.docs.map(doc => {
         const data = doc.data();
+        // Robust amount check
+        const rawAmount = data.totalPrice ?? data.totalAmount ?? data.amount ?? 0;
+        const totalAmount = typeof rawAmount === 'number' ? rawAmount : parseFloat(String(rawAmount)) || 0;
+
         return {
           id: doc.id,
           items: data.items || [],
-          totalAmount: data.totalPrice || data.totalAmount || 0,
+          totalAmount: totalAmount,
           status: data.paymentStatus || data.status || 'completed',
           createdAt: data.createdAt?.toDate?.()?.toLocaleDateString() || 'N/A',
           paymentMethod: data.paymentMethod || 'Razorpay',
           shippingAddress: data.shippingAddress,
-          pointsRedeemed: data.pointsRedeemed || 0,
-          totalPoints: data.totalPoints || 0
+          pointsRedeemed: Number(data.pointsRedeemed || 0),
+          totalPoints: Number(data.totalPoints || 0)
         };
       });
+
       setUserPurchases(purchases);
     } catch (error) {
       console.error('Error fetching user details:', error);
@@ -285,8 +298,7 @@ const UserManagementPage = () => {
                       </TableCell>
                       <TableCell className="text-[#2D3436] font-medium">{user.email}</TableCell>
                       <TableCell>
-                        <span className={`inline-flex items-center px-3 py-1 rounded-lg text-xs font-black uppercase tracking-wider border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,0.1)] ${user.role === 'admin' ? 'bg-[#FF7675] text-black' : 'bg-gray-100 text-black/60'
-                          }`}>
+                        <span className={`inline-flex items-center px-3 py-1 rounded-lg text-xs font-black uppercase tracking-wider border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,0.1)] ${user.role === 'admin' ? 'bg-[#FF7675] text-black' : 'bg-[#74B9FF] text-black'}`}>
                           <span className="mr-2">{getRoleIcon(user.role)}</span>
                           {ROLE_LABELS[user.role] || 'Unknown'}
                         </span>
@@ -526,15 +538,19 @@ const UserManagementPage = () => {
                                   <div className="mb-4">
                                     <h4 className="text-xs font-black text-black/70 uppercase tracking-wider mb-2">Items Ordered</h4>
                                     <div className="space-y-2">
-                                      {purchase.items.map((item, idx) => (
-                                        <div key={idx} className="flex justify-between items-center p-2 bg-white rounded-lg border border-black/10">
-                                          <div className="flex-1">
-                                            <div className="font-bold text-black text-sm">{item.name}</div>
-                                            <div className="text-xs text-black/50 font-medium">Qty: {item.quantity} × ₹{item.price}</div>
+                                      {purchase.items.map((item, idx) => {
+                                        const unitPrice = item.price || item.product?.price || 0;
+                                        const itemName = item.name || item.product?.name || 'Product';
+                                        return (
+                                          <div key={idx} className="flex justify-between items-center p-2 bg-white rounded-lg border border-black/10">
+                                            <div className="flex-1">
+                                              <div className="font-bold text-black text-sm">{itemName}</div>
+                                              <div className="text-xs text-black/50 font-medium">Qty: {item.quantity || 0} × ₹{Number(unitPrice).toFixed(2)}</div>
+                                            </div>
+                                            <div className="font-black text-black">₹{(Number(item.quantity || 0) * Number(unitPrice)).toFixed(2)}</div>
                                           </div>
-                                          <div className="font-black text-black">₹{(item.quantity * item.price).toFixed(2)}</div>
-                                        </div>
-                                      ))}
+                                        );
+                                      })}
                                     </div>
                                   </div>
 
@@ -544,12 +560,12 @@ const UserManagementPage = () => {
                                     <div className="space-y-1.5">
                                       <div className="flex justify-between text-sm">
                                         <span className="text-black/60 font-medium">Subtotal</span>
-                                        <span className="font-bold text-black">₹{purchase.totalAmount}</span>
+                                        <span className="font-bold text-black">₹{Number(purchase.totalAmount || 0).toFixed(2)}</span>
                                       </div>
                                       {(purchase.pointsRedeemed ?? 0) > 0 && (
                                         <div className="flex justify-between text-sm">
                                           <span className="text-black/60 font-medium">Points Redeemed</span>
-                                          <span className="font-bold text-[#FF7675]">-₹{purchase.pointsRedeemed}</span>
+                                          <span className="font-bold text-[#FF7675]">-₹{Number(purchase.pointsRedeemed || 0).toFixed(2)}</span>
                                         </div>
                                       )}
                                       {(purchase.totalPoints ?? 0) > 0 && (
@@ -574,7 +590,7 @@ const UserManagementPage = () => {
                                         <div className="text-black/60 font-medium">{purchase.shippingAddress.phone}</div>
                                         <div className="text-black/60 font-medium">{purchase.shippingAddress.address}</div>
                                         <div className="text-black/60 font-medium">
-                                          {purchase.shippingAddress.city}, {purchase.shippingAddress.state} - {purchase.shippingAddress.pincode}
+                                          {purchase.shippingAddress.city}, {purchase.shippingAddress.state} - {purchase.shippingAddress.pincode || (purchase.shippingAddress as any).postalCode || (purchase.shippingAddress as any).zipCode}
                                         </div>
                                       </div>
                                     </div>
@@ -583,7 +599,8 @@ const UserManagementPage = () => {
                                   {/* Total */}
                                   <div className="flex justify-between items-center pt-4 mt-4 border-t-2 border-black/20">
                                     <span className="text-black/70 font-bold text-sm uppercase tracking-wider">Order Total</span>
-                                    <span className="font-black text-black text-2xl">₹{purchase.totalAmount}</span>
+                                    <span className="font-black text-black text-2xl">₹{Number(purchase.totalAmount || 0).toFixed(2)}</span>
+
                                   </div>
                                 </motion.div>
                               ))}

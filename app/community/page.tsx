@@ -41,27 +41,7 @@ export default function Community() {
         </section>
 
 
-        {/* Final CTA */}
-        <div className="text-center py-16 border-t-2 border-black/10">
-          <h2 className="font-header text-4xl md:text-5xl mb-6 text-black">Ready to Join?</h2>
-          <p className="text-black/70 font-bold text-lg mb-8 max-w-2xl mx-auto">
-            Create your account and start earning points, engaging with the community, and discovering endless joy.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-6 justify-center">
-            <Link
-              href="/auth/signup"
-              className="px-8 py-4 bg-black text-white font-black text-xs tracking-[0.4em] hover:bg-[#6C5CE7] hover:scale-105 transition-all rounded-xl shadow-[4px_4px_0px_rgba(0,0,0,0.2)]"
-            >
-              CREATE ACCOUNT
-            </Link>
-            <Link
-              href="/play"
-              className="px-8 py-4 bg-[#FFD93D] text-black font-black text-xs tracking-[0.4em] border-2 border-black neo-shadow hover:scale-105 transition-all rounded-xl"
-            >
-              PLAY NOW
-            </Link>
-          </div>
-        </div>
+
       </div>
     </div>
   );

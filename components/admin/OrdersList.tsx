@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Package, Truck, Eye, MapPin, User, Phone, Mail, Calendar, Hash, ShoppingBag, X, FileText, ChevronRight, Clock, Box } from 'lucide-react';
+import { Package, Truck, Eye, MapPin, User, Phone, Mail, Calendar, Hash, ShoppingBag, X, FileText, ChevronRight, Clock, Box, Check } from 'lucide-react';
 import Link from 'next/link';
 import { db } from '@/lib/firebase';
 import { collection, query, orderBy, getDocs } from 'firebase/firestore';
@@ -12,6 +12,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 interface Order {
     id: string;
+    pincode?: string;
+    postalCode?: string;
+    zipCode?: string;
     items: any[];
     totalPrice: number;
     totalPoints: number;
@@ -149,7 +152,7 @@ export default function OrdersList() {
                                     </td>
                                     <td className="p-4">
                                         <div className="flex flex-col">
-                                            <span className="font-black text-base text-[#2D3436]">₹{order.totalPrice?.toLocaleString()}</span>
+                                            <span className="font-black text-base text-[#2D3436]">₹{Number(order.totalPrice || 0).toLocaleString()}</span>
                                             {order.totalPoints > 0 && (
                                                 <span className="text-[10px] font-bold text-[#00B894] uppercase tracking-wide">+{order.totalPoints} PTS</span>
                                             )}
@@ -223,7 +226,7 @@ export default function OrdersList() {
                     customerName: selectedOrderForShipment.shippingAddress?.name,
                     customerEmail: selectedOrderForShipment.shippingAddress?.email,
                     customerPhone: selectedOrderForShipment.shippingAddress?.phone,
-                    address: `${selectedOrderForShipment.shippingAddress?.address}, ${selectedOrderForShipment.shippingAddress?.city}, ${selectedOrderForShipment.shippingAddress?.state} - ${selectedOrderForShipment.shippingAddress?.postalCode}`
+                    address: `${selectedOrderForShipment.shippingAddress?.address}, ${selectedOrderForShipment.shippingAddress?.city}, ${selectedOrderForShipment.shippingAddress?.state} - ${selectedOrderForShipment.shippingAddress?.postalCode || selectedOrderForShipment.shippingAddress?.pincode || selectedOrderForShipment.shippingAddress?.zipCode}`
                 } : null}
             />
 
@@ -354,8 +357,8 @@ function OrderDetailsModal({ isOpen, onClose, order }: { isOpen: boolean; onClos
                                                             </div>
                                                         </div>
                                                         <div className="flex items-end justify-between mt-2">
-                                                            <span className="text-[10px] font-bold text-black/40">₹{itemPrice.toLocaleString()} UNIT</span>
-                                                            <span className="font-black text-lg text-black">₹{(itemPrice * itemQuantity).toLocaleString()}</span>
+                                                            <span className="text-[10px] font-bold text-black/40">₹{Number(itemPrice || 0).toLocaleString()} UNIT</span>
+                                                            <span className="font-black text-lg text-black">₹{Number((itemPrice || 0) * (itemQuantity || 0)).toLocaleString()}</span>
                                                         </div>
                                                     </div>
                                                 </motion.div>
@@ -402,7 +405,7 @@ function OrderDetailsModal({ isOpen, onClose, order }: { isOpen: boolean; onClos
                                                 <p className="text-[10px] font-bold text-black/30 uppercase tracking-[0.2em] mb-2">SHIPPING DESTINATION</p>
                                                 <p className="font-medium text-base leading-relaxed text-black">
                                                     {order.shippingAddress?.address}<br />
-                                                    {order.shippingAddress?.city}, {order.shippingAddress?.state} - {order.shippingAddress?.postalCode}
+                                                    {order.shippingAddress?.city}, {order.shippingAddress?.state} - {order.shippingAddress?.postalCode || order.shippingAddress?.pincode || order.shippingAddress?.zipCode}
                                                 </p>
                                             </div>
                                         </div>
@@ -427,7 +430,7 @@ function OrderDetailsModal({ isOpen, onClose, order }: { isOpen: boolean; onClos
                                             <div className="h-1 bg-white/20 w-full" />
                                             <div className="py-2">
                                                 <p className="text-[10px] font-bold uppercase tracking-[0.3em] opacity-40 mb-1">TOTAL AMOUNT DUE</p>
-                                                <p className="text-5xl font-black tracking-tighter text-[#FFD93D]">₹{(order.totalPrice || 0).toLocaleString()}</p>
+                                                <p className="text-5xl font-black tracking-tighter text-[#FFD93D]">₹{Number(order.totalPrice || 0).toLocaleString()}</p>
                                             </div>
 
                                             {(order.totalPoints || 0) > 0 && (
@@ -463,7 +466,4 @@ function OrderDetailsModal({ isOpen, onClose, order }: { isOpen: boolean; onClos
     );
 }
 
-// Check icon fix
-function Check({ size, className }: { size: number, className?: string }) {
-    return <Eye size={size} className={className} />; // Temporary replacement as I notice Eye is used but Check isn't imported from Lucide
-}
+
