@@ -61,11 +61,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: '/admin/events', label: 'Events', icon: Calendar },
     { href: '/admin/experiences', label: 'Experiences', icon: Sparkles },
     { href: '/admin/experiences/enquiries', label: 'Experience Enquiries', icon: MessageSquare },
-    { href: '/admin/testimonials', label: 'Testimonials', icon: MessageSquare },
+    { href: '/admin/proofofjoy', label: 'Proof Of Joy', icon: MessageSquare },
     { href: '/admin/push-notifications', label: 'Notifications', icon: Zap },
     { href: '/admin/inquiries', label: 'Enquiries', icon: MessageSquare },
     { href: '/admin/moderation', label: 'Moderation', icon: Shield },
-    { href: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
   ];
 
   return (

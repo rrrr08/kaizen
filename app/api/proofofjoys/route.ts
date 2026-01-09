@@ -16,28 +16,28 @@ export async function GET(req: NextRequest) {
         // Better: Helper to check admin token from headers. 
         // Simplify: Just fetch based on param for now.
 
-        const testimonialsRef = adminDb.collection('testimonials');
+        const proofofjoysRef = adminDb.collection('proofofjoys');
         let query; // : FirebaseFirestore.Query;
 
         if (getAll) {
-            query = testimonialsRef.orderBy('createdAt', 'desc');
+            query = proofofjoysRef.orderBy('createdAt', 'desc');
         } else {
-            query = testimonialsRef.where('status', '==', 'approved').orderBy('createdAt', 'desc');
+            query = proofofjoysRef.where('status', '==', 'approved').orderBy('createdAt', 'desc');
         }
 
         const snapshot = await query.get();
 
-        const testimonials = snapshot.docs.map(doc => ({
+        const proofofjoys = snapshot.docs.map(doc => ({
             id: doc.id,
             ...doc.data(),
             createdAt: (doc.data().createdAt as Timestamp)?.toDate?.() || new Date().toISOString()
         }));
 
-        return NextResponse.json({ success: true, testimonials });
+        return NextResponse.json({ success: true, proofofjoys });
     } catch (error: any) {
-        console.error('Error fetching testimonials:', error);
+        console.error('Error fetching proofofjoys:', error);
         return NextResponse.json(
-            { success: false, error: 'Failed to fetch testimonials' },
+            { success: false, error: 'Failed to fetch proofofjoys' },
             { status: 500 }
         );
     }
@@ -64,19 +64,19 @@ export async function POST(req: NextRequest) {
             createdAt: new Date().toISOString() // Store as ISO string for simplicity or Firestore Timestamp
         };
 
-        const docRef = await adminDb.collection('testimonials').add({
+        const docRef = await adminDb.collection('proofofjoys').add({
             ...newTestimonial,
             createdAt: Timestamp.now()
         });
 
         return NextResponse.json({
             success: true,
-            testimonial: { id: docRef.id, ...newTestimonial }
+            proofofjoy: { id: docRef.id, ...newTestimonial }
         });
     } catch (error: any) {
-        console.error('Error creating testimonial:', error);
+        console.error('Error creating proofofjoy:', error);
         return NextResponse.json(
-            { success: false, error: 'Failed to submit testimonial' },
+            { success: false, error: 'Failed to submit proofofjoy' },
             { status: 500 }
         );
     }
@@ -115,13 +115,13 @@ export async function PATCH(req: NextRequest) {
             updateData.image = image;
         }
 
-        await adminDb.collection('testimonials').doc(id).update(updateData);
+        await adminDb.collection('proofofjoys').doc(id).update(updateData);
 
         return NextResponse.json({ success: true, message: 'Testimonial updated' });
     } catch (error: any) {
-        console.error('Error updating testimonial:', error);
+        console.error('Error updating proofofjoy:', error);
         return NextResponse.json(
-            { success: false, error: 'Failed to update testimonial' },
+            { success: false, error: 'Failed to update proofofjoy' },
             { status: 500 }
         );
     }
@@ -139,13 +139,13 @@ export async function DELETE(req: NextRequest) {
             );
         }
 
-        await adminDb.collection('testimonials').doc(id).delete();
+        await adminDb.collection('proofofjoys').doc(id).delete();
 
         return NextResponse.json({ success: true, message: 'Testimonial deleted' });
     } catch (error: any) {
-        console.error('Error deleting testimonial:', error);
+        console.error('Error deleting proofofjoy:', error);
         return NextResponse.json(
-            { success: false, error: 'Failed to delete testimonial' },
+            { success: false, error: 'Failed to delete proofofjoy' },
             { status: 500 }
         );
     }
