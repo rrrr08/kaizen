@@ -332,13 +332,13 @@ export default function EventsPage() {
                 >
                   Registrations
                 </button>
-                <button
+                {new Date(event.datetime).getTime() > Date.now() && <button
                   onClick={() => handleDeleteEvent(event.id)}
                   className="flex-1 px-4 py-3 bg-[#FF7675]/20 border-2 border-[#FF7675] rounded-xl text-[#D63031] text-sm font-black uppercase tracking-wide hover:bg-[#FF7675] hover:text-white hover:border-black transition-all flex items-center justify-center gap-2"
                 >
                   <Trash2 className="w-4 h-4" />
                   Cancel
-                </button>
+                </button>}
               </div>
             </div>
           </div>
