@@ -1,12 +1,18 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { BarChart3, Users, ShoppingBag, TrendingUp, Clock, Zap } from 'lucide-react';
+import { BarChart3, Users, ShoppingBag, TrendingUp, Clock, Zap, Calendar, Package, ArrowUpRight, ArrowDownRight, Activity } from 'lucide-react';
 import { useAuth } from '@/app/context/AuthContext';
 import { useRouter } from 'next/navigation';
-import { getDocs, collection, query, orderBy, limit } from 'firebase/firestore';
+import { getDocs, collection, query, orderBy, limit, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import { USER_ROLES, ROLE_LABELS } from '@/lib/roles';
+import { motion } from 'framer-motion';
 import Link from 'next/link';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+import PredictiveInsights from '@/components/admin/PredictiveInsights';
+import LivePulse from '@/components/admin/LivePulse';
+import DeepAnalytics from '@/components/admin/DeepAnalytics';
 
 interface DashboardStats {
   totalUsers: number;
@@ -17,6 +23,12 @@ interface DashboardStats {
   totalPointsRedeemed: number;
   activeUsers: number;
   monthlyGrowth: number;
+  usersByRole: Record<string, number>;
+  recentGrowthCount: number;
+  totalEvents: number;
+  occupancyRate: number;
+  totalProducts: number;
+  outOfStockCount: number;
 }
 
 interface RecentOrder {
@@ -35,43 +47,41 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is admin
-    if (user && !user.email?.includes('admin')) {
-      // For now, allow, but in production verify role
-      loadDashboardData();
-    } else {
-      loadDashboardData();
-    }
+    loadDashboardData();
   }, [user]);
 
   const loadDashboardData = async () => {
     try {
       setLoading(true);
 
-      // Fetch real data from Firebase
+      // 1. Fetch Users Data
       const usersSnapshot = await getDocs(collection(db, 'users'));
       const totalUsers = usersSnapshot.size;
+      const usersByRole: Record<string, number> = {};
+      let recentGrowthCount = 0;
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
+      usersSnapshot.docs.forEach(doc => {
+        const data = doc.data();
+        const role = data.role || 'member';
+        usersByRole[role] = (usersByRole[role] || 0) + 1;
+
+        if (data.created_at) {
+          const createdAt = (data.created_at as Timestamp).toDate ? (data.created_at as Timestamp).toDate() : new Date(data.created_at);
+          if (createdAt > thirtyDaysAgo) {
+            recentGrowthCount++;
+          }
+        }
+      });
+
+      // 2. Fetch Orders Data
       const ordersSnapshot = await getDocs(collection(db, 'orders'));
       const totalOrders = ordersSnapshot.size;
-
       let totalRevenue = 0;
       let totalPointsIssued = 0;
       let totalPointsRedeemed = 0;
       const recentOrdersList: RecentOrder[] = [];
-
-      // For growth calculation
-      const now = new Date();
-      const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-      let newUsersLast30Days = 0;
-
-      usersSnapshot.docs.forEach(doc => {
-        const data = doc.data();
-        const createdAt = data.created_at?.toDate?.() || data.createdAt?.toDate?.() || new Date(0);
-        if (createdAt > thirtyDaysAgo) {
-          newUsersLast30Days++;
-        }
-      });
 
       ordersSnapshot.docs.forEach(doc => {
         const data = doc.data();
@@ -83,52 +93,59 @@ export default function AdminDashboard() {
           id: doc.id,
           userId: data.userId || 'unknown',
           totalPrice: data.totalPrice || 0,
-          createdAt: data.createdAt?.toDate?.()?.toISOString() || new Date().toISOString(),
-          paymentStatus: data.paymentStatus || 'pending',
+          createdAt: data.createdAt?.toDate?.()?.toISOString() || new Date(data.createdAt).toISOString() || new Date().toISOString(),
+          paymentStatus: data.paymentStatus || 'completed',
         });
       });
 
-      // Sort by date and get recent 5
+      // 3. Fetch Events Data
+      const eventsSnapshot = await getDocs(collection(db, 'events'));
+      const totalEvents = eventsSnapshot.size;
+      let totalRegistrations = 0;
+      let totalCapacity = 0;
+      eventsSnapshot.docs.forEach(doc => {
+        const data = doc.data();
+        totalRegistrations += data.registered || 0;
+        totalCapacity += data.capacity || 0;
+      });
+      const occupancyRate = totalCapacity > 0 ? Math.round((totalRegistrations / totalCapacity) * 100) : 0;
+
+      // 4. Fetch Products Data
+      const productsSnapshot = await getDocs(collection(db, 'products'));
+      const totalProducts = productsSnapshot.size;
+      const outOfStockCount = productsSnapshot.docs.filter(doc => (doc.data().stock || 0) <= 0).length;
+
+      // Sort recent orders
       const recent = recentOrdersList
         .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
         .slice(0, 5);
 
-      // Simple growth calculation
-      const oldUsersCount = totalUsers - newUsersLast30Days;
-      const monthlyGrowth = oldUsersCount > 0
-        ? parseFloat(((newUsersLast30Days / oldUsersCount) * 100).toFixed(1))
-        : 100;
-
-      const stats: DashboardStats = {
+      setStats({
         totalUsers,
         totalOrders,
         totalRevenue,
         averageOrderValue: totalOrders > 0 ? Math.round(totalRevenue / totalOrders) : 0,
         totalPointsIssued,
         totalPointsRedeemed,
-        activeUsers: Math.round(totalUsers * 0.25), // Estimate 25% active
-        monthlyGrowth,
-      };
-
-      setStats(stats);
+        activeUsers: Math.ceil(totalUsers * 0.15), // Simulated active users
+        monthlyGrowth: parseFloat(((recentGrowthCount / (totalUsers - recentGrowthCount || 1)) * 100).toFixed(1)),
+        usersByRole,
+        recentGrowthCount,
+        totalEvents,
+        occupancyRate,
+        totalProducts,
+        outOfStockCount
+      });
       setRecentOrders(recent);
     } catch (error) {
       console.error('Error loading dashboard:', error);
-      // Set empty stats on error
-      setStats({
-        totalUsers: 0,
-        totalOrders: 0,
-        totalRevenue: 0,
-        averageOrderValue: 0,
-        totalPointsIssued: 0,
-        totalPointsRedeemed: 0,
-        activeUsers: 0,
-        monthlyGrowth: 0,
-      });
     } finally {
       setLoading(false);
     }
   };
+
+  const COLORS = ['#6C5CE7', '#00B894', '#FFD93D', '#FF7675', '#74B9FF', '#A29BFE'];
+  const roleData = stats ? Object.entries(stats.usersByRole).map(([name, value]) => ({ name: ROLE_LABELS[name] || name, value })) : [];
 
   if (loading) {
     return (
@@ -144,197 +161,249 @@ export default function AdminDashboard() {
   return (
     <div className="p-8 pb-16 min-h-screen bg-[#FFFDF5]">
       {/* Header */}
-      <div className="mb-12 border-b-2 border-black pb-8">
-        <h1 className="font-header text-6xl font-black text-[#2D3436] mb-2 uppercase tracking-tighter">DASHBOARD</h1>
-        <p className="text-[#2D3436]/60 font-bold text-xl">Platform overview and analytics</p>
-      </div>
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="mb-12 border-b-2 border-black pb-8"
+      >
+        <div className="flex items-center gap-4 mb-2">
+          <div className="bg-[#FFD93D] p-2 rounded-lg border-2 border-black neo-shadow-sm">
+            <Activity className="w-6 h-6 text-black" />
+          </div>
+          <h1 className="font-header text-6xl font-black text-black uppercase tracking-tighter">DASHBOARD</h1>
+        </div>
+        <p className="text-black/60 font-bold text-xl ml-12">Platform overview and real-time statistics</p>
+      </motion.div>
 
-      {/* Stats Grid */}
+      {/* Deep Analytics Section */}
+      <DeepAnalytics />
+
+      {/* Main Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-        {/* Total Users */}
-        <div className="bg-[#6C5CE7] border-2 border-black rounded-[20px] p-6 neo-shadow hover:-translate-y-1 transition-transform">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-black text-white text-sm uppercase tracking-wider">Total Users</h3>
-            <div className="bg-white p-2 rounded-lg border-2 border-black">
-              <Users className="w-5 h-5 text-[#2D3436]" />
+        <StatCard
+          title="Total Users"
+          value={stats?.totalUsers || 0}
+          icon={Users}
+          color="#6C5CE7"
+          detail={`+${stats?.recentGrowthCount} this month`}
+        />
+        <StatCard
+          title="Total Orders"
+          value={stats?.totalOrders || 0}
+          icon={ShoppingBag}
+          color="#00B894"
+          detail={`₹${(stats?.totalRevenue || 0).toLocaleString()} Revenue`}
+        />
+        <StatCard
+          title="Avg Order"
+          value={`₹${stats?.averageOrderValue || 0}`}
+          icon={TrendingUp}
+          color="#FF7675"
+          detail="Per Transaction"
+        />
+        <StatCard
+          title="Active Now"
+          value={stats?.activeUsers || 0}
+          icon={Clock}
+          color="#FFD93D"
+          detail="Estimated active"
+        />
+      </div>
+
+      {/* Predictive Analytics Section */}
+      <PredictiveInsights />
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 h-[400px]">
+        {/* User Distribution Chart */}
+        <div className="lg:col-span-2 bg-white p-6 rounded-2xl neo-border shadow-sm flex flex-col">
+          <h3 className="text-xl font-black mb-6 uppercase italic">User Distribution</h3>
+          <div className="flex-1 w-full relative">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={roleData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={100}
+                  fill="#8884d8"
+                  paddingAngle={5}
+                  dataKey="value"
+                >
+                  {roleData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip cursor={{ fill: 'transparent' }} />
+              </PieChart>
+            </ResponsiveContainer>
+            {/* Legend Overlay */}
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none">
+              <span className="text-3xl font-black">{stats?.totalUsers || 0}</span>
+              <p className="text-xs font-bold text-gray-400 uppercase">Users</p>
             </div>
           </div>
-          <p className="font-header text-5xl font-black text-white mb-2">{stats?.totalUsers.toLocaleString()}</p>
-          <div className="flex items-center gap-2">
-            <span className="bg-black text-white text-xs font-black px-2 py-0.5 rounded-md uppercase tracking-wider">Growth</span>
-            <p className="text-white font-bold text-sm">+{stats?.monthlyGrowth}%</p>
+          <div className="mt-4 flex justify-center gap-4 flex-wrap">
+            {roleData.map((entry, index) => (
+              <div key={index} className="flex items-center gap-2 text-xs font-bold uppercase">
+                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }} />
+                {entry.name} ({entry.value})
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* Total Orders */}
-        <div className="bg-[#00B894] border-2 border-black rounded-[20px] p-6 neo-shadow hover:-translate-y-1 transition-transform">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-black text-[#2D3436] text-sm uppercase tracking-wider">Total Orders</h3>
-            <div className="bg-white p-2 rounded-lg border-2 border-black">
-              <ShoppingBag className="w-5 h-5 text-[#2D3436]" />
-            </div>
-          </div>
-          <p className="font-header text-5xl font-black text-[#2D3436] mb-2">{stats?.totalOrders.toLocaleString()}</p>
-          <div className="flex items-center gap-2">
-            <span className="bg-white text-[#2D3436] text-xs font-black px-2 py-0.5 rounded-md border border-black uppercase tracking-wider">Revenue</span>
-            <p className="text-[#2D3436] font-bold text-sm">₹{(stats?.totalRevenue || 0).toLocaleString()}</p>
-          </div>
-        </div>
-
-        {/* Average Order Value */}
-        <div className="bg-[#FF7675] border-2 border-black rounded-[20px] p-6 neo-shadow hover:-translate-y-1 transition-transform">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-black text-[#2D3436] text-sm uppercase tracking-wider">Avg Order</h3>
-            <div className="bg-white p-2 rounded-lg border-2 border-black">
-              <TrendingUp className="w-5 h-5 text-[#2D3436]" />
-            </div>
-          </div>
-          <p className="font-header text-5xl font-black text-[#2D3436] mb-2">₹{stats?.averageOrderValue.toLocaleString()}</p>
-          <p className="text-[#2D3436] font-bold text-sm bg-white/30 inline-block px-2 py-0.5 rounded border border-black/10">Per Transaction</p>
-        </div>
-
-        {/* Active Users */}
-        <div className="bg-[#FFD93D] border-2 border-black rounded-[20px] p-6 neo-shadow hover:-translate-y-1 transition-transform">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-black text-[#2D3436] text-sm uppercase tracking-wider">Active Users</h3>
-            <div className="bg-white p-2 rounded-lg border-2 border-black">
-              <Clock className="w-5 h-5 text-[#2D3436]" />
-            </div>
-          </div>
-          <p className="font-header text-5xl font-black text-[#2D3436] mb-2">{stats?.activeUsers.toLocaleString()}</p>
-          <p className="text-[#2D3436] font-bold text-sm bg-white/30 inline-block px-2 py-0.5 rounded border border-black/10">Last 24 Hours</p>
+        {/* Live Pulse Feed */}
+        <div className="lg:col-span-1 h-full">
+          <LivePulse />
         </div>
       </div>
 
-      {/* Points Statistics */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12">
-        <div className="bg-white border-2 border-black rounded-[20px] p-8 neo-shadow relative overflow-hidden">
-          <div className="relative z-10">
-            <div className="flex items-center gap-4 mb-6">
-              <div className="bg-[#FFD93D] p-3 rounded-xl border-2 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)]">
-                <Zap className="w-6 h-6 text-[#2D3436]" fill="#2D3436" />
+      {/* Operations Overview */}
+      <h2 className="font-header text-3xl font-black text-black mb-6 uppercase tracking-tighter flex items-center gap-2">
+        <Zap className="w-6 h-6 text-[#FFD93D]" fill="#FFD93D" />
+        Operations Overview
+      </h2>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+        {/* Events Statistics */}
+        <div className="bg-white border-2 border-black rounded-[25px] p-8 neo-shadow">
+          <div className="flex items-center justify-between mb-8">
+            <h3 className="font-header text-2xl font-black text-black uppercase tracking-tight flex items-center gap-3">
+              <div className="bg-[#FF7675] p-2 rounded-lg border-2 border-black">
+                <Calendar className="w-5 h-5 text-white" />
               </div>
-              <h3 className="font-header text-[#2D3436] text-3xl font-black uppercase tracking-tighter">Points Issued</h3>
+              Events Performance
+            </h3>
+            <Link href="/admin/events" className="text-[10px] font-black uppercase tracking-widest text-[#6C5CE7] hover:underline underline-offset-4">Manage Events &rarr;</Link>
+          </div>
+          <div className="grid grid-cols-2 gap-8">
+            <div>
+              <p className="text-black/40 text-xs font-black uppercase tracking-widest mb-1">Total Events</p>
+              <p className="text-4xl font-black text-black">{stats?.totalEvents}</p>
             </div>
-            <p className="font-header text-6xl font-black text-[#2D3436] mb-4 tracking-tighter">
-              {(stats?.totalPointsIssued || 0).toLocaleString()}
-            </p>
-            <div className="space-y-3">
-              <p className="text-[#2D3436]/60 font-black uppercase tracking-widest text-xs">Total points given to users</p>
-              <div className="w-full bg-gray-100 rounded-full h-4 border-2 border-black overflow-hidden">
-                <div
-                  className="bg-[#FFD93D] h-full border-r-2 border-black transition-all duration-1000"
-                  style={{ width: `${Math.min(100, (stats?.totalPointsIssued || 0) / 10000)}%` }}
-                ></div>
+            <div>
+              <p className="text-black/40 text-xs font-black uppercase tracking-widest mb-1">Occupancy</p>
+              <div className="flex items-end gap-2">
+                <p className="text-4xl font-black text-[#00B894]">{stats?.occupancyRate}%</p>
+                <div className="h-6 w-full bg-gray-100 rounded-full border border-black overflow-hidden mb-2">
+                  <div className="h-full bg-[#00B894]" style={{ width: `${stats?.occupancyRate}%` }} />
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="bg-white border-2 border-black rounded-[20px] p-8 neo-shadow relative overflow-hidden">
-          <div className="relative z-10">
-            <div className="flex items-center gap-4 mb-6">
-              <div className="bg-[#00B894] p-3 rounded-xl border-2 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)]">
-                <Zap className="w-6 h-6 text-[#2D3436]" fill="#2D3436" />
+        {/* Shop Statistics */}
+        <div className="bg-white border-2 border-black rounded-[25px] p-8 neo-shadow">
+          <div className="flex items-center justify-between mb-8">
+            <h3 className="font-header text-2xl font-black text-black uppercase tracking-tight flex items-center gap-3">
+              <div className="bg-[#74B9FF] p-2 rounded-lg border-2 border-black">
+                <Package className="w-5 h-5 text-white" />
               </div>
-              <h3 className="font-header text-[#2D3436] text-3xl font-black uppercase tracking-tighter">Points Redeemed</h3>
+              Shop Metrics
+            </h3>
+            <Link href="/admin/products" className="text-[10px] font-black uppercase tracking-widest text-[#6C5CE7] hover:underline underline-offset-4">Manage Shop &rarr;</Link>
+          </div>
+          <div className="grid grid-cols-2 gap-8">
+            <div>
+              <p className="text-black/40 text-xs font-black uppercase tracking-widest mb-1">Live Products</p>
+              <p className="text-4xl font-black text-black">{stats?.totalProducts}</p>
             </div>
-            <p className="font-header text-6xl font-black text-[#2D3436] mb-4 tracking-tighter">
-              {(stats?.totalPointsRedeemed || 0).toLocaleString()}
-            </p>
-            <div className="space-y-3">
-              <p className="text-[#2D3436]/60 font-black uppercase tracking-widest text-xs">Points used for discounts</p>
-              <div className="w-full bg-gray-100 rounded-full h-4 border-2 border-black overflow-hidden">
-                <div
-                  className="bg-[#00B894] h-full border-r-2 border-black transition-all duration-1000"
-                  style={{ width: `${Math.min(100, ((stats?.totalPointsRedeemed || 0) / (stats?.totalPointsIssued || 1)) * 100)}%` }}
-                ></div>
-              </div>
+            <div>
+              <p className="text-black/40 text-xs font-black uppercase tracking-widest mb-1">Stock Alerts</p>
+              <p className={`text-4xl font-black ${stats?.outOfStockCount ? 'text-[#FF7675]' : 'text-black/20'}`}>
+                {stats?.outOfStockCount || 'None'}
+              </p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Recent Orders */}
-      <div className="bg-white border-2 border-black rounded-[25px] p-8 neo-shadow mb-8">
-        <h2 className="font-header text-3xl font-black text-[#2D3436] mb-8 flex items-center gap-3 uppercase tracking-tighter">
-          <div className="bg-black p-2 rounded-lg">
-            <ShoppingBag className="w-5 h-5 text-white" />
-          </div>
-          RECENT ORDERS
-        </h2>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b-2 border-black">
-                <th className="py-4 px-4 text-[#2D3436] font-black uppercase tracking-wider text-xs">Order ID</th>
-                <th className="py-4 px-4 text-[#2D3436] font-black uppercase tracking-wider text-xs">Amount</th>
-                <th className="py-4 px-4 text-[#2D3436] font-black uppercase tracking-wider text-xs">Status</th>
-                <th className="py-4 px-4 text-[#2D3436] font-black uppercase tracking-wider text-xs">Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              {recentOrders.map((order) => (
-                <tr key={order.id} className="border-b-2 border-black/5 hover:bg-[#FFFDF5] transition">
-                  <td className="py-4 px-4 text-[#2D3436] font-bold font-mono text-sm">{order.id.substring(0, 8)}...</td>
-                  <td className="py-4 px-4 text-[#2D3436] font-black text-lg">₹{order.totalPrice.toLocaleString()}</td>
-                  <td className="py-4 px-4">
-                    <span className="inline-flex px-3 py-1 bg-[#00B894] border-2 border-black rounded-lg text-[#2D3436] text-xs font-black uppercase shadow-[2px_2px_0px_rgba(0,0,0,0)]">
-                      ✓ Completed
-                    </span>
-                  </td>
-                  <td className="py-4 px-4 text-[#2D3436]/60 font-bold text-xs uppercase tracking-wide">
-                    {new Date(order.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
-                  </td>
+      {/* Recent Activity & Quick Actions */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Recent Orders Table */}
+        <div className="lg:col-span-2 bg-white border-2 border-black rounded-[25px] p-8 neo-shadow overflow-hidden">
+          <h2 className="font-header text-2xl font-black text-black mb-8 flex items-center gap-3 uppercase tracking-tighter">
+            <div className="bg-black p-2 rounded-lg">
+              <ShoppingBag className="w-4 h-4 text-white" />
+            </div>
+            RECENT ORDERS
+          </h2>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b-2 border-black">
+                  <th className="py-4 px-2 text-black font-black uppercase tracking-wider text-[10px]">ID</th>
+                  <th className="py-4 px-2 text-black font-black uppercase tracking-wider text-[10px]">Total</th>
+                  <th className="py-4 px-2 text-black font-black uppercase tracking-wider text-[10px]">Status</th>
+                  <th className="py-4 px-2 text-black font-black uppercase tracking-wider text-[10px]">Date</th>
                 </tr>
-              ))}
-              {recentOrders.length === 0 && (
-                <tr>
-                  <td colSpan={4} className="py-12 text-center text-black/40 font-bold uppercase tracking-widest">No recent orders found.</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {recentOrders.map((order) => (
+                  <tr key={order.id} className="border-b border-black/5 hover:bg-[#FFFDF5] transition group">
+                    <td className="py-4 px-2 text-black font-bold font-mono text-xs">{order.id.substring(0, 8)}</td>
+                    <td className="py-4 px-2 text-black font-black text-md">₹{order.totalPrice.toLocaleString()}</td>
+                    <td className="py-4 px-2">
+                      <span className="px-2 py-0.5 bg-[#00B894] border border-black rounded text-black text-[10px] font-black uppercase">
+                        {order.paymentStatus}
+                      </span>
+                    </td>
+                    <td className="py-4 px-2 text-black/40 font-bold text-[10px] uppercase">
+                      {new Date(order.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
 
-      {/* Quick Actions */}
-      <div className="bg-white border-2 border-black rounded-[25px] p-8 neo-shadow">
-        <h2 className="font-header text-3xl font-black text-[#2D3436] mb-8 uppercase tracking-tighter">
-          ⚡ QUICK ACTIONS
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <Link href="/admin/games" className="p-6 bg-[#6C5CE7] border-2 border-black rounded-xl neo-shadow hover:translate-x-[4px] hover:translate-y-[4px] hover:shadow-none transition-all">
-            <h3 className="font-black text-white text-lg mb-2">🎮 GAME SETTINGS</h3>
-            <p className="text-white/80 text-sm font-bold">Configure points, retries, Game of the Day</p>
-          </Link>
-
-          <Link href="/admin/gamification" className="p-6 bg-[#FFD93D] border-2 border-black rounded-xl neo-shadow hover:translate-x-[4px] hover:translate-y-[4px] hover:shadow-none transition-all">
-            <h3 className="font-black text-[#2D3436] text-lg mb-2">🏆 GAMIFICATION</h3>
-            <p className="text-[#2D3436]/80 text-sm font-bold">Wheel odds, economy rules</p>
-          </Link>
-
-          <Link href="/admin/game-content" className="p-6 bg-[#00B894] border-2 border-black rounded-xl neo-shadow hover:translate-x-[4px] hover:translate-y-[4px] hover:shadow-none transition-all">
-            <h3 className="font-black text-white text-lg mb-2">💾 GAME CONTENT</h3>
-            <p className="text-white/80 text-sm font-bold">Manage riddles, trivia, puzzles</p>
-          </Link>
-
-          <Link href="/admin/users" className="p-6 bg-[#FF7675] border-2 border-black rounded-xl neo-shadow hover:translate-x-[4px] hover:translate-y-[4px] hover:shadow-none transition-all">
-            <h3 className="font-black text-white text-lg mb-2">👥 USERS</h3>
-            <p className="text-white/80 text-sm font-bold">Manage user accounts & roles</p>
-          </Link>
-
-          <Link href="/admin/events" className="p-6 bg-[#A29BFE] border-2 border-black rounded-xl neo-shadow hover:translate-x-[4px] hover:translate-y-[4px] hover:shadow-none transition-all">
-            <h3 className="font-black text-white text-lg mb-2">📅 EVENTS</h3>
-            <p className="text-white/80 text-sm font-bold">Create & manage events</p>
-          </Link>
-
-          <Link href="/admin/products" className="p-6 bg-[#FDCB6E] border-2 border-black rounded-xl neo-shadow hover:translate-x-[4px] hover:translate-y-[4px] hover:shadow-none transition-all">
-            <h3 className="font-black text-[#2D3436] text-lg mb-2">🛍️ PRODUCTS</h3>
-            <p className="text-[#2D3436]/80 text-sm font-bold">Manage shop inventory</p>
-          </Link>
+        {/* Extensive Quick Actions */}
+        <div className="bg-[#FFFDF5] border-2 border-black rounded-[25px] p-8 neo-shadow border-dashed">
+          <h2 className="font-header text-2xl font-black text-black mb-8 uppercase tracking-tighter">
+            🚀 Quick Links
+          </h2>
+          <div className="space-y-3">
+            <QuickLink href="/admin/game-settings" label="Game Console" color="#FFD93D" desc="Consolidated game management" />
+            <QuickLink href="/admin/users" label="Users" color="#6C5CE7" desc="Member database & roles" />
+            <QuickLink href="/admin/events" label="Events" color="#FF7675" desc="Booking & registrations" />
+            <QuickLink href="/admin/products" label="Shop" color="#00B894" desc="Inventory & variants" />
+            <QuickLink href="/admin/blog" label="The Blog" color="#74B9FF" desc="Content & publishing" />
+            <QuickLink href="/admin/settings" label="Site Settings" color="#A29BFE" desc="Global configurations" />
+          </div>
         </div>
       </div>
     </div>
   );
 }
+
+// Reusable Sub-components
+const StatCard = ({ title, value, icon: Icon, color, detail }: any) => (
+  <motion.div
+    whileHover={{ y: -4, x: 4 }}
+    className="border-2 border-black rounded-[20px] p-6 neo-shadow bg-white hover:shadow-none transition-all cursor-default"
+  >
+    <div className="flex items-center justify-between mb-4">
+      <p className="font-black text-black/40 text-[10px] uppercase tracking-widest">{title}</p>
+      <div className="p-2 rounded-lg border-2 border-black neo-shadow-sm" style={{ backgroundColor: color }}>
+        <Icon className="w-4 h-4 text-white" />
+      </div>
+    </div>
+    <p className="font-header text-4xl font-black text-black mb-2">{value}</p>
+    <p className="text-[10px] font-bold text-black/60 bg-[#FFFDF5] border border-black/10 px-2 py-1 rounded inline-block uppercase tracking-wider">{detail}</p>
+  </motion.div>
+);
+
+const QuickLink = ({ href, label, color, desc }: any) => (
+  <Link
+    href={href}
+    className="flex items-center gap-4 p-4 bg-white border-2 border-black rounded-xl hover:translate-x-1 hover:border-[#6C5CE7] transition-all group"
+  >
+    <div className="w-2 h-10 rounded-full border border-black/20" style={{ backgroundColor: color }} />
+    <div>
+      <h4 className="font-black text-black text-sm uppercase group-hover:text-[#6C5CE7]">{label}</h4>
+      <p className="text-[10px] font-bold text-black/40">{desc}</p>
+    </div>
+  </Link>
+);

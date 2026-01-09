@@ -7,7 +7,7 @@ import { CldUploadWidget } from 'next-cloudinary';
 import { MediaGalleryModal } from '@/components/ui/MediaGalleryModal';
 import { usePopup } from '@/app/context/PopupContext';
 
-interface Testimonial {
+interface Proofofjoy {
     id: string;
     name: string;
     role: string;
@@ -17,26 +17,29 @@ interface Testimonial {
     createdAt: string;
 }
 
-export default function TestimonialsPage() {
+export default function ProofofjoysPage() {
     const { showAlert, showConfirm } = usePopup();
-    const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
+    const [proofofjoys, setProofofjoys] = useState<Proofofjoy[]>([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
     const [uploadingPhoto, setUploadingPhoto] = useState<string | null>(null);
 
     useEffect(() => {
-        fetchTestimonials();
+        fetchProofofjoys();
     }, []);
 
-    const fetchTestimonials = async () => {
+    const fetchProofofjoys = async () => {
         try {
-            const res = await fetch('/api/testimonials?all=true');
+            const res = await fetch('/api/proofofjoys?all=true');
             const data = await res.json();
             if (data.success) {
-                setTestimonials(data.testimonials);
+                setProofofjoys(data.proofofjoys);
+            } else {
+                await showAlert('Failed to load proofofjoys', 'error');
             }
         } catch (error) {
-            console.error('Error loading testimonials:', error);
+            console.error('Error loading profofjoy:', error);
+            await showAlert('Error loading profofjoy', 'error');
         } finally {
             setLoading(false);
         }
@@ -44,7 +47,7 @@ export default function TestimonialsPage() {
 
     const handleStatusUpdate = async (id: string, newStatus: 'approved' | 'rejected') => {
         try {
-            const res = await fetch('/api/testimonials', {
+            const res = await fetch('/api/proofofjoys', {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ id, status: newStatus }),
@@ -52,7 +55,7 @@ export default function TestimonialsPage() {
             const data = await res.json();
 
             if (data.success) {
-                setTestimonials(prev => prev.map(t => t.id === id ? { ...t, status: newStatus } : t));
+                setProofofjoys(prev => prev.map(t => t.id === id ? { ...t, status: newStatus } : t));
             } else {
                 await showAlert('Failed to update status', 'error');
             }
@@ -63,17 +66,17 @@ export default function TestimonialsPage() {
     };
 
     const handleDelete = async (id: string) => {
-        const confirmed = await showConfirm('Are you sure you want to delete this testimonial?', 'Delete Testimonial');
+        const confirmed = await showConfirm('Are you sure you want to delete this proofofjoy?', 'Delete Proofofjoy');
         if (!confirmed) return;
 
         try {
-            const res = await fetch(`/api/testimonials?id=${id}`, {
+            const res = await fetch(`/api/proofofjoys?id=${id}`, {
                 method: 'DELETE',
             });
             const data = await res.json();
 
             if (data.success) {
-                setTestimonials(prev => prev.filter(t => t.id !== id));
+                setProofofjoys(prev => prev.filter(t => t.id !== id));
             } else {
                 await showAlert('Failed to delete', 'error');
             }
@@ -86,7 +89,7 @@ export default function TestimonialsPage() {
     const handlePhotoUpload = async (id: string, imageUrl: string) => {
         setUploadingPhoto(id);
         try {
-            const res = await fetch('/api/testimonials', {
+            const res = await fetch('/api/proofofjoys', {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ id, image: imageUrl }),
@@ -94,7 +97,7 @@ export default function TestimonialsPage() {
             const data = await res.json();
 
             if (data.success) {
-                setTestimonials(prev => prev.map(t =>
+                setProofofjoys(prev => prev.map(t =>
                     t.id === id ? { ...t, image: imageUrl } : t
                 ));
             } else {
@@ -108,17 +111,17 @@ export default function TestimonialsPage() {
         }
     };
 
-    const filteredTestimonials = testimonials.filter(t => filter === 'all' || t.status === filter);
+    const filteredProofofjoys = proofofjoys.filter(t => filter === 'all' || t.status === filter);
 
-    const pendingCount = testimonials.filter(t => t.status === 'pending').length;
-    const approvedCount = testimonials.filter(t => t.status === 'approved').length;
+    const pendingCount = proofofjoys.filter(t => t.status === 'pending').length;
+    const approvedCount = proofofjoys.filter(t => t.status === 'approved').length;
 
     if (loading) {
         return (
             <div className="p-8 flex items-center justify-center min-h-screen bg-[#FFFDF5]">
                 <div className="text-center">
                     <div className="w-12 h-12 border-4 border-[#FFD93D] border-t-black rounded-full animate-spin mx-auto mb-4"></div>
-                    <p className="text-black font-black uppercase tracking-widest">Loading testimonials...</p>
+                    <p className="text-black font-black uppercase tracking-widest">Loading proofofjoys...</p>
                 </div>
             </div>
         );
@@ -129,7 +132,7 @@ export default function TestimonialsPage() {
             {/* Header */}
             <div className="flex items-center justify-between mb-8 border-b-2 border-black pb-8">
                 <div>
-                    <h1 className="font-header text-5xl font-black text-[#2D3436] mb-2 uppercase tracking-tighter">Testimonials</h1>
+                    <h1 className="font-header text-5xl font-black text-[#2D3436] mb-2 uppercase tracking-tighter">ProofofJoy</h1>
                     <p className="text-[#2D3436]/60 font-bold text-lg">Manage community stories and reviews</p>
                 </div>
             </div>
@@ -138,7 +141,7 @@ export default function TestimonialsPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
                 <div className="bg-[#FFD93D] border-2 border-black rounded-[20px] p-6 neo-shadow hover:-translate-y-1 transition-transform">
                     <p className="text-[#2D3436] text-xs font-black uppercase tracking-widest mb-2">Total Stories</p>
-                    <p className="font-header text-5xl font-black text-[#2D3436]">{testimonials.length}</p>
+                    <p className="font-header text-5xl font-black text-[#2D3436]">{proofofjoys.length}</p>
                 </div>
                 <div className="bg-[#FF7675] border-2 border-black rounded-[20px] p-6 neo-shadow hover:-translate-y-1 transition-transform">
                     <p className="text-[#2D3436] text-xs font-black uppercase tracking-widest mb-2">Pending Review</p>
@@ -168,7 +171,7 @@ export default function TestimonialsPage() {
 
             {/* Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {filteredTestimonials.map(t => (
+                {filteredProofofjoys.map(t => (
                     <div key={t.id} className="bg-white border-2 border-black rounded-[25px] p-6 neo-shadow flex flex-col gap-4 relative overflow-hidden group">
 
                         {/* Status Badge */}
@@ -283,10 +286,10 @@ export default function TestimonialsPage() {
                 ))}
             </div>
 
-            {filteredTestimonials.length === 0 && (
+            {filteredProofofjoys.length === 0 && (
                 <div className="text-center py-20 bg-white border-2 border-black rounded-[30px] border-dashed">
                     <MessageSquare className="w-12 h-12 text-[#2D3436]/20 mx-auto mb-4" />
-                    <p className="text-[#2D3436]/40 font-black uppercase">No testimonials found</p>
+                    <p className="text-[#2D3436]/40 font-black uppercase">No proofofjoys found</p>
                 </div>
             )}
         </div>

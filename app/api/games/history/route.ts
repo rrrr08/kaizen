@@ -34,11 +34,11 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ history: [] }, { status: 200 });
     }
     
-    // Fetch user's game history
-    const historyRef = adminDb.collection(`users/${userId}/gameHistory`);
+    // Fetch user's game history from gamePlays (standardized collection)
+    const historyRef = adminDb.collection(`users/${userId}/gamePlays`);
     const snapshot = await historyRef
       .where('gameId', '==', gameId)
-      .orderBy('awardedAt', 'desc')
+      .orderBy('playedAt', 'desc')
       .limit(20)
       .get();
     

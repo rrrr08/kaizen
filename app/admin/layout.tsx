@@ -50,10 +50,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: '/admin/dashboard', label: 'Dashboard', icon: Home },
     { href: '/admin/settings', label: 'Settings', icon: Settings },
     { href: '/admin/users', label: 'Users', icon: Users },
-    { href: '/admin/games', label: 'Games', icon: Gamepad2 },
-    { href: '/admin/gamification', label: 'Gamification', icon: Trophy },
-    { href: '/admin/xp-tiers', label: 'XP & Tiers', icon: TrendingUp },
-    { href: '/admin/game-content', label: 'Game Content', icon: Database },
+    { href: '/admin/game-settings', label: 'Game Settings', icon: Gamepad2 },
     { href: '/admin/vouchers', label: 'Vouchers', icon: Ticket },
     { href: '/admin/api-test', label: 'API Test', icon: Zap },
     { href: '/admin/orders', label: 'Orders', icon: ShoppingBag },
@@ -64,11 +61,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: '/admin/events', label: 'Events', icon: Calendar },
     { href: '/admin/experiences', label: 'Experiences', icon: Sparkles },
     { href: '/admin/experiences/enquiries', label: 'Experience Enquiries', icon: MessageSquare },
-    { href: '/admin/testimonials', label: 'Testimonials', icon: MessageSquare },
+    { href: '/admin/proofofjoy', label: 'Proof Of Joy', icon: MessageSquare },
     { href: '/admin/push-notifications', label: 'Notifications', icon: Zap },
     { href: '/admin/inquiries', label: 'Enquiries', icon: MessageSquare },
     { href: '/admin/moderation', label: 'Moderation', icon: Shield },
-    { href: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
   ];
 
   return (
