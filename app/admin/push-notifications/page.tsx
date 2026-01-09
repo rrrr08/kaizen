@@ -595,16 +595,7 @@ export default function PushNotificationsPage() {
                   </p>
                 </div>
 
-                {/* Recipient Preview */}
-                <div className="p-4 bg-[#FFD93D]/10 border-2 border-[#FFD93D] border-dashed rounded-xl">
-                  <p className="text-sm font-black text-black flex items-center gap-2 uppercase tracking-wide">
-                    <Users className="w-4 h-4" />
-                    Recipient Preview
-                  </p>
-                  <p className="text-sm text-black/60 font-bold mt-2">
-                    This will reach approximately all subscribed users in the &quot;{formData.recipientSegment}&quot; segment.
-                  </p>
-                </div>
+                {/* Recipient Preview Removed */}
 
                 {/* Action Buttons */}
                 <div className="flex gap-4 pt-4">

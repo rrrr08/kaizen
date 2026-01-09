@@ -132,10 +132,23 @@ export default function ModerationPage() {
                                             <div className="absolute -top-4 -left-4 w-10 h-10 bg-white border-4 border-black rounded-xl flex items-center justify-center">
                                                 <AlertTriangle size={18} className="text-red-500" />
                                             </div>
-                                            <p className="text-xl font-bold italic text-black/80 leading-relaxed">
-                                                &quot;{report.content}&quot;
+                                            <p className="text-xl font-bold italic text-black/80 leading-relaxed break-words">
+                                                &quot;{report.originalContent || report.content}&quot;
                                             </p>
                                         </div>
+
+                                        {/* Reason / Flagged Words */}
+                                        {report.reason && (
+                                            <div className="flex items-start gap-3 p-4 bg-red-100 border-2 border-red-300 rounded-xl">
+                                                <div className="mt-1">
+                                                    <Ban size={16} className="text-red-600" />
+                                                </div>
+                                                <div>
+                                                    <p className="font-black text-xs uppercase tracking-widest text-red-600 mb-1">Detection Logic</p>
+                                                    <p className="text-sm font-bold text-red-800">{report.reason}</p>
+                                                </div>
+                                            </div>
+                                        )}
 
                                         <div className="flex items-center gap-6 mt-6">
                                             <div className="flex items-center gap-2">

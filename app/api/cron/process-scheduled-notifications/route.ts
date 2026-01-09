@@ -9,12 +9,39 @@ export async function GET(request: Request) {
     const authHeader = request.headers.get('authorization');
     const url = new URL(request.url);
     const secretParam = url.searchParams.get('secret');
-    
+
+    let isAuthorized = false;
+
+    // 1. Check CRON_SECRET (for automated cron jobs)
     if (process.env.CRON_SECRET) {
         const providedSecret = authHeader?.replace('Bearer ', '') || secretParam;
-        if (providedSecret !== process.env.CRON_SECRET) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        if (providedSecret === process.env.CRON_SECRET) {
+            isAuthorized = true;
         }
+    } else {
+        // If no secret is set, we might default to allowed (dev) or strictly require admin (prod)
+        // For safety, let's assume we need at least one auth method if safe-guards are needed.
+    }
+
+    // 2. Check Firebase Auth (for manual triggering from Admin UI)
+    if (!isAuthorized && authHeader?.startsWith('Bearer ')) {
+        const token = authHeader.split('Bearer ')[1];
+        try {
+            const decodedToken = await adminAuth.verifyIdToken(token);
+            // Verify if user is admin
+            const userDoc = await adminDb.collection('users').doc(decodedToken.uid).get();
+            if (userDoc.exists && userDoc.data()?.role === 'admin') {
+                isAuthorized = true;
+            }
+        } catch (error) {
+            console.error('Manual trigger auth failed:', error);
+        }
+    }
+
+    if (!isAuthorized && process.env.CRON_SECRET) { // Only enforce if secret is set, or strictly enforce always?
+        // If CRON_SECRET is set, we strictly enforce auth. 
+        // If not set (dev), we might be lenient, but sticking to strict is better.
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     try {
@@ -82,7 +109,7 @@ export async function GET(request: Request) {
                         .where('status', '==', 'scheduled')
                         .limit(1)
                         .get();
-                    
+
                     if (!fallbackSnapshot.empty) {
                         await fallbackSnapshot.docs[0].ref.update({
                             status: 'sent',

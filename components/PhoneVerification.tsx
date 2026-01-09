@@ -13,10 +13,10 @@ interface PhoneVerificationProps {
   onVerified?: (phoneNumber: string) => void;
 }
 
-export default function PhoneVerification({ 
-  currentPhone, 
-  isVerified, 
-  onVerified 
+export default function PhoneVerification({
+  currentPhone,
+  isVerified,
+  onVerified
 }: PhoneVerificationProps) {
   const { addToast } = useToast();
   const [phoneNumber, setPhoneNumber] = useState(currentPhone || '');
@@ -28,11 +28,19 @@ export default function PhoneVerification({
   const formatPhoneNumber = (value: string) => {
     // Remove all non-digits except leading +
     const cleaned = value.replace(/[^\d+]/g, '');
-    
-    // Ensure it starts with +
-    if (!cleaned.startsWith('+')) {
-      return '+' + cleaned;
+
+    // If it starts with +, respect the user's explicit country code
+    if (cleaned.startsWith('+')) {
+      return cleaned;
     }
+
+    // Default to +91 if no country code provided
+    // If user clears the input, keep it empty or just '+91'? 
+    // Let's just prepend +91 to any number they type if it doesn't have a +
+    if (cleaned.length > 0) {
+      return '+91' + cleaned;
+    }
+
     return cleaned;
   };
 
