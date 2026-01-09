@@ -110,67 +110,67 @@ export default function CreateShipmentModal({ isOpen, onClose, onSuccess, initia
                         initial={{ scale: 0.9, y: 40, rotate: -1 }}
                         animate={{ scale: 1, y: 0, rotate: 0 }}
                         exit={{ scale: 0.9, y: 40, rotate: 1 }}
-                        className="bg-white w-full max-w-3xl max-h-[90vh] overflow-hidden border-8 border-black shadow-[24px_24px_0px_#000] rounded-[60px] relative flex flex-col"
+                        className="bg-white w-full max-w-3xl max-h-[90vh] overflow-hidden border-4 border-black shadow-[12px_12px_0px_#000] rounded-3xl relative flex flex-col"
                     >
                         {/* Decorative Background */}
                         <div className="absolute top-0 right-0 w-48 h-48 bg-[#6C5CE7] opacity-10 rounded-bl-full pointer-events-none" />
 
                         {/* Header */}
-                        <div className="p-8 sm:p-10 border-b-8 border-black flex justify-between items-center bg-[#FFFDF5] relative z-10">
-                            <div className="flex items-center gap-6">
-                                <div className="p-4 bg-black rounded-3xl rotate-6 neo-shadow">
-                                    <Truck size={32} className="text-[#FFD93D]" />
+                        <div className="p-6 sm:p-8 border-b-4 border-black flex justify-between items-center bg-[#FFFDF5] relative z-10">
+                            <div className="flex items-center gap-4">
+                                <div className="p-3 bg-black rounded-xl rotate-6 neo-shadow">
+                                    <Truck size={24} className="text-[#FFD93D]" />
                                 </div>
                                 <div>
-                                    <h2 className="text-3xl font-black uppercase tracking-tighter text-black">Manifest Cargo</h2>
-                                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-black/40">Shipment Registration System</p>
+                                    <h2 className="text-2xl font-black uppercase tracking-tighter text-black">Manifest Cargo</h2>
+                                    <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-black/40">Shipment Registration System</p>
                                 </div>
                             </div>
                             <button
                                 onClick={onClose}
-                                className="w-14 h-14 bg-white border-4 border-black rounded-2xl flex items-center justify-center hover:bg-black hover:text-white transition-all neo-shadow-sm active:translate-y-1 active:shadow-none"
+                                className="w-10 h-10 bg-white border-2 border-black rounded-lg flex items-center justify-center hover:bg-black hover:text-white transition-all neo-shadow-sm active:translate-y-1 active:shadow-none"
                             >
-                                <X size={28} />
+                                <X size={20} />
                             </button>
                         </div>
 
                         {/* Form Content */}
-                        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-8 sm:p-10 space-y-10 relative z-10 scrollbar-hide">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 sm:p-8 space-y-6 relative z-10 scrollbar-hide">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 {/* Order ID */}
                                 <div className="space-y-3">
-                                    <label className="flex items-center gap-2 font-black text-xs uppercase tracking-widest text-black/60 ml-4">
-                                        <Hash size={14} /> Operation Reference *
+                                    <label className="flex items-center gap-2 font-bold text-xs uppercase tracking-widest text-black/60 ml-2">
+                                        <Hash size={12} /> Operation Reference *
                                     </label>
                                     <input
                                         name="orderId"
                                         required
                                         value={formData.orderId}
                                         onChange={handleChange}
-                                        className="w-full px-6 py-4 bg-gray-50 border-4 border-black rounded-[24px] font-black uppercase tracking-tight focus:outline-none focus:bg-white focus:ring-4 focus:ring-[#6C5CE7]/10 transition-all"
+                                        className="w-full px-4 py-3 bg-gray-50 border-2 border-black rounded-xl font-bold uppercase tracking-tight focus:outline-none focus:bg-white focus:ring-4 focus:ring-[#6C5CE7]/10 transition-all text-sm"
                                         placeholder="KZN-XXXXXX"
                                     />
                                 </div>
 
                                 {/* Customer Name */}
                                 <div className="space-y-3">
-                                    <label className="flex items-center gap-2 font-black text-xs uppercase tracking-widest text-black/60 ml-4">
-                                        <User size={14} /> Consignee Name *
+                                    <label className="flex items-center gap-2 font-bold text-xs uppercase tracking-widest text-black/60 ml-2">
+                                        <User size={12} /> Consignee Name *
                                     </label>
                                     <input
                                         name="customerName"
                                         required
                                         value={formData.customerName}
                                         onChange={handleChange}
-                                        className="w-full px-6 py-4 bg-gray-50 border-4 border-black rounded-[24px] font-black uppercase tracking-tight focus:outline-none focus:bg-white focus:ring-4 focus:ring-[#6C5CE7]/10 transition-all"
+                                        className="w-full px-4 py-3 bg-gray-50 border-2 border-black rounded-xl font-bold uppercase tracking-tight focus:outline-none focus:bg-white focus:ring-4 focus:ring-[#6C5CE7]/10 transition-all text-sm"
                                         placeholder="Enter Full Name"
                                     />
                                 </div>
 
                                 {/* Email */}
                                 <div className="space-y-3">
-                                    <label className="flex items-center gap-2 font-black text-xs uppercase tracking-widest text-black/60 ml-4">
-                                        <Mail size={14} /> Contact Email *
+                                    <label className="flex items-center gap-2 font-bold text-xs uppercase tracking-widest text-black/60 ml-2">
+                                        <Mail size={12} /> Contact Email *
                                     </label>
                                     <input
                                         name="customerEmail"
@@ -178,57 +178,57 @@ export default function CreateShipmentModal({ isOpen, onClose, onSuccess, initia
                                         required
                                         value={formData.customerEmail}
                                         onChange={handleChange}
-                                        className="w-full px-6 py-4 bg-gray-50 border-4 border-black rounded-[24px] font-black focus:outline-none focus:bg-white focus:ring-4 focus:ring-[#6C5CE7]/10 transition-all"
+                                        className="w-full px-4 py-3 bg-gray-50 border-2 border-black rounded-xl font-bold focus:outline-none focus:bg-white focus:ring-4 focus:ring-[#6C5CE7]/10 transition-all text-sm"
                                         placeholder="Email Address"
                                     />
                                 </div>
 
                                 {/* Phone */}
                                 <div className="space-y-3">
-                                    <label className="flex items-center gap-2 font-black text-xs uppercase tracking-widest text-black/60 ml-4">
-                                        <Phone size={14} /> Contact Number *
+                                    <label className="flex items-center gap-2 font-bold text-xs uppercase tracking-widest text-black/60 ml-2">
+                                        <Phone size={12} /> Contact Number *
                                     </label>
                                     <input
                                         name="customerPhone"
                                         required
                                         value={formData.customerPhone}
                                         onChange={handleChange}
-                                        className="w-full px-6 py-4 bg-gray-50 border-4 border-black rounded-[24px] font-black focus:outline-none focus:bg-white focus:ring-4 focus:ring-[#6C5CE7]/10 transition-all"
+                                        className="w-full px-4 py-3 bg-gray-50 border-2 border-black rounded-xl font-bold focus:outline-none focus:bg-white focus:ring-4 focus:ring-[#6C5CE7]/10 transition-all text-sm"
                                         placeholder="+91 XXXXX XXXXX"
                                     />
                                 </div>
 
                                 {/* Courier */}
                                 <div className="space-y-3">
-                                    <label className="flex items-center gap-2 font-black text-xs uppercase tracking-widest text-black/60 ml-4">
-                                        <Package size={14} /> Logistic Partner
+                                    <label className="flex items-center gap-2 font-bold text-xs uppercase tracking-widest text-black/60 ml-2">
+                                        <Package size={12} /> Logistic Partner
                                     </label>
                                     <input
                                         name="courierName"
                                         value={formData.courierName}
                                         onChange={handleChange}
-                                        className="w-full px-6 py-4 bg-gray-50 border-4 border-black rounded-[24px] font-black uppercase tracking-tight focus:outline-none focus:bg-white focus:ring-4 focus:ring-[#6C5CE7]/10 transition-all"
+                                        className="w-full px-4 py-3 bg-gray-50 border-2 border-black rounded-xl font-bold uppercase tracking-tight focus:outline-none focus:bg-white focus:ring-4 focus:ring-[#6C5CE7]/10 transition-all text-sm"
                                         placeholder="e.g. Bluedart"
                                     />
                                 </div>
 
                                 {/* AWB Code */}
                                 <div className="space-y-3">
-                                    <label className="flex items-center gap-2 font-black text-xs uppercase tracking-widest text-black/60 ml-4">
-                                        <Sparkles size={14} /> Tracking AWB
+                                    <label className="flex items-center gap-2 font-bold text-xs uppercase tracking-widest text-black/60 ml-2">
+                                        <Sparkles size={12} /> Tracking AWB
                                     </label>
-                                    <div className="flex gap-4">
+                                    <div className="flex gap-3">
                                         <input
                                             name="awbCode"
                                             value={formData.awbCode}
                                             onChange={handleChange}
-                                            className="flex-1 px-6 py-4 bg-gray-50 border-4 border-black rounded-[24px] font-mono font-black uppercase tracking-tight focus:outline-none focus:bg-white focus:ring-4 focus:ring-[#6C5CE7]/10 transition-all"
+                                            className="flex-1 px-4 py-3 bg-gray-50 border-2 border-black rounded-xl font-mono font-bold uppercase tracking-tight focus:outline-none focus:bg-white focus:ring-4 focus:ring-[#6C5CE7]/10 transition-all text-sm"
                                             placeholder="XXXX-XXXX"
                                         />
                                         <button
                                             type="button"
                                             onClick={generateAWB}
-                                            className="px-6 bg-[#FFD93D] border-4 border-black rounded-[24px] font-black text-[10px] uppercase tracking-widest hover:translate-y-[-2px] transition-all neo-shadow-sm active:translate-y-1 active:shadow-none"
+                                            className="px-4 bg-[#FFD93D] border-2 border-black rounded-lg font-bold text-[10px] uppercase tracking-widest hover:translate-y-[-2px] transition-all neo-shadow-sm active:translate-y-1 active:shadow-none"
                                         >
                                             AUTO
                                         </button>
@@ -239,8 +239,8 @@ export default function CreateShipmentModal({ isOpen, onClose, onSuccess, initia
                             {/* Weight & Address */}
                             <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
                                 <div className="md:col-span-1 space-y-3">
-                                    <label className="flex items-center gap-2 font-black text-xs uppercase tracking-widest text-black/60 ml-4">
-                                        <Weight size={14} /> Mass (KG)
+                                    <label className="flex items-center gap-2 font-bold text-xs uppercase tracking-widest text-black/60 ml-2">
+                                        <Weight size={12} /> Mass (KG)
                                     </label>
                                     <input
                                         name="weight"
@@ -248,47 +248,47 @@ export default function CreateShipmentModal({ isOpen, onClose, onSuccess, initia
                                         step="0.01"
                                         value={formData.weight}
                                         onChange={handleChange}
-                                        className="w-full px-6 py-4 bg-gray-50 border-4 border-black rounded-[24px] font-black focus:outline-none focus:bg-white focus:ring-4 focus:ring-[#6C5CE7]/10 transition-all"
+                                        className="w-full px-4 py-3 bg-gray-50 border-2 border-black rounded-xl font-bold focus:outline-none focus:bg-white focus:ring-4 focus:ring-[#6C5CE7]/10 transition-all text-sm"
                                         placeholder="1.0"
                                     />
                                 </div>
                                 <div className="md:col-span-3 space-y-3">
-                                    <label className="flex items-center gap-2 font-black text-xs uppercase tracking-widest text-black/60 ml-4">
-                                        <MapPin size={14} /> Delivery Destination
+                                    <label className="flex items-center gap-2 font-bold text-xs uppercase tracking-widest text-black/60 ml-2">
+                                        <MapPin size={12} /> Delivery Destination
                                     </label>
                                     <textarea
                                         name="address"
                                         rows={2}
                                         value={formData.address}
                                         onChange={handleChange}
-                                        className="w-full px-6 py-4 bg-gray-50 border-4 border-black rounded-[24px] font-bold focus:outline-none focus:bg-white focus:ring-4 focus:ring-[#6C5CE7]/10 transition-all resize-none"
+                                        className="w-full px-4 py-3 bg-gray-50 border-2 border-black rounded-xl font-bold focus:outline-none focus:bg-white focus:ring-4 focus:ring-[#6C5CE7]/10 transition-all resize-none text-sm"
                                         placeholder="Full address details..."
                                     />
                                 </div>
                             </div>
 
                             {/* Sticky Footer Actions */}
-                            <div className="pt-10 flex flex-col sm:flex-row gap-6 pt-10 border-t-8 border-black">
+                            <div className="pt-6 flex flex-col sm:flex-row gap-4 pt-6 border-t-2 border-black">
                                 <button
                                     type="button"
                                     onClick={onClose}
-                                    className="flex-1 py-5 bg-white border-4 border-black rounded-[24px] font-black uppercase tracking-widest hover:bg-black hover:text-white transition-all neo-shadow-sm active:translate-y-1 active:shadow-none"
+                                    className="flex-1 py-3 bg-white border-2 border-black rounded-xl font-bold uppercase tracking-widest hover:bg-black hover:text-white transition-all neo-shadow-sm active:translate-y-1 active:shadow-none text-xs"
                                 >
                                     Abort Operation
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={loading}
-                                    className="flex-1 py-5 bg-[#00B894] text-white border-4 border-black rounded-[24px] font-black uppercase tracking-widest hover:translate-y-[-2px] transition-all neo-shadow-sm active:translate-y-1 active:shadow-none disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
+                                    className="flex-1 py-3 bg-[#00B894] text-white border-2 border-black rounded-xl font-bold uppercase tracking-widest hover:translate-y-[-2px] transition-all neo-shadow-sm active:translate-y-1 active:shadow-none disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-xs"
                                 >
                                     {loading ? (
                                         <>
-                                            <div className="w-5 h-5 border-4 border-white border-t-transparent rounded-full animate-spin" />
-                                            REGISTERING...
+                                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                            REGISTERING
                                         </>
                                     ) : (
                                         <>
-                                            <Sparkles size={20} />
+                                            <Sparkles size={16} />
                                             INITIALIZE SHIPMENT
                                         </>
                                     )}
@@ -297,7 +297,8 @@ export default function CreateShipmentModal({ isOpen, onClose, onSuccess, initia
                         </form>
                     </motion.div>
                 </motion.div>
-            )}
-        </AnimatePresence>
+            )
+            }
+        </AnimatePresence >
     );
 }

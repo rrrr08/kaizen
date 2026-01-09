@@ -264,42 +264,7 @@ export default function Blog() {
                     </div>
                 </section>
 
-                {/* SECTION 7 — GAMIFICATION TEASER */}
-                <section className="mb-32 bg-white text-black rounded-[30px] p-12 text-center relative overflow-hidden border-2 border-black neo-shadow">
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#00B894]/10 blur-[150px] rounded-full pointer-events-none"></div>
-                    <div className="relative z-10 max-w-3xl mx-auto">
-                        <span className="text-[#6C5CE7] font-black text-xs tracking-[0.4em] mb-4 block animate-pulse uppercase">Earn while you learn</span>
-                        <h2 className="font-header text-3xl md:text-5xl mb-8 leading-tight">
-                            &quot;Reading, learning, and playing <br /> earns you points.&quot;
-                        </h2>
-                        <div className="flex justify-center gap-8 mb-12 flex-wrap">
-                            {[
-                                { action: 'Read a Guide', points: '+5 PTS' },
-                                { action: 'Play a Game', points: '+10 PTS' },
-                                { action: 'Attend Event', points: '+50 PTS' },
-                            ].map((item, idx) => (
-                                <div key={idx} className="bg-white px-6 py-4 rounded-xl border-2 border-black shadow-[4px_4px_0px_rgba(0,0,0,0.1)] hover:-translate-y-1 transition-all">
-                                    <p className="font-bold text-black/60 text-xs uppercase tracking-wider mb-1">{item.action}</p>
-                                    <p className="font-header text-[#00B894] text-2xl">{item.points}</p>
-                                </div>
-                            ))}
-                        </div>
-                        <div className="flex flex-col sm:flex-row gap-6 justify-center">
-                            <Link
-                                href="/auth/signup"
-                                className="px-8 py-4 bg-black text-white font-black text-xs tracking-[0.4em] hover:bg-[#6C5CE7] hover:scale-105 transition-all rounded-xl shadow-[4px_4px_0px_rgba(0,0,0,0.2)]"
-                            >
-                                CREATE FREE ACCOUNT
-                            </Link>
-                            <Link
-                                href="/play"
-                                className="px-8 py-4 bg-[#FFD93D] text-black font-black text-xs tracking-[0.4em] border-2 border-black neo-shadow hover:scale-105 transition-all rounded-xl"
-                            >
-                                PLAY & EARN
-                            </Link>
-                        </div>
-                    </div>
-                </section>
+              
 
                 {/* SECTION 8 — FINAL CTA */}
                 <div className="text-center py-16 border-t-2 border-black/10">
@@ -315,7 +280,7 @@ export default function Blog() {
                             EXPLORE GAMES
                         </Link>
                         <Link
-                            href="/community"
+                            href="/events/upcoming"
                             className="px-8 py-4 border-2 border-black text-black font-black text-xs tracking-[0.4em] hover:bg-black/5 hover:scale-105 transition-all rounded-xl"
                         >
                             JOIN AN EVENT

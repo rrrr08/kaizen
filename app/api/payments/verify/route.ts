@@ -103,6 +103,38 @@ export async function POST(request: NextRequest) {
                     });
                 });
                 console.log(`[Order] Successfully processed order ${orderDoc.id} and updated stock.`);
+
+                // Send order confirmation email with invoice
+                try {
+                    const customerEmail = orderData.shippingAddress?.email;
+                    const customerName = orderData.shippingAddress?.name;
+                    
+                    if (customerEmail) {
+                        const { getOrderInvoiceTemplate } = await import('@/lib/email-templates');
+                        const { sendEmail } = await import('@/lib/email-service');
+
+                        const invoiceHtml = getOrderInvoiceTemplate({
+                            id: orderDoc.id,
+                            createdAt: orderData.createdAt?.toDate() || new Date(),
+                            items: orderData.items || [],
+                            subtotal: orderData.subtotal || orderData.totalPrice,
+                            gst: orderData.gst || 0,
+                            gstRate: orderData.gstRate || 0,
+                            totalPrice: orderData.totalPrice,
+                            shippingAddress: orderData.shippingAddress
+                        });
+
+                        await sendEmail({
+                            to: customerEmail,
+                            subject: `Order Confirmation - ${orderDoc.id}`,
+                            html: invoiceHtml,
+                        });
+
+                        console.log(`[Order] Confirmation email sent to ${customerEmail}`);
+                    }
+                } catch (emailError) {
+                    console.error('[Order] Error sending confirmation email:', emailError);
+                }
              } catch (err) {
                  console.error('[Order] Transaction failed:', err);
              }
@@ -222,35 +254,24 @@ export async function POST(request: NextRequest) {
             const userData = userDoc.data();
 
             if (userData?.email) {
-              const emailUser = process.env.EMAIL_USER;
-              const emailPass = process.env.EMAIL_APP_PASSWORD;
 
-              if (emailUser && emailPass) {
-                const transporter = nodemailer.createTransport({
-                  host: 'smtp.gmail.com',
-                  port: 587,
-                  secure: false,
-                  auth: { user: emailUser, pass: emailPass },
-                  tls: { rejectUnauthorized: false }
-                });
+              const { getEventConfirmationTemplate } = await import('@/lib/email-templates');
+              const { sendEmail } = await import('@/lib/email-service');
 
-                const { getEventConfirmationTemplate } = await import('@/lib/email-templates');
-                const ticketHtml = getEventConfirmationTemplate(
-                  regRef.id,
-                  userData.displayName || userData.name || 'Gamer',
-                  eventData?.title || 'Event',
-                  eventData?.datetime?.toDate(),
-                  eventData?.location,
-                  amount
-                );
+              const ticketHtml = getEventConfirmationTemplate(
+                regRef.id,
+                userData.displayName || userData.name || 'Gamer',
+                eventData?.title || 'Event',
+                eventData?.datetime?.toDate(),
+                eventData?.location,
+                amount
+              );
 
-                await transporter.sendMail({
-                  from: `"Joy Juncture Events" <${emailUser}>`,
-                  to: userData.email,
-                  subject: `Ticket Confirmed: ${eventData?.title || 'Event'}`,
-                  html: ticketHtml,
-                });
-              }
+              await sendEmail({
+                to: userData.email,
+                subject: `Ticket Confirmed: ${eventData?.title || 'Event'}`,
+                html: ticketHtml,
+              });
             }
           } catch (emailError) {
             console.error('Error sending confirmation email:', emailError);
@@ -263,7 +284,7 @@ export async function POST(request: NextRequest) {
             await eventsRef.doc(eventId).update({
               registered: FieldValue.increment(1)
             });
-            
+
             // RELEASE LOCK
             // Check for any active locks for this user and event and delete them
             try {
@@ -272,7 +293,7 @@ export async function POST(request: NextRequest) {
                 .where('eventId', '==', eventId)
                 .where('userId', '==', userId)
                 .get();
-                
+
               if (!locksSnap.empty) {
                 const batch = adminDb.batch();
                 locksSnap.docs.forEach(doc => batch.delete(doc.ref));
@@ -282,7 +303,7 @@ export async function POST(request: NextRequest) {
             } catch (lockError) {
               console.error('Error releasing locks in verify:', lockError);
             }
-            
+
           } catch (error) {
             console.error('Error updating event count:', error);
           }
@@ -341,7 +362,7 @@ export async function POST(request: NextRequest) {
           }, { merge: true });
 
           console.log(`Event Registration - Awarded ${totalXP} XP and ${totalJP} JP (base + ₹${amount} value)`);
-          
+
           // Log transaction
           const { FieldValue } = await import('firebase-admin/firestore');
           await adminDb.collection('users').doc(userId).collection('transactions').add({
@@ -349,11 +370,11 @@ export async function POST(request: NextRequest) {
             amount: totalJP,
             source: 'EVENT_REGISTRATION',
             description: `Event: ${eventData?.title || 'Registration'}`,
-            metadata: { 
-              eventId, 
-              registrationId: regRef.id, 
-              amountPaid: amount, 
-              xpEarned: totalXP 
+            metadata: {
+              eventId,
+              registrationId: regRef.id,
+              amountPaid: amount,
+              xpEarned: totalXP
             },
             timestamp: FieldValue.serverTimestamp()
           });

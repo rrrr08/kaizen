@@ -21,28 +21,23 @@ function ResetPasswordPageContent() {
         setError(null);
 
         try {
-            // Lazy load Firebase
-            const { auth } = await import('@/lib/firebase');
-            const { sendPasswordResetEmail } = await import('firebase/auth');
-
-            await sendPasswordResetEmail(auth, email, {
-                url: `${window.location.origin}/auth/action`,
-                handleCodeInApp: true,
+            const response = await fetch('/api/auth/reset-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email }),
             });
 
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || "Failed to send reset transmission");
+            }
+
+            console.log("Custom reset protocol initiated successfully");
             setSuccess(true);
         } catch (error: any) {
-            const authError = error;
-
-            if (authError.code === 'auth/user-not-found') {
-                setError('No account found with this email address');
-            } else if (authError.code === 'auth/invalid-email') {
-                setError('Invalid email format');
-            } else if (authError.code === 'auth/too-many-requests') {
-                setError('Too many requests. Please try again later.');
-            } else {
-                setError(authError.message || "An error occurred while sending reset email");
-            }
+            console.error("Password reset error details:", error);
+            setError(error.message || "An error occurred while sending the reset link. Please check your connection.");
         } finally {
             setLoading(false);
         }

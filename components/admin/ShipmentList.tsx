@@ -111,22 +111,22 @@ export default function ShipmentList() {
                     placeholder="Search by Customer, Order ID, or AWB..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-16 pr-8 py-6 bg-white border-4 border-black rounded-[32px] font-black text-xl uppercase tracking-tight focus:outline-none focus:bg-[#FFFDF5] transition-all neo-shadow-sm"
+                    className="w-full pl-14 pr-6 py-4 bg-white border-2 border-black rounded-xl font-bold text-lg uppercase tracking-tight focus:outline-none focus:bg-[#FFFDF5] transition-all neo-shadow-sm"
                 />
             </div>
 
-            <div className="overflow-hidden border-4 border-black rounded-[40px] bg-white neo-shadow relative">
+            <div className="overflow-hidden border-2 border-black rounded-[20px] bg-white neo-shadow relative">
                 <table className="w-full text-left border-collapse">
                     <thead>
                         <tr className="bg-black text-white">
-                            <th className="p-6 font-black uppercase tracking-widest text-xs">Logistic ID</th>
-                            <th className="p-6 font-black uppercase tracking-widest text-xs">Recipient</th>
-                            <th className="p-6 font-black uppercase tracking-widest text-xs">Tracking</th>
-                            <th className="p-6 font-black uppercase tracking-widest text-xs text-center">Status</th>
-                            <th className="p-6 font-black uppercase tracking-widest text-xs text-right">Actions</th>
+                            <th className="p-4 font-black uppercase tracking-widest text-xs">Logistic ID</th>
+                            <th className="p-4 font-black uppercase tracking-widest text-xs">Recipient</th>
+                            <th className="p-4 font-black uppercase tracking-widest text-xs">Tracking</th>
+                            <th className="p-4 font-black uppercase tracking-widest text-xs text-center">Status</th>
+                            <th className="p-4 font-black uppercase tracking-widest text-xs text-right">Actions</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y-4 divide-black">
+                    <tbody className="divide-y-2 divide-black/10">
                         {filteredShipments.map((shipment, index) => (
                             <motion.tr
                                 key={shipment.id}
@@ -135,41 +135,41 @@ export default function ShipmentList() {
                                 transition={{ delay: index * 0.03 }}
                                 className="group hover:bg-[#FFFDF5] transition-colors"
                             >
-                                <td className="p-6">
-                                    <div className="flex flex-col gap-1">
-                                        <div className="flex items-center gap-2">
-                                            <Hash size={14} className="text-[#2D3436]/30" />
-                                            <Link href={`/admin/shipments/${shipment.id}`} className="font-mono font-black text-[#2D3436] hover:underline underline-offset-4">
+                                <td className="p-4">
+                                    <div className="flex flex-col gap-0.5">
+                                        <div className="flex items-center gap-1.5">
+                                            <Hash size={12} className="text-[#2D3436]/50" />
+                                            <Link href={`/admin/shipments/${shipment.id}`} className="font-mono font-bold text-[#2D3436] hover:underline underline-offset-4 text-sm">
                                                 {shipment.orderId.slice(0, 12)}
                                             </Link>
                                         </div>
                                         <div className="flex items-center gap-1.5 opacity-40">
-                                            <Calendar size={12} />
-                                            <span className="text-[10px] font-black uppercase tracking-widest">
+                                            <Calendar size={10} />
+                                            <span className="text-[10px] font-bold uppercase tracking-widest">
                                                 {new Date(shipment.createdAt).toLocaleDateString()}
                                             </span>
                                         </div>
                                     </div>
                                 </td>
-                                <td className="p-6">
+                                <td className="p-4">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-xl bg-gray-100 border-2 border-black flex items-center justify-center font-black text-sm group-hover:bg-[#00B894] group-hover:text-white transition-colors">
-                                            <User size={18} />
+                                        <div className="w-8 h-8 rounded-lg bg-gray-100 border border-black flex items-center justify-center font-bold text-xs group-hover:bg-[#00B894] group-hover:text-white transition-colors">
+                                            <User size={14} />
                                         </div>
-                                        <span className="font-black text-[#2D3436] text-sm uppercase tracking-tight">{shipment.customerName}</span>
+                                        <span className="font-bold text-[#2D3436] text-sm uppercase tracking-tight">{shipment.customerName}</span>
                                     </div>
                                 </td>
-                                <td className="p-6">
+                                <td className="p-4">
                                     <div className="flex flex-col gap-1">
-                                        <div className="font-mono text-xs font-black px-3 py-1.5 bg-gray-100 rounded-lg border-2 border-black/5 select-all inline-block w-fit">
+                                        <div className="font-mono text-[10px] font-bold px-2 py-1 bg-gray-100 rounded border border-black/10 select-all inline-block w-fit">
                                             {shipment.awbCode || 'PENDING_AWB'}
                                         </div>
-                                        <span className="text-[10px] font-black uppercase tracking-widest text-[#2D3436]/30 ml-1">
+                                        <span className="text-[10px] font-bold uppercase tracking-wider text-[#2D3436]/40 ml-1">
                                             {shipment.courierName || 'Unassigned Courier'}
                                         </span>
                                     </div>
                                 </td>
-                                <td className="p-6 text-center">
+                                <td className="p-4 text-center">
                                     <AnimatePresence mode="wait">
                                         {editingId === shipment.id ? (
                                             <motion.div
@@ -192,7 +192,7 @@ export default function ShipmentList() {
                                         ) : (
                                             <button
                                                 onClick={() => setEditingId(shipment.id)}
-                                                className={`px-4 py-2 border-4 border-black rounded-2xl text-[10px] font-black uppercase tracking-widest hover:translate-y-[-2px] transition-all neo-shadow-sm active:shadow-none active:translate-y-1
+                                                className={`px-3 py-1.5 border-2 border-black rounded-lg text-[10px] font-bold uppercase tracking-wider hover:translate-y-[-2px] transition-all neo-shadow-sm active:shadow-none active:translate-y-1
                                                     ${STATUS_COLORS[shipment.status] || 'bg-gray-100'}
                                                 `}
                                             >
@@ -201,29 +201,29 @@ export default function ShipmentList() {
                                         )}
                                     </AnimatePresence>
                                 </td>
-                                <td className="p-6">
-                                    <div className="flex items-center justify-end gap-3">
+                                <td className="p-4">
+                                    <div className="flex items-center justify-end gap-2">
                                         <Link
                                             href={`/admin/shipments/labels?id=${shipment.id}`}
                                             target="_blank"
-                                            className="p-3 bg-white border-4 border-black rounded-xl hover:bg-black hover:text-white transition-all neo-shadow-sm group-hover:rotate-2"
+                                            className="p-2 bg-white border-2 border-black rounded-lg hover:bg-black hover:text-white transition-all neo-shadow-sm group-hover:rotate-2"
                                             title="Print Label"
                                         >
-                                            <Printer size={18} />
+                                            <Printer size={14} />
                                         </Link>
                                         <button
                                             onClick={() => setEditingId(shipment.id)}
-                                            className="p-3 bg-white border-4 border-black rounded-xl hover:bg-[#FFD93D] transition-all neo-shadow-sm group-hover:-rotate-2"
+                                            className="p-2 bg-white border-2 border-black rounded-lg hover:bg-[#FFD93D] transition-all neo-shadow-sm group-hover:-rotate-2"
                                             title="Edit Status"
                                         >
-                                            <Pencil size={18} />
+                                            <Pencil size={14} />
                                         </button>
                                         <button
                                             onClick={() => handleDelete(shipment.id)}
-                                            className="p-3 bg-[#FF7675] text-white border-4 border-black rounded-xl hover:bg-black transition-all neo-shadow-sm"
+                                            className="p-2 bg-[#FF7675] text-white border-2 border-black rounded-lg hover:bg-black transition-all neo-shadow-sm"
                                             title="Delete"
                                         >
-                                            <Trash2 size={18} />
+                                            <Trash2 size={14} />
                                         </button>
                                     </div>
                                 </td>

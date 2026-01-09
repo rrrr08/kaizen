@@ -231,11 +231,17 @@ export default function CheckoutPage() {
           amount: finalPrice,
           currency: 'INR',
           receipt: `RCP-${Date.now()}`,
-          notes: { name: formData.name, email: formData.email }
+          notes: { name: formData.name, email: formData.email, userId: user?.uid },
+          items,
+          shippingAddress: formData,
+          userId: user?.uid
         }),
       });
 
-      if (!response.ok) throw new Error('Failed to create payment order');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || errorData.details || 'Failed to create payment order');
+      }
       const { orderId, amount, dbOrderId } = await response.json();
 
       const RazorpayOptions = {
@@ -253,6 +259,8 @@ export default function CheckoutPage() {
                 razorpay_payment_id: response.razorpay_payment_id,
                 razorpay_order_id: response.razorpay_order_id,
                 razorpay_signature: response.razorpay_signature,
+                amount: finalPrice,
+                userId: user?.uid
               }),
             });
 
@@ -280,7 +288,7 @@ export default function CheckoutPage() {
       const rzp = new (window as any).Razorpay(RazorpayOptions);
       rzp.open();
     } catch (error: any) {
-      addToast({ title: 'Payment Failed', description: error.message });
+      addToast({ title: 'Payment Failed', description: error.message, variant: 'destructive' });
     } finally {
       setIsProcessing(false);
     }
@@ -315,16 +323,7 @@ export default function CheckoutPage() {
 
               <div className="bg-white border-2 border-black p-6 rounded-[20px] neo-shadow">
                 <h3 className="font-header text-lg font-black mb-4 uppercase">Points & Vouchers</h3>
-                {walletPoints > 0 && (
-                  <div className="mb-6 p-4 bg-[#FFD93D]/10 border-2 border-[#FFD93D] rounded-xl">
-                    <div className="flex justify-between items-center mb-4">
-                      <p className="font-black text-sm">Available JP: {walletPoints}</p>
-                      <button type="button" onClick={() => setRedeemPoints(Math.min(walletPoints, Math.floor(maxRedeemable / config.redeemRate)))} className="text-[10px] font-black underline uppercase">Use Max</button>
-                    </div>
-                    <input type="range" min="0" max={Math.min(walletPoints, Math.floor(maxRedeemable / config.redeemRate))} value={redeemPoints} onChange={handleRedeemPointsChange} className="w-full accent-black" />
-                    <p className="text-xs font-bold mt-2">Redeeming {redeemPoints} JP (Saving ₹{pointsWorthRupees})</p>
-                  </div>
-                )}
+                {/* Points Redemption Slider Removed - Points only for Vouchers now */}
                 <div className="flex gap-2">
                   <input type="text" value={voucherCode} onChange={(e) => setVoucherCode(e.target.value.toUpperCase())} placeholder="Voucher Code" className="flex-1 border-2 border-black rounded-lg px-4 py-2 font-bold uppercase" />
                   <button type="button" onClick={handleApplyVoucher} disabled={checkingVoucher} className="bg-black text-white px-6 py-2 rounded-lg font-black neo-shadow uppercase text-xs">{checkingVoucher ? '...' : 'Apply'}</button>
@@ -351,7 +350,7 @@ export default function CheckoutPage() {
               </div>
               <div className="space-y-3 mb-6 pb-6 border-b-2 border-black/10 font-bold text-sm">
                 <div className="flex justify-between"><span>Subtotal</span><span>₹{totalPrice}</span></div>
-                {redeemPoints > 0 && <div className="flex justify-between text-[#00B894]"><span>JP Discount</span><span>-₹{pointsWorthRupees}</span></div>}
+                {/* JP Discount removed */}
                 {voucherDiscountAmount > 0 && <div className="flex justify-between text-[#6C5CE7]"><span>Voucher</span><span>-₹{voucherDiscountAmount}</span></div>}
                 <div className="flex justify-between"><span>GST ({gstRate}%)</span><span>₹{gstAmount}</span></div>
               </div>

@@ -9,27 +9,29 @@ interface EmailOptions {
     html?: string;
 }
 
-const emailUser = process.env.EMAIL_USER;
-const emailPass = process.env.EMAIL_APP_PASSWORD;
-
-const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 587,
-    secure: false, // true for 465, false for other ports
-    auth: {
-        user: emailUser,
-        pass: emailPass,
-    },
-    tls: {
-        rejectUnauthorized: false
-    }
-});
-
 export const sendEmail = async ({ to, subject, text, html }: EmailOptions) => {
+    const emailUser = process.env.EMAIL_USER;
+    const emailPass = process.env.EMAIL_APP_PASSWORD;
+
     if (!emailUser || !emailPass) {
-        console.warn('Email credentials not configured (EMAIL_USER/EMAIL_APP_PASSWORD). Skipping email.');
-        return false;
+        const msg = 'Email credentials not configured (EMAIL_USER/EMAIL_APP_PASSWORD).';
+        console.warn(msg);
+        return { success: false, error: msg };
     }
+
+    // Create transporter inside the function to ensure process.env is ready
+    const transporter = nodemailer.createTransport({
+        host: 'smtp.gmail.com',
+        port: 465,
+        secure: true, // true for port 465
+        auth: {
+            user: emailUser,
+            pass: emailPass,
+        },
+        tls: {
+            rejectUnauthorized: false
+        }
+    });
 
     try {
         const info = await transporter.sendMail({
@@ -40,10 +42,14 @@ export const sendEmail = async ({ to, subject, text, html }: EmailOptions) => {
             html: html || getBaseEmailTemplate(subject, text || ''),
         });
 
-        console.log(`Email sent: ${info.messageId}`);
-        return true;
-    } catch (error) {
-        console.error('Error sending email:', error);
-        return false;
+        console.log(`Email sent successfully: ${info.messageId}`);
+        return { success: true, messageId: info.messageId };
+    } catch (error: any) {
+        console.error('SMTP Transmission Error:', error);
+        return {
+            success: false,
+            error: error.message || 'Unknown SMTP error',
+            code: error.code
+        };
     }
 };
