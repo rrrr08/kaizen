@@ -21,6 +21,7 @@ export default function EventDetail() {
   const [rating, setRating] = useState<number>(0);
   const [comment, setComment] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [hasAttended, setHasAttended] = useState<boolean>(false);
 
   useEffect(() => {
     (async () => {
@@ -54,6 +55,12 @@ export default function EventDetail() {
     fetchEvent();
   }, [id]);
 
+  useEffect(() => {
+    if (user && event) {
+      checkAttendance();
+    }
+  }, [user, event]);
+
   async function fetchEvent() {
     try {
       setLoading(true);
@@ -73,6 +80,21 @@ export default function EventDetail() {
     }
   }
 
+  async function checkAttendance() {
+    if (!user || !event) return;
+
+    try {
+      // Check if user is registered for this event
+      const response = await fetch(`/api/events/${event.id}/attendance?userId=${user.uid}`);
+      if (response.ok) {
+        const data = await response.json();
+        setHasAttended(data.attended);
+      }
+    } catch (error) {
+      console.error('Error checking attendance:', error);
+    }
+  }
+
   async function submitTestimonial() {
     if (!event || !user) return;
     if (rating === 0 || comment.trim() === '') {
@@ -83,11 +105,15 @@ export default function EventDetail() {
     try {
       setSubmitting(true);
 
+      const token = await user.getIdToken();
       const method = myTestimonial?.comment ? 'PUT' : 'POST';
 
       const res = await fetch(`/api/events/${event.id}/testimonial`, {
         method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({
           rating,
           comment,
@@ -210,7 +236,7 @@ export default function EventDetail() {
             )}
 
             {/* Testimonials */}
-            {user && myTestimonial && (
+            {user && hasAttended && (
               <Section title="Your Experience">
                 <div className="space-y-4 max-w-xl bg-white border-2 border-black rounded-xl p-6 neo-shadow">
 
@@ -258,12 +284,26 @@ export default function EventDetail() {
                   {event.testimonials.map((t, i) => (
                     <blockquote key={i} className="bg-[#FFFDF5] border-2 border-black rounded-xl p-6 neo-shadow text-black/70 font-medium italic">
                       "{t.comment}"
-                      <footer className="mt-4 text-black/40 text-sm not-italic font-black uppercase tracking-widest">
-                        — {t.name}
-                        {t.edited && (
-                          <span className="ml-2 text-[10px] text-[#6C5CE7]">
-                            Edited
-                          </span>
+                      <footer className="mt-4 flex items-center justify-between">
+                        <div className="text-black/40 text-sm not-italic font-black uppercase tracking-widest">
+                          — {t.name}
+                          {t.edited && (
+                            <span className="ml-2 text-[10px] text-[#6C5CE7]">
+                              Edited
+                            </span>
+                          )}
+                        </div>
+                        {t.rating && (
+                          <div className="flex gap-1">
+                            {[1, 2, 3, 4, 5].map(n => (
+                              <span
+                                key={n}
+                                className={`text-sm ${n <= t.rating ? 'text-[#FFD93D]' : 'text-black/20'}`}
+                              >
+                                ★
+                              </span>
+                            ))}
+                          </div>
                         )}
                       </footer>
                     </blockquote>
