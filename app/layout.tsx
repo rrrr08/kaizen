@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import type { Metadata } from "next";
 import { Outfit, Fredoka, Instrument_Serif } from "next/font/google"; // Import fonts
 import "./globals.css";
@@ -7,6 +8,7 @@ import { AuthProvider } from "@/app/context/AuthContext";
 import { PopupProvider } from "@/app/context/PopupContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import ClientLayout from "@/components/ClientLayout";
+import UserActivityTracker from "@/components/analytics/UserActivityTracker";
 import { defaultMetadata } from "@/lib/metadata";
 
 // Configure fonts
@@ -103,7 +105,11 @@ export default function RootLayout({
       </head>
       <body className={`${outfit.variable} ${fredoka.variable} ${instrumentSerif.variable} antialiased bg-[#FFFDF5] text-[#2D3436] font-sans`}>
         <ErrorBoundary>
+
           <AuthProvider>
+            <Suspense fallback={null}>
+              <UserActivityTracker />
+            </Suspense>
             <GamificationProvider>
               <CartProvider>
                 <PopupProvider>

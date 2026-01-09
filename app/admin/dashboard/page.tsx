@@ -9,6 +9,10 @@ import { db } from '@/lib/firebase';
 import { USER_ROLES, ROLE_LABELS } from '@/lib/roles';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+import PredictiveInsights from '@/components/admin/PredictiveInsights';
+import LivePulse from '@/components/admin/LivePulse';
+import DeepAnalytics from '@/components/admin/DeepAnalytics';
 
 interface DashboardStats {
   totalUsers: number;
@@ -140,7 +144,8 @@ export default function AdminDashboard() {
     }
   };
 
-  const roleColors = ['#6C5CE7', '#00B894', '#FFD93D', '#FF7675', '#74B9FF', '#A29BFE'];
+  const COLORS = ['#6C5CE7', '#00B894', '#FFD93D', '#FF7675', '#74B9FF', '#A29BFE'];
+  const roleData = stats ? Object.entries(stats.usersByRole).map(([name, value]) => ({ name: ROLE_LABELS[name] || name, value })) : [];
 
   if (loading) {
     return (
@@ -169,6 +174,9 @@ export default function AdminDashboard() {
         </div>
         <p className="text-black/60 font-bold text-xl ml-12">Platform overview and real-time statistics</p>
       </motion.div>
+
+      {/* Deep Analytics Section */}
+      <DeepAnalytics />
 
       {/* Main Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
@@ -202,73 +210,52 @@ export default function AdminDashboard() {
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
-        {/* User Roles Chart */}
-        <div className="lg:col-span-2 bg-white border-2 border-black rounded-[25px] p-8 neo-shadow flex flex-col md:flex-row items-center gap-12">
-          <div className="relative">
-            <svg width="220" height="220" className="transform -rotate-90">
-              <circle cx="110" cy="110" r="95" fill="none" stroke="#f3f4f6" strokeWidth="20" />
-              {stats && Object.entries(stats.usersByRole).map(([role, count], index) => {
-                const percentage = (count / stats.totalUsers) * 100;
-                const circumference = 2 * Math.PI * 95;
-                const strokeDasharray = `${(percentage / 100) * circumference} ${circumference}`;
-                const prevPercentages = Object.entries(stats.usersByRole).slice(0, index).reduce((sum, [_, c]) => sum + (c / stats.totalUsers) * 100, 0);
-                const strokeDashoffset = -((prevPercentages / 100) * circumference);
-                return (
-                  <circle
-                    key={role}
-                    cx="110"
-                    cy="110"
-                    r="95"
-                    fill="none"
-                    stroke={roleColors[index % roleColors.length]}
-                    strokeWidth="20"
-                    strokeDasharray={strokeDasharray}
-                    strokeDashoffset={strokeDashoffset}
-                    className="transition-all duration-1000"
-                  />
-                );
-              })}
-              <circle cx="110" cy="110" r="85" fill="none" stroke="black" strokeWidth="1" />
-              <circle cx="110" cy="110" r="105" fill="none" stroke="black" strokeWidth="1" />
-            </svg>
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <p className="text-3xl font-black text-black">{stats?.totalUsers}</p>
-              <p className="text-[10px] font-black uppercase tracking-widest text-black/40">Users</p>
+      {/* Predictive Analytics Section */}
+      <PredictiveInsights />
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 h-[400px]">
+        {/* User Distribution Chart */}
+        <div className="lg:col-span-2 bg-white p-6 rounded-2xl neo-border shadow-sm flex flex-col">
+          <h3 className="text-xl font-black mb-6 uppercase italic">User Distribution</h3>
+          <div className="flex-1 w-full relative">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={roleData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={100}
+                  fill="#8884d8"
+                  paddingAngle={5}
+                  dataKey="value"
+                >
+                  {roleData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip cursor={{ fill: 'transparent' }} />
+              </PieChart>
+            </ResponsiveContainer>
+            {/* Legend Overlay */}
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none">
+              <span className="text-3xl font-black">{stats?.totalUsers || 0}</span>
+              <p className="text-xs font-bold text-gray-400 uppercase">Users</p>
             </div>
           </div>
-
-          <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
-            <h3 className="col-span-full font-black text-black uppercase tracking-widest text-sm mb-2">User Distribution</h3>
-            {stats && Object.entries(stats.usersByRole).map(([role, count], index) => (
-              <div key={role} className="flex items-center gap-3 p-3 bg-[#FFFDF5] border-2 border-black rounded-xl">
-                <div className="w-3 h-3 rounded-full border border-black" style={{ backgroundColor: roleColors[index % roleColors.length] }} />
-                <div>
-                  <p className="text-[10px] font-black uppercase text-black/40">{ROLE_LABELS[role] || role}</p>
-                  <p className="text-sm font-black text-black">{count} ({Math.round((count / stats.totalUsers) * 100)}%)</p>
-                </div>
+          <div className="mt-4 flex justify-center gap-4 flex-wrap">
+            {roleData.map((entry, index) => (
+              <div key={index} className="flex items-center gap-2 text-xs font-bold uppercase">
+                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }} />
+                {entry.name} ({entry.value})
               </div>
             ))}
           </div>
         </div>
 
-        {/* Growth Card */}
-        <div className="bg-[#6C5CE7] border-2 border-black rounded-[25px] p-8 neo-shadow relative overflow-hidden group">
-          <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform duration-500">
-            <TrendingUp size={120} />
-          </div>
-          <div className="relative z-10">
-            <h3 className="font-header text-3xl font-black text-white uppercase tracking-tighter mb-8">Growth Rate</h3>
-            <div className="flex items-end gap-3 mb-6">
-              <p className="font-header text-7xl font-black text-white">{stats?.monthlyGrowth}%</p>
-              <div className="bg-white p-1 rounded-lg border-2 border-black mb-2 animate-bounce">
-                <ArrowUpRight className="w-6 h-6 text-black" />
-              </div>
-            </div>
-            <p className="text-white/80 font-bold text-sm bg-black/20 p-4 rounded-xl border border-white/10 italic">
-              "Your user base is growing steadily. Keep up the good work!"
-            </p>
-          </div>
+        {/* Live Pulse Feed */}
+        <div className="lg:col-span-1 h-full">
+          <LivePulse />
         </div>
       </div>
 

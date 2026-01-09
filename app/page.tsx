@@ -5,8 +5,13 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Sparkles, Plus, Flame, ChevronRight } from 'lucide-react';
-import Hero from '@/components/ui/Hero';
+// Hero is replaced by ContextAwareLayout
+// import Hero from '@/components/ui/Hero';
 import GameDiscoveryCarousel from '@/components/ui/GameDiscoveryCarousel';
+import SocialPulseTicker from '@/components/home/SocialPulseTicker';
+import ContextAwareLayout from '@/components/home/ContextAwareLayout';
+import DailyDropCard from '@/components/home/DailyDropCard';
+import GameRow from '@/components/home/GameRow';
 import ProductCard from '@/components/ui/ProductCard';
 import { Product } from '@/lib/types';
 import { GameEvent } from '@/lib/types';
@@ -149,16 +154,38 @@ export default function Home() {
   }, [user]);
 
   return (
+
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="pb-20 pt-24"
+      className="pb-20 pt-20"
     >
-      {/* Section 1: Hero Section - Kept Unchanged */}
-      <Hero
-        backgroundImage={content?.hero.backgroundImage}
-      />
+      <SocialPulseTicker />
+
+      <div className="container mx-auto px-6 mt-8">
+        <ContextAwareLayout />
+
+        {/* Daily Drop & Active Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-20">
+          <div className="lg:col-span-1">
+            <DailyDropCard />
+          </div>
+          <div className="lg:col-span-2">
+            <GameRow
+              title="Jump Back In"
+              items={[
+                { title: "Chess", category: "Strategy", color: "bg-[#0984e3]" },
+                { title: "2048", category: "Puzzle", color: "bg-[#00b894]" },
+                { title: "Sudoku", category: "Brain", color: "bg-[#e17055]" }
+              ]}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Section 2: Choose Your Play Style */}
+
 
       {/* Section 2: Choose Your Play Style */}
       <section className="px-6 py-20 bg-white">
