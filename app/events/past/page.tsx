@@ -95,7 +95,7 @@ export default function PastEvents() {
         <div className="space-y-6">
           {events.map(event => (
             <Link key={event.id} href={`/events/past/${event.id}`}>
-              <div className="bg-white border-2 border-black rounded-[25px] overflow-hidden hover:translate-x-1 hover:-translate-y-1 transition-transform duration-300 neo-shadow group flex flex-col md:flex-row cursor-pointer">
+              <div className="bg-white border-2 border-black rounded-[25px] overflow-hidden hover:translate-x-1 hover:-translate-y-1 transition-transform duration-300 neo-shadow group flex flex-col md:flex-row cursor-pointer mb-3">
               {/* Image */}
               <div className="w-full md:w-80 h-64 md:h-auto bg-gray-100 flex-shrink-0 overflow-hidden border-b-2 md:border-b-0 md:border-r-2 border-black relative">
                 {event.image !== "" ? (

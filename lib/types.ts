@@ -126,6 +126,7 @@ export interface ExperienceEnquiry {
   internalNotes?: string;
   adminReply?: string;
   repliedAt?: Date;
+  finalPrice?: number; // Price set by admin for confirmation
   createdAt: Date;
   updatedAt: Date;
 }

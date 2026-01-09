@@ -8,6 +8,7 @@ import { Calendar, Eye, CheckCircle, Clock, AlertCircle, XCircle, ArrowLeft, Zap
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import ExperiencePaymentForm from '@/components/ExperiencePaymentForm';
 
 const STATUS_CONFIG = {
   new: {
@@ -54,6 +55,8 @@ export default function ProfileEnquiriesPage() {
   const router = useRouter();
   const [enquiries, setEnquiries] = useState<ExperienceEnquiry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showPaymentForm, setShowPaymentForm] = useState(false);
+  const [selectedEnquiry, setSelectedEnquiry] = useState<ExperienceEnquiry | null>(null);
 
   useEffect(() => {
     if (authLoading) return;
@@ -153,9 +156,15 @@ export default function ProfileEnquiriesPage() {
                         <StatusIcon size={14} /> {status.label}
                       </div>
                       {enquiry.adminReply ? (
-                        <div className="bg-[#FFD93D] text-black px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest border-2 border-black">
-                          Admin Replied
-                        </div>
+                        <button
+                          onClick={() => {
+                            setSelectedEnquiry(enquiry);
+                            setShowPaymentForm(true);
+                          }}
+                          className="px-10 py-4 bg-[#00B894] text-white border-2 border-black rounded-xl font-black text-xs uppercase tracking-widest neo-shadow hover:scale-105 transition-all"
+                        >
+                          Complete Registration
+                        </button>
                       ) : (
                         <div className="bg-black/5 text-black/40 px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest border-2 border-black/10">
                           Waiting for HQ
@@ -216,7 +225,13 @@ export default function ProfileEnquiriesPage() {
                         <h4 className="font-black text-xl uppercase tracking-tight">Mission Confirmed</h4>
                         <p className="text-xs font-bold text-black/40">Proceed to final registration to lock in your slot.</p>
                       </div>
-                      <button className="px-10 py-4 bg-[#00B894] text-white border-2 border-black rounded-xl font-black text-xs uppercase tracking-widest neo-shadow hover:scale-105 transition-all">
+                      <button
+                        onClick={() => {
+                          setSelectedEnquiry(enquiry);
+                          setShowPaymentForm(true);
+                        }}
+                        className="px-10 py-4 bg-[#00B894] text-white border-2 border-black rounded-xl font-black text-xs uppercase tracking-widest neo-shadow hover:scale-105 transition-all"
+                      >
                         Complete Registration
                       </button>
                     </div>
@@ -226,6 +241,19 @@ export default function ProfileEnquiriesPage() {
             })
           )}
         </div>
+
+        {/* Payment Form Modal */}
+        {showPaymentForm && selectedEnquiry && (
+          <ExperiencePaymentForm
+            enquiry={selectedEnquiry}
+            user={user}
+            onSuccess={() => {
+              setShowPaymentForm(false);
+              fetchUserEnquiries(); // Refresh list to show updated status
+            }}
+            onClose={() => setShowPaymentForm(false)}
+          />
+        )}
 
         <div className="mt-20 text-center opacity-20">
           <p className="text-[8px] font-black tracking-[0.8em] uppercase">ENQUIRY_STREAM_LOGS_v2.1</p>

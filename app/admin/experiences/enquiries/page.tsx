@@ -306,6 +306,40 @@ export default function AdminEnquiriesPage() {
                           </option>
                         ))}
                       </select>
+
+                      {enquiry.status === 'confirmed' && (
+                        <div className="mt-2 flex items-center gap-2" onClick={e => e.stopPropagation()}>
+                          <span className="text-[10px] font-bold uppercase">Price: ₹</span>
+                          <input
+                            type="number"
+                            defaultValue={enquiry.finalPrice || ''}
+                            onBlur={(e) => {
+                              const price = parseFloat(e.target.value);
+                              if (!isNaN(price)) {
+                                // Update price via API - reusing updateInternalNotes logic kind of, 
+                                // creating a dedicated update function would be better but for speed:
+                                // We need to implement price updating in the API route too.
+                                // For now let's just use the same patch endpoint if it supports arbitrary fields or add support.
+                                // Let's assume we will update the API to handle it.
+                                const auth = getAuth();
+                                const currentUser = auth.currentUser;
+                                if (currentUser) {
+                                  currentUser.getIdToken().then(token => {
+                                    fetch(`/api/experiences/enquiries/${enquiry.id}`, {
+                                      method: 'PATCH',
+                                      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                                      body: JSON.stringify({ finalPrice: price })
+                                    });
+                                  });
+                                }
+                              }
+                            }}
+                            className="w-20 px-2 py-1 text-xs border border-black rounded"
+                            placeholder="Set Price"
+                          />
+                        </div>
+                      )}
+
                       <button
                         onClick={(e) => { e.stopPropagation(); setSelectedEnquiry(enquiry); }}
                         className="flex items-center gap-2 text-blue-600 font-black text-[10px] uppercase tracking-widest hover:underline"

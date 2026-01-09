@@ -115,7 +115,7 @@ export default function ExperienceEnquiryPage() {
     }
 
     // Phone validation
-    const phoneRegex = /^[6-9]\d{9}$/;
+    const phoneRegex = /^\d{10}$/;
     const cleanPhone = formData.phone.replace(/\D/g, '');
     if (!formData.phone.trim()) {
       errors.phone = 'Phone number is required';

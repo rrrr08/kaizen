@@ -132,6 +132,36 @@ export async function PATCH(
       }
     }
 
+    // If status is changed to confirmed or price is updated, send notification
+    if ((updates.status === 'confirmed' || updates.finalPrice) && updates.status !== 'archived') {
+      const enquiryDoc = await db.collection('experience_enquiries').doc(id).get();
+      const enquiryData = enquiryDoc.data();
+
+      if (enquiryData?.email) {
+        const { sendEmail } = await import('@/lib/email-service');
+        const finalPrice = updates.finalPrice || enquiryData.finalPrice;
+
+        if (finalPrice) {
+          await sendEmail({
+            to: enquiryData.email,
+            subject: `Great News! Your Experience is Confirmed`,
+            text: `Your experience enquiry for ${enquiryData.categoryName} has been confirmed. The total cost is ₹${finalPrice}. Please log in to your profile to complete the payment and secure your booking.`,
+            html: `
+                 <div style="font-family: sans-serif; color: #2D3436;">
+                     <h1 style="color: #00B894;">Experience Confirmed! 🚀</h1>
+                     <p>Hi ${enquiryData.name || 'Explorer'},</p>
+                     <p>We are excited to confirm your custom experience <strong>${enquiryData.categoryName}</strong>!</p>
+                     <p style="font-size: 1.2em;"><strong>Total Price: ₹${finalPrice}</strong></p>
+                     <p>Please log in to your dashboard to complete the payment and finalize the arrangements.</p>
+                     <p><a href="${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/profile/enquiries" style="background-color: #6C5CE7; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold;">Go to Dashboard</a></p>
+                     <p>See you soon,<br>The Joy Juncture Team</p>
+                 </div>
+               `
+          });
+        }
+      }
+    }
+
     await db.collection('experience_enquiries').doc(id).update(cleanedUpdates);
 
     // Get updated enquiry
