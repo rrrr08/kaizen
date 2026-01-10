@@ -4,57 +4,84 @@ import { useAuth } from '@/app/context/AuthContext';
 import { Calendar, Users, MapPin } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
-export default function EventHero() {
+interface EventHeroProps {
+    title: string;
+    subtitle: string;
+    ctaText: string;
+    ctaTextJoin: string;
+}
+
+export default function EventHero({ title, subtitle, ctaText, ctaTextJoin }: EventHeroProps) {
     const { user } = useAuth();
     const router = useRouter();
 
     return (
-        <div className="relative overflow-hidden bg-[#6C5CE7] rounded-[32px] p-8 md:p-12 mb-12 shadow-[8px_8px_0px_#000] border-4 border-black text-white">
-            {/* Pattern Overlay */}
-            <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(#fff 2px, transparent 2px)', backgroundSize: '30px 30px' }} />
+        <div className="relative overflow-hidden bg-[#FFFDF5] rounded-[32px] p-8 md:p-12 mb-12 border-4 border-black text-black">
+            {/* Background Decorations */}
+            <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[#6C5CE7]/5 rounded-full blur-[100px] translate-x-1/2 -translate-y-1/2 pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#FFD93D]/10 rounded-full blur-[80px] -translate-x-1/2 translate-y-1/2 pointer-events-none" />
 
-            <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-8">
-                <div className="text-left space-y-6 max-w-xl">
-                    <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-white text-black rounded-lg border-2 border-black shadow-[4px_4px_0px_#000]">
-                        <Users size={14} />
-                        <span className="text-xs font-black tracking-[0.2em] uppercase">Community Pulse</span>
+            {/* Pattern Overlay */}
+            <div className="absolute inset-0 opacity-5 pointer-events-none" style={{ backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
+
+            <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-12">
+                {/* Left Content */}
+                <div className="text-left space-y-8 max-w-xl flex-1">
+                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#6C5CE7] text-white rounded-full border-2 border-black shadow-[4px_4px_0px_#000] rotate-[-2deg]">
+                        <Users size={16} />
+                        <span className="text-xs font-black tracking-[0.2em] uppercase">Level Up Your Social Life</span>
                     </div>
 
-                    <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tighter leading-none transform -rotate-1">
-                        WHAT'S <br />
-                        <span className="text-[#FFD93D] text-stroke-black">HAPPENING</span>
+                    <h1 className="text-5xl md:text-7xl font-header font-black tracking-tighter leading-[0.9]">
+                        Games are <br />
+                        Moments, <br />
+                        Memories, <br />
+                        and Shared Joy.
                     </h1>
 
-                    <p className="text-white/80 font-bold text-lg max-w-md">
-                        Yo {user?.displayName}! There are 3 meetups happening near you this week.
+                    <p className="text-black/70 font-medium text-lg max-w-md leading-relaxed">
+                        {subtitle}
                     </p>
 
-                    <button
-                        onClick={() => router.push('/events')}
-                        className="px-8 py-4 bg-[#FFD93D] text-black font-black uppercase tracking-wider rounded-xl border-2 border-black shadow-[4px_4px_0px_#000] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_#000] transition-all flex items-center gap-2"
-                    >
-                        Find Events <Calendar size={20} />
-                    </button>
+                    <div className="flex gap-4 pt-2">
+                        <button
+                            onClick={() => router.push('/shop')}
+                            className="px-10 py-4 bg-[#FFD93D] text-black font-black uppercase tracking-wider rounded-2xl border-2 border-black shadow-[4px_4px_0px_#000] hover:bg-[#FFEAA7] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_#000] transition-all"
+                        >
+                            {ctaTextJoin}
+                        </button>
+                        <button
+                            onClick={() => router.push('/events')}
+                            className="px-10 py-4 bg-white text-black font-black uppercase tracking-wider rounded-2xl border-2 border-black shadow-[4px_4px_0px_#000] hover:bg-gray-50 hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_#000] transition-all"
+                        >
+                            {ctaText}
+                        </button>
+                    </div>
                 </div>
 
-                {/* Ticket Stub Visual */}
-                <div className="w-80 bg-[#FFFDF5] text-black p-6 rounded-xl border-4 border-black shadow-[8px_8px_0px_rgba(0,0,0,0.5)] rotate-3 group-hover:rotate-6 transition-transform">
-                    <div className="border-b-2 border-dashed border-black pb-4 mb-4 flex justify-between items-end">
-                        <div>
-                            <span className="block text-xs font-black text-gray-400 uppercase">Next Up</span>
-                            <span className="text-2xl font-black uppercase">Gaming Night</span>
-                        </div>
-                        <div className="text-right">
-                            <span className="block text-3xl font-black text-[#6C5CE7]">12</span>
-                            <span className="text-xs font-bold uppercase">Jan</span>
-                        </div>
+                {/* Right Visuals */}
+                <div className="relative w-full md:w-[500px] h-[400px] md:h-[500px] flex-shrink-0">
+                    {/* Blob Image Mask */}
+                    <div className="absolute inset-0 rounded-[40%_60%_70%_30%/40%_50%_60%_50%] overflow-hidden border-4 border-black bg-gray-200 shadow-[8px_8px_0px_rgba(0,0,0,0.1)]">
+                        <img
+                            src="https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&q=80&w=1000"
+                            alt="Friends playing games"
+                            className="w-full h-full object-cover"
+                        />
                     </div>
-                    <div className="space-y-2">
-                        <div className="flex items-center gap-2 font-bold text-sm">
-                            <MapPin size={16} className="text-[#FF7675]" /> Central Hub
-                        </div>
-                        <div className="flex items-center gap-2 font-bold text-sm">
-                            <Users size={16} className="text-[#00B894]" /> 24 Going
+
+                    {/* Floating Elements */}
+                    <div className="absolute top-10 right-0 translate-x-1/2 bg-[#00B894] text-white p-4 rounded-full border-4 border-black shadow-[4px_4px_0px_#000] w-24 h-24 flex flex-col items-center justify-center text-center rotate-12 z-20">
+                        <span className="font-black text-xl leading-none">10K+</span>
+                        <span className="text-[8px] font-bold uppercase leading-tight">Happy Gamers</span>
+                    </div>
+
+                    <div className="absolute bottom-0 left-10 -translate-x-1/2 bg-[#FFD93D] p-6 rounded-[2rem] border-4 border-black shadow-[8px_8px_0px_#000] rotate-[-12deg] z-20">
+                        <div className="grid grid-cols-2 gap-2">
+                            <div className="w-3 h-3 bg-black rounded-full" />
+                            <div className="w-3 h-3 bg-transparent rounded-full" />
+                            <div className="w-3 h-3 bg-transparent rounded-full" />
+                            <div className="w-3 h-3 bg-black rounded-full" />
                         </div>
                     </div>
                 </div>

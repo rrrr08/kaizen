@@ -158,3 +158,10 @@ h6,
   overflow: hidden !important;
   border-radius: 30px;
 }
+
+/* Background Patterns */
+.bg-dot-pattern {
+  background-image: radial-gradient(#000000 1px, transparent 1px);
+  background-size: 20px 20px;
+  opacity: 0.1;
+}

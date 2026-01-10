@@ -152,7 +152,8 @@ const SiteContentManager = () => {
 
     // State for home page section
     const [homeContent, setHomeContent] = useState<any>({
-        hero: { backgroundImage: '' }
+        hero: { backgroundImage: '' },
+        heroSocial: { backgroundImage: '' }
     });
 
     const [aboutContent, setAboutContent] = useState<any>({
@@ -215,14 +216,28 @@ const SiteContentManager = () => {
                 <AccordionContent className="space-y-8 pt-4 pb-8">
                     {/* HOME: HERO */}
                     <div className="space-y-4">
-                        <h3 className="font-black text-sm uppercase tracking-widest bg-[#FFD93D] inline-block px-2 py-1 border border-black rounded">Hero Section</h3>
+                        <h3 className="font-black text-sm uppercase tracking-widest bg-[#FFD93D] inline-block px-2 py-1 border border-black rounded">Hero Section (Default)</h3>
                         <div>
                             <label className="text-xs font-black uppercase block mb-1">Hero Background Image</label>
                             <ImageUpload
                                 uploadId="home-hero-bg"
-                                value={homeContent.hero.backgroundImage ? [homeContent.hero.backgroundImage] : []}
+                                value={homeContent.hero?.backgroundImage ? [homeContent.hero.backgroundImage] : []}
                                 onChange={(url) => setHomeContent({ ...homeContent, hero: { ...homeContent.hero, backgroundImage: url } })}
                                 onRemove={() => setHomeContent({ ...homeContent, hero: { ...homeContent.hero, backgroundImage: '' } })}
+                            />
+                        </div>
+                    </div>
+
+                    {/* HERO SOCIAL */}
+                    <div className="space-y-4 pt-4 border-t-2 border-dashed border-black/10">
+                        <h3 className="font-black text-sm uppercase tracking-widest bg-[#6C5CE7] text-white inline-block px-2 py-1 border border-black rounded">Hero Section (Social / Current)</h3>
+                        <div>
+                            <label className="text-xs font-black uppercase block mb-1">Social Hero Background Image</label>
+                            <ImageUpload
+                                uploadId="home-hero-social-bg"
+                                value={homeContent.heroSocial?.backgroundImage ? [homeContent.heroSocial.backgroundImage] : []}
+                                onChange={(url) => setHomeContent({ ...homeContent, heroSocial: { ...homeContent.heroSocial, backgroundImage: url } })}
+                                onRemove={() => setHomeContent({ ...homeContent, heroSocial: { ...homeContent.heroSocial, backgroundImage: '' } })}
                             />
                         </div>
                     </div>

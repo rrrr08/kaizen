@@ -4,55 +4,27 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import { ChevronLeft, ChevronRight, Users, Clock, Sparkles, Flame, Crown } from 'lucide-react';
+import { FeaturedGame } from '@/lib/types';
 
-const featuredGames = [
-    {
-        id: 1,
-        title: 'Catan',
-        tagline: 'Build. Trade. Settle.',
-        image: 'https://images.unsplash.com/photo-1610890716171-6b1bb98ffd09?auto=format&fit=crop&q=80&w=1200',
-        players: '3-4',
-        time: '60-90 min',
-        mood: 'Strategic',
-        badge: 'BESTSELLER',
-        color: 'bg-[#FFD93D]'
-    },
-    {
-        id: 2,
-        title: 'Codenames',
-        tagline: 'Think. Connect. Win.',
-        image: 'https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?auto=format&fit=crop&q=80&w=1200',
-        players: '4-8',
-        time: '15-30 min',
-        mood: 'Party',
-        badge: 'HOT',
-        color: 'bg-[#6C5CE7]'
-    },
-    {
-        id: 3,
-        title: 'Azul',
-        tagline: 'Pattern. Beauty. Victory.',
-        image: 'https://images.unsplash.com/photo-1606167668584-78701c57f13d?auto=format&fit=crop&q=80&w=1200',
-        players: '2-4',
-        time: '30-45 min',
-        mood: 'Elegant',
-        badge: 'AWARD WINNER',
-        color: 'bg-[#00B894]'
-    }
-];
+interface GameDiscoveryCarouselProps {
+    games?: FeaturedGame[];
+}
 
-const GameDiscoveryCarousel: React.FC = () => {
+const GameDiscoveryCarousel: React.FC<GameDiscoveryCarouselProps> = ({ games = [] }) => {
     const [currentIndex, setCurrentIndex] = useState(0);
 
+    // If no games, don't render or render a fallback
+    if (!games || games.length === 0) return null;
+
     const nextSlide = () => {
-        setCurrentIndex((prev) => (prev + 1) % featuredGames.length);
+        setCurrentIndex((prev) => (prev + 1) % games.length);
     };
 
     const prevSlide = () => {
-        setCurrentIndex((prev) => (prev - 1 + featuredGames.length) % featuredGames.length);
+        setCurrentIndex((prev) => (prev - 1 + games.length) % games.length);
     };
 
-    const currentGame = featuredGames[currentIndex];
+    const currentGame = games[currentIndex];
 
     return (
         <section className="px-6 py-32 bg-[#FFFDF5] relative overflow-hidden">
@@ -173,13 +145,13 @@ const GameDiscoveryCarousel: React.FC = () => {
 
                     {/* Dots Indicator */}
                     <div className="flex gap-4">
-                        {featuredGames.map((_, index) => (
+                        {games.map((_, index) => (
                             <button
                                 key={index}
                                 onClick={() => setCurrentIndex(index)}
                                 className={`transition-all duration-300 rounded-full neo-border ${index === currentIndex
-                                        ? 'w-16 h-6 bg-black'
-                                        : 'w-6 h-6 bg-white hover:bg-gray-200'
+                                    ? 'w-16 h-6 bg-black'
+                                    : 'w-6 h-6 bg-white hover:bg-gray-200'
                                     }`}
                             />
                         ))}
@@ -200,3 +172,4 @@ const GameDiscoveryCarousel: React.FC = () => {
 };
 
 export default GameDiscoveryCarousel;
+

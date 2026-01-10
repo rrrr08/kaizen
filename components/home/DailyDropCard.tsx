@@ -3,10 +3,37 @@
 import React, { useState, useEffect } from 'react';
 import { Timer, Gift, Crosshair, ShoppingBag } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { DailyQuest } from '@/lib/types';
 
-export default function DailyDropCard() {
+interface DailyDropCardProps {
+    quests?: DailyQuest[];
+}
+
+export default function DailyDropCard({ quests }: DailyDropCardProps) {
     const router = useRouter();
     const [timeLeft, setTimeLeft] = useState('');
+
+    // Default quests if none provided
+    const items = quests || [
+        {
+            id: 'default-1',
+            type: 'game',
+            title: 'Win 1 Chess Game',
+            subtitle: 'Daily Challenge',
+            xp: 500,
+            actionUrl: '/play/chess',
+            highlightColor: 'bg-[#FF7675]'
+        },
+        {
+            id: 'default-2',
+            type: 'product',
+            title: '20% Off Hoodies',
+            subtitle: 'Flash Deal',
+            ctaText: 'CLAIM',
+            actionUrl: '/shop',
+            highlightColor: 'bg-[#00B894]'
+        }
+    ];
 
     // Countdown Logic (Expires at Midnight)
     useEffect(() => {
@@ -42,30 +69,30 @@ export default function DailyDropCard() {
                 <Gift size={32} className="text-[#6C5CE7]" />
             </div>
 
-            {/* Quest 1: Game */}
+            {/* Quests List */}
             <div className="space-y-4 mb-6">
-                <div className="p-4 bg-[#F0F2F5] rounded-xl border border-black/10 flex items-center gap-4 cursor-pointer hover:bg-[#E2E8F0] transition-colors" onClick={() => router.push('/play/chess')}>
-                    <div className="bg-[#FF7675] p-2 rounded-lg border border-black">
-                        <Crosshair size={20} className="text-white" />
+                {items.map((quest) => (
+                    <div
+                        key={quest.id}
+                        className="p-4 bg-[#F0F2F5] rounded-xl border border-black/10 flex items-center gap-4 cursor-pointer hover:bg-[#E2E8F0] transition-colors"
+                        onClick={() => router.push(quest.actionUrl)}
+                    >
+                        <div className={`${quest.highlightColor} p-2 rounded-lg border border-black`}>
+                            {quest.type === 'game' ? (
+                                <Crosshair size={20} className="text-white" />
+                            ) : (
+                                <ShoppingBag size={20} className="text-white" />
+                            )}
+                        </div>
+                        <div>
+                            <p className="text-xs font-black text-gray-500 uppercase">{quest.subtitle}</p>
+                            <p className="font-bold text-[#2D3436]">{quest.title}</p>
+                        </div>
+                        <div className="ml-auto text-xs font-black text-[#00B894]">
+                            {quest.xp ? `+${quest.xp} XP` : quest.ctaText}
+                        </div>
                     </div>
-                    <div>
-                        <p className="text-xs font-black text-gray-500 uppercase">Daily Challenge</p>
-                        <p className="font-bold text-[#2D3436]">Win 1 Chess Game</p>
-                    </div>
-                    <div className="ml-auto text-xs font-black text-[#00B894]">+500 XP</div>
-                </div>
-
-                {/* Quest 2: Product */}
-                <div className="p-4 bg-[#F0F2F5] rounded-xl border border-black/10 flex items-center gap-4 cursor-pointer hover:bg-[#E2E8F0] transition-colors" onClick={() => router.push('/shop')}>
-                    <div className="bg-[#00B894] p-2 rounded-lg border border-black">
-                        <ShoppingBag size={20} className="text-white" />
-                    </div>
-                    <div>
-                        <p className="text-xs font-black text-gray-500 uppercase">Flash Deal</p>
-                        <p className="font-bold text-[#2D3436]">20% Off Hoodies</p>
-                    </div>
-                    <div className="ml-auto text-xs font-black text-[#00B894]">CLAIM</div>
-                </div>
+                ))}
             </div>
 
             {/* Footer */}

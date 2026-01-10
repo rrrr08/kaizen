@@ -1,0 +1,133 @@
+
+import { HomepageContent } from '@/lib/types';
+
+export const DEFAULT_HOMEPAGE_CONTENT: HomepageContent = {
+  hero: {
+    title: "LEVEL UP",
+    subtitle: "YOUR GAME",
+    ctaTextShops: "My Stats",
+    ctaTextJoin: "Play Now",
+    backgroundImage: "/default-hero.jpg"
+  },
+  heroShopper: {
+    title: "CURATED",
+    subtitle: "FOR YOU",
+    ctaTextShops: "Start Shopping",
+    ctaTextJoin: "View Drops"
+  },
+  heroSocial: {
+    title: "Games are Moments, Memories, and Shared Joy.",
+    subtitle: "Analog connection for a digital world. Join the movement of people playing, belonging, and earning joy.",
+    ctaTextShops: "Join Game Night",
+    ctaTextJoin: "Shop Games",
+    backgroundImage: "/hero-image.png"
+  },
+  playStyle: {
+    playAtHome: {
+      title: "Play at Home",
+      description: "Shop premium board games and puzzles for your home collection",
+      emoji: "🏠"
+    },
+    playTogether: {
+      title: "Play Together",
+      description: "Join live game nights and community events in your city",
+      emoji: "👥"
+    },
+    playOccasions: {
+      title: "Play for Occasions",
+      description: "Book custom game experiences for weddings, parties & corporate events",
+      emoji: "🎉"
+    },
+    playEarn: {
+      title: "Play & Earn Points",
+      description: "Play free puzzles daily and earn rewards you can redeem",
+      emoji: "🎮"
+    }
+  },
+  featuredGames: [
+    {
+      id: "1",
+      title: 'Catan',
+      tagline: 'Build. Trade. Settle.',
+      image: 'https://images.unsplash.com/photo-1610890716171-6b1bb98ffd09?auto=format&fit=crop&q=80&w=1200',
+      players: '3-4',
+      time: '60-90 min',
+      mood: 'Strategic',
+      badge: 'BESTSELLER',
+      color: 'bg-[#FFD93D]'
+    },
+    {
+      id: "2",
+      title: 'Codenames',
+      tagline: 'Think. Connect. Win.',
+      image: 'https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?auto=format&fit=crop&q=80&w=1200',
+      players: '4-8',
+      time: '15-30 min',
+      mood: 'Party',
+      badge: 'HOT',
+      color: 'bg-[#6C5CE7]'
+    },
+    {
+      id: "3",
+      title: 'Azul',
+      tagline: 'Pattern. Beauty. Victory.',
+      image: 'https://images.unsplash.com/photo-1606167668584-78701c57f13d?auto=format&fit=crop&q=80&w=1200',
+      players: '2-4',
+      time: '30-45 min',
+      mood: 'Elegant',
+      badge: 'AWARD WINNER',
+      color: 'bg-[#00B894]'
+    }
+  ],
+  gamification: {
+    sampleBalance: 1250,
+    activities: [
+      { name: "Daily Puzzle", xp: 100 },
+      { name: "Refer a Friend", xp: 500 },
+      { name: "First Purchase", xp: 1000 }
+    ],
+    rewards: [
+      { xp: 5000, reward: "Free Board Game" },
+      { xp: 2500, reward: "20% Off Coupon" },
+      { xp: 1000, reward: "Coffee Mug" }
+    ]
+  },
+  activePuzzles: [
+      {
+          id: "chess-daily",
+          title: "Daily Chess Puzzle",
+          xp: 150,
+          url: "/play/chess",
+          isLive: true,
+          description: "Solve in 3 moves"
+      },
+      {
+          id: "sudoku-hard",
+          title: "Hard Sudoku",
+          xp: 300,
+          url: "/play/sudoku",
+          isLive: true,
+          description: "Brain teaser"
+      }
+  ],
+  dailyDrops: [
+      {
+          id: "daily-chess",
+          type: "game",
+          title: "Win 1 Chess Game",
+          subtitle: "Daily Challenge",
+          xp: 500,
+          actionUrl: "/play/chess",
+          highlightColor: "bg-[#FF7675]"
+      },
+      {
+          id: "flash-deal-1",
+          type: "product",
+          title: "20% Off Hoodies",
+          subtitle: "Flash Deal",
+          ctaText: "CLAIM",
+          actionUrl: "/shop",
+          highlightColor: "bg-[#00B894]"
+      }
+  ]
+};

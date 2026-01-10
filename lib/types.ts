@@ -458,3 +458,76 @@ export interface CommunityMessage {
   replyToId?: string;
   isFlagged?: boolean; // For censorship
 }
+
+// Daily Quest / Drop Type
+export interface DailyQuest {
+  id: string;
+  type: 'game' | 'product';
+  title: string;
+  subtitle: string;
+  xp?: number;
+  actionUrl: string;
+  icon?: string;
+  ctaText?: string;
+  highlightColor: string;
+}
+
+// Homepage Content Types
+export interface HeroContent {
+  title: string;
+  subtitle: string;
+  ctaTextShops: string;
+  ctaTextJoin: string;
+  backgroundImage?: string;
+}
+
+export interface HomepageContent {
+  hero: HeroContent; // Default (Gamer)
+  heroShopper?: HeroContent;
+  heroSocial?: HeroContent;
+  playStyle?: {
+    playAtHome: PlayStyleItem;
+    playTogether: PlayStyleItem;
+    playOccasions: PlayStyleItem;
+    playEarn: PlayStyleItem;
+  };
+  featuredGames?: FeaturedGame[];
+  gamification?: {
+    sampleBalance: number;
+    activities: Array<{ name: string; xp: number; }>;
+    rewards: Array<{ xp: number; reward: string; }>;
+  };
+  activePuzzles?: PuzzleItem[];
+  dailyDrops?: DailyQuest[];
+  proofOfJoy?: {
+    photos?: Array<{ title: string; subtitle: string; emoji: string; }>;
+    testimonials?: Array<{ title: string; subtitle: string; emoji: string; }>;
+  };
+}
+
+export interface PlayStyleItem {
+  title: string;
+  description: string;
+  emoji: string;
+}
+
+export interface FeaturedGame {
+  id: string | number;
+  title: string;
+  tagline: string;
+  image: string;
+  players: string;
+  time: string;
+  mood: string;
+  badge: string;
+  color: string;
+}
+
+export interface PuzzleItem {
+  id: string;
+  title: string;
+  xp: number;
+  url: string;
+  isLive: boolean;
+  description?: string;
+}
