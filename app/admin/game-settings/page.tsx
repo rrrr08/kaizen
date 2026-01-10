@@ -165,14 +165,43 @@ export default function GameSettingsDashboard() {
     const loadXPSettings = async () => {
         const settingsRef = doc(db, 'settings', 'xpSystem');
         const snap = await getDoc(settingsRef);
+
+        const defaultTiers = getDefaultTiers();
+        const defaultSources = getDefaultXPSources();
+
         if (snap.exists()) {
             const data = snap.data();
-            setTiers(data.tiers || getDefaultTiers());
-            setXPSources(data.xpSources || getDefaultXPSources());
+
+            // Merge Tiers: Keep existing, add missing defaults
+            const existingTiers = (data.tiers || []) as Tier[];
+            const mergedTiers = [...existingTiers];
+
+            defaultTiers.forEach(defTier => {
+                if (!existingTiers.some(t => t.name === defTier.name)) {
+                    mergedTiers.push(defTier);
+                }
+            });
+
+            // Sort by minXP to keep order correct
+            mergedTiers.sort((a, b) => a.minXP - b.minXP);
+
+
+            // Merge Sources: Keep existing, add missing defaults
+            const existingSources = (data.xpSources || []) as XPSource[];
+            const mergedSources = [...existingSources];
+
+            defaultSources.forEach(defSource => {
+                if (!existingSources.some(s => s.name === defSource.name)) {
+                    mergedSources.push(defSource);
+                }
+            });
+
+            setTiers(mergedTiers);
+            setXPSources(mergedSources);
             setXpInitialized(true);
         } else {
-            setTiers(getDefaultTiers());
-            setXPSources(getDefaultXPSources());
+            setTiers(defaultTiers);
+            setXPSources(defaultSources);
             setXpInitialized(false);
         }
     };
@@ -188,15 +217,63 @@ export default function GameSettingsDashboard() {
     };
 
     const getDefaultTiers = (): Tier[] => [
-        { name: 'Newbie', minXP: 0, multiplier: 1.0, badge: 'Grey Meeple', perk: 'None', color: '#94a3b8', icon: '♟️', unlockPrice: 0 },
-        { name: 'Player', minXP: 500, multiplier: 1.1, badge: 'Green Pawn', perk: 'Early access to Event Tickets', color: '#34d399', icon: '♟️', unlockPrice: 2000 },
-        { name: 'Strategist', minXP: 2000, multiplier: 1.25, badge: 'Blue Rook', perk: '5% off all Workshops', color: '#60a5fa', icon: '♜', unlockPrice: 5000 },
-        { name: 'Grandmaster', minXP: 5000, multiplier: 1.5, badge: 'Gold Crown', perk: 'VIP Seating at Game Nights', color: '#fbbf24', icon: '👑', unlockPrice: 10000 }
+        {
+            name: 'Newbie',
+            minXP: 0,
+            multiplier: 1.0,
+            badge: 'Grey Meeple',
+            perk: 'None',
+            color: '#94a3b8',
+            icon: '♟️',
+            unlockPrice: 0
+        },
+        {
+            name: 'Player',
+            minXP: 500,
+            multiplier: 1.1,
+            badge: 'Green Pawn',
+            perk: 'Early access to Event Tickets',
+            color: '#34d399',
+            icon: '♟️',
+            unlockPrice: 2000
+        },
+        {
+            name: 'Strategist',
+            minXP: 2000,
+            multiplier: 1.25,
+            badge: 'Blue Rook',
+            perk: '5% off all Workshops',
+            color: '#60a5fa',
+            icon: '♜',
+            unlockPrice: 5000
+        },
+        {
+            name: 'Knight',
+            minXP: 3500,
+            multiplier: 1.35,
+            badge: 'Purple Knight',
+            perk: 'Priority access & bonus XP on Experiences',
+            color: '#a78bfa',
+            icon: '♞',
+            unlockPrice: 7500
+        },
+        {
+            name: 'Grandmaster',
+            minXP: 5000,
+            multiplier: 1.5,
+            badge: 'Gold Crown',
+            perk: 'VIP Seating at Game Nights',
+            color: '#fbbf24',
+            icon: '👑',
+            unlockPrice: 10000
+        }
     ];
+
 
     const getDefaultXPSources = (): XPSource[] => [
         { name: 'Shop Purchase (per ₹100)', baseXP: 10, baseJP: 10, enabled: true },
         { name: 'Event Registration', baseXP: 50, baseJP: 50, enabled: true },
+        { name: 'Experiences Registration', baseXP: 60, baseJP: 60, enabled: true },
         { name: 'Workshop Registration', baseXP: 75, baseJP: 75, enabled: true },
         { name: 'Game Night Attendance', baseXP: 100, baseJP: 100, enabled: true }
     ];

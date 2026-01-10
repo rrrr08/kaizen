@@ -671,7 +671,7 @@ export default function EventRegistrationForm({
           }
         }}
       >
-        <div className="bg-[#FFFDF5] border-4 border-black rounded-[30px] p-8 md:p-10 max-w-2xl w-full my-8 neo-shadow relative" onClick={(e) => e.stopPropagation()}>
+        <div className="bg-[#FFFDF5] border-4 border-black rounded-[30px] p-8 md:p-10 max-w-2xl w-full my-8 neo-shadow relative max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
           {/* Header */}
           <div className="flex items-start justify-between mb-8">
             <div>

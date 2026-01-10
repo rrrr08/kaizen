@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { usePopup } from '@/app/context/PopupContext';
 import { useGamification } from '@/app/context/GamificationContext';
-import { X } from 'lucide-react';
+import { X, Check, Zap } from 'lucide-react';
 
 interface ExperiencePaymentFormProps {
     enquiry: any;
@@ -27,9 +27,10 @@ export default function ExperiencePaymentForm({
 }: ExperiencePaymentFormProps) {
     const router = useRouter();
     const { showAlert } = usePopup();
-    const { config, calculatePointWorth } = useGamification();
 
-    const [loading, setLoading] = useState(false);
+    // Kept for future use if we need config
+    useGamification();
+
     const [error, setError] = useState<string | null>(null);
     const [isProcessing, setIsProcessing] = useState(false);
     const [showErrorModal, setShowErrorModal] = useState(false);
@@ -41,11 +42,7 @@ export default function ExperiencePaymentForm({
         phone: enquiry.phone || user?.phoneNumber || '',
     });
 
-    // Gamification State
-    const [walletPoints, setWalletPoints] = useState(0);
-    const [redeemPoints, setRedeemPoints] = useState(0);
-
-    // Voucher State
+    // Gamification & Voucher State
     const [voucherCode, setVoucherCode] = useState('');
     const [appliedVoucher, setAppliedVoucher] = useState<any>(null);
     const [appliedVoucherId, setAppliedVoucherId] = useState<string | null>(null);
@@ -53,47 +50,12 @@ export default function ExperiencePaymentForm({
     const [voucherError, setVoucherError] = useState('');
     const [checkingVoucher, setCheckingVoucher] = useState(false);
 
+    // Hardcoded Earnings as requested
+    const EARN_XP = 60;
+    const EARN_JP = 60;
+
     const finalPrice = enquiry.finalPrice || 0;
-
-    // Maximum 50% of order can be paid with points
-    const maxRedeemable = finalPrice * 0.5;
-    const maxRedeemPoints = Math.floor(maxRedeemable / config.redeemRate);
-    const actualRedeemPoints = Math.min(redeemPoints, walletPoints, maxRedeemPoints);
-    const pointsDiscount = calculatePointWorth(actualRedeemPoints);
-
-    const finalAmount = Math.max(0, finalPrice - pointsDiscount - voucherDiscount);
-
-    // Fetch Wallet Points
-    useEffect(() => {
-        if (user) {
-            const fetchUserData = async () => {
-                try {
-                    const { getFirestore, doc, getDoc } = await import('firebase/firestore');
-                    const { app } = await import('@/lib/firebase');
-                    const db = getFirestore(app);
-                    const userRef = doc(db, 'users', user.uid);
-                    const userSnap = await getDoc(userRef);
-                    if (userSnap.exists()) {
-                        const userData = userSnap.data();
-                        setWalletPoints(userData?.points || 0);
-
-                        // Load saved checkout info
-                        const savedInfo = userData?.checkoutInfo;
-                        if (savedInfo) {
-                            setFormData(prev => ({
-                                name: savedInfo.name || prev.name,
-                                email: savedInfo.email || prev.email,
-                                phone: savedInfo.phone || prev.phone,
-                            }));
-                        }
-                    }
-                } catch (error) {
-                    console.error('Error fetching user data:', error);
-                }
-            };
-            fetchUserData();
-        }
-    }, [user]);
+    const finalAmount = Math.max(0, finalPrice - voucherDiscount);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -108,18 +70,6 @@ export default function ExperiencePaymentForm({
         return true;
     };
 
-    const handleRedeemPointsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        let points = parseInt(e.target.value) || 0;
-        if (points > walletPoints) points = walletPoints;
-        if (points > maxRedeemPoints) points = maxRedeemPoints;
-        setRedeemPoints(points);
-    };
-
-    const handleUseMaxPoints = () => {
-        const pointsToUse = Math.min(walletPoints, maxRedeemPoints);
-        setRedeemPoints(pointsToUse);
-    };
-
     const handleApplyVoucher = async () => {
         if (!voucherCode.trim()) { setVoucherError('Please enter a voucher code'); return; }
         if (!user) { setVoucherError('Please log in to apply vouchers'); return; }
@@ -129,14 +79,12 @@ export default function ExperiencePaymentForm({
 
         try {
             const token = await user.getIdToken();
-            // Using generic categories or default to events if experiences not supported explicitly
-            // Assuming 'experiences' category works or falls back
             const response = await fetch('/api/rewards/validate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({
                     code: voucherCode,
-                    orderTotal: finalPrice, // Discount applies on base price usually
+                    orderTotal: finalPrice,
                     category: 'experiences'
                 })
             });
@@ -168,8 +116,6 @@ export default function ExperiencePaymentForm({
         if (!user) { await showAlert('Please sign in to proceed', 'warning'); return; }
         if (!validateForm()) return;
 
-        if (finalAmount < 0) { setError("Invalid payment amount."); setShowErrorModal(true); return; }
-
         try {
             setIsProcessing(true);
             setError(null);
@@ -199,18 +145,7 @@ export default function ExperiencePaymentForm({
             }
 
             const orderData = await orderResponse.json();
-            const razorpayOrderId = orderData.orderId || orderData.id; // Correctly get ID
-
-            // If amount is 0 (fully covered), handle directly? 
-            // For now, Razorpay might complain if amount is 0. 
-            // If amount is 0, skip razorpay and verify directly?
-            if (finalAmount === 0) {
-                // Direct Verify call for 0 amount if applicable
-                // But create-order likely returned success with 0 amount logic? 
-                // Usually Razorpay doesn't support 0 amount orders for payment.
-                // We need to handle free/fully discounted separate.
-                // Let's assume standard payment for now.
-            }
+            const razorpayOrderId = orderData.orderId || orderData.id;
 
             // Load Razorpay
             const script = document.createElement('script');
@@ -228,7 +163,7 @@ export default function ExperiencePaymentForm({
                     prefill: {
                         name: formData.name,
                         email: formData.email,
-                        contact: formData.phone,
+                        contact: formData.phone, // KEY FIX: Razorpay expects 'contact', not 'phone'
                     },
                     handler: async (response: any) => {
                         try {
@@ -240,10 +175,10 @@ export default function ExperiencePaymentForm({
                                     razorpay_payment_id: response.razorpay_payment_id,
                                     razorpay_order_id: response.razorpay_order_id,
                                     razorpay_signature: response.razorpay_signature,
-                                    enquiryId: enquiry.id, // Explicitly passed
+                                    enquiryId: enquiry.id,
                                     userId: user.uid,
                                     amount: orderData.amount,
-                                    walletPointsUsed: actualRedeemPoints
+                                    walletPointsUsed: 0
                                 }),
                             });
 
@@ -260,21 +195,6 @@ export default function ExperiencePaymentForm({
                                             body: JSON.stringify({ voucherId: appliedVoucherId, orderId: razorpayOrderId })
                                         });
                                     } catch (e) { console.error("Voucher use failed", e); }
-                                }
-
-                                // Redeem Points if used
-                                if (actualRedeemPoints > 0) {
-                                    try {
-                                        // Points deduction logic usually in backend verify/webhook, but here context helper?
-                                        // GamificationContext.spendPoints? 
-                                        // Better to let backend handle points deduction to be atomic.
-                                        // But for now let's rely on standard flow.
-                                        // Actually, my verify API probably doesn't deduct points yet.
-                                        // I should update Update Verify API to handle point deduction.
-                                        // OR do it here (less secure but ok for MVP).
-                                        // Let's do it via API if possible, or here.
-                                        // For now I will focus on Form.
-                                    } catch (e) { }
                                 }
 
                                 await showAlert('Payment Successful! Your experience is confirmed.', 'success');
@@ -389,89 +309,79 @@ export default function ExperiencePaymentForm({
                         </div>
                     </div>
 
+                    {/* You Will Earn Section */}
+                    <div className="mb-8 p-6 bg-[#FFD93D]/20 border-2 border-black rounded-xl border-dashed">
+                        <div className="font-black text-xs tracking-widest text-black/60 mb-4 flex items-center gap-2 uppercase">
+                            <Zap className="fill-current text-[#FFD93D]" size={20} /> YOU WILL EARN
+                        </div>
+                        <div className="flex gap-4">
+                            <span className="flex items-center gap-2 px-3 py-1 bg-black text-white rounded-lg font-black text-xs tracking-wider border-2 border-transparent">
+                                {EARN_XP} XP
+                            </span>
+                            <span className="flex items-center gap-2 px-3 py-1 bg-[#FFD93D] text-black rounded-lg font-black text-xs tracking-wider border-2 border-black">
+                                {EARN_JP} JP
+                            </span>
+                        </div>
+                    </div>
+
                     {/* Voucher Section */}
                     <div className="mb-8 p-6 bg-[#6C5CE7]/10 border-2 border-black rounded-xl">
                         <div className="font-black text-xs tracking-widest text-[#6C5CE7] mb-4 uppercase">HAVE A VOUCHER?</div>
                         {!appliedVoucher ? (
                             <div className="flex gap-3">
-                                <input type="text" value={voucherCode} onChange={(e) => setVoucherCode(e.target.value.toUpperCase())} placeholder="Enter code" className="flex-1 px-4 py-2 bg-white border-2 border-black rounded-lg text-sm font-bold uppercase focus:outline-none" />
-                                <button onClick={handleApplyVoucher} disabled={checkingVoucher || !voucherCode} className="px-6 py-2 bg-[#6C5CE7] text-white border-2 border-black rounded-lg font-black text-xs uppercase tracking-widest hover:translate-y-[-2px] hover:shadow-[2px_2px_0px_#000] transition-all disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-none">
+                                <input type="text" value={voucherCode} onChange={(e) => setVoucherCode(e.target.value.toUpperCase())} placeholder="PROMO CODE" className="flex-1 px-4 py-3 bg-white border-2 border-black rounded-xl text-black placeholder:text-black/30 focus:outline-none focus:shadow-[4px_4px_0px_#000] transition-all uppercase font-bold" />
+                                <button onClick={handleApplyVoucher} disabled={checkingVoucher || !voucherCode.trim()} className="px-6 py-3 bg-[#6C5CE7] text-white border-2 border-black rounded-xl font-black text-xs tracking-widest hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all uppercase disabled:opacity-50 disabled:hover:translate-x-0 disabled:hover:translate-y-0">
                                     {checkingVoucher ? '...' : 'APPLY'}
                                 </button>
                             </div>
                         ) : (
-                            <div className="flex items-center justify-between bg-white border-2 border-black rounded-lg p-3">
-                                <div className="flex items-center gap-3">
-                                    <span className="font-black text-green-600 text-lg">✓</span>
-                                    <div>
-                                        <p className="font-black text-sm uppercase">{appliedVoucher.code} APPLIED</p>
-                                        <p className="text-xs font-bold text-black/40">Saving ₹{voucherDiscount}</p>
-                                    </div>
+                            <div className="flex items-center justify-between p-4 bg-white border-2 border-black rounded-xl neo-shadow">
+                                <div>
+                                    <p className="text-black font-black text-sm uppercase">{appliedVoucher.code} APPLIED</p>
+                                    <p className="text-[#00B894] font-bold text-xs mt-1">SAVED ₹{voucherDiscount}</p>
                                 </div>
-                                <button onClick={handleRemoveVoucher} className="p-2 hover:bg-red-50 rounded-lg text-red-500 transition-colors"><X size={16} /></button>
+                                <button onClick={handleRemoveVoucher} className="px-3 py-1.5 bg-[#FF7675] text-black border-2 border-black rounded-lg font-black text-[10px] tracking-widest hover:bg-red-400 transition-all uppercase">REMOVE</button>
                             </div>
                         )}
-                        {voucherError && <p className="text-red-500 text-xs font-bold mt-2 uppercase">{voucherError}</p>}
-                    </div>
-
-                    {/* Points Redemption */}
-                    <div className="mb-8 p-6 bg-[#FFD93D]/20 border-2 border-black rounded-xl">
-                        <div className="flex items-center justify-between mb-4">
-                            <div className="font-black text-xs tracking-widest text-[#FFD93D] uppercase drop-shadow-[1px_1px_0px_#000]">REDEEM POINTS</div>
-                            <div className="text-xs font-bold bg-black text-[#FFD93D] px-2 py-1 rounded">Available: {walletPoints} JP</div>
-                        </div>
-
-                        <div className="flex items-center gap-4 mb-2">
-                            <input
-                                type="range"
-                                min="0"
-                                max={Math.min(walletPoints, maxRedeemPoints)}
-                                value={redeemPoints}
-                                onChange={(e) => setRedeemPoints(parseInt(e.target.value))}
-                                className="flex-1 h-2 bg-black/10 rounded-lg appearance-none cursor-pointer accent-black"
-                            />
-                            <div className="font-black text-xl w-16 text-right">{redeemPoints}</div>
-                        </div>
-
-                        <div className="flex justify-between items-center text-xs font-bold text-black/40">
-                            <span>Wait, save for later?</span>
-                            <button onClick={handleUseMaxPoints} className="text-black underline decoration-2 hover:text-[#6C5CE7]">Use Max ({Math.min(walletPoints, maxRedeemPoints)})</button>
-                        </div>
-                        {pointsDiscount > 0 && <p className="text-right text-sm font-black text-green-600 mt-2">Saving ₹{pointsDiscount}</p>}
+                        {voucherError && <p className="text-[#FF7675] font-bold text-xs mt-2 flex items-center gap-1"><span>!</span> {voucherError}</p>}
                     </div>
 
                     {/* Price Breakdown */}
-                    <div className="space-y-3 mb-8 border-t-2 border-dashed border-black/20 pt-6">
-                        <div className="flex justify-between text-sm font-bold text-black/60">
-                            <span>Subtotal</span>
-                            <span>₹{finalPrice}</span>
+                    <div className="mb-10 bg-white border-2 border-black rounded-xl overflow-hidden">
+                        <div className="p-6 space-y-3">
+                            <div className="flex justify-between text-black/60">
+                                <span className="font-black text-xs tracking-widest uppercase">EXPERIENCE PRICE</span>
+                                <span className="font-bold font-mono">₹{finalPrice}</span>
+                            </div>
+                            {voucherDiscount > 0 && (
+                                <div className="flex justify-between text-[#6C5CE7]">
+                                    <span className="font-black text-xs tracking-widest uppercase">VOUCHER DISCOUNT</span>
+                                    <span className="font-bold font-mono">-₹{voucherDiscount}</span>
+                                </div>
+                            )}
                         </div>
-                        {voucherDiscount > 0 && (
-                            <div className="flex justify-between text-sm font-bold text-green-600">
-                                <span>Voucher Discount</span>
-                                <span>-₹{voucherDiscount}</span>
-                            </div>
-                        )}
-                        {pointsDiscount > 0 && (
-                            <div className="flex justify-between text-sm font-bold text-green-600">
-                                <span>Points Redemption</span>
-                                <span>-₹{pointsDiscount}</span>
-                            </div>
-                        )}
-                        <div className="flex justify-between font-header text-3xl text-black pt-4 border-t-2 border-black/10">
-                            <span>Total</span>
-                            <span>₹{finalAmount}</span>
+                        <div className="bg-[#FFFDF5] border-t-2 border-black p-6 flex justify-between items-center">
+                            <span className="font-black text-sm tracking-widest uppercase text-black">TOTAL AMOUNT</span>
+                            <span className="font-header text-3xl text-black">₹{finalAmount}</span>
                         </div>
                     </div>
 
-                    <button
-                        onClick={handlePayment}
-                        disabled={isProcessing}
-                        className={`w-full py-5 rounded-xl font-black text-sm uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-3 ${isProcessing ? 'bg-gray-200 text-black/40 border-2 border-gray-300' : 'bg-[#00B894] text-white border-2 border-black neo-shadow hover:translate-y-[-2px] hover:shadow-lg'
-                            }`}
-                    >
-                        {isProcessing ? 'PROCESSING...' : `PAY ₹${finalAmount}`}
-                    </button>
+                    <div className="grid grid-cols-2 gap-4">
+                        <button
+                            onClick={onClose}
+                            disabled={isProcessing}
+                            className="px-6 py-4 bg-white text-black border-2 border-black rounded-xl font-black text-xs tracking-widest hover:bg-gray-50 transition-all uppercase disabled:opacity-50"
+                        >
+                            CANCEL
+                        </button>
+                        <button
+                            onClick={handlePayment}
+                            disabled={isProcessing}
+                            className={`px-6 py-4 bg-[#6C5CE7] text-white border-2 border-black rounded-xl neo-shadow font-black text-xs tracking-widest hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all uppercase disabled:opacity-50 disabled:shadow-none disabled:translate-x-0 disabled:translate-y-0`}
+                        >
+                            {isProcessing ? 'PROCESSING...' : `PAY ₹${finalAmount}`}
+                        </button>
+                    </div>
                 </div>
             </div>
         </>
