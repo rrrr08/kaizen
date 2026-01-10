@@ -35,6 +35,7 @@ const STATUS_OPTIONS: EnquiryStatus[] = ['new', 'contacted', 'in_discussion', 'c
 
 export default function AdminEnquiriesPage() {
   const [enquiries, setEnquiries] = useState<ExperienceEnquiry[]>([]);
+  const [finalPrice, setFinalPrice] = useState<number | ''>('');
   const [loading, setLoading] = useState(true);
   const [checkingAdmin, setCheckingAdmin] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -76,8 +77,10 @@ export default function AdminEnquiriesPage() {
   useEffect(() => {
     if (selectedEnquiry) {
       setReplyText(selectedEnquiry.adminReply || '');
+      setFinalPrice(selectedEnquiry.finalPrice ?? '');
     }
   }, [selectedEnquiry]);
+
 
   const fetchEnquiries = async () => {
     try {
@@ -112,6 +115,40 @@ export default function AdminEnquiriesPage() {
       setLoading(false);
     }
   };
+
+  const updateFinalPrice = async (enquiryId: string, price: number) => {
+    try {
+      const auth = getAuth();
+      const user = auth.currentUser;
+      if (!user) return;
+
+      const token = await user.getIdToken();
+
+      const response = await fetch(`/api/experiences/enquiries/${enquiryId}`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ finalPrice: price }),
+      });
+
+      if (!response.ok) throw new Error('Failed to update price');
+
+      setEnquiries(prev =>
+        prev.map(e =>
+          e.id === enquiryId ? { ...e, finalPrice: price } : e
+        )
+      );
+
+      setSelectedEnquiry(prev =>
+        prev ? { ...prev, finalPrice: price } : null
+      );
+    } catch (err) {
+      console.error('Price update failed', err);
+    }
+  };
+
 
   const updateEnquiryStatus = async (enquiryId: string, newStatus: EnquiryStatus) => {
     try {
@@ -265,7 +302,7 @@ export default function AdminEnquiriesPage() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <div className="bg-white border-2 border-black px-4 py-2 rounded-xl neo-shadow font-bold uppercase text-[10px] tracking-widest text-[#2D3436]">
+            <div className="bg-white border-2 border-black px-4 py-2 rounded-xl neo-shadow font-bold uppercase text-xs tracking-widest text-[#2D3436]">
               Total: {enquiries.length}
             </div>
           </div>
@@ -297,18 +334,18 @@ export default function AdminEnquiriesPage() {
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex-1">
                       <div className="flex flex-wrap items-center gap-2 mb-1">
-                        <h3 className="font-bold text-[#2D3436] text-base uppercase tracking-tight">{enquiry.name}</h3>
+                        <h3 className="font-bold text-[#2D3436] text-lg uppercase tracking-tight">{enquiry.name}</h3>
                         {enquiry.adminReply ? (
-                          <span className="bg-[#EEFDF9] text-[#00B894] px-2 py-0.5 rounded-lg text-[8px] font-bold uppercase tracking-widest border border-[#00B894]/20">
+                          <span className="bg-[#EEFDF9] text-[#00B894] px-2 py-0.5 rounded-lg text-[10px] font-bold uppercase tracking-widest border border-[#00B894]/20">
                             REPLIED
                           </span>
                         ) : (
-                          <span className="bg-red-50 text-red-600 px-2 py-0.5 rounded-lg text-[8px] font-bold uppercase tracking-widest border border-red-100">
+                          <span className="bg-red-50 text-red-600 px-2 py-0.5 rounded-lg text-[10px] font-bold uppercase tracking-widest border border-red-100">
                             NEW
                           </span>
                         )}
                       </div>
-                      <p className="text-[#2D3436]/40 font-bold text-[10px] uppercase tracking-widest">{enquiry.categoryName}</p>
+                      <p className="text-[#2D3436]/40 font-bold text-xs uppercase tracking-widest">{enquiry.categoryName}</p>
                     </div>
                     <div className="flex flex-col items-end gap-2">
                       <select
@@ -316,7 +353,7 @@ export default function AdminEnquiriesPage() {
                         onClick={(e) => e.stopPropagation()}
                         onChange={(e) => updateEnquiryStatus(enquiry.id, e.target.value as EnquiryStatus)}
                         disabled={updatingStatus === enquiry.id}
-                        className={`px-2 py-1 rounded-lg text-[8px] font-bold tracking-widest uppercase border-2 shadow-sm ${STATUS_COLORS[enquiry.status]
+                        className={`px-2 py-1 rounded-lg text-[10px] font-bold tracking-widest uppercase border-2 shadow-sm ${STATUS_COLORS[enquiry.status]
                           } ${updatingStatus === enquiry.id ? 'opacity-50' : ''} cursor-pointer focus:outline-none`}
                       >
                         {STATUS_OPTIONS.map((status) => (
@@ -328,7 +365,7 @@ export default function AdminEnquiriesPage() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2 text-[10px] font-bold text-[#2D3436]/60">
+                  <div className="grid grid-cols-2 gap-2 text-xs font-bold text-[#2D3436]/60">
                     <div className="flex items-center gap-2">
                       <Users size={12} className="text-[#6C5CE7]" />
                       <span>{enquiry.audienceSize} PPL</span>
@@ -339,7 +376,7 @@ export default function AdminEnquiriesPage() {
                     </div>
                   </div>
 
-                  <div className="mt-4 pt-4 border-t-2 border-black/5 flex items-center justify-between text-[8px] font-bold uppercase tracking-widest text-[#2D3436]/30">
+                  <div className="mt-4 pt-4 border-t-2 border-black/5 flex items-center justify-between text-[10px] font-bold uppercase tracking-widest text-[#2D3436]/30">
                     <span>
                       {(() => {
                         const d = getValidDate(enquiry.createdAt);
@@ -375,10 +412,10 @@ export default function AdminEnquiriesPage() {
                       </div>
                       <div>
                         <h2 className="text-2xl font-black uppercase tracking-tighter text-[#2D3436]">Enquiry Data</h2>
-                        <p className="text-[10px] font-bold text-[#2D3436]/40 uppercase tracking-widest">LOG_REF_{selectedEnquiry.id.slice(0, 8)}</p>
+                        <p className="text-xs font-bold text-[#2D3436]/40 uppercase tracking-widest">LOG_REF_{selectedEnquiry.id.slice(0, 8)}</p>
                       </div>
                     </div>
-                    <div className={`px-4 py-1.5 rounded-lg border-2 ${STATUS_COLORS[selectedEnquiry.status]} font-bold text-[10px] uppercase tracking-widest shadow-sm`}>
+                    <div className={`px-4 py-1.5 rounded-lg border-2 ${STATUS_COLORS[selectedEnquiry.status]} font-bold text-xs uppercase tracking-widest shadow-sm`}>
                       {selectedEnquiry.status.replace('_', ' ')}
                     </div>
                   </div>
@@ -386,45 +423,67 @@ export default function AdminEnquiriesPage() {
                   <div className="p-6 sm:p-8 grid grid-cols-1 md:grid-cols-2 gap-10">
                     <div className="space-y-6">
                       <div className="p-4 bg-[#FFFDF5] border-2 border-black rounded-xl">
-                        <h3 className="text-[10px] font-bold text-[#2D3436]/40 uppercase tracking-widest mb-2 flex items-center gap-2">
+                        <h3 className="text-xs font-bold text-[#2D3436]/40 uppercase tracking-widest mb-2 flex items-center gap-2">
                           <Users size={12} className="text-[#6C5CE7]" /> Lead Identification
                         </h3>
-                        <p className="font-bold text-lg text-[#2D3436]">{selectedEnquiry.name}</p>
-                        <div className="flex items-center gap-2 text-xs font-bold text-[#6C5CE7] mt-1">
+                        <p className="font-bold text-xl text-[#2D3436]">{selectedEnquiry.name}</p>
+                        <div className="flex items-center gap-2 text-sm font-bold text-[#6C5CE7] mt-1">
                           <Mail size={12} /> {selectedEnquiry.email}
                         </div>
                         {selectedEnquiry.phone && (
-                          <div className="flex items-center gap-2 text-xs font-bold text-[#2D3436]/60 mt-1">
+                          <div className="flex items-center gap-2 text-sm font-bold text-[#2D3436]/60 mt-1">
                             <Phone size={12} /> {selectedEnquiry.phone}
                           </div>
                         )}
                       </div>
 
                       <div className="p-4 bg-white border-2 border-black rounded-xl">
-                        <h3 className="text-[10px] font-bold text-[#2D3436]/40 uppercase tracking-widest mb-2">Event Scope</h3>
-                        <p className="font-bold text-sm text-[#2D3436] leading-relaxed">{selectedEnquiry.occasionDetails}</p>
+                        <h3 className="text-xs font-bold text-[#2D3436]/40 uppercase tracking-widest mb-2">Event Scope</h3>
+                        <p className="font-bold text-base text-[#2D3436] leading-relaxed">{selectedEnquiry.occasionDetails}</p>
                       </div>
                     </div>
 
                     <div className="space-y-6">
                       <div className="grid grid-cols-2 gap-4">
                         <div className="p-4 border-2 border-black rounded-xl bg-white shadow-inner">
-                          <p className="text-[9px] font-bold uppercase text-[#2D3436]/40 mb-1">AUDIENCE</p>
-                          <p className="font-black text-lg text-[#2D3436]">{selectedEnquiry.audienceSize}</p>
+                          <p className="text-[10px] font-bold uppercase text-[#2D3436]/40 mb-1">AUDIENCE</p>
+                          <p className="font-black text-xl text-[#2D3436]">{selectedEnquiry.audienceSize}</p>
                         </div>
                         <div className="p-4 border-2 border-black rounded-xl bg-white shadow-inner">
-                          <p className="text-[9px] font-bold uppercase text-[#2D3436]/40 mb-1">BUDGET</p>
-                          <p className="font-black text-lg text-[#2D3436]">{selectedEnquiry.budgetRange}</p>
+                          <p className="text-[10px] font-bold uppercase text-[#2D3436]/40 mb-1">BUDGET</p>
+                          <p className="font-black text-xl text-[#2D3436]">{selectedEnquiry.budgetRange}</p>
                         </div>
+
                       </div>
 
                       <div className="p-4 border-2 border-black rounded-xl bg-[#FFFDF5]">
-                        <h3 className="text-[10px] font-bold uppercase text-[#2D3436]/40 mb-2 flex items-center gap-2">
+                        <h3 className="text-xs font-bold uppercase text-[#2D3436]/40 mb-2 flex items-center gap-2">
                           <Calendar size={12} className="text-[#6C5CE7]" /> Preferred Timeline
                         </h3>
-                        <p className="font-bold text-sm text-[#2D3436]">{selectedEnquiry.preferredDateRange}</p>
+                        <p className="font-bold text-base text-[#2D3436]">{selectedEnquiry.preferredDateRange}</p>
                       </div>
                     </div>
+
+                    {selectedEnquiry.status === 'confirmed' && (
+                      <div className="p-4 border-4 border-[#00B894] rounded-xl bg-[#EEFDF9] shadow-md relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-24 h-24 bg-[#00B894]/10 rounded-full blur-2xl -mr-8 -mt-8"></div>
+                        <p className="text-xs font-black uppercase text-[#00B894] mb-2 tracking-widest flex items-center gap-2">
+                          <Sparkles size={14} /> FINAL PRICE (₹)
+                        </p>
+                        <input
+                          type="number"
+                          value={finalPrice}
+                          onChange={(e) => setFinalPrice(e.target.value === '' ? '' : Number(e.target.value))}
+                          onBlur={() => {
+                            if (finalPrice !== '' && finalPrice !== selectedEnquiry.finalPrice) {
+                              updateFinalPrice(selectedEnquiry.id, finalPrice);
+                            }
+                          }}
+                          className="w-full px-3 py-2 border-2 border-[#00B894]/30 rounded-lg font-black text-lg text-[#2D3436] focus:outline-none focus:ring-4 focus:ring-[#00B894]/20 bg-white"
+                          placeholder="Enter final amount"
+                        />
+                      </div>
+                    )}
 
                     {selectedEnquiry.message && (
                       <div className="md:col-span-2 bg-[#FFFDF5] border-2 border-black p-5 rounded-xl relative shadow-[4px_4px_0px_#000] mt-4">
