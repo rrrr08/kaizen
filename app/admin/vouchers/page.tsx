@@ -48,6 +48,24 @@ export default function AdminVouchersPage() {
     usageLimit: undefined
   });
 
+  const [isIconDropdownOpen, setIsIconDropdownOpen] = useState(false);
+
+  const SUGGESTED_ICONS = [
+    '🎁', '🎟️', '🎫', '🛍️', '🎮', '🍔', '☕', '👕', '💎', '✨',
+    '🌟', '🌈', '🍕', '🍰', '🚗', '🎬', '👗', '👟', '🕶️', '🧴',
+    '📱', '🎧', '📷', '📚', '🎒', '🎨', '🎸', '⚽', '🏆', '🔥'
+  ];
+
+
+
+  const categoryIconMap: Record<string, string> = {
+    shop: '🛍️',
+    events: '🎫',
+    experiences: '🎮',
+    all: '🌟'
+  };
+
+
   useEffect(() => {
     fetchVouchers();
   }, []);
@@ -280,13 +298,46 @@ export default function AdminVouchersPage() {
 
             <div>
               <label className="block text-xs font-black uppercase tracking-wider text-black/60 mb-2">Icon (Emoji)</label>
-              <input
-                type="text"
-                value={formData.icon}
-                onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
-                className="w-full px-4 py-3 bg-white border-3 border-black rounded-xl font-bold text-2xl text-center focus:outline-none focus:ring-4 focus:ring-[#FFD93D]"
-              />
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setIsIconDropdownOpen(!isIconDropdownOpen)}
+                  className="w-full flex items-center justify-between px-6 py-4 bg-white border-3 border-black rounded-xl font-black text-3xl neo-shadow hover:bg-gray-50 transition-all"
+                >
+                  <span className="flex-1 text-center ml-6">{formData.icon}</span>
+                  <div className={`transition-transform duration-200 ${isIconDropdownOpen ? 'rotate-180' : ''}`}>
+                    <Plus size={24} className="text-black/40 rotate-45" />
+                  </div>
+                </button>
+
+                {isIconDropdownOpen && (
+                  <>
+                    <div
+                      className="fixed inset-0 z-10"
+                      onClick={() => setIsIconDropdownOpen(false)}
+                    />
+                    <div className="absolute top-full left-0 right-0 mt-3 p-4 bg-white border-4 border-black rounded-2xl neo-shadow z-20 max-h-64 overflow-y-auto grid grid-cols-6 gap-2">
+                      {SUGGESTED_ICONS.map(emoji => (
+                        <button
+                          key={emoji}
+                          type="button"
+                          onClick={() => {
+                            setFormData({ ...formData, icon: emoji });
+                            setIsIconDropdownOpen(false);
+                          }}
+                          className={`text-2xl p-3 rounded-xl hover:bg-[#FFD93D] transition-all border-2 border-transparent ${formData.icon === emoji ? 'bg-[#FFD93D] !border-black' : ''}`}
+                        >
+                          {emoji}
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+              <p className="mt-2 text-[10px] font-bold text-black/40 uppercase tracking-widest text-center">Click to change icon</p>
             </div>
+
+
 
             <div className="md:col-span-2">
               <label className="block text-xs font-black uppercase tracking-wider text-black/60 mb-2">Description</label>
@@ -337,7 +388,14 @@ export default function AdminVouchersPage() {
               <label className="block text-xs font-black uppercase tracking-wider text-black/60 mb-2">Category</label>
               <select
                 value={formData.category}
-                onChange={(e) => setFormData({ ...formData, category: e.target.value as 'shop' | 'events' | 'experiences' | 'all' })}
+                onChange={(e) => {
+                  const newCat = e.target.value as any;
+                  setFormData({
+                    ...formData,
+                    category: newCat,
+                    icon: categoryIconMap[newCat] || formData.icon
+                  });
+                }}
                 className="w-full px-4 py-3 bg-white border-3 border-black rounded-xl font-bold focus:outline-none focus:ring-4 focus:ring-[#FFD93D]"
               >
                 <option value="shop">🛍️ Shop</option>
@@ -346,6 +404,7 @@ export default function AdminVouchersPage() {
                 <option value="all">🌟 All Categories</option>
               </select>
             </div>
+
 
             <div>
               <label className="block text-xs font-black uppercase tracking-wider text-black/60 mb-2">Min Purchase (₹)</label>

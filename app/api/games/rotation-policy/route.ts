@@ -47,8 +47,8 @@ export async function GET() {
         ? policy.selectedGames
         : allGames;
 
-      // 3. Shuffle and Pick 3
-      const validGamesPerDay = 3;
+      // 3. Shuffle and Pick N
+      const validGamesPerDay = policy.gamesPerDay || 3;
       const shuffled = [...gamesToRotate].sort(() => Math.random() - 0.5);
       const todaysGames = shuffled.slice(0, Math.min(validGamesPerDay, shuffled.length));
 
@@ -145,8 +145,8 @@ export async function POST(req: NextRequest) {
     // If no specific games selected, use all games
     const gamesToRotate = selectedGames && selectedGames.length > 0 ? selectedGames : allGames;
 
-    // Enforce 3 games if not specified or invalid. User wanted strict 3.
-    const validGamesPerDay = 3;
+    // Use gamesPerDay from body or default to 3
+    const validGamesPerDay = parseInt(gamesPerDay) || 3;
 
     // Generate today's rotation
     const shuffled = [...gamesToRotate].sort(() => Math.random() - 0.5);
@@ -235,8 +235,7 @@ export async function PUT(req: NextRequest) {
 
     // Generate new rotation
     const shuffled = [...policy.selectedGames].sort(() => Math.random() - 0.5);
-    // Enforce 3 games logic here too, or trust policy. Let's enforce 3 to be safe as per user req.
-    const targetCount = 3;
+    const targetCount = parseInt(policy.gamesPerDay) || 3;
     const todaysGames = shuffled.slice(0, Math.min(targetCount, shuffled.length));
     const gameOfTheDay = todaysGames.length > 0 ? todaysGames[0] : null;
 

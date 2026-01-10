@@ -753,10 +753,21 @@ export default function GameSettingsDashboard() {
                                             </h2>
                                             <div className="space-y-3">
                                                 {xpSources.map((s, i) => (
-                                                    <div key={i} className={`flex items-center gap-3 p-4 rounded-2xl border-2 transition-all ${s.enabled ? 'border-black bg-[#FFFDF5]' : 'border-black/5 opacity-40'}`}>
-                                                        <input type="checkbox" checked={s.enabled} onChange={e => { const n = [...xpSources]; n[i].enabled = e.target.checked; setXPSources(n); }} className="w-5 h-5 accent-[#00B894]" />
-                                                        <span className="flex-1 font-bold text-sm uppercase">{s.name}</span>
-                                                        <input type="number" value={s.baseXP} onChange={e => { const n = [...xpSources]; n[i].baseXP = +e.target.value; setXPSources(n); }} className="w-16 p-2 bg-white border-2 border-black/10 rounded-xl text-center font-bold text-xs" />
+                                                    <div key={i} className={`flex flex-col gap-4 p-4 rounded-3xl border-2 transition-all ${s.enabled ? 'border-black bg-[#FFFDF5]' : 'border-black/5 opacity-40'}`}>
+                                                        <div className="flex items-center gap-3">
+                                                            <input type="checkbox" checked={s.enabled} onChange={e => { const n = [...xpSources]; n[i].enabled = e.target.checked; setXPSources(n); }} className="w-5 h-5 accent-[#00B894]" />
+                                                            <span className="flex-1 font-black text-xs uppercase tracking-wider">{s.name}</span>
+                                                        </div>
+                                                        <div className="grid grid-cols-2 gap-4">
+                                                            <div>
+                                                                <label className="text-[10px] font-black opacity-30 uppercase block mb-1">Base XP</label>
+                                                                <input type="number" value={s.baseXP} onChange={e => { const n = [...xpSources]; n[i].baseXP = +e.target.value; setXPSources(n); }} className="w-full p-2 bg-white border-2 border-black/10 rounded-xl text-center font-bold text-xs" />
+                                                            </div>
+                                                            <div>
+                                                                <label className="text-[10px] font-black opacity-30 uppercase block mb-1">Base JP</label>
+                                                                <input type="number" value={s.baseJP} onChange={e => { const n = [...xpSources]; n[i].baseJP = +e.target.value; setXPSources(n); }} className="w-full p-2 bg-white border-2 border-black/10 rounded-xl text-center font-bold text-xs" />
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 ))}
                                             </div>

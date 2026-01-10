@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { ExperienceEnquiry, EnquiryStatus } from '@/lib/types';
 import { Eye, MessageSquare, Phone, Mail, Calendar, DollarSign, Users, ChevronRight, MessageCircleReply, Trash2, Send, Sparkles, Filter } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
@@ -41,6 +42,7 @@ export default function AdminEnquiriesPage() {
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
   const [savingReply, setSavingReply] = useState(false);
   const [replyText, setReplyText] = useState('');
+  const { addToast } = useToast();
 
   useEffect(() => {
     const auth = getAuth();
@@ -218,7 +220,11 @@ export default function AdminEnquiriesPage() {
         setSelectedEnquiry(prev => prev ? { ...prev, adminReply: replyText, repliedAt: new Date() } : null);
       }
 
-      alert('Reply saved successfully!');
+      addToast({
+        title: 'Success!',
+        description: 'Reply saved successfully!',
+        variant: 'success'
+      });
     } catch (err) {
       console.error('Error saving reply:', err);
       setError('Failed to save reply');

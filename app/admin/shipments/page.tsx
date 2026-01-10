@@ -99,11 +99,7 @@ export default function AdminShipmentsPage() {
                         <div className="w-2 h-2 bg-[#6C5CE7] rounded-full animate-pulse" />
                         <h2 className="text-2xl font-header font-black uppercase tracking-tight text-[#2D3436]">Active Dispatches</h2>
                     </div>
-                    <div className="flex gap-4">
-                        <button className="px-4 py-2 bg-white border-2 border-black rounded-lg font-bold text-[10px] uppercase tracking-widest hover:bg-black hover:text-white transition-all neo-shadow-sm flex items-center gap-2">
-                            Export CSV <ArrowUpRight size={14} />
-                        </button>
-                    </div>
+
                 </div>
 
                 <ShipmentList key={refreshTrigger} />

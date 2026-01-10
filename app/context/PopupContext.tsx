@@ -37,6 +37,8 @@ interface PopupState extends PopupOptions {
   resolve?: (value: boolean) => void;
 }
 
+import { toast } from '@/hooks/use-toast';
+
 export function PopupProvider({ children }: { children: ReactNode }) {
   const [popup, setPopup] = useState<PopupState>({
     isOpen: false,
@@ -55,8 +57,13 @@ export function PopupProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const showAlert = useCallback(async (message: string, type: PopupType = 'info', title?: string): Promise<void> => {
-    await showPopup({ message, type, title, confirmText: 'OK' });
-  }, [showPopup]);
+    toast({
+      title: title || (type === 'success' ? 'Success' : type === 'error' ? 'Error' : type === 'warning' ? 'Warning' : 'Notice'),
+      description: message,
+      variant: type === 'error' ? 'destructive' : type === 'success' ? 'success' : 'default',
+      duration: 5000
+    });
+  }, []);
 
   const showConfirm = useCallback((message: string, title?: string): Promise<boolean> => {
     return showPopup({

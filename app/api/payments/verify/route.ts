@@ -64,22 +64,29 @@ export async function POST(request: NextRequest) {
 
     if (userId && amount && !eventId) {
       try {
-        // Fetch User
+        // Fetch User and other settings in parallel
         const userRef = adminDb.collection('users').doc(userId);
-        const userSnap = await userRef.get();
-        userData = userSnap.exists ? userSnap.data() : {};
-
-        // Fetch Settings
         const xpSettingsRef = adminDb.collection('settings').doc('xpSystem');
-        const xpSettingsSnap = await xpSettingsRef.get();
+        const storeSettingsRef = adminDb.collection('settings').doc('store');
+        const ordersRef = adminDb.collection('orders');
+
+        const [userSnap, xpSettingsSnap, storeSettingsSnap, previousOrdersSnap] = await Promise.all([
+          userRef.get(),
+          xpSettingsRef.get(),
+          storeSettingsRef.get(),
+          ordersRef.where('userId', '==', userId).where('paymentStatus', '==', 'paid').limit(1).get()
+        ]);
+
+        userData = userSnap.exists ? userSnap.data() : {};
         xpSettings = xpSettingsSnap.exists ? xpSettingsSnap.data() : null;
+        const storeSettings = storeSettingsSnap.exists ? storeSettingsSnap.data() : null;
 
         // Calculate Base XP
         const shopXPSource = xpSettings?.xpSources?.find((s: any) => s.name.includes('Shop Purchase'));
         const xpPer100 = shopXPSource?.baseXP || 10;
         purchaseXP = Math.floor((amount / 100) * xpPer100);
 
-        // Calculate JP with Tier Multiplier
+        // Calculate JP with Tier Multiplier - Strictly use XP Sources for JP (per ₹100)
         const TIERS = xpSettings?.tiers || [
           { name: 'Newbie', minXP: 0, multiplier: 1.0 },
           { name: 'Player', minXP: 500, multiplier: 1.1 },
@@ -89,11 +96,20 @@ export async function POST(request: NextRequest) {
         const currentXP = userData?.xp || 0;
         const currentTier = [...TIERS].reverse().find((tier: any) => currentXP >= tier.minXP) || TIERS[0];
 
-        const jpPer100 = shopXPSource?.baseJP || 10;
-        purchaseJP = Math.floor((amount / 100) * jpPer100 * currentTier.multiplier);
+        // Sync with frontend logic: (amount / 100) * baseJP * multiplier
+        const baseJP = shopXPSource?.baseJP || 10;
+        const pointsFromAmount = Math.floor((amount / 100) * baseJP);
+        purchaseJP = Math.floor(pointsFromAmount * currentTier.multiplier);
 
-        console.log(`Calculated for Purchase: ${purchaseXP} XP, ${purchaseJP} JP (Tier: ${currentTier.name} x${currentTier.multiplier})`);
+        // Add First Time Bonus
+        const isFirstPurchase = previousOrdersSnap.empty;
+        if (isFirstPurchase) {
+          const bonusPoints = storeSettings?.firstTimeBonusPoints || 100;
+          purchaseJP += bonusPoints;
+          console.log(`Adding first-time purchase bonus: ${bonusPoints} JP`);
+        }
 
+        console.log(`Calculated for Purchase: ${purchaseXP} XP, ${purchaseJP} JP (Tier: ${currentTier.name} x${currentTier.multiplier}, BaseJP: ${baseJP}/100)`);
       } catch (calcError) {
         console.error('Error calculating points:', calcError);
       }
@@ -147,6 +163,38 @@ export async function POST(request: NextRequest) {
             });
           });
           console.log(`[Order] Successfully processed order ${orderDoc.id}, stock deducted, points recorded.`);
+
+          // SEND EMAIL RECEIPT FOR SHOP ORDER
+          try {
+            const userSnap = await adminDb.collection('users').doc(userId).get();
+            const userData = userSnap.data();
+
+            if (userData?.email) {
+              const { getOrderInvoiceTemplate } = await import('@/lib/email-templates');
+              const { sendEmail } = await import('@/lib/email-service');
+
+              const invoiceHtml = getOrderInvoiceTemplate({
+                id: orderDoc.id,
+                createdAt: new Date(),
+                items: orderData.items,
+                totalPrice: amount,
+                shippingAddress: orderData.shippingAddress || {},
+                subtotal: orderData.subtotal || amount,
+                gst: orderData.gst || 0,
+                gstRate: orderData.gstRate || 0
+              });
+
+              await sendEmail({
+                to: userData.email,
+                subject: `Order Confirmed - #${orderDoc.id.slice(0, 8).toUpperCase()}`,
+                html: invoiceHtml,
+              });
+              console.log(`[Email] Receipt sent to ${userData.email}`);
+            }
+          } catch (emailError) {
+            console.error('[Email] Failed to send receipt:', emailError);
+          }
+
         } catch (err) {
           console.error('[Order] Transaction failed:', err);
         }

@@ -83,6 +83,7 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
   const [streak, setStreak] = useState({ count: 0, lastActiveDate: null as string | null, freezeCount: 0 });
   const [dailyStats, setDailyStats] = useState({ lastSpinDate: null as string | null, eggsFound: 0 });
   const [storeConfig, setStoreConfig] = useState(CONFIG);
+  const [xpSystemSettings, setXpSystemSettings] = useState<any>(null);
 
   // History State
   const [history, setHistory] = useState<Transaction[]>([]);
@@ -95,13 +96,18 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
   // Load tiers and rewards from Firebase on mount
   useEffect(() => {
     const loadConfigs = async () => {
-      const { fetchStoreSettingsFromFirebase, fetchTiersFromFirebase, fetchRewardsConfigFromFirebase } = await import('@/lib/gamification');
-      const [tiers, fetchedRewards, storeSettings] = await Promise.all([
-        fetchTiersFromFirebase(),
+      const { fetchStoreSettingsFromFirebase, fetchXPSettings, fetchRewardsConfigFromFirebase } = await import('@/lib/gamification');
+      const [xpSettings, fetchedRewards, storeSettings] = await Promise.all([
+        fetchXPSettings(),
         fetchRewardsConfigFromFirebase(),
         fetchStoreSettingsFromFirebase()
       ]);
-      setAllTiers(tiers);
+
+      if (xpSettings) {
+        setAllTiers(xpSettings.tiers || []);
+        setXpSystemSettings(xpSettings);
+      }
+
       if (fetchedRewards) setRewardsConfig(fetchedRewards);
 
       if (storeSettings) {
@@ -453,7 +459,16 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
 
   // Dynamic calculation functions
   const calculatePointsLocal = (price: number, isFirstTime: boolean = false) => {
-    let points = Math.floor(price * rewardsConfig.SHOP.POINTS_PER_RUPEE);
+    const shopXPSource = xpSystemSettings?.xpSources?.find((s: any) => s.name.includes('Shop Purchase'));
+    const baseJP = shopXPSource?.baseJP || 10;
+
+    // Use store rate only if explicitly set and non-zero, otherwise use xpSource baseJP (per ₹100)
+    const multiplier = tier?.multiplier || 1.0;
+
+    // Correct logic should match backend: (price / 100) * baseJP
+    const basePoints = Math.floor((price / 100) * baseJP);
+    let points = Math.floor(basePoints * multiplier);
+
     if (isFirstTime) {
       points += 100; // Bonus
     }

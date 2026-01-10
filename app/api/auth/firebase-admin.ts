@@ -12,17 +12,17 @@ function initializeFirebaseAdmin() {
     if (process.env.FIREBASE_ADMIN_SERVICE_ACCOUNT) {
       try {
         const serviceAccountJson = JSON.parse(process.env.FIREBASE_ADMIN_SERVICE_ACCOUNT);
-        
+
         // Make sure private_key is formatted correctly
         if (serviceAccountJson.private_key) {
           serviceAccountJson.private_key = serviceAccountJson.private_key.replace(/\\n/g, '\n');
         }
-        
+
         admin.initializeApp({
           credential: admin.credential.cert(serviceAccountJson),
           databaseURL: process.env.FIREBASE_DATABASE_URL,
         });
-        
+
         console.log('Firebase Admin initialized with service account JSON string');
       } catch (jsonError) {
         console.error('Error parsing FIREBASE_ADMIN_SERVICE_ACCOUNT:', jsonError);
@@ -42,27 +42,27 @@ function initializeFirebaseAdmin() {
         auth_provider_x509_cert_url: process.env.FIREBASE_ADMIN_AUTH_PROVIDER_X509_CERT_URL || 'https://www.googleapis.com/oauth2/v1/certs',
         client_x509_cert_url: process.env.FIREBASE_ADMIN_CLIENT_X509_CERT_URL,
       };
-      
+
       // Validate required fields
       const requiredFields: (keyof typeof serviceAccount)[] = ['project_id', 'private_key', 'client_email'];
       const missingFields = requiredFields.filter(field => !serviceAccount[field]);
-      
+
       if (missingFields.length > 0) {
         throw new Error(`Missing required service account fields: ${missingFields.join(', ')}`);
       }
-      
+
       admin.initializeApp({
         credential: admin.credential.cert(serviceAccount as any),
         databaseURL: process.env.FIREBASE_DATABASE_URL,
       });
-      
+
       console.log('Firebase Admin initialized with individual environment variables');
     }
   } catch (error) {
     console.error('Firebase Admin initialization error:', error);
     throw error;
   }
-  
+
   isInitialized = true;
 }
 
@@ -76,19 +76,14 @@ export function getAdminAuth() {
   return admin.auth();
 }
 
-// For compatibility with existing imports
-export const adminDb = {
-  collection: (path: string) => getAdminDb().collection(path),
-  batch: () => getAdminDb().batch(),
-};
+// Export actual SDK instances for full functionality
+// These are initialized lazily upon first access or manual call
+export const adminDb = getAdminDb();
+export const adminAuth = getAdminAuth();
 
-export const adminAuth = {
-  getUserByEmail: (email: string) => getAdminAuth().getUserByEmail(email),
-  verifyIdToken: (token: string) => getAdminAuth().verifyIdToken(token),
-  verifySessionCookie: (cookie: string) => getAdminAuth().verifySessionCookie(cookie),
-  createSessionCookie: (idToken: string, options: any) => getAdminAuth().createSessionCookie(idToken, options),
-  setCustomUserClaims: (uid: string, claims: any) => getAdminAuth().setCustomUserClaims(uid, claims),
-  revokeRefreshTokens: (uid: string) => getAdminAuth().revokeRefreshTokens(uid),
-};
+// Alias for backward compatibility
+export const db = adminDb;
+export const auth = adminAuth;
+
 
 export default admin;
