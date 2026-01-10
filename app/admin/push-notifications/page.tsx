@@ -900,12 +900,199 @@ export default function PushNotificationsPage() {
 
           {/* Analytics Tab */}
           <TabsContent value="analytics">
-            <div className="bg-white border-2 border-black rounded-[25px] p-12 text-center neo-shadow">
-              <BarChart3 className="w-16 h-16 text-black/20 mx-auto mb-4" />
-              <p className="text-black font-black uppercase tracking-widest text-lg">Analytics data will appear here</p>
-              <p className="text-sm text-black/60 font-bold mt-2">
-                Send notifications to see delivery and engagement statistics
-              </p>
+            <div className="space-y-8">
+              {/* Summary Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div className="bg-white border-2 border-black rounded-xl p-6 neo-shadow">
+                  <div className="flex items-center justify-between mb-2">
+                    <Bell className="w-8 h-8 text-[#6C5CE7]" />
+                    <span className="text-xs font-black text-black/40 uppercase tracking-widest">Total</span>
+                  </div>
+                  <p className="font-header text-4xl font-black text-black">{campaigns.length}</p>
+                  <p className="text-xs font-bold text-black/60 uppercase tracking-wider mt-1">Campaigns</p>
+                </div>
+
+                <div className="bg-white border-2 border-black rounded-xl p-6 neo-shadow">
+                  <div className="flex items-center justify-between mb-2">
+                    <CheckCircle className="w-8 h-8 text-[#00B894]" />
+                    <span className="text-xs font-black text-black/40 uppercase tracking-widest">Sent</span>
+                  </div>
+                  <p className="font-header text-4xl font-black text-black">
+                    {campaigns.filter(c => c.status === 'sent').length}
+                  </p>
+                  <p className="text-xs font-bold text-black/60 uppercase tracking-wider mt-1">Delivered</p>
+                </div>
+
+                <div className="bg-white border-2 border-black rounded-xl p-6 neo-shadow">
+                  <div className="flex items-center justify-between mb-2">
+                    <Users className="w-8 h-8 text-[#FFD93D]" />
+                    <span className="text-xs font-black text-black/40 uppercase tracking-widest">Reach</span>
+                  </div>
+                  <p className="font-header text-4xl font-black text-black">
+                    {campaigns.reduce((sum, c) => sum + (c.deliveredCount || 0), 0).toLocaleString()}
+                  </p>
+                  <p className="text-xs font-bold text-black/60 uppercase tracking-wider mt-1">Total Delivered</p>
+                </div>
+
+                <div className="bg-white border-2 border-black rounded-xl p-6 neo-shadow">
+                  <div className="flex items-center justify-between mb-2">
+                    <BarChart3 className="w-8 h-8 text-[#FF7675]" />
+                    <span className="text-xs font-black text-black/40 uppercase tracking-widest">Engagement</span>
+                  </div>
+                  <p className="font-header text-4xl font-black text-black">
+                    {campaigns.reduce((sum, c) => sum + (c.interactionCount || 0), 0).toLocaleString()}
+                  </p>
+                  <p className="text-xs font-bold text-black/60 uppercase tracking-wider mt-1">Total Clicks</p>
+                </div>
+              </div>
+
+              {/* Campaign Performance Table */}
+              <div className="bg-white border-2 border-black rounded-[25px] p-8 neo-shadow">
+                <h2 className="font-header text-3xl font-black text-black uppercase tracking-tighter mb-6">Campaign Performance</h2>
+
+                {campaigns.filter(c => c.status === 'sent').length === 0 ? (
+                  <div className="text-center py-12">
+                    <BarChart3 className="w-16 h-16 text-black/20 mx-auto mb-4" />
+                    <p className="text-black font-black uppercase tracking-widest text-lg">No sent campaigns yet</p>
+                    <p className="text-sm text-black/60 font-bold mt-2">
+                      Send notifications to see delivery and engagement statistics
+                    </p>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b-2 border-black">
+                          <th className="text-left py-4 px-2 text-xs font-black uppercase tracking-widest text-black/60">Campaign</th>
+                          <th className="text-center py-4 px-2 text-xs font-black uppercase tracking-widest text-black/60">Recipients</th>
+                          <th className="text-center py-4 px-2 text-xs font-black uppercase tracking-widest text-black/60">Delivered</th>
+                          <th className="text-center py-4 px-2 text-xs font-black uppercase tracking-widest text-black/60">Clicks</th>
+                          <th className="text-center py-4 px-2 text-xs font-black uppercase tracking-widest text-black/60">CTR</th>
+                          <th className="text-center py-4 px-2 text-xs font-black uppercase tracking-widest text-black/60">Date</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-black/10">
+                        {campaigns
+                          .filter(c => c.status === 'sent')
+                          .slice(0, 10)
+                          .map((campaign) => {
+                            const deliveryRate = campaign.recipientCount > 0
+                              ? ((campaign.deliveredCount / campaign.recipientCount) * 100).toFixed(1)
+                              : '0.0';
+                            const clickRate = campaign.deliveredCount > 0
+                              ? ((campaign.interactionCount / campaign.deliveredCount) * 100).toFixed(1)
+                              : '0.0';
+
+                            return (
+                              <tr key={campaign.id} className="hover:bg-[#FFFDF5] transition-colors">
+                                <td className="py-4 px-2">
+                                  <p className="font-black text-sm text-black uppercase tracking-tight line-clamp-1">
+                                    {campaign.title}
+                                  </p>
+                                  <p className="text-xs text-black/50 font-bold mt-0.5 line-clamp-1">
+                                    {campaign.message}
+                                  </p>
+                                </td>
+                                <td className="text-center py-4 px-2 font-bold text-sm text-black">
+                                  {campaign.recipientCount.toLocaleString()}
+                                </td>
+                                <td className="text-center py-4 px-2">
+                                  <div className="flex flex-col items-center">
+                                    <span className="font-black text-sm text-black">
+                                      {campaign.deliveredCount.toLocaleString()}
+                                    </span>
+                                    <span className="text-xs font-bold text-[#00B894]">
+                                      {deliveryRate}%
+                                    </span>
+                                  </div>
+                                </td>
+                                <td className="text-center py-4 px-2 font-bold text-sm text-black">
+                                  {campaign.interactionCount.toLocaleString()}
+                                </td>
+                                <td className="text-center py-4 px-2">
+                                  <span className={`inline-block px-3 py-1 rounded-lg border-2 border-black text-xs font-black uppercase ${parseFloat(clickRate) >= 10
+                                      ? 'bg-[#00B894] text-black'
+                                      : parseFloat(clickRate) >= 5
+                                        ? 'bg-[#FFD93D] text-black'
+                                        : 'bg-[#FF7675] text-black'
+                                    }`}>
+                                    {clickRate}%
+                                  </span>
+                                </td>
+                                <td className="text-center py-4 px-2 text-xs font-bold text-black/60 uppercase tracking-wide">
+                                  {new Date(campaign.sentAt || campaign.createdAt).toLocaleDateString()}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+
+              {/* Engagement Insights */}
+              {campaigns.filter(c => c.status === 'sent').length > 0 && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="bg-white border-2 border-black rounded-xl p-6 neo-shadow">
+                    <h3 className="font-header text-xl font-black text-black uppercase tracking-tight mb-4">
+                      Delivery Performance
+                    </h3>
+                    <div className="space-y-3">
+                      {(() => {
+                        const sentCampaigns = campaigns.filter(c => c.status === 'sent');
+                        const totalRecipients = sentCampaigns.reduce((sum, c) => sum + (c.recipientCount || 0), 0);
+                        const totalDelivered = sentCampaigns.reduce((sum, c) => sum + (c.deliveredCount || 0), 0);
+                        const avgDeliveryRate = totalRecipients > 0 ? ((totalDelivered / totalRecipients) * 100).toFixed(1) : '0.0';
+
+                        return (
+                          <>
+                            <div className="flex justify-between items-center">
+                              <span className="text-sm font-bold text-black/60 uppercase tracking-wide">Avg. Delivery Rate</span>
+                              <span className="font-black text-2xl text-[#00B894]">{avgDeliveryRate}%</span>
+                            </div>
+                            <div className="w-full bg-black/10 rounded-full h-3 border-2 border-black overflow-hidden">
+                              <div
+                                className="bg-[#00B894] h-full transition-all duration-500"
+                                style={{ width: `${avgDeliveryRate}%` }}
+                              />
+                            </div>
+                          </>
+                        );
+                      })()}
+                    </div>
+                  </div>
+
+                  <div className="bg-white border-2 border-black rounded-xl p-6 neo-shadow">
+                    <h3 className="font-header text-xl font-black text-black uppercase tracking-tight mb-4">
+                      Click-Through Rate
+                    </h3>
+                    <div className="space-y-3">
+                      {(() => {
+                        const sentCampaigns = campaigns.filter(c => c.status === 'sent');
+                        const totalDelivered = sentCampaigns.reduce((sum, c) => sum + (c.deliveredCount || 0), 0);
+                        const totalClicks = sentCampaigns.reduce((sum, c) => sum + (c.interactionCount || 0), 0);
+                        const avgCTR = totalDelivered > 0 ? ((totalClicks / totalDelivered) * 100).toFixed(1) : '0.0';
+
+                        return (
+                          <>
+                            <div className="flex justify-between items-center">
+                              <span className="text-sm font-bold text-black/60 uppercase tracking-wide">Avg. CTR</span>
+                              <span className="font-black text-2xl text-[#6C5CE7]">{avgCTR}%</span>
+                            </div>
+                            <div className="w-full bg-black/10 rounded-full h-3 border-2 border-black overflow-hidden">
+                              <div
+                                className="bg-[#6C5CE7] h-full transition-all duration-500"
+                                style={{ width: `${Math.min(parseFloat(avgCTR) * 5, 100)}%` }}
+                              />
+                            </div>
+                          </>
+                        );
+                      })()}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </TabsContent>
         </Tabs>

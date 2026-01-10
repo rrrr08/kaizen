@@ -958,6 +958,7 @@ export interface Campaign {
   interactionCount: number;
   createdAt: string;
   scheduledFor?: string;
+  sentAt?: string;
   image?: string;
   actionUrl?: string;
   priority?: string;

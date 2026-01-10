@@ -15,7 +15,9 @@ import {
   ChevronRight,
   ShieldCheck,
   X,
-  Lock
+  Lock,
+  Database,
+  Palette
 } from 'lucide-react';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
@@ -31,6 +33,8 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import ImageUpload from '@/components/ui/ImageUpload';
+import DataManagement from '@/components/settings/DataManagement';
+import AppearanceSettings, { AppearanceSettings as AppearanceSettingsType } from '@/components/settings/AppearanceSettings';
 
 export default function SettingsPage() {
   const { user, loading } = useAuth();
@@ -41,6 +45,8 @@ export default function SettingsPage() {
   const [isDeactivating, setIsDeactivating] = useState(false);
   const [isSecurityOpen, setIsSecurityOpen] = useState(false);
   const [isNetworkInfoOpen, setIsNetworkInfoOpen] = useState(false);
+  const [isDataOpen, setIsDataOpen] = useState(false);
+  const [isAppearanceOpen, setIsAppearanceOpen] = useState(false);
 
   const [displayName, setDisplayName] = useState('');
   const [photoURL, setPhotoURL] = useState('');
@@ -110,8 +116,6 @@ export default function SettingsPage() {
     setIsSaving(true);
     try {
       const { deleteUser } = await import('firebase/auth');
-      // Optionally delete Firestore data here if strict cleanup is needed
-
       await deleteUser(user);
       addToast({ title: 'Account Deleted', description: 'Your account has been deactivated.', variant: 'default' });
       router.push('/');
@@ -132,7 +136,6 @@ export default function SettingsPage() {
     const providerId = user.providerData[0]?.providerId;
 
     if (providerId === 'password') {
-      // Send Password Reset
       setIsSaving(true);
       try {
         const { getAuth, sendPasswordResetEmail } = await import('firebase/auth');
@@ -146,12 +149,44 @@ export default function SettingsPage() {
         setIsSaving(false);
       }
     } else {
-      // Just explaining external provider
       addToast({ title: 'External Provider', description: `Your security is managed by ${providerId}.` });
     }
   };
 
-  // Determine primary provider for UI logic
+  const handleSavePrivacy = async (settings: PrivacySettingsType) => {
+    try {
+      const { doc, updateDoc, getFirestore } = await import('firebase/firestore');
+      const { app } = await import('@/lib/firebase');
+      const db = getFirestore(app);
+      const userRef = doc(db, 'users', user.uid);
+
+      await updateDoc(userRef, { privacySettings: settings });
+
+      addToast({ title: 'Success', description: 'Privacy settings saved!', variant: 'success' });
+      setIsPrivacyOpen(false);
+    } catch (error: any) {
+      addToast({ title: 'Error', description: 'Failed to save privacy settings', variant: 'destructive' });
+      throw error;
+    }
+  };
+
+  const handleSaveAppearance = async (settings: AppearanceSettingsType) => {
+    try {
+      const { doc, updateDoc, getFirestore } = await import('firebase/firestore');
+      const { app } = await import('@/lib/firebase');
+      const db = getFirestore(app);
+      const userRef = doc(db, 'users', user.uid);
+
+      await updateDoc(userRef, { appearanceSettings: settings });
+
+      addToast({ title: 'Success', description: 'Appearance settings saved!', variant: 'success' });
+      setIsAppearanceOpen(false);
+    } catch (error: any) {
+      addToast({ title: 'Error', description: 'Failed to save appearance settings', variant: 'destructive' });
+      throw error;
+    }
+  };
+
   const isPasswordUser = user.providerData[0]?.providerId === 'password';
   const providerLabel = user.providerData[0]?.providerId || 'Unknown Provider';
 
@@ -170,6 +205,22 @@ export default function SettingsPage() {
       color: 'bg-[#6C5CE7]',
       text: 'text-white',
       action: () => setIsSecurityOpen(true)
+    },
+    {
+      title: 'Data Management',
+      desc: 'Export & manage your data',
+      icon: Database,
+      color: 'bg-[#74B9FF]',
+      text: 'text-white',
+      action: () => setIsDataOpen(true)
+    },
+    {
+      title: 'Appearance',
+      desc: 'Theme & accessibility',
+      icon: Palette,
+      color: 'bg-[#FF7675]',
+      text: 'text-white',
+      action: () => setIsAppearanceOpen(true)
     },
     {
       title: 'Notifications',
@@ -306,7 +357,7 @@ export default function SettingsPage() {
 
       {/* Edit Profile Dialog */}
       <Dialog open={isEditingProfile} onOpenChange={setIsEditingProfile}>
-        <DialogContent className="border-4 border-black shadow-[8px_8px_0px_#000] sm:max-w-md max-h-[80vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-md max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="font-header text-3xl font-black uppercase">Edit Identity</DialogTitle>
             <DialogDescription className="font-bold text-black/60">
@@ -344,7 +395,7 @@ export default function SettingsPage() {
 
       {/* Security Dialog */}
       <Dialog open={isSecurityOpen} onOpenChange={setIsSecurityOpen}>
-        <DialogContent className="border-4 border-black shadow-[8px_8px_0px_#000] sm:max-w-md">
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <div className="w-12 h-12 bg-[#6C5CE7] rounded-xl border-2 border-black flex items-center justify-center mb-4 neo-shadow">
               <Lock className="text-white" />
@@ -378,7 +429,7 @@ export default function SettingsPage() {
 
       {/* Network Info Dialog */}
       <Dialog open={isNetworkInfoOpen} onOpenChange={setIsNetworkInfoOpen}>
-        <DialogContent className="border-4 border-black shadow-[8px_8px_0px_#000] sm:max-w-lg">
+        <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle className="font-header text-3xl font-black uppercase text-[#00B894]">Network Integrity</DialogTitle>
           </DialogHeader>
@@ -413,7 +464,7 @@ export default function SettingsPage() {
 
       {/* Deactivate Account Dialog */}
       <Dialog open={isDeactivating} onOpenChange={setIsDeactivating}>
-        <DialogContent className="border-4 border-[#FF7675] bg-[#FFF5F5] shadow-[8px_8px_0px_#FF7675] sm:max-w-md">
+        <DialogContent className="border-[#FF7675] bg-[#FFF5F5] shadow-[8px_8px_0px_#FF7675] sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="font-header text-3xl font-black uppercase text-[#FF7675]">Critical Warning</DialogTitle>
             <DialogDescription className="font-bold text-black/60">
@@ -439,6 +490,38 @@ export default function SettingsPage() {
               {isSaving ? 'Deactivating...' : 'Confirm Deactivation'}
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Data Management Dialog */}
+      <Dialog open={isDataOpen} onOpenChange={setIsDataOpen}>
+        <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <div className="w-12 h-12 bg-[#74B9FF] rounded-xl border-2 border-black flex items-center justify-center mb-4 neo-shadow">
+              <Database className="text-white" />
+            </div>
+            <DialogTitle className="font-header text-3xl font-black uppercase">Data Management</DialogTitle>
+            <DialogDescription className="font-bold text-black/60">
+              Export, manage, and control your data
+            </DialogDescription>
+          </DialogHeader>
+          <DataManagement userId={user.uid} />
+        </DialogContent>
+      </Dialog>
+
+      {/* Appearance Settings Dialog */}
+      <Dialog open={isAppearanceOpen} onOpenChange={setIsAppearanceOpen}>
+        <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <div className="w-12 h-12 bg-[#FF7675] rounded-xl border-2 border-black flex items-center justify-center mb-4 neo-shadow">
+              <Palette className="text-white" />
+            </div>
+            <DialogTitle className="font-header text-3xl font-black uppercase">Appearance</DialogTitle>
+            <DialogDescription className="font-bold text-black/60">
+              Customize your visual experience
+            </DialogDescription>
+          </DialogHeader>
+          <AppearanceSettings onSave={handleSaveAppearance} />
         </DialogContent>
       </Dialog>
     </div>

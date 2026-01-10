@@ -143,7 +143,7 @@ export default function About() {
               </div>
 
               {/* Center Marker */}
-              <div className="absolute left-[20px] md:left-1/2 -translate-x-1/2 w-20 h-20 bg-white border-4 border-black rounded-full z-10 hidden md:flex items-center justify-center shadow-[6px_6px_0px_#FFD93D] group-hover:scale-110 transition-transform">
+              <div className="absolute left-[20px] md:left-1/2 -translate-x-1/2 w-20 h-20 bg-white border-4 border-black rounded-full z-20 hidden md:flex items-center justify-center shadow-[6px_6px_0px_#FFD93D] group-hover:scale-110 transition-transform md:top-0">
                 <span className="text-4xl">💡</span>
               </div>
 
@@ -173,7 +173,7 @@ export default function About() {
               </div>
 
               {/* Center Marker aligned with path curve roughly */}
-              <div className="absolute left-[20px] md:left-[20%] -translate-x-1/2 w-20 h-20 bg-white border-4 border-black rounded-full z-10 hidden md:flex items-center justify-center shadow-[6px_6px_0px_#FF7675] group-hover:scale-110 transition-transform">
+              <div className="absolute left-[20px] md:left-1/2 -translate-x-1/2 w-20 h-20 bg-white border-4 border-black rounded-full z-20 hidden md:flex items-center justify-center shadow-[6px_6px_0px_#FF7675] group-hover:scale-110 transition-transform md:top-[-80px]">
                 <span className="text-4xl">🧪</span>
               </div>
 
@@ -203,7 +203,7 @@ export default function About() {
               </div>
 
               {/* Center Marker */}
-              <div className="absolute left-[20px] md:left-[80%] -translate-x-1/2 w-20 h-20 bg-white border-4 border-black rounded-full z-10 hidden md:flex items-center justify-center shadow-[6px_6px_0px_#6C5CE7] group-hover:scale-110 transition-transform">
+              <div className="absolute left-[20px] md:left-1/2 -translate-x-1/2 w-20 h-20 bg-white border-4 border-black rounded-full z-20 hidden md:flex items-center justify-center shadow-[6px_6px_0px_#6C5CE7] group-hover:scale-110 transition-transform md:top-[-80px]">
                 <span className="text-4xl">🚀</span>
               </div>
 
@@ -233,7 +233,7 @@ export default function About() {
               </div>
 
               {/* Center Marker aligned with path curve roughly */}
-              <div className="absolute left-[20px] md:left-[20%] -translate-x-1/2 w-20 h-20 bg-white border-4 border-black rounded-full z-10 hidden md:flex items-center justify-center shadow-[6px_6px_0px_#00B894] group-hover:scale-110 transition-transform">
+              <div className="absolute left-[20px] md:left-1/2 -translate-x-1/2 w-20 h-20 bg-white border-4 border-black rounded-full z-20 hidden md:flex items-center justify-center shadow-[6px_6px_0px_#00B894] group-hover:scale-110 transition-transform md:top-[-80px]">
                 <span className="text-4xl">🌍</span>
               </div>
 

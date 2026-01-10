@@ -43,6 +43,8 @@ const nextConfig: NextConfig = {
     ],
     dangerouslyAllowSVG: true,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+    // Disable optimization to avoid timeout errors with external images
+    unoptimized: true,
   },
   async redirects() {
     return [
