@@ -18,6 +18,7 @@ export default function EditEventPage() {
   const [checkingAdmin, setCheckingAdmin] = useState(true);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [isOriginallyPast, setIsOriginallyPast] = useState(false);
 
   const [form, setForm] = useState<{
     title: string;
@@ -87,13 +88,19 @@ export default function EditEventPage() {
 
         const e = data.event;
 
+        const eventTime = new Date(e.datetime).getTime();
+        setIsOriginallyPast(eventTime < Date.now());
+
         setForm({
           title: e.title ?? '',
           description: e.description ?? '',
           image: e.image ?? '',
           location: e.location ?? '',
           datetime: e.datetime
-            ? new Date(e.datetime).toISOString().slice(0, 16)
+            ? (() => {
+              const d = new Date(e.datetime);
+              return new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
+            })()
             : '',
           price: e.price?.toString() ?? '',
           capacity: e.capacity?.toString() ?? '',
@@ -147,7 +154,8 @@ export default function EditEventPage() {
     setSaving(true);
 
     // Validate that the event datetime is not in the past
-    if (form.datetime && new Date(form.datetime).getTime() < Date.now()) {
+    // We allow editing past events, but prevent moving upcoming events to the past accidentally.
+    if (!isOriginallyPast && form.datetime && new Date(form.datetime).getTime() < Date.now()) {
       await showAlert('Cannot set event date and time to a past date/time', 'error');
       setSaving(false);
       return;
@@ -356,9 +364,8 @@ export default function EditEventPage() {
                 <label className="font-black text-xs tracking-widest text-black/40 mb-3 uppercase pl-1 block">Gallery Images</label>
                 <ImageUpload
                   value={form.gallery}
-                  onChange={(url) => handleGalleryChange([...form.gallery, url])}
+                  onChange={(url) => setForm(prev => ({ ...prev, gallery: [...prev.gallery, url] }))}
                   onRemove={(url) => handleGalleryChange(form.gallery.filter(u => u !== url))}
-                  uploadId="event-gallery-edit"
                 />
               </div>
             </Section>

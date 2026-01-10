@@ -13,7 +13,6 @@ interface ImageUploadProps {
     onRemove: (value: string) => void;
     value: string[];
     maxFiles?: number;
-    uploadId?: string; // Add unique ID for each upload widget
 }
 
 const ImageUpload: React.FC<ImageUploadProps> = ({
@@ -21,8 +20,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
     onChange,
     onRemove,
     value,
-    maxFiles,
-    uploadId
+    maxFiles
 }) => {
     const [isMounted, setIsMounted] = useState(false);
 
@@ -75,7 +73,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
                     uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "kaizen_uploads"}
                     options={{
                         ...(maxFiles ? { maxFiles } : {}),
-                        publicId: uploadId // Use unique ID to prevent widget conflicts
+                        // publicId removed to allow unique IDs
                     }}
                 >
                     {({ open }) => {
