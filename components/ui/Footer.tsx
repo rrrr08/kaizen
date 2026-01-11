@@ -55,7 +55,7 @@ const Footer = () => {
       </div>
 
       <div className="container mx-auto mt-12 pt-8 border-t border-black/10 flex flex-col md:flex-row justify-between items-center gap-6 font-bold text-[#2D3436]/40 text-sm">
-        <p>© 2024 Joy Juncture Inc. Play Responsibly.</p>
+        <p>© 2026 Joy Juncture Inc. Play Responsibly.</p>
         <div className="flex gap-8">
           <Link href="/about" className="hover:text-black">Privacy Policy</Link>
           <Link href="/about" className="hover:text-black">Terms of Service</Link>
