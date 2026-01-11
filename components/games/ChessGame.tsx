@@ -333,7 +333,6 @@ const ChessGame: React.FC = () => {
                   value={currentMoveInput}
                   onChange={e => setCurrentMoveInput(e.target.value)}
                   placeholder="SAN Move (e.g. Nf3)"
-                  maxLength={10}
                   className="flex-1 bg-[#FFFDF5] border-2 border-black rounded-lg px-4 py-3 font-bold focus:outline-none focus:shadow-[4px_4px_0px_#000] transition-all"
                 />
                 <button type="submit" className="bg-[#00B894] text-white px-6 py-3 rounded-lg border-2 border-black font-black hover:translate-y-1 transition-transform shadow-[4px_4px_0px_#000]">GO</button>
@@ -357,7 +356,7 @@ const ChessGame: React.FC = () => {
               <Trophy className="mx-auto text-white w-12 h-12 mb-2 drop-shadow-md" />
               <h2 className="text-2xl font-black text-white uppercase">VICTORY!</h2>
               <p className="text-white font-bold">{message}</p>
-              {points && <div className="text-4xl font-black text-white mt-2">+{points} JP</div>}
+              {points && <div className="text-4xl font-black text-white mt-2">+{points} XP</div>}
 
               {showScratcher && scratcherDrops && (
                 <div className="mt-4 bg-white p-4 rounded-xl border-2 border-black">

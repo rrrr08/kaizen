@@ -153,22 +153,7 @@ export default function SettingsPage() {
     }
   };
 
-  const handleSavePrivacy = async (settings: PrivacySettingsType) => {
-    try {
-      const { doc, updateDoc, getFirestore } = await import('firebase/firestore');
-      const { app } = await import('@/lib/firebase');
-      const db = getFirestore(app);
-      const userRef = doc(db, 'users', user.uid);
 
-      await updateDoc(userRef, { privacySettings: settings });
-
-      addToast({ title: 'Success', description: 'Privacy settings saved!', variant: 'success' });
-      setIsPrivacyOpen(false);
-    } catch (error: any) {
-      addToast({ title: 'Error', description: 'Failed to save privacy settings', variant: 'destructive' });
-      throw error;
-    }
-  };
 
   const handleSaveAppearance = async (settings: AppearanceSettingsType) => {
     try {

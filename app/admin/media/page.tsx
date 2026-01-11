@@ -220,7 +220,6 @@ const SiteContentManager = () => {
                         <div>
                             <label className="text-xs font-black uppercase block mb-1">Hero Background Image</label>
                             <ImageUpload
-                                uploadId="home-hero-bg"
                                 value={homeContent.hero?.backgroundImage ? [homeContent.hero.backgroundImage] : []}
                                 onChange={(url) => setHomeContent({ ...homeContent, hero: { ...homeContent.hero, backgroundImage: url } })}
                                 onRemove={() => setHomeContent({ ...homeContent, hero: { ...homeContent.hero, backgroundImage: '' } })}
@@ -234,7 +233,6 @@ const SiteContentManager = () => {
                         <div>
                             <label className="text-xs font-black uppercase block mb-1">Social Hero Background Image</label>
                             <ImageUpload
-                                uploadId="home-hero-social-bg"
                                 value={homeContent.heroSocial?.backgroundImage ? [homeContent.heroSocial.backgroundImage] : []}
                                 onChange={(url) => setHomeContent({ ...homeContent, heroSocial: { ...homeContent.heroSocial, backgroundImage: url } })}
                                 onRemove={() => setHomeContent({ ...homeContent, heroSocial: { ...homeContent.heroSocial, backgroundImage: '' } })}
@@ -260,7 +258,6 @@ const SiteContentManager = () => {
                                 <div key={i} className="border-2 border-black/10 p-4 rounded-lg space-y-3">
                                     <p className="font-black text-xs uppercase">Founder #{i + 1}</p>
                                     <ImageUpload
-                                        uploadId={`about-founder-${i}`}
                                         value={founder.image ? [founder.image] : []}
                                         onChange={(url) => {
                                             const newFounders = [...aboutContent.founders];
@@ -317,7 +314,6 @@ const SiteContentManager = () => {
                             <div className="space-y-4">
                                 <label className="text-xs font-black uppercase block mb-1">Story Image</label>
                                 <ImageUpload
-                                    uploadId="blog-featured-story"
                                     value={blogContent.featuredStory.image ? [blogContent.featuredStory.image] : []}
                                     onChange={(url) => setBlogContent({ ...blogContent, featuredStory: { ...blogContent.featuredStory, image: url } })}
                                     onRemove={() => setBlogContent({ ...blogContent, featuredStory: { ...blogContent.featuredStory, image: '' } })}
@@ -333,7 +329,6 @@ const SiteContentManager = () => {
                             {blogContent.communityGallery.map((img: string, i: number) => (
                                 <div key={i} className="space-y-2">
                                     <ImageUpload
-                                        uploadId={`blog-gallery-${i}`}
                                         value={img ? [img] : []}
                                         onChange={(url) => {
                                             const newGal = [...blogContent.communityGallery];
@@ -366,7 +361,6 @@ const SiteContentManager = () => {
                         <div className="border-2 border-black/10 p-6 rounded-lg space-y-4">
                             <p className="text-xs font-bold text-black/60">Upload a custom logo that will appear across all pages (Navbar, Login, Signup, etc.). If no logo is uploaded, the default &quot;JJ&quot; logo will be used.</p>
                             <ImageUpload
-                                uploadId="site-logo"
                                 value={logoUrl ? [logoUrl] : []}
                                 onChange={(url) => setLogoUrl(url)}
                                 onRemove={() => setLogoUrl('')}

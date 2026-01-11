@@ -132,7 +132,7 @@ export default function EditExperienceCategoryPage() {
       .trim();
   };
 
-  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const name = e.target.value;
     const slug = generateSlug(name);
     setFormData(prev => ({
@@ -286,7 +286,6 @@ export default function EditExperienceCategoryPage() {
                 value={formData.image}
                 onChange={(url) => setFormData(prev => ({ ...prev, image: [url] }))}
                 onRemove={() => setFormData(prev => ({ ...prev, image: [] }))}
-                uploadId="experience-main-image-edit"
               />
             </div>
           </Section>
@@ -380,7 +379,6 @@ export default function EditExperienceCategoryPage() {
                 value={formData.imageGallery}
                 onChange={(url) => setFormData(prev => ({ ...prev, imageGallery: [...prev.imageGallery, url] }))}
                 onRemove={(url) => setFormData(prev => ({ ...prev, imageGallery: prev.imageGallery.filter(u => u !== url) }))}
-                uploadId="experience-gallery-edit"
               />
             </div>
           </Section>

@@ -467,8 +467,17 @@ export default function GameSettingsDashboard() {
                                     </div>
                                     <button
                                         onClick={async () => {
-                                            const ids = Object.keys(settings);
-                                            const rand = ids[Math.floor(Math.random() * ids.length)];
+                                            const today = new Date().toISOString().slice(0, 10);
+                                            const todayGames = rotationPolicy?.rotationSchedule?.[today] || [];
+                                            // Fallback to all games if today's list is empty
+                                            const pool = todayGames.length > 0 ? todayGames : Object.keys(settings);
+
+                                            if (pool.length === 0) {
+                                                showAlert('No games available to select.', 'error');
+                                                return;
+                                            }
+
+                                            const rand = pool[Math.floor(Math.random() * pool.length)];
                                             const token = await user?.getIdToken();
                                             await fetch('/api/games/game-of-the-day', {
                                                 method: 'POST',

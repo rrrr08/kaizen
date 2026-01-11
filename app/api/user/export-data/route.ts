@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
 
         // Fetch user data
         const userDoc = await adminDb.collection('users').doc(userId).get();
-        const userData = userDoc.exists ? userDoc.data() : {};
+        const userData = userDoc.exists ? (userDoc.data() || {}) : {};
 
         // Fetch orders
         const ordersSnapshot = await adminDb
@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
 
         // Fetch wallet/points history
         const walletDoc = await adminDb.collection('wallets').doc(userId).get();
-        const walletData = walletDoc.exists ? walletDoc.data() : {};
+        const walletData = walletDoc.exists ? (walletDoc.data() || {}) : {};
 
         // Fetch event registrations
         const registrationsSnapshot = await adminDb

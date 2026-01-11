@@ -257,7 +257,6 @@ export default function CreateEventPage() {
                   value={form.gallery}
                   onChange={(url) => handleGalleryChange([...form.gallery, url])}
                   onRemove={(url) => handleGalleryChange(form.gallery.filter(u => u !== url))}
-                  uploadId="event-gallery"
                 />
               </div>
             </Section>

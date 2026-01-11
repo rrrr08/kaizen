@@ -47,11 +47,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               // Fetch user role from Firestore
               try {
                 if (!db) {
-                  console.warn('[AuthContext] Firebase db not initialized');
-                  setRole(null);
-                  setIsAdmin(false);
-                  setUserProfile(null);
-                  setLoading(false);
+                  // CRITICAL FIX: If DB is not ready, DO NOT load the user as "member" with empty data.
+                  // Keep loading state true so the UI waits for DB to be ready or for a reload.
+                  console.error('[AuthContext] Critical: Firebase db not initialized - keeping app in loading state to prevent data corruption');
+                  setLoading(true);
                   return;
                 }
 

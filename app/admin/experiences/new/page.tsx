@@ -208,7 +208,6 @@ export default function NewExperienceCategoryPage() {
                 value={formData.image}
                 onChange={(url) => setFormData(prev => ({ ...prev, image: [url] }))}
                 onRemove={() => setFormData(prev => ({ ...prev, image: [] }))}
-                uploadId="experience-main-image"
               />
             </div>
           </Section>
@@ -302,7 +301,6 @@ export default function NewExperienceCategoryPage() {
                 value={formData.imageGallery}
                 onChange={(url) => setFormData(prev => ({ ...prev, imageGallery: [...prev.imageGallery, url] }))}
                 onRemove={(url) => setFormData(prev => ({ ...prev, imageGallery: prev.imageGallery.filter(u => u !== url) }))}
-                uploadId="experience-gallery"
               />
             </div>
           </Section>

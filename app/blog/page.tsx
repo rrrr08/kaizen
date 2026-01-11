@@ -243,9 +243,9 @@ export default function Blog() {
                             <h2 className="font-header text-4xl md:text-5xl text-black mb-4">Community Moments</h2>
                             <p className="text-black/60 font-bold italic text-xl">Real people. Real joy. Real memories.</p>
                         </div>
-                        <Link href="/community" className="font-black text-xs tracking-[0.3em] text-[#6C5CE7] border-b-2 border-[#6C5CE7] pb-1 hover:text-black hover:border-black transition-all">
+                        {/* <Link href="/community" className="font-black text-xs tracking-[0.3em] text-[#6C5CE7] border-b-2 border-[#6C5CE7] pb-1 hover:text-black hover:border-black transition-all">
                             VIEW FULL GALLERY
-                        </Link>
+                        </Link> */}
                     </div>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         {communityGallery.map((img, idx) => (
@@ -264,7 +264,7 @@ export default function Blog() {
                     </div>
                 </section>
 
-              
+
 
                 {/* SECTION 8 — FINAL CTA */}
                 <div className="text-center py-16 border-t-2 border-black/10">
