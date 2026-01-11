@@ -201,7 +201,7 @@ export default function Home() {
                       </Link>
                     </div>
                   ))}
-                  <Link href="/events">
+                  <Link href="/events/upcoming">
                     <button className="w-full bg-[#6C5CE7] text-white font-black py-2 rounded-lg neo-border hover:bg-[#5B4CD6] transition-colors text-sm">
                       View All Events
                     </button>
@@ -429,16 +429,22 @@ export default function Home() {
 
           {/* Call to Action */}
           <div className="text-center mt-32 relative z-10">
-            <Link href="/auth/signup">
+            <Link href={user ? '/play' : '/auth/signup'}>
               <motion.button
                 whileHover={{ scale: 1.05, rotate: -1 }}
                 whileTap={{ scale: 0.95 }}
                 className="bg-[#00B894] text-black px-16 py-8 rounded-[30px] font-header font-black text-3xl md:text-5xl uppercase tracking-tighter neo-border-thick neo-shadow-lg hover:bg-white transition-all group"
               >
-                Inaugurate <span className="group-hover:text-[#6C5CE7] transition-colors">Vessel</span>
+                {user ? (
+                  <span>Start <span className="group-hover:text-[#6C5CE7] transition-colors">Earning</span></span>
+                ) : (
+                  <span>Inaugurate <span className="group-hover:text-[#6C5CE7] transition-colors">Vessel</span></span>
+                )}
               </motion.button>
             </Link>
-            <p className="mt-8 text-white/20 font-black text-[10px] uppercase tracking-[0.4em] italic">*Membership initiation protocol required for credits</p>
+            {!user && (
+              <p className="mt-8 text-white/20 font-black text-[10px] uppercase tracking-[0.4em] italic">*Membership initiation protocol required for credits</p>
+            )}
           </div>
         </div>
       </section>
