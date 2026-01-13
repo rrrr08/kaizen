@@ -19,7 +19,7 @@ export default function robots(): MetadataRoute.Robots {
           '/notification-preferences/',
           '/wallet/',
           '/rewards/',
-          '/games/*/play',
+          '/play/*/play',
           '/games/wheel/',
           '/games/scratch-card/',
           '/games/daily-challenge/',
@@ -32,7 +32,7 @@ export default function robots(): MetadataRoute.Robots {
           '/progress/',
         ],
       },
-      // Block specific bad bots
+      // Block aggressive crawlers
       {
         userAgent: ['AhrefsBot', 'SemrushBot', 'DotBot', 'MJ12bot'],
         disallow: ['/'],

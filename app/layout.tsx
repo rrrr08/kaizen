@@ -34,7 +34,7 @@ const instrumentSerif = Instrument_Serif({
   display: 'swap',
 });
 
-const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://joyjuncture.com';
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://joy-juncture.vercel.app';
 
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
@@ -97,6 +97,54 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        {/* Security Headers */}
+        <meta httpEquiv="X-Content-Type-Options" content="nosniff" />
+        <meta httpEquiv="X-Frame-Options" content="SAMEORIGIN" />
+        <meta httpEquiv="X-XSS-Protection" content="1; mode=block" />
+        <meta name="referrer" content="origin-when-cross-origin" />
+
+        {/* Structured Data - Organization */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'Organization',
+              name: 'Joy Juncture',
+              url: baseUrl,
+              logo: `${baseUrl}/icon.png`,
+              description: 'Experience board games, events, and community engagement like never before.',
+              contactPoint: {
+                '@type': 'ContactPoint',
+                contactType: 'Customer Service',
+                email: 'support@joyjuncture.com',
+              },
+            }),
+          }}
+        />
+
+        {/* Structured Data - Website */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'WebSite',
+              name: 'Joy Juncture',
+              url: baseUrl,
+              potentialAction: {
+                '@type': 'SearchAction',
+                target: {
+                  '@type': 'EntryPoint',
+                  urlTemplate: `${baseUrl}/shop?search={search_term_string}`,
+                },
+                'query-input': 'required name=search_term_string',
+              },
+            }),
+          }}
+        />
+
+        {/* Razorpay Script */}
         <script
           key="razorpay-checkout"
           src="https://checkout.razorpay.com/v1/checkout.js"

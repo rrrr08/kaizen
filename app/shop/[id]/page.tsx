@@ -103,8 +103,46 @@ export default function ProductDetail() {
 
   const currentImage = selectedImage || product.image;
 
+  // Generate Product Schema for SEO
+  const productSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: product.name,
+    description: product.description || `${product.name} - Premium board game from Joy Juncture`,
+    image: images,
+    sku: product.id,
+    brand: {
+      '@type': 'Brand',
+      name: 'Joy Juncture',
+    },
+    offers: {
+      '@type': 'Offer',
+      url: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://joy-juncture.vercel.app'}/shop/${product.id}`,
+      priceCurrency: 'INR',
+      price: product.price,
+      availability: 'https://schema.org/InStock',
+      seller: {
+        '@type': 'Organization',
+        name: 'Joy Juncture',
+      },
+    },
+    ...(product.category && { category: product.category }),
+    ...(product.ageGroup && {
+      audience: {
+        '@type': 'PeopleAudience',
+        suggestedMinAge: product.ageGroup,
+      }
+    }),
+  };
+
   return (
     <div className="min-h-screen pt-28 pb-16 bg-[#FFFDF5] text-[#2D3436]">
+      {/* Product Schema */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
+      />
+
       <div className="max-w-7xl mx-auto px-6 md:px-12">
         <Link href="/shop" className="font-black text-xs tracking-widest text-[#2D3436]/50 hover:text-[#FFD93D] mb-12 inline-flex items-center gap-2 transition-colors uppercase">
           <ArrowLeft size={16} /> Back to Repository

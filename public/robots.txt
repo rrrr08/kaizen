@@ -9,6 +9,7 @@ Allow: /
 Disallow: /admin/
 Disallow: /api/
 Disallow: /auth/
+Disallow: /set-admin/
 
 # Disallow user-specific pages
 Disallow: /profile/
@@ -16,10 +17,14 @@ Disallow: /checkout/
 Disallow: /notifications/
 Disallow: /notification-preferences/
 Disallow: /wallet/
-Disallow: /rewards/
+Disallow: /orders/
+Disallow: /cart/
+Disallow: /payment-error/
+Disallow: /order-confirmation/
+Disallow: /progress/
 
 # Disallow dynamic game pages (they're user-specific)
-Disallow: /games/*/play
+Disallow: /play/*/play
 Disallow: /games/wheel/
 Disallow: /games/scratch-card/
 Disallow: /games/daily-challenge/
@@ -27,28 +32,29 @@ Disallow: /games/daily-challenge/
 # Disallow registration success pages (temporary pages)
 Disallow: /events/registration-success/
 
-# Allow important pages
+# Allow important public pages
 Allow: /
 Allow: /about
 Allow: /contact
-Allow: /events
-Allow: /events/*
+Allow: /shop
+Allow: /shop/*
+Allow: /events/upcoming
+Allow: /events/upcoming/*
+Allow: /events/past
+Allow: /events/past/*
 Allow: /blog
 Allow: /blog/*
-Allow: /products
-Allow: /products/*
 Allow: /experiences
 Allow: /experiences/*
-Allow: /testimonials
+Allow: /play
+Allow: /play/*
+Allow: /community
+Allow: /community/*
 
 # Sitemap location
 Sitemap: https://joy-juncture.vercel.app/sitemap.xml
 
-# Crawl-delay for specific bots (optional, adjust as needed)
-# User-agent: Googlebot
-# Crawl-delay: 0
-
-# Block bad bots (optional)
+# Block aggressive crawlers
 User-agent: AhrefsBot
 Disallow: /
 

@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 
 // Base URL - Update this with your actual domain
-const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://joyjuncture.com';
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://joy-juncture.vercel.app';
 
 // Default SEO configuration
 export const defaultMetadata = {
@@ -36,7 +36,7 @@ export const pageMetadata: Record<string, Metadata> = {
       images: [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'Joy Juncture' }],
     },
   },
-  
+
   shop: {
     title: 'Shop',
     description: 'Browse our collection of premium board games, card games, and tabletop experiences. Find your next favorite game at Joy Juncture.',
@@ -47,7 +47,7 @@ export const pageMetadata: Record<string, Metadata> = {
       url: `${baseUrl}/shop`,
     },
   },
-  
+
   events: {
     title: 'Events',
     description: 'Discover and join exciting gaming events, tournaments, and community gatherings. Connect with fellow gamers at Joy Juncture events.',
@@ -58,7 +58,7 @@ export const pageMetadata: Record<string, Metadata> = {
       url: `${baseUrl}/events`,
     },
   },
-  
+
   orders: {
     title: 'My Orders',
     description: 'View and track all your orders from Joy Juncture. Check order status, download invoices, and manage your purchases.',
@@ -72,7 +72,7 @@ export const pageMetadata: Record<string, Metadata> = {
       follow: false,
     },
   },
-  
+
   profile: {
     title: 'Profile',
     description: 'Manage your Joy Juncture profile, view your gaming stats, rewards, and customize your preferences.',
@@ -86,7 +86,7 @@ export const pageMetadata: Record<string, Metadata> = {
       follow: false,
     },
   },
-  
+
   cart: {
     title: 'Shopping Cart',
     description: 'Review your selected items and proceed to checkout. Your gaming adventure awaits at Joy Juncture.',
@@ -100,7 +100,7 @@ export const pageMetadata: Record<string, Metadata> = {
       follow: false,
     },
   },
-  
+
   checkout: {
     title: 'Checkout',
     description: 'Complete your purchase securely. Fast shipping on all board games and gaming products.',
@@ -114,7 +114,7 @@ export const pageMetadata: Record<string, Metadata> = {
       follow: false,
     },
   },
-  
+
   play: {
     title: 'Play Games',
     description: 'Play free online games including chess, riddles, sudoku, word search, and more. Earn rewards while you play at Joy Juncture.',
@@ -125,7 +125,7 @@ export const pageMetadata: Record<string, Metadata> = {
       url: `${baseUrl}/play`,
     },
   },
-  
+
   rewards: {
     title: 'Rewards',
     description: 'Track your rewards, achievements, and loyalty points. Unlock exclusive benefits and discounts at Joy Juncture.',
@@ -136,7 +136,7 @@ export const pageMetadata: Record<string, Metadata> = {
       url: `${baseUrl}/rewards`,
     },
   },
-  
+
   wallet: {
     title: 'Wallet',
     description: 'Manage your Joy Juncture wallet, view your balance, and track your transactions.',
@@ -150,7 +150,7 @@ export const pageMetadata: Record<string, Metadata> = {
       follow: false,
     },
   },
-  
+
   blog: {
     title: 'Blog',
     description: 'Read the latest gaming news, board game reviews, strategy guides, and community stories from Joy Juncture.',
@@ -161,7 +161,7 @@ export const pageMetadata: Record<string, Metadata> = {
       url: `${baseUrl}/blog`,
     },
   },
-  
+
   community: {
     title: 'Community',
     description: 'Join the Joy Juncture gaming community. Connect with players, share experiences, and participate in discussions.',
@@ -172,7 +172,7 @@ export const pageMetadata: Record<string, Metadata> = {
       url: `${baseUrl}/community`,
     },
   },
-  
+
   about: {
     title: 'About Us',
     description: 'Learn about Joy Juncture - your destination for board games, gaming events, and community engagement. Discover our mission and values.',
@@ -182,7 +182,7 @@ export const pageMetadata: Record<string, Metadata> = {
       url: `${baseUrl}/about`,
     },
   },
-  
+
   contact: {
     title: 'Contact Us',
     description: 'Get in touch with Joy Juncture. We\'re here to help with your questions about products, orders, events, and more.',
@@ -192,7 +192,7 @@ export const pageMetadata: Record<string, Metadata> = {
       url: `${baseUrl}/contact`,
     },
   },
-  
+
   progress: {
     title: 'My Progress',
     description: 'Track your gaming progress, achievements, and milestones at Joy Juncture.',
@@ -206,7 +206,7 @@ export const pageMetadata: Record<string, Metadata> = {
       follow: false,
     },
   },
-  
+
   notifications: {
     title: 'Notifications',
     description: 'View your notifications and stay updated with the latest from Joy Juncture.',
@@ -225,7 +225,7 @@ export const pageMetadata: Record<string, Metadata> = {
 // Helper function to generate metadata for a page
 export function generatePageMetadata(pageKey: keyof typeof pageMetadata): Metadata {
   const pageMeta = pageMetadata[pageKey];
-  
+
   return {
     ...pageMeta,
     keywords: pageMeta.keywords || defaultMetadata.keywords,

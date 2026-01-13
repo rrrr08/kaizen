@@ -120,8 +120,47 @@ export default function UpcomingEventDetail() {
   const isFull = (availableSlots !== null ? availableSlots <= 0 : event.registered >= event.capacity);
   const { date, time } = splitDateTime(event.datetime);
 
+  // Generate Event Schema for SEO
+  const eventDate = new Date(event.datetime);
+  const eventSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Event',
+    name: event.title,
+    description: event.description,
+    startDate: eventDate.toISOString(),
+    location: {
+      '@type': 'Place',
+      name: event.location,
+      address: event.location,
+    },
+    image: event.image ? [event.image] : [],
+    offers: {
+      '@type': 'Offer',
+      url: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://joy-juncture.vercel.app'}/events/upcoming/${id}`,
+      price: event.price,
+      priceCurrency: 'INR',
+      availability: isFull
+        ? 'https://schema.org/SoldOut'
+        : 'https://schema.org/InStock',
+      validFrom: new Date().toISOString(),
+    },
+    organizer: {
+      '@type': 'Organization',
+      name: 'Joy Juncture',
+      url: process.env.NEXT_PUBLIC_BASE_URL || 'https://joy-juncture.vercel.app',
+    },
+    eventStatus: 'https://schema.org/EventScheduled',
+    eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+  };
+
   return (
     <div className="min-h-screen pt-28 pb-16 bg-[#FFFDF5]">
+      {/* Event Schema */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(eventSchema) }}
+      />
+
       <div className="max-w-7xl mx-auto px-6 md:px-12">
 
         <Link
