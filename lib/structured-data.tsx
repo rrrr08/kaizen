@@ -1,6 +1,6 @@
 // Structured Data (JSON-LD) helpers for SEO
 
-const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://joyjuncture.com';
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://joy-juncture.vercel.app';
 
 // Organization Schema
 export const organizationSchema = {
@@ -77,12 +77,12 @@ export function generateProductSchema(product: ProductSchemaProps) {
     },
     ...(product.rating && product.reviewCount
       ? {
-          aggregateRating: {
-            '@type': 'AggregateRating',
-            ratingValue: product.rating,
-            reviewCount: product.reviewCount,
-          },
-        }
+        aggregateRating: {
+          '@type': 'AggregateRating',
+          ratingValue: product.rating,
+          reviewCount: product.reviewCount,
+        },
+      }
       : {}),
     ...(product.category ? { category: product.category } : {}),
   };
@@ -122,23 +122,23 @@ export function generateEventSchema(event: EventSchemaProps) {
       name: event.location.name,
       ...(event.location.address
         ? {
-            address: {
-              '@type': 'PostalAddress',
-              streetAddress: event.location.address,
-            },
-          }
+          address: {
+            '@type': 'PostalAddress',
+            streetAddress: event.location.address,
+          },
+        }
         : {}),
     },
     ...(event.price
       ? {
-          offers: {
-            '@type': 'Offer',
-            url: `${baseUrl}/events/${event.id}`,
-            priceCurrency: event.currency || 'USD',
-            price: event.price,
-            availability: 'https://schema.org/InStock',
-          },
-        }
+        offers: {
+          '@type': 'Offer',
+          url: `${baseUrl}/events/${event.id}`,
+          priceCurrency: event.currency || 'USD',
+          price: event.price,
+          availability: 'https://schema.org/InStock',
+        },
+      }
       : {}),
     organizer: {
       '@type': 'Organization',
