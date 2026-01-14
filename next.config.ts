@@ -23,6 +23,8 @@ const nextConfig: NextConfig = {
   experimental: {
     // Optimize for better performance
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons', 'framer-motion'],
+    // Enable CSS optimization
+    optimizeCss: true,
   },
 
   images: {
