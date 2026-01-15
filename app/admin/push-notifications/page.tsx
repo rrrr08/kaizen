@@ -403,7 +403,7 @@ export default function PushNotificationsPage() {
                     name="actionUrl"
                     value={formData.actionUrl}
                     onChange={handleInputChange}
-                    placeholder="https://joyjuncture.com/shop"
+                    placeholder="https://joy-juncture.vercel.app/shop"
                     className="w-full bg-[#FFFDF5] border-2 border-black rounded-xl px-4 py-3 text-black placeholder-black/30 focus:outline-none focus:neo-shadow-sm transition-all font-bold"
                     maxLength={500}
                   />
@@ -1011,10 +1011,10 @@ export default function PushNotificationsPage() {
                                 </td>
                                 <td className="text-center py-4 px-2">
                                   <span className={`inline-block px-3 py-1 rounded-lg border-2 border-black text-xs font-black uppercase ${parseFloat(clickRate) >= 10
-                                      ? 'bg-[#00B894] text-black'
-                                      : parseFloat(clickRate) >= 5
-                                        ? 'bg-[#FFD93D] text-black'
-                                        : 'bg-[#FF7675] text-black'
+                                    ? 'bg-[#00B894] text-black'
+                                    : parseFloat(clickRate) >= 5
+                                      ? 'bg-[#FFD93D] text-black'
+                                      : 'bg-[#FF7675] text-black'
                                     }`}>
                                     {clickRate}%
                                   </span>

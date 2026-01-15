@@ -172,6 +172,7 @@ const Navbar: React.FC = () => {
             <motion.button
               whileHover={{ scale: 1.1, rotate: -5 }}
               whileTap={{ scale: 0.9 }}
+              aria-label={`Shopping cart with ${totalItems} item${totalItems !== 1 ? 's' : ''}`}
               className="w-10 h-10 bg-white flex items-center justify-center rounded-full border-2 border-black neo-shadow relative"
             >
               <ShoppingBag className="w-4 h-4 text-black" />
@@ -197,6 +198,7 @@ const Navbar: React.FC = () => {
                 <motion.button
                   whileHover={{ scale: 1.1, rotate: 5 }}
                   whileTap={{ scale: 0.9 }}
+                  aria-label="User menu"
                   className="w-10 h-10 bg-[#6C5CE7] flex items-center justify-center rounded-full border-2 border-black neo-shadow cursor-pointer outline-none"
                 >
                   <div className="w-full h-full flex items-center justify-center text-white font-black text-sm">
@@ -255,6 +257,7 @@ const Navbar: React.FC = () => {
               <motion.button
                 whileHover={{ scale: 1.1, rotate: 5 }}
                 whileTap={{ scale: 0.9 }}
+                aria-label="Login"
                 className="w-10 h-10 bg-[#6C5CE7] flex items-center justify-center rounded-full border-2 border-black neo-shadow"
               >
                 <User className="w-4 h-4 text-white" />
@@ -264,6 +267,8 @@ const Navbar: React.FC = () => {
 
           {/* Mobile Menu Toggle */}
           <button
+            aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={isMobileMenuOpen}
             className="lg:hidden w-10 h-10 bg-black flex items-center justify-center rounded-full text-white"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >

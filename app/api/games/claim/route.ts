@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminAuth, adminDb } from '@/lib/firebaseAdmin';
 import { headers } from 'next/headers';
+import { withRateLimit, RateLimitPresets } from '@/lib/redis-rate-limit';
+import { logUserActivity, logError } from '@/lib/log-aggregator';
+import { captureGameCompletion } from '@/lib/change-data-capture';
 
-// POST /api/games/award - Award points after game completion
-export async function POST(req: NextRequest) {
+// POST /api/games/claim - Award points after game completion
+async function claimHandler(req: NextRequest) {
   try {
     // Get Firebase Auth token from Authorization header
     const headersList = await headers();
@@ -41,8 +44,17 @@ export async function POST(req: NextRequest) {
     const playRecordSnap = await playRecordRef.get();
     const alreadyPlayed = playRecordSnap.exists;
 
-    // Get game settings
+    // Calculate points
     console.log(`[Award API] Processing award for game: ${gameId}, User: ${userUid}`);
+
+    // Log game start
+    await logUserActivity(userUid, 'game_started', {
+      gameId,
+      retry,
+      level,
+      alreadyPlayed
+    });
+
     const settingsSnap = await adminDb.doc('settings/gamePoints').get();
     const gameSettings = settingsSnap.exists ? settingsSnap.data()?.[gameId] : null;
 
@@ -185,6 +197,42 @@ export async function POST(req: NextRequest) {
 
     await leaderboardRef.set({ entries, updatedAt: new Date().toISOString() });
 
+    // ============================================
+    // LOG GAME COMPLETION
+    // ============================================
+
+    // Log user activity
+    await logUserActivity(userUid, 'game_completed', {
+      gameId,
+      xpEarned,
+      jpEarned,
+      tierMultiplier: currentTier.multiplier,
+      tierName: currentTier.name,
+      isGameOfDay,
+      appliedMultiplier,
+      finalPoints,
+      retry,
+      level: level || 'default',
+      alreadyPlayed
+    });
+
+    // Capture CDC event for game completion
+    await captureGameCompletion(`${gameId}_${userUid}_${Date.now()}`, {
+      userId: userUid,
+      gameId,
+      gameType: gameId,
+      xpEarned,
+      jpEarned,
+      score: finalPoints,
+      tierMultiplier: currentTier.multiplier,
+      tierName: currentTier.name,
+      isGameOfDay,
+      appliedMultiplier,
+      retry,
+      level: level || 'default',
+      timestamp: Date.now()
+    });
+
     return NextResponse.json({
       success: true,
       awardedPoints: jpEarned,
@@ -200,9 +248,25 @@ export async function POST(req: NextRequest) {
 
   } catch (error: any) {
     console.error('Error awarding points:', error);
+
+    // Log error
+    await logError(error, {
+      endpoint: '/api/games/claim',
+      context: 'game_completion'
+    });
+
     return NextResponse.json(
       { error: 'Internal server error', details: error.message },
       { status: 500 }
     );
   }
 }
+
+// Export with rate limiting (30 requests per minute - more lenient for game claims)
+export const POST = withRateLimit(
+  {
+    endpoint: 'api:games:claim',
+    ...RateLimitPresets.api,
+  },
+  claimHandler
+);

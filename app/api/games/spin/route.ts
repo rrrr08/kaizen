@@ -2,16 +2,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import { adminAuth, adminDb } from '@/lib/firebaseAdmin';
 import { headers } from 'next/headers';
 import { FieldValue } from 'firebase-admin/firestore';
+import { withRateLimit, RateLimitPresets } from '@/lib/redis-rate-limit';
 
 import { WHEEL_PRIZES as DEFAULT_PRIZES, SPIN_COST as SHARED_SPIN_COST } from '@/lib/gamification';
 
 const SPIN_COST = 100;
 
-export async function POST(req: NextRequest) {
+async function spinHandler(req: NextRequest) {
   try {
     const headersList = await headers();
     const authorization = headersList.get('authorization');
-    
+
     if (!authorization?.startsWith('Bearer ')) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -37,12 +38,12 @@ export async function POST(req: NextRequest) {
       }
 
       const userData = userDoc.data()!;
-      
+
       // 1. Validation
       if (isFreeSpin) {
         const today = new Date().toISOString().split('T')[0];
         const lastSpin = userData.daily_stats?.last_spin_date;
-        
+
         if (lastSpin === today) {
           throw new Error('Free spin already used today');
         }
@@ -52,10 +53,10 @@ export async function POST(req: NextRequest) {
         if (balance < SPIN_COST) {
           throw new Error('Insufficient funds');
         }
-        
+
         // Deduct cost
         t.update(userRef, {
-            points: FieldValue.increment(-SPIN_COST)
+          points: FieldValue.increment(-SPIN_COST)
         });
       }
 
@@ -64,7 +65,7 @@ export async function POST(req: NextRequest) {
       if (settingsDoc.exists && settingsDoc.data()?.prizes) {
         prizes = settingsDoc.data()?.prizes;
       }
-      
+
       // 3. Select Prize (Weighted Random)
       const rand = Math.random();
       let cumulative = 0;
@@ -72,7 +73,7 @@ export async function POST(req: NextRequest) {
 
       const totalWeight = prizes.reduce((sum: number, p: any) => sum + (p.probability || 0), 0);
       let randomWeight = rand * totalWeight;
-      
+
       for (const prize of prizes) {
         randomWeight -= (prize.probability || 0);
         if (randomWeight <= 0) {
@@ -83,7 +84,7 @@ export async function POST(req: NextRequest) {
 
       // 4. Award Prize
       const updates: any = {
-          'daily_stats.last_spin_date': new Date().toISOString().split('T')[0]
+        'daily_stats.last_spin_date': new Date().toISOString().split('T')[0]
       };
 
       let message = `You won ${selectedPrize.label}`;
@@ -100,27 +101,27 @@ export async function POST(req: NextRequest) {
       const currentTier = [...TIERS].reverse().find((tier: any) => currentXP >= tier.minXP) || TIERS[0];
 
       if (selectedPrize.type === 'JP' || selectedPrize.type === 'JACKPOT') {
-         const basePrizeValue = Number(selectedPrize.value);
-         // Apply tier multiplier to JP prizes
-         const jpEarned = Math.round(basePrizeValue * currentTier.multiplier);
-         updates.points = FieldValue.increment(jpEarned);
-         awardedValue = jpEarned;
-         message = `You won ${jpEarned} JP (${basePrizeValue} × ${currentTier.multiplier}x ${currentTier.name} bonus)!`;
-         
+        const basePrizeValue = Number(selectedPrize.value);
+        // Apply tier multiplier to JP prizes
+        const jpEarned = Math.round(basePrizeValue * currentTier.multiplier);
+        updates.points = FieldValue.increment(jpEarned);
+        awardedValue = jpEarned;
+        message = `You won ${jpEarned} JP (${basePrizeValue} × ${currentTier.multiplier}x ${currentTier.name} bonus)!`;
+
       } else if (selectedPrize.type === 'XP') {
-          // XP prizes don't get multiplier (consistent with game rewards)
-          const prizeValue = Number(selectedPrize.value);
-          updates.xp = FieldValue.increment(prizeValue);
-          awardedValue = prizeValue;
+        // XP prizes don't get multiplier (consistent with game rewards)
+        const prizeValue = Number(selectedPrize.value);
+        updates.xp = FieldValue.increment(prizeValue);
+        awardedValue = prizeValue;
       } else if (selectedPrize.type === 'ITEM' || selectedPrize.type === 'COUPON') {
-          // Placeholder for item logic
+        // Placeholder for item logic
       }
 
       t.update(userRef, updates);
 
       return {
-          prize: selectedPrize,
-          awardedValue
+        prize: selectedPrize,
+        awardedValue
       };
     });
 
@@ -131,3 +132,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: error.message || 'Spin failed' }, { status: 400 });
   }
 }
+
+// Export with rate limiting (10 requests per minute)
+export const POST = withRateLimit(
+  {
+    endpoint: 'api:games:spin',
+    ...RateLimitPresets.game,
+  },
+  spinHandler
+);

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebaseAdmin';
 import { FieldValue } from 'firebase-admin/firestore';
+import { withRateLimit, RateLimitPresets } from '@/lib/redis-rate-limit';
 
 let razorpayInstance: any = null;
 
@@ -15,7 +16,7 @@ async function getRazorpay() {
   return razorpayInstance;
 }
 
-export async function POST(request: NextRequest) {
+async function createOrderHandler(request: NextRequest) {
   try {
     // Check if Razorpay credentials are set
     if (!process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
@@ -148,3 +149,12 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+// Export with strict rate limiting (5 requests per 5 minutes - prevents payment fraud)
+export const POST = withRateLimit(
+  {
+    endpoint: 'api:payments:create-order',
+    ...RateLimitPresets.auth, // 5 req/5min (very strict)
+  },
+  createOrderHandler
+);

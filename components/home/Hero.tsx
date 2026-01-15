@@ -86,6 +86,8 @@ const Hero: React.FC<HeroProps> = ({
                                 src={backgroundImage}
                                 alt="Hero visual"
                                 fill
+                                priority
+                                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 40vw"
                                 className="object-cover grayscale-0 group-hover:grayscale-0 group-hover:sepia-[0.3] transition-all duration-700"
                             />
                         </motion.div>

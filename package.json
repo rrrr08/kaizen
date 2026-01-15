@@ -29,6 +29,7 @@
     "@radix-ui/react-tabs": "^1.1.13",
     "@radix-ui/react-toast": "^1.2.15",
     "@types/canvas-confetti": "^1.9.0",
+    "@upstash/redis": "^1.36.1",
     "canvas-confetti": "^1.9.4",
     "chess.js": "^1.4.0",
     "class-variance-authority": "^0.7.1",
@@ -86,5 +87,10 @@
   "engines": {
     "node": ">=20.0.0",
     "npm": ">=10.0.0"
-  }
+  },
+  "browserslist": [
+    "last 2 versions",
+    "not dead",
+    "not ie 11"
+  ]
 }

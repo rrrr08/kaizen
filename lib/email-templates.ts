@@ -102,7 +102,7 @@ export const getBaseEmailTemplate = (subject: string, message: string) => {
           <div class="content">
             <div class="message-card">${message.replace(/\n/g, '<br>')}</div>
             <p style="font-weight: 700; font-size: 18px; margin-top: 30px;">Stay connected, stay playful!</p>
-            <a href="https://joyjuncture.com" class="btn">Explore More Fun</a>
+            <a href="https://joy-juncture.vercel.app" class="btn">Explore More Fun</a>
           </div>
           <div class="footer">
             © ${new Date().getFullYear()} JOY JUNCTURE • THE ULTIMATE PLAYGROUND

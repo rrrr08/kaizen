@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { adminAuth, adminDb } from '@/lib/firebaseAdmin';
 import twilio from 'twilio';
 import { otpStore, generateOTP, OTP_EXPIRY_MS } from '@/lib/otpStore';
+import { SmsTemplates } from '@/lib/sms-templates';
 
 export async function POST(req: NextRequest) {
   try {
@@ -102,7 +103,7 @@ export async function POST(req: NextRequest) {
     // Send SMS
     try {
       await client.messages.create({
-        body: `Your verification code is: ${otp}\n\nThis code will expire in 10 minutes.\n\nDo not share this code with anyone.`,
+        body: SmsTemplates.otp(otp, 10),
         from: twilioPhone,
         to: phoneNumber
       });

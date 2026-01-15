@@ -5,8 +5,9 @@ import { FieldValue } from 'firebase-admin/firestore';
 import { doc, getDoc, getFirestore } from 'firebase/firestore';
 import { app } from '@/lib/firebase';
 import nodemailer from 'nodemailer';
+import { withRateLimit, RateLimitPresets } from '@/lib/redis-rate-limit';
 
-export async function POST(request: NextRequest) {
+async function verifyPaymentHandler(request: NextRequest) {
   try {
     // Check if Razorpay secret is configured
     if (!process.env.RAZORPAY_KEY_SECRET) {
@@ -448,3 +449,12 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+// Export with strict rate limiting (5 requests per 5 minutes - prevents verification abuse)
+export const POST = withRateLimit(
+  {
+    endpoint: 'api:payments:verify',
+    ...RateLimitPresets.auth, // 5 req/5min (very strict)
+  },
+  verifyPaymentHandler
+);

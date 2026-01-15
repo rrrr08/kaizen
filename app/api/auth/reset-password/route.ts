@@ -3,8 +3,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAdminAuth } from "@/app/api/auth/firebase-admin";
 import { sendEmail } from "@/lib/email-service";
 import { getPasswordResetTemplate } from "@/lib/email-templates";
+import { withRateLimit, RateLimitPresets } from '@/lib/redis-rate-limit';
 
-export async function POST(req: NextRequest) {
+async function resetPasswordHandler(req: NextRequest) {
     try {
         const { email } = await req.json();
 
@@ -56,3 +57,12 @@ export async function POST(req: NextRequest) {
         );
     }
 }
+
+// Export with strict rate limiting (5 requests per 5 minutes - prevents brute force)
+export const POST = withRateLimit(
+    {
+        endpoint: 'api:auth:reset-password',
+        ...RateLimitPresets.auth, // 5 req/5min (very strict)
+    },
+    resetPasswordHandler
+);
