@@ -3,9 +3,11 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User } from 'firebase/auth';
 
+import { UserProfile } from '@/lib/types';
+
 interface AuthContextType {
   user: User | null;
-  userProfile: any | null; // Typed loosely here or import UserProfile
+  userProfile: UserProfile | null;
   loading: boolean;
   role: string | null;
   isAdmin: boolean;
@@ -15,7 +17,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [userProfile, setUserProfile] = useState<any | null>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [role, setRole] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -58,7 +60,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 const userDocSnap = await getDoc(userDocRef);
 
                 if (userDocSnap.exists()) {
-                  const userData = userDocSnap.data();
+                  const userData = userDocSnap.data() as UserProfile;
                   const userRole = userData?.role || null;
                   setUserProfile(userData);
                   setRole(userRole);

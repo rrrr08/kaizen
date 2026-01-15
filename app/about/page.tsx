@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { motion, useScroll } from 'framer-motion';
 
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
@@ -31,6 +32,11 @@ interface Founder {
 
 export default function About() {
   const [founders, setFounders] = useState<Founder[]>(DEFAULT_FOUNDERS);
+  const containerRef = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start 0.8", "end 0.8"]
+  });
 
   useEffect(() => {
     async function fetchContent() {
@@ -98,13 +104,14 @@ export default function About() {
             </h2>
           </div>
 
-          <div className="relative max-w-5xl mx-auto px-4">
+          <div ref={containerRef} className="relative max-w-5xl mx-auto px-4">
             {/* SVG PATHWAY BACKGROUND */}
+            {/* SCROLL PROGRESS PATH ANIMATION */}
             <svg
-              className="absolute top-0 left-0 w-full h-[95%] pointer-events-none hidden md:block"
+              className="absolute top-0 left-0 w-full h-full pointer-events-none hidden md:block"
               viewBox="0 0 1000 1200"
               fill="none"
-              preserveAspectRatio="xMidYMid meet"
+              preserveAspectRatio="none"
               style={{ zIndex: 0 }}
             >
               <defs>
@@ -115,7 +122,25 @@ export default function About() {
                   <stop offset="100%" stopColor="#00B894" />
                 </linearGradient>
               </defs>
+
+              {/* Track Path (Dashed/Faint) */}
               <path
+                d="M 500 50 
+                   C 500 100, 200 150, 200 300
+                   C 200 450, 800 500, 800 650
+                   C 800 800, 200 850, 200 1000
+                   C 200 1100, 500 1150, 500 1200"
+                stroke="#000"
+                strokeWidth="4"
+                strokeOpacity="0.1"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeDasharray="10 10"
+                vectorEffect="non-scaling-stroke"
+              />
+
+              {/* Animated Filling Path */}
+              <motion.path
                 d="M 500 50 
                    C 500 100, 200 150, 200 300
                    C 200 450, 800 500, 800 650
@@ -125,13 +150,23 @@ export default function About() {
                 strokeWidth="6"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                strokeDasharray="20 20"
-                className="opacity-40"
+                vectorEffect="non-scaling-stroke"
+                style={{
+                  pathLength: scrollYProgress,
+                  opacity: 1
+                }}
               />
             </svg>
 
+
             {/* Level 1: THE SPARK (Left Aligned on desktop path) */}
-            <div className="relative flex flex-col md:flex-row items-center gap-12 mb-36 group">
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.6 }}
+              className="relative flex flex-col md:flex-row items-center gap-12 mb-36 group"
+            >
               <div className="md:w-1/2 md:pr-16 text-right order-1 md:order-1 relative">
                 <div className="inline-block bg-[#FFD93D] border-2 border-black px-4 py-1 font-black text-xs mb-4 shadow-[3px_3px_0px_#000] rotate-2">
                   LEVEL 1
@@ -156,10 +191,16 @@ export default function About() {
                   </div>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
             {/* Level 2: TRIAL & ERROR (Right Aligned on desktop path) */}
-            <div className="relative flex flex-col md:flex-row items-center gap-12 mb-36 group">
+            <motion.div
+              initial={{ opacity: 0, x: 50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.6 }}
+              className="relative flex flex-col md:flex-row items-center gap-12 mb-36 group"
+            >
               <div className="md:w-1/2 md:pr-16 order-2 md:order-1">
                 <div className="relative bg-[#FF7675] p-2 rounded-3xl border-4 border-black -rotate-2 group-hover:-rotate-6 transition-transform hover:scale-105 duration-300">
                   <div className="bg-white rounded-2xl h-48 flex items-center justify-center relative overflow-hidden text-center p-4">
@@ -188,10 +229,16 @@ export default function About() {
                   </p>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
             {/* Level 3: FIRST VICTORY (Left Aligned on desktop path) */}
-            <div className="relative flex flex-col md:flex-row items-center gap-12 mb-36 group">
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.6 }}
+              className="relative flex flex-col md:flex-row items-center gap-12 mb-36 group"
+            >
               <div className="md:w-1/2 md:pr-16 text-right order-1 md:order-1 relative">
                 <div className="inline-block bg-[#6C5CE7] text-white border-2 border-black px-4 py-1 font-black text-xs mb-4 shadow-[3px_3px_0px_#000] rotate-2">
                   LEVEL 3
@@ -218,10 +265,16 @@ export default function About() {
                   </div>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
             {/* Level 4: EXPANSION (Right Aligned on desktop path) */}
-            <div className="relative flex flex-col md:flex-row items-center gap-12 mb-36 group">
+            <motion.div
+              initial={{ opacity: 0, x: 50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.6 }}
+              className="relative flex flex-col md:flex-row items-center gap-12 mb-36 group"
+            >
               <div className="md:w-1/2 md:pr-16 order-2 md:order-1">
                 <div className="relative bg-[#00B894] p-2 rounded-3xl border-4 border-black -rotate-2 group-hover:-rotate-4 transition-transform hover:scale-105 duration-300">
                   <div className="bg-white rounded-2xl h-48 flex items-center justify-center relative overflow-hidden">
@@ -248,7 +301,7 @@ export default function About() {
                   </p>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
             {/* Level 5: THE FUTURE */}
             <div className="relative flex justify-center mt-24">
@@ -261,9 +314,9 @@ export default function About() {
                 <p className="text-xl text-gray-300 font-medium leading-relaxed mb-8">
                   New worlds. New games. Same mission: To rid the world of boring evenings, one dice roll at a time.
                 </p>
-                <button className="bg-[#FFD93D] text-black font-black text-lg px-8 py-4 rounded-xl border-b-4 border-[#C5A300] active:border-b-0 active:translate-y-1 transition-all hover:bg-white hover:scale-105">
+                <Link href="/play" className="bg-[#FFD93D] text-black font-black text-lg px-8 py-4 rounded-xl border-b-4 border-[#C5A300] active:border-b-0 active:translate-y-1 transition-all hover:bg-white hover:scale-105">
                   JOIN THE ADVENTURE
-                </button>
+                </Link>
               </div>
             </div>
 

@@ -48,7 +48,7 @@ const Hero: React.FC<HeroProps> = ({
                     </p>
 
                     <div className="flex flex-wrap gap-8 pt-6">
-                        <Link href="/shop">
+                        <Link href="/events/upcoming">
                             <motion.button
                                 whileHover={{ scale: 1.05, y: -8, rotate: -2 }}
                                 whileTap={{ scale: 0.95 }}
@@ -57,7 +57,7 @@ const Hero: React.FC<HeroProps> = ({
                                 {ctaTextShops}
                             </motion.button>
                         </Link>
-                        <Link href="/events">
+                        <Link href="/shop">
                             <motion.button
                                 whileHover={{ scale: 1.05, y: -8, rotate: 2 }}
                                 whileTap={{ scale: 0.95 }}

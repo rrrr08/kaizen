@@ -310,7 +310,7 @@ export default function WalletPage() {
                           <div className="flex items-center gap-2 text-xs font-bold text-black/40 uppercase tracking-wider">
                             <span>{tx.source}</span>
                             <span>•</span>
-                            <span>{tx.timestamp?.seconds ? new Date(tx.timestamp.seconds * 1000).toLocaleDateString() : 'Just now'}</span>
+                            <span>{(tx.timestamp as any)?.seconds ? new Date((tx.timestamp as any).seconds * 1000).toLocaleDateString() : 'Just now'}</span>
                           </div>
                         </div>
                       </div>
