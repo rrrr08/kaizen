@@ -91,12 +91,7 @@ const Hero: React.FC<HeroProps> = ({
                         </motion.div>
                         <div className="absolute inset-0 bg-gradient-to-t from-[#6C5CE7]/40 to-transparent mix-blend-overlay" />
 
-                        {/* Play Overlay */}
-                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <div className="bg-white p-6 rounded-full neo-border neo-shadow">
-                                <Sparkles size={36} className="text-black" />
-                            </div>
-                        </div>
+
                     </div>
 
                     {/* Floating Dopamine Accents */}
