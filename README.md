@@ -110,6 +110,7 @@ This full-stack web application combines e-commerce, event management, gamificat
 ### Backend & Services
 - **Authentication**: [Firebase Auth](https://firebase.google.com/products/auth)
 - **Database**: [Cloud Firestore](https://firebase.google.com/products/firestore)
+- **Cache & Sessions**: [Upstash Redis](https://upstash.com/) (rate limiting, leaderboards, caching)
 - **Storage**: [Firebase Storage](https://firebase.google.com/products/storage) + [Cloudinary](https://cloudinary.com/)
 - **Payments**: [Razorpay](https://razorpay.com/)
 - **SMS**: [Twilio](https://www.twilio.com/)
@@ -185,6 +186,14 @@ This full-stack web application combines e-commerce, event management, gamificat
    # Razorpay (Payments)
    NEXT_PUBLIC_RAZORPAY_KEY_ID=rzp_test_...
    RAZORPAY_KEY_SECRET=your_secret_here
+
+   # Razorpay (Payments)
+   NEXT_PUBLIC_RAZORPAY_KEY_ID=rzp_test_...
+   RAZORPAY_KEY_SECRET=your_secret_here
+
+   # Redis (Upstash - for caching, rate limiting, leaderboards)
+   UPSTASH_REDIS_REST_URL=https://your-redis-url.upstash.io
+   UPSTASH_REDIS_REST_TOKEN=your_redis_token_here
 
    # SEO
    NEXT_PUBLIC_BASE_URL=http://localhost:3000
@@ -276,6 +285,7 @@ Comprehensive documentation is available in the `/docs` folder:
 
 ### Technical Documentation
 - **[FIREBASE_MIGRATION_GUIDE.md](./docs/FIREBASE_MIGRATION_GUIDE.md)** - Firebase setup
+- **[REDIS_INTEGRATION_GUIDE.md](./docs/REDIS_INTEGRATION_GUIDE.md)** - Redis setup & usage
 - **[GAME_SETUP_GUIDE.md](./docs/GAME_SETUP_GUIDE.md)** - Game integration
 - **[PAYMENT_INTEGRATION_GUIDE.md](./docs/PAYMENT_INTEGRATION_GUIDE.md)** - Payment setup
 - **[NOTIFICATION_SYSTEM_GUIDE.md](./docs/NOTIFICATION_SYSTEM_GUIDE.md)** - Notifications
