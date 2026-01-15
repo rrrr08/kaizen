@@ -66,7 +66,12 @@ export default function ExperiencePaymentForm({
         if (!formData.name.trim()) { setError('Please enter your name'); setShowErrorModal(true); return false; }
         if (!formData.email.trim()) { setError('Please enter your email'); setShowErrorModal(true); return false; }
         if (!formData.phone.trim()) { setError('Please enter your phone number'); setShowErrorModal(true); return false; }
-        if (!/^\d{10}$/.test(formData.phone.replace(/\D/g, ''))) { setError('Please enter a valid phone number'); setShowErrorModal(true); return false; }
+        const phoneRegex = /^\+?[\d\s-()]{10,20}$/;
+        if (!phoneRegex.test(formData.phone)) {
+            setError('Please enter a valid phone number');
+            setShowErrorModal(true);
+            return false;
+        }
         return true;
     };
 
