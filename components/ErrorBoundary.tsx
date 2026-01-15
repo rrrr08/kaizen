@@ -1,5 +1,6 @@
 'use client';
 
+
 import { ReactNode, Component, ErrorInfo } from 'react';
 import Link from 'next/link';
 import { AlertCircle, Home, RotateCcw } from 'lucide-react';
@@ -51,7 +52,7 @@ export class ErrorBoundary extends Component<Props, State> {
               </p>
 
               {/* Error Details (Development Only) */}
-              {process.env.NODE_ENV === 'development' && this.state.error && (
+              {this.state.error && (
                 <div className="mt-6 p-4 bg-red-950/20 border border-red-500/30 rounded-lg text-left">
                   <p className="text-xs text-red-400 font-mono break-all">
                     {this.state.error.message || 'Unknown error'}

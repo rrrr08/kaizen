@@ -7,6 +7,7 @@ import { createPaymentOrder, completeRegistration } from '@/lib/db/payments';
 import { useGamification } from '@/app/context/GamificationContext';
 import { usePopup } from '@/app/context/PopupContext';
 import { X, Check } from 'lucide-react';
+import Script from 'next/script';
 
 interface EventRegistrationFormProps {
   event: any;
@@ -62,6 +63,7 @@ export default function EventRegistrationForm({
   const [redeemPoints, setRedeemPoints] = useState(0);
   const [pointsDiscount, setPointsDiscount] = useState(0);
   const [lockId, setLockId] = useState<string | null>(null);
+  const [isRazorpayLoaded, setIsRazorpayLoaded] = useState(false);
 
   const [formData, setFormData] = useState({
     name: user?.displayName || '',
@@ -465,144 +467,147 @@ export default function EventRegistrationForm({
       );
 
       // Load Razorpay script
-      const script = document.createElement('script');
-      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-      script.async = true;
+      if (!window.Razorpay) {
+        throw new Error('Payment system is not ready. Please check your connection.');
+      }
 
-      script.onload = () => {
-        const options = {
-          key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-          amount: finalAmount * 100, // in paise
-          currency: 'INR',
-          name: 'Joy Juncture',
-          description: `Registration for ${event.title}`,
-          order_id: razorpayOrderId, // Use Razorpay order ID
-          prefill: {
-            name: formData.name,
-            email: formData.email,
-            contact: formData.phone,
-          },
-          handler: async (response: any) => {
-            try {
-              // Verify payment and complete registration
-              const paymentResponse = await fetch('/api/payments/verify', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  razorpay_payment_id: response.razorpay_payment_id,
-                  razorpay_order_id: response.razorpay_order_id,
-                  razorpay_signature: response.razorpay_signature,
-                  orderId: dbOrderResult.orderId,
-                  eventId: event.id,
-                  userId: user.uid,
-                  amount: Math.round(finalAmount * 100),
-                  walletPointsUsed: 0,
-                }),
-              });
+      const options = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+        amount: finalAmount * 100, // in paise
+        currency: 'INR',
+        name: 'Joy Juncture',
+        description: `Registration for ${event.title}`,
+        order_id: razorpayOrderId, // Use Razorpay order ID
+        prefill: {
+          name: formData.name,
+          email: formData.email,
+          contact: formData.phone,
+        },
+        handler: async (response: any) => {
+          try {
+            // Verify payment and complete registration
+            const paymentResponse = await fetch('/api/payments/verify', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_signature: response.razorpay_signature,
+                orderId: dbOrderResult.orderId,
+                eventId: event.id,
+                userId: user.uid,
+                amount: Math.round(finalAmount * 100),
+                walletPointsUsed: 0,
+              }),
+            });
 
-              const paymentData = await paymentResponse.json();
+            const paymentData = await paymentResponse.json();
 
-              if (paymentData.success) {
-                isSuccessRef.current = true; // Prevents lock release/notify on cleanup
+            if (paymentData.success) {
+              isSuccessRef.current = true; // Prevents lock release/notify on cleanup
 
-                // Clear lock ID so we don't try to release it manually either
-                setLockId(null);
+              // Clear lock ID so we don't try to release it manually either
+              setLockId(null);
 
-                // Mark voucher as used if one was applied
-                if (appliedVoucherId) {
-                  try {
-                    const token = await user.getIdToken();
-                    await fetch('/api/rewards/use', {
-                      method: 'POST',
-                      headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                      },
-                      body: JSON.stringify({
-                        voucherId: appliedVoucherId,
-                        orderId: dbOrderResult.orderId
-                      })
-                    });
-                  } catch (voucherError) {
-                    console.error('Error marking voucher as used:', voucherError);
-                  }
-                }
-
-                const registrationId = paymentData.registrationId || dbOrderResult.orderId;
-
-                // Store registration details in localStorage for the success page
-                const registrationDetails = {
-                  registrationId,
-                  eventTitle: event.title,
-                  eventDate: event.datetime ? new Date(event.datetime).toISOString() : undefined,
-                  eventLocation: event.location,
-                  amount: finalAmount.toFixed(2),
-                  pointsUsed: actualRedeemPoints,
-                  userName: formData.name,
-                  userEmail: formData.email,
-                  vipSeating: hasVIPSeating && wantsVIPSeating,
-                  tierDiscount: tierDiscount > 0 ? tierDiscount.toFixed(2) : null,
-                  voucherDiscount: voucherDiscount > 0 ? voucherDiscount.toFixed(2) : null,
-                };
-
-                if (typeof window !== 'undefined') {
-                  localStorage.setItem(
-                    `registration_${registrationId}`,
-                    JSON.stringify(registrationDetails)
-                  );
-                }
-
-                // Save checkout info for future auto-fill
+              // Mark voucher as used if one was applied
+              if (appliedVoucherId) {
                 try {
-                  const { getFirestore, doc, updateDoc } = await import('firebase/firestore');
-                  const { app } = await import('@/lib/firebase');
-                  const db = getFirestore(app);
-                  const userRef = doc(db, 'users', user.uid);
-                  await updateDoc(userRef, {
-                    checkoutInfo: {
-                      name: formData.name,
-                      email: formData.email,
-                      phone: formData.phone,
-                      updatedAt: new Date().toISOString(),
-                    }
+                  const token = await user.getIdToken();
+                  await fetch('/api/rewards/use', {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                      voucherId: appliedVoucherId,
+                      orderId: dbOrderResult.orderId
+                    })
                   });
-                } catch (saveError) {
-                  console.error('Failed to save checkout info:', saveError);
+                } catch (voucherError) {
+                  console.error('Error marking voucher as used:', voucherError);
                 }
-
-                // Close modal and redirect to success page
-                onClose();
-                router.push(`/events/registration-success/${registrationId}`);
-              } else {
-                setError(paymentData.error || 'Payment verification failed');
-                setShowErrorModal(true);
-                setIsProcessing(false);
               }
-            } catch (err: any) {
-              setError(err.message || 'Payment verification failed');
+
+              const registrationId = paymentData.registrationId || dbOrderResult.orderId;
+
+              // Store registration details in localStorage for the success page
+              const registrationDetails = {
+                registrationId,
+                eventTitle: event.title,
+                eventDate: event.datetime ? new Date(event.datetime).toISOString() : undefined,
+                eventLocation: event.location,
+                amount: finalAmount.toFixed(2),
+                pointsUsed: actualRedeemPoints,
+                userName: formData.name,
+                userEmail: formData.email,
+                vipSeating: hasVIPSeating && wantsVIPSeating,
+                tierDiscount: tierDiscount > 0 ? tierDiscount.toFixed(2) : null,
+                voucherDiscount: voucherDiscount > 0 ? voucherDiscount.toFixed(2) : null,
+              };
+
+              if (typeof window !== 'undefined') {
+                localStorage.setItem(
+                  `registration_${registrationId}`,
+                  JSON.stringify(registrationDetails)
+                );
+              }
+
+              // Save checkout info for future auto-fill
+              try {
+                const { getFirestore, doc, updateDoc } = await import('firebase/firestore');
+                const { app } = await import('@/lib/firebase');
+                const db = getFirestore(app);
+                const userRef = doc(db, 'users', user.uid);
+                await updateDoc(userRef, {
+                  checkoutInfo: {
+                    name: formData.name,
+                    email: formData.email,
+                    phone: formData.phone,
+                    updatedAt: new Date().toISOString(),
+                  }
+                });
+              } catch (saveError) {
+                console.error('Failed to save checkout info:', saveError);
+              }
+
+              // Close modal and redirect to success page
+              onClose();
+              router.push(`/events/registration-success/${registrationId}`);
+            } else {
+              setError(paymentData.error || 'Payment verification failed');
               setShowErrorModal(true);
               setIsProcessing(false);
             }
-          },
-          theme: {
-            color: '#fbbf24',
-          },
-          modal: {
-            ondismiss: function () {
-              setIsProcessing(false);
-              // Do NOT release lock immediately on modal dismiss? 
-              // Actually user might want to try again. 
-              // If we release lock here, they lose spot. 
-              // Better to keep lock until they interact with OUR modal close.
-            }
+          } catch (err: any) {
+            setError(err.message || 'Payment verification failed');
+            setShowErrorModal(true);
+            setIsProcessing(false);
           }
-        };
-
-        const razorpay = new window.Razorpay(options);
-        razorpay.open();
+        },
+        theme: {
+          color: '#fbbf24',
+        },
+        modal: {
+          ondismiss: function () {
+            setIsProcessing(false);
+            // Do NOT release lock immediately on modal dismiss? 
+            // Actually user might want to try again. 
+            // If we release lock here, they lose spot. 
+            // Better to keep lock until they interact with OUR modal close.
+          }
+        }
       };
 
-      document.body.appendChild(script);
+      const razorpay = new window.Razorpay(options);
+      razorpay.on('payment.failed', function (response: any) {
+        console.error('Payment Failed:', response.error);
+        setError(response.error.description || 'Payment Failed');
+        setShowErrorModal(true);
+        setIsProcessing(false);
+      });
+      razorpay.open();
+
     } catch (err: any) {
       setError(err.message || 'Failed to initiate payment');
       setShowErrorModal(true);
@@ -642,6 +647,12 @@ export default function EventRegistrationForm({
 
   return (
     <>
+      <Script
+        id="razorpay-event-checkout"
+        src="https://checkout.razorpay.com/v1/checkout.js"
+        strategy="lazyOnload"
+        onLoad={() => setIsRazorpayLoaded(true)}
+      />
       {/* Error Modal */}
       {showErrorModal && error && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4">

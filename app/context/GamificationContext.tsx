@@ -204,16 +204,7 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
         });
 
       } else {
-        // Init profile if missing
-        setDoc(userRef, {
-          xp: 0,
-          game_xp: 0,
-          points: 0,
-          streak: { count: 0, last_active_date: null, freeze_count: 0 },
-          daily_stats: { eggs_found: 0 }
-        }, { merge: true }).catch(err => {
-          console.error("Error initializing user profile:", err);
-        });
+        console.log("User profile not found in GamificationContext (waiting for creation)");
       }
       setLoading(false);
     }, (error) => {
