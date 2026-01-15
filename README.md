@@ -2,7 +2,7 @@
 
 <div align="center">
 
-**A modern, gamified platform for board games, events, experiences, and community engagement**
+**A modern, gamified platform for board games, events, experiences, and community engagements**
 
 [![Next.js](https://img.shields.io/badge/Next.js-16.0-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
