@@ -118,13 +118,15 @@ export default function ExperienceEnquiryPage() {
     // Phone validation
     // Allow + at start, then digits, spaces, hyphens, parentheses (common for country codes)
     const phoneRegex = /^\+?[\d\s-()]{10,20}$/;
-    const cleanPhone = formData.phone.replace(/[^\d+]/g, ''); // Keep + and digits
     if (!formData.phone.trim()) {
       errors.phone = 'Phone number is required';
-    } else if (cleanPhone.length < 10) {
-      errors.phone = 'Phone number must be at least 10 digits';
     } else if (!phoneRegex.test(formData.phone)) {
       errors.phone = 'Please enter a valid phone number';
+    } else {
+      const cleanPhone = formData.phone.replace(/[^\d+]/g, ''); // Keep + and digits
+      if (cleanPhone.length < 10) {
+        errors.phone = 'Phone number must be at least 10 digits';
+      }
     }
 
     // Occasion details validation
@@ -213,11 +215,11 @@ export default function ExperienceEnquiryPage() {
       const enquiryData = {
         name: formData.name.trim(),
         email: formData.email.trim(),
-        phone: formData.phone.replace(/\D/g, ''), // Clean phone number
+        phone: formData.phone.trim(), // Keep phone as-is, don't strip the + prefix
         categoryId: category.id,
         categoryName: category.name,
         occasionDetails: formData.occasionDetails.trim(),
-        audienceSize: formData.audienceSize,
+        audienceSize: formData.audienceSize, 
         preferredDateRange: formData.preferredDateRange.trim(),
         budgetRange: formData.budgetRange,
         specialRequirements: formData.specialRequirements.trim(),
