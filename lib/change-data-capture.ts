@@ -6,6 +6,7 @@
 import { redis } from './redis';
 import { adminDb } from './firebaseAdmin';
 import { logError } from './log-aggregator';
+import admin from 'firebase-admin';
 
 export interface ChangeEvent {
     collection: string;
@@ -146,7 +147,7 @@ export class ChangeDataCapture {
         try {
             for (const item of order.items || []) {
                 await adminDb.collection('products').doc(item.productId).update({
-                    stock: adminDb.FieldValue.increment(-item.quantity)
+                    stock: admin.firestore.FieldValue.increment(-item.quantity)
                 });
             }
         } catch (error) {
@@ -186,13 +187,13 @@ export class ChangeDataCapture {
             const updates: any = {};
 
             if (stats.ordersCount) {
-                updates.ordersCount = adminDb.FieldValue.increment(stats.ordersCount);
+                updates.ordersCount = admin.firestore.FieldValue.increment(stats.ordersCount);
             }
             if (stats.gamesPlayed) {
-                updates.gamesPlayed = adminDb.FieldValue.increment(stats.gamesPlayed);
+                updates.gamesPlayed = admin.firestore.FieldValue.increment(stats.gamesPlayed);
             }
             if (stats.totalXP) {
-                updates.totalXP = adminDb.FieldValue.increment(stats.totalXP);
+                updates.totalXP = admin.firestore.FieldValue.increment(stats.totalXP);
             }
 
             await adminDb.collection('users').doc(userId).update(updates);
@@ -203,14 +204,17 @@ export class ChangeDataCapture {
 
     /**
      * Subscribe to changes (real-time)
+     * Note: Upstash Redis doesn't support pub/sub in the same way as regular Redis
+     * This method is commented out for now
      */
+    /*
     static async subscribeToChanges(
         collection: string,
         callback: (event: ChangeEvent) => void
     ): Promise<any> {
         const subscriber = redis.duplicate();
 
-        await subscriber.subscribe(`changes:${collection}`, (message) => {
+        await subscriber.subscribe(`changes:${collection}`, (message: string) => {
             try {
                 const event = JSON.parse(message);
                 callback(event);
@@ -221,6 +225,7 @@ export class ChangeDataCapture {
 
         return subscriber;
     }
+    */
 
     /**
      * Get recent changes
@@ -231,7 +236,8 @@ export class ChangeDataCapture {
     ): Promise<ChangeEvent[]> {
         try {
             const streamKey = `cdc:${collection}`;
-            const messages = await redis.xrevrange(streamKey, '+', '-', 'COUNT', limit);
+            // Upstash Redis xrevrange: (key, end, start, count)
+            const messages = await redis.xrevrange(streamKey, '+', '-', limit) as unknown as any[];
 
             // Check if messages is valid and is an array
             if (!messages || !Array.isArray(messages) || messages.length === 0) {

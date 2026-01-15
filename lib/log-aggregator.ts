@@ -88,10 +88,10 @@ export class LogAggregator {
                 -limit,
                 -1,
                 { rev: true }
-            );
+            ) as string[];
 
             const logs = await Promise.all(
-                keys.map(async (key) => {
+                keys.map(async (key: string) => {
                     const data = await redis.get(key);
                     if (!data) return null;
                     // Redis might return object or string
