@@ -34,7 +34,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      import('firebase/auth').then(({ onAuthStateChanged }) => {
+      import('firebase/auth').then(({ onAuthStateChanged, signOut }) => {
         import('firebase/firestore').then(({ doc, getDoc }) => {
           const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
             console.log('[AuthContext] Auth state changed:', {
@@ -61,6 +61,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
                 if (userDocSnap.exists()) {
                   const userData = userDocSnap.data() as UserProfile;
+
+                  // Check for Ban Status
+                  if (userData.isBanned) {
+                    console.warn('[AuthContext] User is banned. Logging out.');
+                    await signOut(auth);
+                    setUser(null);
+                    setUserProfile(null);
+                    setRole(null);
+                    setIsAdmin(false);
+                    setLoading(false);
+                    // Optional: Redirect or Alert
+                    if (typeof window !== 'undefined') {
+                      alert("Your account has been suspended. Please contact support.");
+                      window.location.href = "/";
+                    }
+                    return;
+                  }
+
                   const userRole = userData?.role || null;
                   setUserProfile(userData);
                   setRole(userRole);

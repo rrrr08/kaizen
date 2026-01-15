@@ -30,6 +30,7 @@ interface User {
   name?: string;
   email: string;
   role: string;
+  isBanned?: boolean;
   created_at?: {
     toDate: () => Date;
   };
@@ -94,6 +95,7 @@ const UserManagementPage = () => {
             name: data.name,
             email: data.email,
             role: data.role,
+            isBanned: data.isBanned || false,
             created_at: data.created_at
           } as User;
         });
@@ -119,6 +121,27 @@ const UserManagementPage = () => {
         console.error('Error updating role:', error);
         await showAlert('Failed to update role. Please check your permissions.', 'error');
       }
+    }
+  };
+
+  const handleBanToggle = async (user: User) => {
+    try {
+      const userRef = doc(db, 'users', user.id);
+      const newBanStatus = !user.isBanned;
+
+      await updateDoc(userRef, { isBanned: newBanStatus });
+
+      setUsers(users.map(u =>
+        u.id === user.id ? { ...u, isBanned: newBanStatus } : u
+      ));
+
+      await showAlert(
+        `User ${newBanStatus ? 'banned' : 'unbanned'} successfully`,
+        'success'
+      );
+    } catch (error) {
+      console.error('Error updating ban status:', error);
+      await showAlert('Failed to update ban status', 'error');
     }
   };
 
@@ -271,6 +294,7 @@ const UserManagementPage = () => {
                     <TableHead className="font-black text-white uppercase tracking-wider py-4">User</TableHead>
                     <TableHead className="font-black text-white uppercase tracking-wider py-4">Email</TableHead>
                     <TableHead className="font-black text-white uppercase tracking-wider py-4">Role</TableHead>
+                    <TableHead className="font-black text-white uppercase tracking-wider py-4">Status</TableHead>
                     <TableHead className="font-black text-white uppercase tracking-wider py-4">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -285,11 +309,19 @@ const UserManagementPage = () => {
                     >
                       <TableCell className="py-4">
                         <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 bg-[#FFD93D] rounded-full border-2 border-black flex items-center justify-center text-[#2D3436] font-black shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+                          <div className={`w-10 h-10 rounded-full border-2 border-black flex items-center justify-center font-black shadow-[2px_2px_0px_rgba(0,0,0,1)] ${user.isBanned ? 'bg-red-500 text-white' : 'bg-[#FFD93D] text-[#2D3436]'}`}>
                             {user.name?.charAt(0)?.toUpperCase() || '?'}
                           </div>
                           <div>
-                            <div className="font-bold text-[#2D3436]">{user.name || 'No Name'}</div>
+                            <div className="flex items-center gap-2">
+                              {/* Name */}
+                              <div className="font-bold text-[#2D3436]">{user.name || 'No Name'}</div>
+                              {user.isBanned && (
+                                <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-red-100 text-red-600 border border-red-200">
+                                  Banned
+                                </span>
+                              )}
+                            </div>
                             <div className="text-xs text-[#2D3436]/60 font-medium uppercase tracking-wide">
                               Joined {user.created_at ? new Date(user.created_at.toDate()).toLocaleDateString() : 'N/A'}
                             </div>
@@ -304,7 +336,22 @@ const UserManagementPage = () => {
                         </span>
                       </TableCell>
                       <TableCell>
+                        <span className={`inline-flex items-center px-2 py-1 rounded text-[10px] font-black uppercase border border-black ${user.isBanned ? 'bg-red-400 text-black' : 'bg-green-400 text-black'}`}>
+                          {user.isBanned ? 'Banned' : 'Active'}
+                        </span>
+                      </TableCell>
+                      <TableCell>
                         <div className="flex gap-2">
+                          <button
+                            onClick={() => handleBanToggle(user)}
+                            className={`inline-flex items-center px-3 py-2 rounded-lg transition-all duration-200 text-xs font-black uppercase tracking-wider border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none ${user.isBanned
+                              ? 'bg-green-400 hover:bg-green-500 text-black'
+                              : 'bg-red-400 hover:bg-red-500 text-black'
+                              }`}
+                          >
+                            <Shield className="w-3 h-3 mr-2" />
+                            {user.isBanned ? 'Unban' : 'Ban'}
+                          </button>
                           <button
                             onClick={() => openDetailsDialog(user)}
                             className="inline-flex items-center px-3 py-2 bg-[#74B9FF] text-black rounded-lg hover:bg-[#5FA3E8] transition-all duration-200 text-xs font-black uppercase tracking-wider border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
@@ -657,4 +704,3 @@ const UserManagementPage = () => {
 };
 
 export default UserManagementPage;
-
