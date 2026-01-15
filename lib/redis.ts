@@ -5,11 +5,39 @@
 
 import { Redis } from '@upstash/redis';
 
-// Initialize Redis client
-export const redis = new Redis({
-    url: process.env.UPSTASH_REDIS_REST_URL!,
-    token: process.env.UPSTASH_REDIS_REST_TOKEN!,
-});
+// Initialize Redis client or a mock for development
+const redisUrl = process.env.UPSTASH_REDIS_REST_URL;
+const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN;
+
+// Helper to warn about missing config, but only once
+let hasWarned = false;
+const warnMissingConfig = () => {
+    if (!hasWarned && typeof window === 'undefined') {
+        console.warn('⚠️  Redis credentials missing. Using mock Redis client. Rate limiting and caching will be disabled.');
+        console.warn('   Add UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN to your .env.local file.');
+        hasWarned = true;
+    }
+};
+
+export const redis = (redisUrl && redisToken)
+    ? new Redis({
+        url: redisUrl,
+        token: redisToken,
+    })
+    : new Proxy({} as Redis, {
+        get: (target, prop) => {
+            warnMissingConfig();
+            // Return no-op functions for common methods
+            if (prop === 'incr') return async () => 1;
+            if (prop === 'expire') return async () => 1;
+            if (prop === 'get') return async () => null;
+            if (prop === 'setex') return async () => 'OK';
+            if (prop === 'del') return async () => 0;
+            if (prop === 'ping') return async () => 'PONG';
+            // Default safe return for others
+            return async () => null;
+        }
+    });
 
 /**
  * Redis Key Patterns

@@ -1,5 +1,5 @@
 'use client';
-// Force HMR update
+
 
 import { ReactNode, Component, ErrorInfo } from 'react';
 import Link from 'next/link';
