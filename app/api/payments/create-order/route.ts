@@ -30,21 +30,6 @@ async function createOrderHandler(request: NextRequest) {
     const body = await request.json();
     const { amount, currency = 'INR', receipt, notes, items, shippingAddress, userId } = body;
 
-    // Check if user is already registered (event logic)
-    if (notes?.userId && notes?.eventId) {
-      const existingReg = await adminDb.collection('event_registrations')
-        .where('eventId', '==', notes.eventId)
-        .where('userId', '==', notes.userId)
-        .get();
-
-      if (!existingReg.empty) {
-        return NextResponse.json(
-          { error: 'You are already registered for this event' },
-          { status: 400 }
-        );
-      }
-    }
-
     if (!amount || amount <= 0) {
       return NextResponse.json(
         { error: 'Invalid amount' },
@@ -52,37 +37,74 @@ async function createOrderHandler(request: NextRequest) {
       );
     }
 
-    // Check for stock availability before creating order
+    // Parallelize validation checks
+    const validationPromises: Promise<any>[] = [];
+
+    // Check if user is already registered (event logic)
+    if (notes?.userId && notes?.eventId) {
+      validationPromises.push(
+        adminDb.collection('event_registrations')
+          .where('eventId', '==', notes.eventId)
+          .where('userId', '==', notes.userId)
+          .limit(1)
+          .get()
+          .then(existingReg => {
+            if (!existingReg.empty) {
+              throw new Error('EVENT_ALREADY_REGISTERED');
+            }
+          })
+      );
+    }
+
+    // Check for stock availability
     if (items && items.length > 0) {
       const productRefs = items.map((item: any) => adminDb.collection('products').doc(item.productId));
-      const productDocs = await adminDb.getAll(...productRefs);
+      validationPromises.push(
+        adminDb.getAll(...productRefs).then(productDocs => {
+          const unavailableItems: string[] = [];
 
-      const unavailableItems: string[] = [];
+          productDocs.forEach((doc, i) => {
+            const item = items[i];
 
-      for (let i = 0; i < productDocs.length; i++) {
-        const doc = productDocs[i];
-        const item = items[i];
+            if (!doc.exists) {
+              unavailableItems.push(`${item.name || 'Item'} (Not Found)`);
+              return;
+            }
 
-        if (!doc.exists) {
-          unavailableItems.push(`${item.name || 'Item'} (Not Found)`);
-          continue;
-        }
+            const productData = doc.data();
+            const currentStock = productData?.stock || 0;
 
-        const productData = doc.data();
-        const currentStock = productData?.stock || 0;
+            if (currentStock < item.quantity) {
+              const reason = currentStock === 0 ? 'Out of Stock' : `Only ${currentStock} left`;
+              unavailableItems.push(`${productData?.name || 'Item'} (${reason})`);
+            }
+          });
 
-        if (currentStock < item.quantity) {
-          const reason = currentStock === 0 ? 'Out of Stock' : `Only ${currentStock} left`;
-          unavailableItems.push(`${productData?.name || 'Item'} (${reason})`);
-        }
-      }
+          if (unavailableItems.length > 0) {
+            throw new Error(`STOCK_UNAVAILABLE:${unavailableItems.join(', ')}`);
+          }
+        })
+      );
+    }
 
-      if (unavailableItems.length > 0) {
+    // Wait for all validations
+    try {
+      await Promise.all(validationPromises);
+    } catch (validationError: any) {
+      if (validationError.message === 'EVENT_ALREADY_REGISTERED') {
         return NextResponse.json(
-          { error: `Availability Update: ${unavailableItems.join(', ')}` },
+          { error: 'You are already registered for this event' },
           { status: 400 }
         );
       }
+      if (validationError.message.startsWith('STOCK_UNAVAILABLE:')) {
+        const items = validationError.message.replace('STOCK_UNAVAILABLE:', '');
+        return NextResponse.json(
+          { error: `Availability Update: ${items}` },
+          { status: 400 }
+        );
+      }
+      throw validationError;
     }
 
     // Amount should be in paise (multiply by 100)
