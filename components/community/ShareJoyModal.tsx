@@ -78,7 +78,7 @@ export default function ShareJoyModal({ isOpen, onClose, onSuccess }: ShareJoyMo
                         initial={{ scale: 0.9, opacity: 0, y: 20 }}
                         animate={{ scale: 1, opacity: 1, y: 0 }}
                         exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                        className="relative w-full max-w-lg bg-[#FFFDF5] border-4 border-black rounded-[32px] p-8 neo-shadow overflow-hidden"
+                        className="relative w-full max-w-lg bg-[#FFFDF5] border-4 border-black rounded-[32px] p-8 neo-shadow overflow-y-auto max-h-[85vh]"
                     >
                         {/* Close Button */}
                         <button
@@ -134,7 +134,7 @@ export default function ShareJoyModal({ isOpen, onClose, onSuccess }: ShareJoyMo
                                 <label className="block font-bold text-sm uppercase tracking-wide mb-2 text-black/60">Profile Photo</label>
 
                                 {formData.image ? (
-                                    <div className="relative w-full h-48 bg-gray-100 rounded-xl overflow-hidden border-2 border-black group">
+                                    <div className="relative w-full h-40 bg-gray-100 rounded-xl overflow-hidden border-2 border-black group">
                                         <Image
                                             src={formData.image}
                                             alt="Preview"
