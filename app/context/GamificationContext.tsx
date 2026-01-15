@@ -4,7 +4,7 @@ import React, { createContext, useContext, useEffect, useState, ReactNode } from
 import { useAuth } from './AuthContext';
 import { UserProfile } from '@/lib/types';
 import { getTier, fetchTiersFromFirebase, fetchRewardsConfigFromFirebase, REWARDS as DEFAULT_REWARDS, STREAK_REWARDS, STREAK_FREEZE_COST, CONFIG, calculatePoints, calculatePointWorth, getMaxRedeemableAmount, logTransaction } from '@/lib/gamification';
-import { doc, onSnapshot, updateDoc, increment, setDoc, getFirestore, getDoc, collection, query, orderBy, limit, startAfter, getDocs, QueryDocumentSnapshot, DocumentData } from 'firebase/firestore';
+import { doc, onSnapshot, updateDoc, increment, setDoc, getFirestore, getDoc, collection, query, orderBy, limit, startAfter, getDocs, QueryDocumentSnapshot, DocumentData, Timestamp } from 'firebase/firestore';
 import { app } from '@/lib/firebase';
 
 export interface Transaction {
@@ -13,8 +13,8 @@ export interface Transaction {
   amount: number;
   source: string;
   description: string;
-  timestamp: any;
-  metadata?: any;
+  timestamp: Timestamp | Date | { seconds: number; nanoseconds: number };
+  metadata?: Record<string, unknown>;
 }
 
 interface Tier {
@@ -49,7 +49,7 @@ interface GamificationContextType {
   loading: boolean;
   awardPoints: (amount: number, reason: string, isGameXP?: boolean) => Promise<void>;
   spendPoints: (amount: number, reason: string) => Promise<boolean>;
-  spinWheel: (prize: any) => Promise<void>;
+  spinWheel: (prize: { type: string; value: number | string; label?: string }) => Promise<void>;
   updateStreak: () => Promise<void>;
   buyStreakFreeze: () => Promise<boolean>;
   foundEasterEgg: () => Promise<boolean>;
@@ -83,7 +83,7 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
   const [streak, setStreak] = useState({ count: 0, lastActiveDate: null as string | null, freezeCount: 0 });
   const [dailyStats, setDailyStats] = useState({ lastSpinDate: null as string | null, eggsFound: 0 });
   const [storeConfig, setStoreConfig] = useState(CONFIG);
-  const [xpSystemSettings, setXpSystemSettings] = useState<any>(null);
+  const [xpSystemSettings, setXpSystemSettings] = useState<Record<string, unknown> | null>(null);
 
   // History State
   const [history, setHistory] = useState<Transaction[]>([]);
@@ -283,7 +283,7 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
     // "Rule: Every action awards both JP and XP equally" - but modified by multiplier for JP
     const jpEarned = Math.round(amount * tier.multiplier);
 
-    const updates: any = {
+    const updates: Record<string, unknown> = {
       xp: increment(amount),
       points: increment(jpEarned),
     };
@@ -361,13 +361,13 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
     return false;
   }
 
-  const spinWheel = async (prize: any) => {
+  const spinWheel = async (prize: { type: string; value: number | string; label?: string }) => {
     // Prize logic is handled by caller (deterministically or random), this just commits the result
     if (!user) return;
     const today = new Date().toISOString().split('T')[0];
     const userRef = doc(db, 'users', user.uid);
 
-    const updates: any = {
+    const updates: Record<string, unknown> = {
       'daily_stats.last_spin_date': today
     };
 
@@ -459,7 +459,7 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
 
   // Dynamic calculation functions
   const calculatePointsLocal = (price: number, isFirstTime: boolean = false) => {
-    const shopXPSource = xpSystemSettings?.xpSources?.find((s: any) => s.name.includes('Shop Purchase'));
+    const shopXPSource = (xpSystemSettings?.xpSources as Array<{ name: string; baseJP: number }>)?.find((s) => s.name.includes('Shop Purchase'));
     const baseJP = shopXPSource?.baseJP || 10;
 
     // Use store rate only if explicitly set and non-zero, otherwise use xpSource baseJP (per ₹100)

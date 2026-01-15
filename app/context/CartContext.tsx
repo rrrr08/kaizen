@@ -55,7 +55,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     try {
       const stored = localStorage.getItem(CART_STORAGE_KEY);
       const storedUserId = localStorage.getItem(CART_USER_KEY);
-      
+
       // If user has changed, clear localStorage cart to prevent transfer
       if (currentUserId && storedUserId && storedUserId !== currentUserId) {
         console.log('User changed, clearing old cart from localStorage');
@@ -63,7 +63,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         localStorage.removeItem(CART_USER_KEY);
         return [];
       }
-      
+
       if (!stored) return [];
       const parsed = JSON.parse(stored);
       // Convert addedAt strings back to Date objects with validation
@@ -80,11 +80,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           console.error('Error parsing addedAt date:', error);
           addedAtDate = new Date();
         }
-        
+
         return {
           ...item,
           addedAt: addedAtDate,
-        };
+        } as CartItem;
       });
     } catch (error) {
       console.error('Failed to load from localStorage:', error);
@@ -110,7 +110,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const { getUserCart } = await import('@/lib/firebase');
       const cartData = await getUserCart(user.uid);
       // Convert addedAt strings back to Date objects with validation
-      return (cartData || []).map((item: any) => {
+      return (cartData || []).map((item: Partial<CartItem> & { addedAt?: string | number | Date }) => {
         let addedAtDate;
         try {
           if (item.addedAt) {
@@ -123,11 +123,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           console.error('Error parsing addedAt date:', error);
           addedAtDate = new Date();
         }
-        
+
         return {
           ...item,
           addedAt: addedAtDate,
-        };
+        } as CartItem;
       });
     } catch (error) {
       console.error('Failed to load from Firebase:', error);
@@ -152,13 +152,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           setHasSynced(false);
           setAppliedPointsDiscount(0);
         }
-        
+
         setLastUserId(user?.uid || null);
 
         if (user?.uid) {
           // User authenticated: Load from Firebase
           const firebaseCart = await loadFromFirebase();
-          
+
           // Merge with localStorage if not synced yet
           if (!hasSynced) {
             const localCart = loadFromLocalStorage(user.uid);

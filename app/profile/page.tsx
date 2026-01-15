@@ -251,7 +251,7 @@ export default function ProfilePage() {
                         </span>
                       </div>
                       <p className="text-[9px] font-bold text-black/40 uppercase tracking-widest">
-                        {log.timestamp?.seconds ? new Date(log.timestamp.seconds * 1000).toLocaleDateString() : 'Just Now'}
+                        {(log.timestamp as any)?.seconds ? new Date((log.timestamp as any).seconds * 1000).toLocaleDateString() : 'Just Now'}
                       </p>
                     </div>
                   </div>

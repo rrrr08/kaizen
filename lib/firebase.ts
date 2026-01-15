@@ -271,6 +271,18 @@ export const createUserProfile = async (userId: string, data: UserProfile) => {
   }
   const userRef = doc(db, "users", userId);
 
+  // Check if user already exists to prevent overwriting critical fields like 'role'
+  const userSnap = await getDoc(userRef);
+  let existingRole = null;
+
+  if (userSnap.exists()) {
+    const existingData = userSnap.data();
+    if (existingData.role) {
+      existingRole = existingData.role;
+      console.log(`[createUserProfile] User ${userId} already exists with role: ${existingRole}. Preserving role.`);
+    }
+  }
+
   // Initialize with multiavatar if no photoURL provided
   let avatarData = {};
   if (!data.photoURL) {
@@ -289,7 +301,7 @@ export const createUserProfile = async (userId: string, data: UserProfile) => {
 
   const profileDataToSet = {
     id: userId,
-    role: data.role || "member",
+    role: existingRole || data.role || "member", // Prioritize existing role
     ...data,
     ...avatarData, // Add multiavatar data if generated
     created_at:
@@ -300,7 +312,13 @@ export const createUserProfile = async (userId: string, data: UserProfile) => {
         : data.created_at || serverTimestamp(),
     updated_at: serverTimestamp(),
   };
-  await setDoc(userRef, profileDataToSet);
+
+  // If preserving role, ensure we don't accidentally overwrite it if passed in 'data'
+  if (existingRole) {
+    profileDataToSet.role = existingRole;
+  }
+
+  await setDoc(userRef, profileDataToSet, { merge: true });
 };
 
 export const checkUserExists = async (userId: string) => {
