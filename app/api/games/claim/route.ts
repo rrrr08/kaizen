@@ -4,6 +4,7 @@ import { headers } from 'next/headers';
 import { withRateLimit, RateLimitPresets } from '@/lib/redis-rate-limit';
 import { logUserActivity, logError } from '@/lib/log-aggregator';
 import { captureGameCompletion } from '@/lib/change-data-capture';
+import { getServerTodayString } from '@/lib/date-utils';
 
 // POST /api/games/claim - Award points after game completion
 async function claimHandler(req: NextRequest) {
@@ -35,7 +36,7 @@ async function claimHandler(req: NextRequest) {
       return NextResponse.json({ error: 'gameId is required' }, { status: 400 });
     }
 
-    const today = new Date().toISOString().slice(0, 10);
+    const today = getServerTodayString();
     const playRecordId = `${gameId}_${today}`;
 
     // Check if user already played this game today

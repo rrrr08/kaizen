@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminAuth, adminDb } from '@/lib/firebaseAdmin';
+import { getServerTodayString } from '@/lib/date-utils';
 
 // GET /api/games/game-of-the-day
 export async function GET() {
   try {
-    const today = new Date().toISOString().slice(0, 10);
+    const today = getServerTodayString();
     const gotdSnap = await adminDb.doc('settings/gameOfTheDay').get();
     const gotd = gotdSnap.exists ? gotdSnap.data() : undefined;
     
@@ -86,7 +87,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'gameId required' }, { status: 400 });
     }
     
-    const today = new Date().toISOString().slice(0, 10);
+    const today = getServerTodayString();
     const updates: any = { 
       gameId, 
       date: today,

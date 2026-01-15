@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebaseAdmin';
+import { getServerTodayString } from '@/lib/date-utils';
 
 const FALLBACK_GAMES = [
   'sudoku', 'riddle', 'puzzles', 'wordle', 'chess',
@@ -24,7 +25,7 @@ export async function GET() {
     };
 
     // Date check
-    const today = new Date().toISOString().slice(0, 10);
+    const today = getServerTodayString();
     const schedule = policy.rotationSchedule || {};
 
     // Check if we need to generate a rotation for today
@@ -136,7 +137,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'gamesPerDay must be between 1 and 20' }, { status: 400 });
     }
 
-    const today = new Date().toISOString().slice(0, 10);
+    const today = getServerTodayString();
+
 
     // Get all available games
     const settingsSnap = await adminDb.doc('settings/gamePoints').get();
@@ -231,7 +233,8 @@ export async function PUT(req: NextRequest) {
       return NextResponse.json({ error: 'Policy data is missing' }, { status: 500 });
     }
 
-    const today = new Date().toISOString().slice(0, 10);
+    const today = getServerTodayString();
+
 
     // Generate new rotation
     const shuffled = [...policy.selectedGames].sort(() => Math.random() - 0.5);

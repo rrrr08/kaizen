@@ -4,7 +4,8 @@ import React, { createContext, useContext, useEffect, useState, ReactNode } from
 import { useAuth } from './AuthContext';
 import { UserProfile } from '@/lib/types';
 import { getTier, fetchTiersFromFirebase, fetchRewardsConfigFromFirebase, REWARDS as DEFAULT_REWARDS, STREAK_REWARDS, STREAK_FREEZE_COST, CONFIG, calculatePoints, calculatePointWorth, getMaxRedeemableAmount, logTransaction } from '@/lib/gamification';
-import { doc, onSnapshot, updateDoc, increment, setDoc, getFirestore, getDoc, collection, query, orderBy, limit, startAfter, getDocs, QueryDocumentSnapshot, DocumentData, Timestamp } from 'firebase/firestore';
+import { getServerTodayString, getServerYesterdayString, getDaysDifference } from '@/lib/date-utils';
+import { doc, onSnapshot, updateDoc, increment, setDoc, getFirestore, getDoc, collection, query, orderBy, limit, startAfter, getDocs, QueryDocumentSnapshot, DocumentData, Timestamp, runTransaction } from 'firebase/firestore';
 import { app } from '@/lib/firebase';
 
 export interface Transaction {
@@ -195,7 +196,7 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
         });
 
         // Reset daily stats if it's a new day (client-side check for UI consistency, real daily limits should be server enforced or strictly time-checked)
-        const today = new Date().toISOString().split('T')[0];
+        const today = getServerTodayString();
         const lastEggDate = data.daily_stats?.last_egg_date;
 
         setDailyStats({
@@ -222,7 +223,7 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
               lastActiveDate: data.streak?.last_active_date || null,
               freezeCount: data.streak?.freeze_count || 0
             });
-            const today = new Date().toISOString().split('T')[0];
+            const today = getServerTodayString();
             const lastEggDate = data.daily_stats?.last_egg_date;
             setDailyStats({
               lastSpinDate: data.daily_stats?.last_spin_date || null,
@@ -256,7 +257,7 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
    */
   useEffect(() => {
     if (user && !loading) {
-      const today = new Date().toISOString().split('T')[0];
+      const today = getServerTodayString();
       // Only attempt update if local state shows it's not updated yet
       // updateStreak() has internal checks strictly against DB/logic too
       if (streak.lastActiveDate !== today) {
@@ -300,45 +301,67 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
 
   const updateStreak = async () => {
     if (!user) return;
-    const today = new Date().toISOString().split('T')[0];
-
-    if (streak.lastActiveDate === today) return; // Already acted today
+    const today = getServerTodayString();
 
     const userRef = doc(db, 'users', user.uid);
 
-    // Check if yesterday was active
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    const yesterdayStr = yesterday.toISOString().split('T')[0];
+    try {
+      await runTransaction(db, async (transaction) => {
+        const userDoc = await transaction.get(userRef);
+        if (!userDoc.exists()) return;
 
-    let newCount = 1;
-    if (streak.lastActiveDate === yesterdayStr) {
-      newCount = streak.count + 1;
-    } else if (streak.lastActiveDate && streak.lastActiveDate !== yesterdayStr && streak.freezeCount > 0) {
-      // Used a freeze
-      await updateDoc(userRef, {
-        'streak.freeze_count': increment(-1),
-        'streak.last_active_date': today,
-        // Count continues? Typically streak freezes keep the count.
-        // But if we missed a day, and use a freeze now... 
-        // Simplified: To save a streak, you must have a freeze when you MISS the day. 
-        // Logic: If missed > 1 day, reset. If missed 1 day and have freeze, consume freeze and continue.
+        const userData = userDoc.data();
+        const currentStreak = userData.streak || {};
+        const lastActiveDate = currentStreak.last_active_date;
+
+        // If already acted today, DO NOTHING.
+        // This check inside transaction protects against race conditions.
+        if (lastActiveDate === today) return;
+
+        let newCount = 1;
+        let diff = 1;
+        let freezeConsumed = false;
+
+        if (!lastActiveDate) {
+          newCount = 1;
+        } else {
+          diff = getDaysDifference(lastActiveDate, today);
+
+          if (diff === 0) {
+            return; // Should be caught by top check, but safe to keep
+          } else if (diff === 1) {
+            newCount = (currentStreak.count || 0) + 1;
+          } else if (diff > 1) {
+            // Missed day(s)
+            if ((currentStreak.freeze_count || 0) > 0) {
+              // Consume one freeze to maintain streak
+              freezeConsumed = true;
+              newCount = (currentStreak.count || 0) + 1;
+              // Note: Some apps just maintain streak (don't increment) on freeze day. 
+              // But increasing is fine for MVP "streaks saved".
+            } else {
+              newCount = 1;
+            }
+          } else {
+            // Negative diff (anomaly)
+            newCount = currentStreak.count || 1;
+          }
+        }
+
+        const updates: any = {
+          'streak.count': newCount,
+          'streak.last_active_date': today
+        };
+
+        if (freezeConsumed) {
+          updates['streak.freeze_count'] = increment(-1);
+        }
+
+        transaction.update(userRef, updates);
       });
-      // Logic needs to be more robust for "auto-freeze" on login. 
-      // For now, simple increment if consecutive.
-      newCount = 1; // Reset if broken without auto-freeze logic implemented yet
+    } catch (e) {
+      console.error("Streak transaction failed: ", e);
     }
-
-    // Simple Streak Logic for MVP: 
-    // If last active was yesterday, increment. Else reset to 1.
-    if (streak.lastActiveDate === yesterdayStr) {
-      newCount = streak.count + 1;
-    }
-
-    await updateDoc(userRef, {
-      'streak.count': newCount,
-      'streak.last_active_date': today
-    });
   };
 
   const buyStreakFreeze = async () => {
@@ -355,7 +378,7 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
   const spinWheel = async (prize: { type: string; value: number | string; label?: string }) => {
     // Prize logic is handled by caller (deterministically or random), this just commits the result
     if (!user) return;
-    const today = new Date().toISOString().split('T')[0];
+    const today = getServerTodayString();
     const userRef = doc(db, 'users', user.uid);
 
     const updates: Record<string, unknown> = {
@@ -385,7 +408,7 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
 
   const foundEasterEgg = async () => {
     if (!user) return false;
-    const today = new Date().toISOString().split('T')[0];
+    const today = getServerTodayString();
 
     if (dailyStats.eggsFound >= 3) return false;
 
