@@ -64,7 +64,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: '/admin/push-notifications', label: 'Notifications', icon: Zap },
     { href: '/admin/inquiries', label: 'Enquiries', icon: MessageSquare },
     { href: '/admin/moderation', label: 'Moderation', icon: Shield },
+    { href: '/admin/logs', label: 'System Logs', icon: FileText },
+    { href: '/admin/cdc', label: 'Database Changes', icon: Database },
   ];
+
 
   return (
     <div className="flex min-h-screen bg-[#FFFDF5] text-[#2D3436] font-sans">
