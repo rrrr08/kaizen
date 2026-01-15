@@ -65,15 +65,16 @@ export default function CheckoutPage() {
           const userData = userSnap.data();
           const savedInfo = userData?.checkoutInfo;
 
-          if (savedInfo) {
+          if (savedInfo || userData?.phoneNumber) {
             setFormData(prev => ({
-              name: savedInfo.name || user?.displayName || prev.name,
-              email: savedInfo.email || user?.email || prev.email,
-              phone: savedInfo.phone || prev.phone,
-              address: savedInfo.address || prev.address,
-              city: savedInfo.city || prev.city,
-              state: savedInfo.state || prev.state,
-              zipCode: savedInfo.zipCode || prev.zipCode,
+              ...prev,
+              name: savedInfo?.name || user?.displayName || prev.name,
+              email: savedInfo?.email || user?.email || prev.email,
+              phone: userData?.phoneNumber || savedInfo?.phone || prev.phone,
+              address: savedInfo?.address || prev.address,
+              city: savedInfo?.city || prev.city,
+              state: savedInfo?.state || prev.state,
+              zipCode: savedInfo?.zipCode || prev.zipCode,
             }));
           } else {
             setFormData(prev => ({
