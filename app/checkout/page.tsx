@@ -254,6 +254,23 @@ export default function CheckoutPage() {
       }
       const { orderId, amount, dbOrderId } = await response.json();
 
+      // Load Razorpay script dynamically
+      const loadRazorpayScript = () => {
+        return new Promise((resolve, reject) => {
+          const script = document.createElement('script');
+          script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+          script.async = true;
+          script.onload = resolve;
+          script.onerror = () => reject(new Error('Failed to load Razorpay SDK'));
+          document.body.appendChild(script);
+        });
+      };
+
+      // Check if Razorpay is already loaded, if not load it
+      if (!window.Razorpay) {
+        await loadRazorpayScript();
+      }
+
       const RazorpayOptions = {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
         amount,
@@ -295,7 +312,7 @@ export default function CheckoutPage() {
         theme: { color: '#000000' },
       };
 
-      const rzp = new (window as any).Razorpay(RazorpayOptions);
+      const rzp = new window.Razorpay(RazorpayOptions);
       rzp.open();
     } catch (error: any) {
       addToast({ title: 'Payment Failed', description: error.message, variant: 'destructive' });

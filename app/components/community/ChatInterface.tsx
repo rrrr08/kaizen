@@ -23,6 +23,8 @@ export default function ChatInterface({ containerId, containerType, isLocked = f
     const [loadingMore, setLoadingMore] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
+    const hasScrolledRef = useRef(false);
+    const isInitialLoadRef = useRef(true);
 
     // Initial load and real-time subscription
     useEffect(() => {
@@ -55,15 +57,21 @@ export default function ChatInterface({ containerId, containerType, isLocked = f
                 return [...olderHistory, ...msgs];
             });
 
-            // Only auto-scroll if we were near bottom
+            // Only auto-scroll if: 
+            // 1. Initial load (first time messages arrive)
+            // 2. User is near bottom (actively viewing)
             if (containerRef.current) {
                 const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
                 const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
-                if (isNearBottom) {
+                
+                if (isInitialLoadRef.current || (isNearBottom && hasScrolledRef.current)) {
                     setTimeout(scrollToBottom, 100);
+                    isInitialLoadRef.current = false;
                 }
-            } else {
+            } else if (isInitialLoadRef.current) {
+                // Only scroll on initial load when container not yet rendered
                 setTimeout(scrollToBottom, 100);
+                isInitialLoadRef.current = false;
             }
         });
         return () => unsubscribe();
@@ -75,6 +83,9 @@ export default function ChatInterface({ containerId, containerType, isLocked = f
 
     const handleScroll = async () => {
         if (!containerRef.current || loadingMore) return;
+
+        // Track that user has scrolled
+        hasScrolledRef.current = true;
 
         const { scrollTop, scrollHeight } = containerRef.current;
         if (scrollTop === 0 && messages.length >= 50) {
