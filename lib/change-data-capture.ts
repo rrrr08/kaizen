@@ -6,6 +6,7 @@
 import { redis } from './redis';
 import { adminDb } from './firebaseAdmin';
 import { logError } from './log-aggregator';
+import { FieldValue } from 'firebase-admin/firestore';
 
 export interface ChangeEvent {
     collection: string;
@@ -35,11 +36,8 @@ export class ChangeDataCapture {
                 userId: event.userId || 'system'
             });
 
-            // 2. Publish to Redis Pub/Sub for real-time listeners
-            await redis.publish(
-                `changes:${event.collection}`,
-                JSON.stringify(event)
-            );
+            // 2. Note: Pub/Sub removed as Upstash REST API doesn't support it
+            // For real-time updates, clients should poll getRecentChanges()
 
             // 3. Trigger side effects based on collection
             await this.handleSideEffects(event);
@@ -146,7 +144,7 @@ export class ChangeDataCapture {
         try {
             for (const item of order.items || []) {
                 await adminDb.collection('products').doc(item.productId).update({
-                    stock: adminDb.FieldValue.increment(-item.quantity)
+                    stock: FieldValue.increment(-item.quantity)
                 });
             }
         } catch (error) {
@@ -186,13 +184,13 @@ export class ChangeDataCapture {
             const updates: any = {};
 
             if (stats.ordersCount) {
-                updates.ordersCount = adminDb.FieldValue.increment(stats.ordersCount);
+                updates.ordersCount = FieldValue.increment(stats.ordersCount);
             }
             if (stats.gamesPlayed) {
-                updates.gamesPlayed = adminDb.FieldValue.increment(stats.gamesPlayed);
+                updates.gamesPlayed = FieldValue.increment(stats.gamesPlayed);
             }
             if (stats.totalXP) {
-                updates.totalXP = adminDb.FieldValue.increment(stats.totalXP);
+                updates.totalXP = FieldValue.increment(stats.totalXP);
             }
 
             await adminDb.collection('users').doc(userId).update(updates);
@@ -203,23 +201,17 @@ export class ChangeDataCapture {
 
     /**
      * Subscribe to changes (real-time)
+     * Note: Upstash Redis REST API doesn't support pub/sub in traditional way
+     * For production, consider using polling or webhooks
      */
     static async subscribeToChanges(
         collection: string,
         callback: (event: ChangeEvent) => void
     ): Promise<any> {
-        const subscriber = redis.duplicate();
-
-        await subscriber.subscribe(`changes:${collection}`, (message) => {
-            try {
-                const event = JSON.parse(message);
-                callback(event);
-            } catch (error) {
-                logError(error as Error, { collection, message });
-            }
-        });
-
-        return subscriber;
+        // Note: Upstash Redis (REST API) doesn't support traditional pub/sub
+        // This is a placeholder for future implementation using polling
+        console.warn('Real-time subscriptions not supported with Upstash REST API. Use polling via getRecentChanges()');
+        return null;
     }
 
     /**
@@ -231,7 +223,8 @@ export class ChangeDataCapture {
     ): Promise<ChangeEvent[]> {
         try {
             const streamKey = `cdc:${collection}`;
-            const messages = await redis.xrevrange(streamKey, '+', '-', 'COUNT', limit);
+            // Upstash Redis xrevrange: start, end, count (3 params)
+            const messages = await redis.xrevrange(streamKey, '+', '-', limit);
 
             // Check if messages is valid and is an array
             if (!messages || !Array.isArray(messages) || messages.length === 0) {

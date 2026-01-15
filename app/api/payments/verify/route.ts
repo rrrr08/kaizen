@@ -178,10 +178,10 @@ async function verifyPaymentHandler(request: NextRequest) {
                 id: orderDoc.id,
                 createdAt: new Date(),
                 items: orderData.items,
-                totalPrice: amount,
+                totalPrice: amount / 100, // Convert from paisa to rupees
                 shippingAddress: orderData.shippingAddress || {},
-                subtotal: orderData.subtotal || amount,
-                gst: orderData.gst || 0,
+                subtotal: (orderData.subtotal || amount) / 100, // Convert from paisa to rupees
+                gst: (orderData.gst || 0) / 100, // Convert from paisa to rupees
                 gstRate: orderData.gstRate || 0
               });
 
@@ -298,7 +298,7 @@ async function verifyPaymentHandler(request: NextRequest) {
                 eventData?.title || 'Event',
                 eventData?.datetime?.toDate(),
                 eventData?.location,
-                amount
+                amount / 100 // Convert from paisa to rupees
               );
 
               await sendEmail({
