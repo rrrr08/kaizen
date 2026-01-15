@@ -37,7 +37,7 @@ import DataManagement from '@/components/settings/DataManagement';
 import AppearanceSettings, { AppearanceSettings as AppearanceSettingsType } from '@/components/settings/AppearanceSettings';
 
 export default function SettingsPage() {
-  const { user, loading } = useAuth();
+  const { user, userProfile, loading } = useAuth();
   const router = useRouter();
   const { addToast } = useToast();
 
@@ -50,15 +50,17 @@ export default function SettingsPage() {
 
   const [displayName, setDisplayName] = useState('');
   const [photoURL, setPhotoURL] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [deactivateConfirm, setDeactivateConfirm] = useState('');
 
   useEffect(() => {
     if (user) {
-      setDisplayName(user.displayName || '');
-      setPhotoURL(user.photoURL || '');
+      setDisplayName(userProfile?.name || user.displayName || '');
+      setPhotoURL(userProfile?.photoURL || user.photoURL || '');
+      setPhoneNumber(userProfile?.phoneNumber || userProfile?.checkoutInfo?.phone || '');
     }
-  }, [user]);
+  }, [user, userProfile]);
 
   if (loading) {
     return (
@@ -95,7 +97,10 @@ export default function SettingsPage() {
 
       // Update Firestore User Doc
       const userRef = doc(db, 'users', user.uid);
-      await updateDoc(userRef, { name: displayName, image: photoURL });
+      await updateDoc(userRef, {
+        name: displayName,
+        image: photoURL,
+      });
 
       addToast({ title: 'Success', description: 'Profile updated successfully!', variant: 'success' });
       setIsEditingProfile(false);
@@ -357,6 +362,7 @@ export default function SettingsPage() {
                 onChange={(url) => setPhotoURL(url)}
                 onRemove={() => setPhotoURL('')}
                 maxFiles={1}
+                showGallery={false}
               />
             </div>
 
@@ -367,6 +373,19 @@ export default function SettingsPage() {
                 onChange={(e) => setDisplayName(e.target.value)}
                 className="border-2 border-black font-bold text-lg"
               />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-xs font-black uppercase tracking-widest text-black/40">Phone Number (Linked)</label>
+              <div className="flex items-center gap-3 p-4 bg-black/5 border-2 border-dashed border-black/20 rounded-xl">
+                <span className="font-bold text-black/40">{phoneNumber || 'No phone number linked'}</span>
+                {phoneNumber && userProfile?.phoneVerified && (
+                  <span className="ml-auto bg-[#00B894] text-white text-[10px] px-2 py-0.5 rounded-full font-black uppercase">Verified</span>
+                )}
+              </div>
+              <p className="text-[10px] font-bold text-black/30 uppercase mt-1">
+                You can manage your phone number in <Link href="/notification-preferences" className="underline hover:text-black">Notification Settings</Link>
+              </p>
             </div>
           </div>
           <DialogFooter>

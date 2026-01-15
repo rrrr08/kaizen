@@ -64,23 +64,24 @@ export default function ProofOfJoyGrid({ limit, showAddButton = true }: ProofOfJ
     return (
         <div className="w-full py-20">
             {/* Section Header */}
-            <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
+            {/* Section Header */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 md:mb-16 gap-6 md:gap-8">
                 <div>
-                    <div className="flex items-center gap-3 mb-4">
-                        <Sparkles className="text-[#00B894]" size={24} />
-                        <span className="font-black text-sm uppercase tracking-[0.2em] text-[#00B894]">Testimonials</span>
+                    <div className="flex items-center gap-2 md:gap-3 mb-2 md:mb-4">
+                        <Sparkles className="text-[#00B894]" size={20} />
+                        <span className="font-black text-xs md:text-sm uppercase tracking-[0.2em] text-[#00B894]">Testimonials</span>
                     </div>
-                    <h2 className="font-header text-5xl md:text-6xl text-black tracking-tighter">
+                    <h2 className="font-header text-4xl md:text-6xl text-black tracking-tighter">
                         Proof of <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#6C5CE7] to-[#FF7675]">Joy</span>
                     </h2>
                 </div>
 
                 {showAddButton && (
                     <button
-                        className="px-8 py-4 bg-white border-4 border-black rounded-2xl flex items-center gap-3 font-black uppercase tracking-widest hover:bg-black hover:text-white hover:translate-y-[-4px] transition-all neo-shadow"
+                        className="w-full md:w-auto px-6 py-3 md:px-8 md:py-4 bg-white border-2 md:border-4 border-black rounded-xl md:rounded-2xl flex items-center justify-center gap-2 md:gap-3 font-black text-xs md:text-base uppercase tracking-widest hover:bg-black hover:text-white hover:translate-y-[-4px] transition-all neo-shadow"
                         onClick={() => setIsModalOpen(true)}
                     >
-                        <MessageSquarePlus size={20} />
+                        <MessageSquarePlus size={18} />
                         <span>Share Your Story</span>
                     </button>
                 )}

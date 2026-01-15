@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { motion, useScroll } from 'framer-motion';
 
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
@@ -31,6 +32,11 @@ interface Founder {
 
 export default function About() {
   const [founders, setFounders] = useState<Founder[]>(DEFAULT_FOUNDERS);
+  const containerRef = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start 0.8", "end 0.8"]
+  });
 
   useEffect(() => {
     async function fetchContent() {
@@ -51,19 +57,26 @@ export default function About() {
     <div className="min-h-screen pt-32 pb-16 bg-[#FFFDF5] text-[#2D3436] selection:bg-[#FFD93D]/50 font-sans">
       <div className="max-w-7xl mx-auto px-6 md:px-12">
         {/* SECTION 1 — PAGE HERO */}
-        <section className="mb-32">
-          <div className="text-[#6C5CE7] font-black text-sm tracking-[0.2em] mb-4 uppercase font-header">Our Story</div>
-          <h1 className="font-header text-6xl md:text-8xl tracking-tighter mb-8 leading-none text-black">
-            OUR <br /><span className="text-[#FFD93D] drop-shadow-[2px_2px_0px_#000] italic font-serif">(accidentally awesome)</span> STORY
-          </h1>
-          <p className="text-black/80 font-bold text-xl max-w-3xl leading-relaxed">
-            A digital playground built on the belief that games are more than products—they&apos;re moments, memories, and shared joy.
-          </p>
-          <div className="max-w-2xl border-l-4 border-black pl-8 py-2 mt-8">
-            <p className="text-black/70 font-medium italic text-xl md:text-2xl leading-relaxed">
-              Honestly? There&apos;s no dramatic lifelong passion story here.
-              Just two people who realized they&apos;re pretty good at creating chaos, laughter, and the kind of competitive tension that turns friends into frenemies.
+        <section className="mb-32 border-b-4 border-black pb-12">
+          <div className="flex flex-col items-start">
+            <div className="text-[#6C5CE7] font-black text-xs md:text-sm tracking-[0.3em] mb-6 uppercase font-display bg-white px-3 py-1 border-2 border-black rounded-lg shadow-[2px_2px_0px_#000]">
+              Our Story
+            </div>
+            <h1 className="font-header tracking-tighter text-[#2D3436] flex flex-col items-start leading-none mb-8">
+              <span className="text-3xl md:text-4xl font-black uppercase mb-1">OUR (accidentally awesome)</span>
+              <span className="text-6xl md:text-9xl italic font-serif text-black drop-shadow-[4px_4px_0px_#FFD93D] relative z-10">
+                STORY
+              </span>
+            </h1>
+            <p className="text-black/80 font-bold text-lg md:text-2xl max-w-3xl leading-relaxed mb-8">
+              A digital playground built on the belief that games are more than products—they&apos;re moments, memories, and shared joy.
             </p>
+            <div className="max-w-2xl border-l-4 border-black pl-8 py-2">
+              <p className="text-black/70 font-medium italic text-xl md:text-2xl leading-relaxed">
+                Honestly? There&apos;s no dramatic lifelong passion story here.
+                Just two people who realized they&apos;re pretty good at creating chaos, laughter, and the kind of competitive tension that turns friends into frenemies.
+              </p>
+            </div>
           </div>
         </section>
 
@@ -93,18 +106,19 @@ export default function About() {
             <div className="inline-block bg-black text-white px-6 py-2 rounded-full font-black text-xs tracking-[0.3em] uppercase mb-4 shadow-[4px_4px_0px_#FFD93D] hover:translate-y-1 hover:shadow-none transition-all">
               The Quest Log
             </div>
-            <h2 className="font-header text-6xl md:text-7xl text-black leading-none uppercase drop-shadow-[5px_5px_0px_rgba(0,0,0,0.1)]">
+            <h2 className="font-header text-4xl md:text-7xl text-black leading-none uppercase drop-shadow-[5px_5px_0px_rgba(0,0,0,0.1)]">
               Leveling Up <br /> Since 2020
             </h2>
           </div>
 
-          <div className="relative max-w-5xl mx-auto px-4">
+          <div ref={containerRef} className="relative max-w-5xl mx-auto px-4">
             {/* SVG PATHWAY BACKGROUND */}
+            {/* SCROLL PROGRESS PATH ANIMATION */}
             <svg
-              className="absolute top-0 left-0 w-full h-[95%] pointer-events-none hidden md:block"
+              className="absolute top-0 left-0 w-full h-full pointer-events-none hidden md:block"
               viewBox="0 0 1000 1200"
               fill="none"
-              preserveAspectRatio="xMidYMid meet"
+              preserveAspectRatio="none"
               style={{ zIndex: 0 }}
             >
               <defs>
@@ -115,7 +129,25 @@ export default function About() {
                   <stop offset="100%" stopColor="#00B894" />
                 </linearGradient>
               </defs>
+
+              {/* Track Path (Dashed/Faint) */}
               <path
+                d="M 500 50 
+                   C 500 100, 200 150, 200 300
+                   C 200 450, 800 500, 800 650
+                   C 800 800, 200 850, 200 1000
+                   C 200 1100, 500 1150, 500 1200"
+                stroke="#000"
+                strokeWidth="4"
+                strokeOpacity="0.1"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeDasharray="10 10"
+                vectorEffect="non-scaling-stroke"
+              />
+
+              {/* Animated Filling Path */}
+              <motion.path
                 d="M 500 50 
                    C 500 100, 200 150, 200 300
                    C 200 450, 800 500, 800 650
@@ -125,14 +157,24 @@ export default function About() {
                 strokeWidth="6"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                strokeDasharray="20 20"
-                className="opacity-40"
+                vectorEffect="non-scaling-stroke"
+                style={{
+                  pathLength: scrollYProgress,
+                  opacity: 1
+                }}
               />
             </svg>
 
+
             {/* Level 1: THE SPARK (Left Aligned on desktop path) */}
-            <div className="relative flex flex-col md:flex-row items-center gap-12 mb-36 group">
-              <div className="md:w-1/2 md:pr-16 text-right order-1 md:order-1 relative">
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.6 }}
+              className="relative flex flex-col md:flex-row items-center gap-12 mb-36 group"
+            >
+              <div className="md:w-1/2 md:pr-16 text-center md:text-right order-2 md:order-1 relative">
                 <div className="inline-block bg-[#FFD93D] border-2 border-black px-4 py-1 font-black text-xs mb-4 shadow-[3px_3px_0px_#000] rotate-2">
                   LEVEL 1
                 </div>
@@ -147,25 +189,30 @@ export default function About() {
                 <span className="text-4xl">💡</span>
               </div>
 
-              <div className="md:w-1/2 md:pl-16 order-2 md:order-2">
+              <div className="md:w-1/2 md:pl-16 order-1 md:order-2">
                 <div className="relative bg-[#FFD93D] p-2 rounded-3xl border-4 border-black rotate-3 group-hover:rotate-6 transition-transform hover:scale-105 duration-300">
-                  <div className="bg-black rounded-2xl h-48 flex items-center justify-center relative overflow-hidden">
+                  <div className="bg-white rounded-2xl h-48 flex items-center justify-center relative overflow-hidden">
                     {/* Pattern */}
                     <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#FFD93D_2px,transparent_2px)] [background-size:12px_12px]"></div>
-                    <span className="font-header text-[#FFD93D] text-8xl drop-shadow-[4px_4px_0px_#FFF]">2020</span>
+                    <span className="font-header text-[#FFD93D] text-6xl md:text-8xl drop-shadow-[4px_4px_0px_#FFF]">2020</span>
                   </div>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
             {/* Level 2: TRIAL & ERROR (Right Aligned on desktop path) */}
-            <div className="relative flex flex-col md:flex-row items-center gap-12 mb-36 group">
+            <motion.div
+              initial={{ opacity: 0, x: 50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.6 }}
+              className="relative flex flex-col md:flex-row items-center gap-12 mb-36 group"
+            >
               <div className="md:w-1/2 md:pr-16 order-2 md:order-1">
                 <div className="relative bg-[#FF7675] p-2 rounded-3xl border-4 border-black -rotate-2 group-hover:-rotate-6 transition-transform hover:scale-105 duration-300">
                   <div className="bg-white rounded-2xl h-48 flex items-center justify-center relative overflow-hidden text-center p-4">
                     <div className="absolute inset-0 opacity-10 bg-[linear-gradient(45deg,#FF7675_25%,transparent_25%,transparent_50%,#FF7675_50%,#FF7675_75%,transparent_75%,transparent)] [background-size:20px_20px]"></div>
                     <div className="relative z-10 flex flex-col items-center">
-                      {/* Emoji Removed */}
                       <span className="font-header text-white text-5xl bg-black px-4 py-1 -rotate-3 inline-block shadow-[4px_4px_0px_rgba(0,0,0,0.1)]">FAIL?</span>
                     </div>
                   </div>
@@ -188,10 +235,16 @@ export default function About() {
                   </p>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
             {/* Level 3: FIRST VICTORY (Left Aligned on desktop path) */}
-            <div className="relative flex flex-col md:flex-row items-center gap-12 mb-36 group">
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.6 }}
+              className="relative flex flex-col md:flex-row items-center gap-12 mb-36 group"
+            >
               <div className="md:w-1/2 md:pr-16 text-right order-1 md:order-1 relative">
                 <div className="inline-block bg-[#6C5CE7] text-white border-2 border-black px-4 py-1 font-black text-xs mb-4 shadow-[3px_3px_0px_#000] rotate-2">
                   LEVEL 3
@@ -212,21 +265,27 @@ export default function About() {
                   <div className="bg-black rounded-2xl h-48 flex items-center justify-center relative overflow-hidden">
                     <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#6C5CE7_2px,transparent_2px)] [background-size:12px_12px]"></div>
                     <div className="relative z-10 flex items-baseline">
-                      <span className="font-header text-[#6C5CE7] text-[8rem] leading-none drop-shadow-[4px_4px_0px_#FFF]">W</span>
-                      <span className="font-header text-white text-6xl ml-1">IN!</span>
+                      <span className="font-header text-[#6C5CE7] text-[5rem] md:text-[8rem] leading-none drop-shadow-[4px_4px_0px_#FFF]">W</span>
+                      <span className="font-header text-white text-4xl md:text-6xl ml-1">IN!</span>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
             {/* Level 4: EXPANSION (Right Aligned on desktop path) */}
-            <div className="relative flex flex-col md:flex-row items-center gap-12 mb-36 group">
+            <motion.div
+              initial={{ opacity: 0, x: 50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.6 }}
+              className="relative flex flex-col md:flex-row items-center gap-12 mb-36 group"
+            >
               <div className="md:w-1/2 md:pr-16 order-2 md:order-1">
                 <div className="relative bg-[#00B894] p-2 rounded-3xl border-4 border-black -rotate-2 group-hover:-rotate-4 transition-transform hover:scale-105 duration-300">
                   <div className="bg-white rounded-2xl h-48 flex items-center justify-center relative overflow-hidden">
                     <div className="absolute inset-x-0 bottom-0 h-1/2 bg-[#00B894]/20"></div>
-                    <span className="font-header text-black text-7xl z-10 tracking-widest">FAM</span>
+                    <span className="font-header text-black text-5xl md:text-7xl z-10 tracking-widest">FAM</span>
                     <div className="absolute -top-4 -right-4 w-12 h-12 bg-[#00B894] rounded-full border-2 border-black"></div>
                   </div>
                 </div>
@@ -248,7 +307,7 @@ export default function About() {
                   </p>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
             {/* Level 5: THE FUTURE */}
             <div className="relative flex justify-center mt-24">
@@ -261,9 +320,9 @@ export default function About() {
                 <p className="text-xl text-gray-300 font-medium leading-relaxed mb-8">
                   New worlds. New games. Same mission: To rid the world of boring evenings, one dice roll at a time.
                 </p>
-                <button className="bg-[#FFD93D] text-black font-black text-lg px-8 py-4 rounded-xl border-b-4 border-[#C5A300] active:border-b-0 active:translate-y-1 transition-all hover:bg-white hover:scale-105">
+                <Link href="/play" className="inline-block bg-[#FFD93D] text-black font-black text-sm md:text-lg px-6 py-3 md:px-8 md:py-4 rounded-xl border-b-4 border-[#C5A300] active:border-b-0 active:translate-y-1 transition-all hover:bg-white hover:scale-105">
                   JOIN THE ADVENTURE
-                </button>
+                </Link>
               </div>
             </div>
 
@@ -338,7 +397,7 @@ export default function About() {
         <section className="mb-32 relative">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[120%] h-full bg-[#FFD93D]/10 -skew-y-3 pointer-events-none rounded-[60px] -z-10"></div>
 
-          <h2 className="font-header text-5xl md:text-7xl mb-24 text-center text-black leading-[0.9] drop-shadow-[4px_4px_0px_#00B894]">
+          <h2 className="font-header text-4xl md:text-7xl mb-24 text-center text-black leading-[0.9] drop-shadow-[4px_4px_0px_#00B894]">
             THE MINDS BEHIND <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#6C5CE7] to-[#FF7675]">THE MADNESS</span>
           </h2>

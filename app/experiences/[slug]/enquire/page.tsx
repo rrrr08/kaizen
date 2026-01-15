@@ -36,7 +36,7 @@ export default function ExperienceEnquiryPage() {
   const params = useParams();
   const router = useRouter();
   const slug = params.slug as string;
-  const { user, loading: authLoading } = useAuth();
+  const { user, userProfile, loading: authLoading } = useAuth();
 
   const [category, setCategory] = useState<ExperienceCategory | null>(null);
   const [loading, setLoading] = useState(true);
@@ -90,8 +90,9 @@ export default function ExperienceEnquiryPage() {
     if (user && !authLoading) {
       setFormData(prev => ({
         ...prev,
-        name: user.displayName || prev.name,
-        email: user.email || prev.email,
+        name: userProfile?.name || user.displayName || prev.name,
+        email: userProfile?.email || user.email || prev.email,
+        phone: userProfile?.phoneNumber || userProfile?.checkoutInfo?.phone || prev.phone,
       }));
     }
   }, [user, authLoading]);
@@ -115,14 +116,17 @@ export default function ExperienceEnquiryPage() {
     }
 
     // Phone validation
-    const phoneRegex = /^\d{10}$/;
-    const cleanPhone = formData.phone.replace(/\D/g, '');
+    // Allow + at start, then digits, spaces, hyphens, parentheses (common for country codes)
+    const phoneRegex = /^\+?[\d\s-()]{10,20}$/;
     if (!formData.phone.trim()) {
       errors.phone = 'Phone number is required';
-    } else if (cleanPhone.length < 10) {
-      errors.phone = 'Phone number must be at least 10 digits';
-    } else if (!phoneRegex.test(cleanPhone)) {
-      errors.phone = 'Please enter a valid Indian phone number';
+    } else if (!phoneRegex.test(formData.phone)) {
+      errors.phone = 'Please enter a valid phone number';
+    } else {
+      const cleanPhone = formData.phone.replace(/[^\d+]/g, ''); // Keep + and digits
+      if (cleanPhone.length < 10) {
+        errors.phone = 'Phone number must be at least 10 digits';
+      }
     }
 
     // Occasion details validation
@@ -157,7 +161,7 @@ export default function ExperienceEnquiryPage() {
     const limits: Record<string, number> = {
       name: 100,
       email: 100,
-      phone: 15,
+      phone: 20,
       occasionDetails: 200,
       preferredDateRange: 100,
       specialRequirements: 300,
@@ -211,11 +215,11 @@ export default function ExperienceEnquiryPage() {
       const enquiryData = {
         name: formData.name.trim(),
         email: formData.email.trim(),
-        phone: formData.phone.replace(/\D/g, ''), // Clean phone number
+        phone: formData.phone.trim(), // Keep phone as-is, don't strip the + prefix
         categoryId: category.id,
         categoryName: category.name,
         occasionDetails: formData.occasionDetails.trim(),
-        audienceSize: formData.audienceSize,
+        audienceSize: formData.audienceSize, 
         preferredDateRange: formData.preferredDateRange.trim(),
         budgetRange: formData.budgetRange,
         specialRequirements: formData.specialRequirements.trim(),
@@ -497,7 +501,7 @@ export default function ExperienceEnquiryPage() {
                       value={formData.phone}
                       onChange={handleInputChange}
                       placeholder="+91 98765 43210"
-                      maxLength={15}
+                      maxLength={20}
                       className={`w-full pl-12 pr-4 py-4 bg-[#FFFDF5] border-2 rounded-2xl focus:outline-none focus:shadow-[4px_4px_0px_#000] transition-all font-bold placeholder:text-black/20 ${formErrors.phone ? 'border-[#FF7675]' : 'border-black'
                         }`}
                     />
@@ -512,7 +516,7 @@ export default function ExperienceEnquiryPage() {
                       {formErrors.phone}
                     </motion.p>
                   )}
-                  <p className="text-[10px] text-black/40 font-bold mt-1 uppercase tracking-wider text-right">{formData.phone.length}/15</p>
+                  <p className="text-[10px] text-black/40 font-bold mt-1 uppercase tracking-wider text-right">{formData.phone.length}/20</p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

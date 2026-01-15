@@ -127,28 +127,28 @@ export default function NotificationCenter() {
 
   const typeColors = {
     info: {
-      bg: 'bg-blue-50 dark:bg-blue-950/20',
-      border: 'border-blue-200 dark:border-blue-800',
-      icon: 'bg-blue-500',
-      text: 'text-blue-700 dark:text-blue-300'
+      bg: 'bg-white',
+      border: 'border-black',
+      icon: 'bg-[#6C5CE7]', // Purple
+      text: 'text-black'
     },
     success: {
-      bg: 'bg-green-50 dark:bg-green-950/20',
-      border: 'border-green-200 dark:border-green-800',
-      icon: 'bg-green-500',
-      text: 'text-green-700 dark:text-green-300'
+      bg: 'bg-[#ECFDF5]',
+      border: 'border-[#00B894]',
+      icon: 'bg-[#00B894]', // Green
+      text: 'text-black'
     },
     warning: {
-      bg: 'bg-yellow-50 dark:bg-yellow-950/20',
-      border: 'border-yellow-200 dark:border-yellow-800',
-      icon: 'bg-yellow-500',
-      text: 'text-yellow-700 dark:text-yellow-300'
+      bg: 'bg-[#FFFBEB]',
+      border: 'border-[#FFD93D]',
+      icon: 'bg-[#FFD93D]', // Yellow
+      text: 'text-black'
     },
     offer: {
-      bg: 'bg-purple-50 dark:bg-purple-950/20',
-      border: 'border-purple-200 dark:border-purple-800',
-      icon: 'bg-purple-500',
-      text: 'text-purple-700 dark:text-purple-300'
+      bg: 'bg-[#FEF2F2]',
+      border: 'border-[#FF7675]',
+      icon: 'bg-[#FF7675]', // Red
+      text: 'text-black'
     }
   };
 
@@ -185,8 +185,8 @@ export default function NotificationCenter() {
           }
         }}
         className={`relative p-3 rounded-xl border-2 border-black transition-all ${hasNewNotifications
-            ? 'bg-red-400 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none'
-            : 'bg-white hover:bg-gray-50 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]'
+          ? 'bg-red-400 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none'
+          : 'bg-white hover:bg-gray-50 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]'
           }`}
         aria-label="Notifications"
       >
@@ -206,33 +206,33 @@ export default function NotificationCenter() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="absolute right-0 top-full mt-3 w-96 bg-[#FFFDF5] rounded-2xl border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] overflow-hidden z-50"
+            className="absolute -right-16 sm:right-0 top-full mt-3 w-[90vw] sm:w-96 bg-[#FFFDF5] rounded-2xl border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] overflow-hidden z-50 transform origin-top-right"
           >
             {/* Header with gradient */}
-            <div className="p-4 bg-gradient-to-r from-primary to-primary/80 border-b-4 border-black flex justify-between items-center sticky top-0 z-10">
+            <div className="p-3 md:p-4 bg-[#FFD93D] border-b-4 border-black flex justify-between items-center sticky top-0 z-10">
               <div className="flex items-center gap-2">
-                <Bell className="w-5 h-5 text-primary-foreground" />
-                <h3 className="font-display font-bold text-lg text-primary-foreground">Notifications</h3>
+                <Bell className="w-4 h-4 md:w-5 md:h-5 text-black fill-current" />
+                <h3 className="font-header font-black text-lg md:text-xl text-black tracking-wide uppercase">Notifications</h3>
                 {unreadCount > 0 && (
-                  <span className="px-2 py-0.5 bg-white text-primary rounded-full text-xs font-bold border-2 border-black">
+                  <span className="px-2 py-0.5 bg-black text-[#FFD93D] rounded-full text-[10px] md:text-xs font-black border border-black shadow-[2px_2px_0px_white]">
                     {unreadCount}
                   </span>
                 )}
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1 md:gap-2">
                 <Link
                   href="/notification-preferences"
                   onClick={() => setOpen(false)}
-                  className="p-1.5 hover:bg-white/20 rounded-lg transition-colors text-primary-foreground"
+                  className="p-1.5 md:p-2 hover:bg-black hover:text-white rounded-lg transition-colors text-black border-2 border-transparent hover:border-black"
                   title="Notification Settings"
                 >
-                  <Settings className="w-5 h-5" />
+                  <Settings className="w-4 h-4 md:w-5 md:h-5" />
                 </Link>
                 <button
                   onClick={() => setOpen(false)}
-                  className="p-1.5 hover:bg-white/20 rounded-lg transition-colors text-primary-foreground"
+                  className="p-1.5 md:p-2 hover:bg-black hover:text-white rounded-lg transition-colors text-black border-2 border-transparent hover:border-black"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-4 h-4 md:w-5 md:h-5" />
                 </button>
               </div>
             </div>
@@ -245,11 +245,11 @@ export default function NotificationCenter() {
                   animate={{ opacity: 1 }}
                   className="p-12 text-center"
                 >
-                  <div className="w-20 h-20 mx-auto mb-4 rounded-2xl border-4 border-black bg-gray-100 flex items-center justify-center">
-                    <Bell className="w-10 h-10 text-gray-400" />
+                  <div className="w-20 h-20 mx-auto mb-6 rounded-2xl border-4 border-black bg-[#E0F7FA] shadow-[4px_4px_0px_#000] flex items-center justify-center -rotate-3">
+                    <Bell className="w-10 h-10 text-black fill-current" />
                   </div>
-                  <p className="font-header text-lg font-bold mb-2">All caught up!</p>
-                  <p className="text-sm text-muted-foreground">No new notifications</p>
+                  <p className="font-header text-2xl font-black mb-2 text-black uppercase tracking-wide">All caught up!</p>
+                  <p className="text-sm font-bold text-black/60">No new notifications for now.</p>
                 </motion.div>
               ) : (
                 <div className="divide-y-2 divide-black">

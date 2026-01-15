@@ -65,15 +65,16 @@ export default function CheckoutPage() {
           const userData = userSnap.data();
           const savedInfo = userData?.checkoutInfo;
 
-          if (savedInfo) {
+          if (savedInfo || userData?.phoneNumber) {
             setFormData(prev => ({
-              name: savedInfo.name || user?.displayName || prev.name,
-              email: savedInfo.email || user?.email || prev.email,
-              phone: savedInfo.phone || prev.phone,
-              address: savedInfo.address || prev.address,
-              city: savedInfo.city || prev.city,
-              state: savedInfo.state || prev.state,
-              zipCode: savedInfo.zipCode || prev.zipCode,
+              ...prev,
+              name: savedInfo?.name || user?.displayName || prev.name,
+              email: savedInfo?.email || user?.email || prev.email,
+              phone: userData?.phoneNumber || savedInfo?.phone || prev.phone,
+              address: savedInfo?.address || prev.address,
+              city: savedInfo?.city || prev.city,
+              state: savedInfo?.state || prev.state,
+              zipCode: savedInfo?.zipCode || prev.zipCode,
             }));
           } else {
             setFormData(prev => ({
@@ -318,24 +319,24 @@ export default function CheckoutPage() {
           <div className="lg:col-span-2">
             <form onSubmit={handlePlaceOrder} className="space-y-8">
               <div className="bg-white border-2 border-black rounded-[20px] p-8 neo-shadow">
-                <h2 className="font-header text-3xl font-black mb-8 text-black">SHIPPING INFORMATION</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <input type="text" name="name" placeholder="Full Name" value={formData.name} onChange={handleInputChange} className="col-span-2 md:col-span-1 bg-white border-2 border-black rounded-lg px-4 py-3 font-bold focus:bg-[#FFD93D]/20 outline-none" required />
-                  <input type="email" name="email" placeholder="Email" value={formData.email} onChange={handleInputChange} className="col-span-2 md:col-span-1 bg-white border-2 border-black rounded-lg px-4 py-3 font-bold focus:bg-[#FFD93D]/20 outline-none" required />
-                  <input type="tel" name="phone" placeholder="Phone" value={formData.phone} onChange={handleInputChange} className="col-span-2 md:col-span-1 bg-white border-2 border-black rounded-lg px-4 py-3 font-bold focus:bg-[#FFD93D]/20 outline-none" required />
-                  <input type="text" name="address" placeholder="Address" value={formData.address} onChange={handleInputChange} className="col-span-2 bg-white border-2 border-black rounded-lg px-4 py-3 font-bold focus:bg-[#FFD93D]/20 outline-none" required />
-                  <input type="text" name="city" placeholder="City" value={formData.city} onChange={handleInputChange} className="bg-white border-2 border-black rounded-lg px-4 py-3 font-bold focus:bg-[#FFD93D]/20 outline-none" />
-                  <input type="text" name="state" placeholder="State" value={formData.state} onChange={handleInputChange} className="bg-white border-2 border-black rounded-lg px-4 py-3 font-bold focus:bg-[#FFD93D]/20 outline-none" />
-                  <input type="text" name="zipCode" placeholder="ZIP" value={formData.zipCode} onChange={handleInputChange} className="bg-white border-2 border-black rounded-lg px-4 py-3 font-bold focus:bg-[#FFD93D]/20 outline-none" />
+                <h2 className="font-header text-2xl md:text-3xl font-black mb-6 md:mb-8 text-black">SHIPPING INFORMATION</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                  <input type="text" name="name" placeholder="Full Name" value={formData.name} onChange={handleInputChange} className="col-span-1 bg-white border-2 border-black rounded-lg px-4 py-3 md:py-4 text-sm md:text-base font-bold focus:bg-[#FFD93D]/20 outline-none w-full" required />
+                  <input type="email" name="email" placeholder="Email" value={formData.email} onChange={handleInputChange} className="col-span-1 bg-white border-2 border-black rounded-lg px-4 py-3 md:py-4 text-sm md:text-base font-bold focus:bg-[#FFD93D]/20 outline-none w-full" required />
+                  <input type="tel" name="phone" placeholder="Phone" value={formData.phone} onChange={handleInputChange} className="col-span-1 bg-white border-2 border-black rounded-lg px-4 py-3 md:py-4 text-sm md:text-base font-bold focus:bg-[#FFD93D]/20 outline-none w-full" required />
+                  <input type="text" name="address" placeholder="Address" value={formData.address} onChange={handleInputChange} className="col-span-1 md:col-span-2 bg-white border-2 border-black rounded-lg px-4 py-3 md:py-4 text-sm md:text-base font-bold focus:bg-[#FFD93D]/20 outline-none w-full" required />
+                  <input type="text" name="city" placeholder="City" value={formData.city} onChange={handleInputChange} className="bg-white border-2 border-black rounded-lg px-4 py-3 md:py-4 text-sm md:text-base font-bold focus:bg-[#FFD93D]/20 outline-none w-full" />
+                  <input type="text" name="state" placeholder="State" value={formData.state} onChange={handleInputChange} className="bg-white border-2 border-black rounded-lg px-4 py-3 md:py-4 text-sm md:text-base font-bold focus:bg-[#FFD93D]/20 outline-none w-full" />
+                  <input type="text" name="zipCode" placeholder="ZIP" value={formData.zipCode} onChange={handleInputChange} className="bg-white border-2 border-black rounded-lg px-4 py-3 md:py-4 text-sm md:text-base font-bold focus:bg-[#FFD93D]/20 outline-none w-full" />
                 </div>
               </div>
 
               <div className="bg-white border-2 border-black p-6 rounded-[20px] neo-shadow">
                 <h3 className="font-header text-lg font-black mb-4 uppercase">Points & Vouchers</h3>
                 {/* Points Redemption Slider Removed - Points only for Vouchers now */}
-                <div className="flex gap-2">
-                  <input type="text" value={voucherCode} onChange={(e) => setVoucherCode(e.target.value.toUpperCase())} placeholder="Voucher Code" className="flex-1 border-2 border-black rounded-lg px-4 py-2 font-bold uppercase" />
-                  <button type="button" onClick={handleApplyVoucher} disabled={checkingVoucher} className="bg-black text-white px-6 py-2 rounded-lg font-black neo-shadow uppercase text-xs">{checkingVoucher ? '...' : 'Apply'}</button>
+                <div className="flex flex-col md:flex-row gap-2 md:gap-4">
+                  <input type="text" value={voucherCode} onChange={(e) => setVoucherCode(e.target.value.toUpperCase())} placeholder="Voucher Code" className="w-full md:flex-1 border-2 border-black rounded-lg px-4 py-3 font-bold uppercase text-sm md:text-base" />
+                  <button type="button" onClick={handleApplyVoucher} disabled={checkingVoucher} className="bg-black text-white px-6 py-3 rounded-lg font-black neo-shadow uppercase text-xs tracking-widest hover:bg-[#6C5CE7] transition-all">{checkingVoucher ? '...' : 'Apply'}</button>
                 </div>
                 {voucherError && <p className="text-red-500 text-xs font-bold mt-2">{voucherError}</p>}
               </div>

@@ -159,8 +159,19 @@ export interface UserProfile {
   last_name?: string;
   photoURL?: string | null;
   avatar_url?: string | null;
+  phoneNumber?: string;
+  phoneVerified?: boolean;
   avatarSeed?: string;
   role?: string;
+  checkoutInfo?: {
+    name?: string;
+    email?: string;
+    phone?: string;
+    address?: string;
+    city?: string;
+    state?: string;
+    zipCode?: string;
+  };
   isBanned?: boolean;
   onboardingCompleted?: boolean;
   likedBlogs?: string[];

@@ -115,11 +115,11 @@ export default function EventRegistrationForm({
 
             // Load saved checkout info for auto-fill
             const savedInfo = userData?.checkoutInfo;
-            if (savedInfo) {
+            if (savedInfo || userData?.phoneNumber) {
               setFormData(prev => ({
-                name: savedInfo.name || user?.displayName || prev.name,
-                email: savedInfo.email || user?.email || prev.email,
-                phone: savedInfo.phone || prev.phone,
+                name: savedInfo?.name || user?.displayName || prev.name,
+                email: savedInfo?.email || user?.email || prev.email,
+                phone: userData?.phoneNumber || savedInfo?.phone || prev.phone,
               }));
             }
           }
@@ -168,8 +168,16 @@ export default function EventRegistrationForm({
       setShowErrorModal(true);
       return false;
     }
-    if (!/^\d{10}$/.test(formData.phone.replace(/\D/g, ''))) {
+    // Allow + at start, then digits, spaces, hyphens, parentheses
+    const phoneRegex = /^\+?[\d\s-()]{10,20}$/;
+    if (!phoneRegex.test(formData.phone)) {
       setError('Please enter a valid phone number');
+      setShowErrorModal(true);
+      return false;
+    }
+    const cleanPhone = formData.phone.replace(/[^\d+]/g, '');
+    if (cleanPhone.length < 10) {
+      setError('Phone number must be at least 10 digits');
       setShowErrorModal(true);
       return false;
     }
@@ -730,7 +738,8 @@ export default function EventRegistrationForm({
                 name="phone"
                 value={formData.phone}
                 onChange={handleInputChange}
-                placeholder="10-digit phone number"
+                placeholder="+91 98765 43210"
+                maxLength={20}
                 className="w-full px-4 py-3 bg-white border-2 border-black rounded-xl text-black placeholder:text-black/30 focus:outline-none focus:shadow-[4px_4px_0px_#000] transition-all font-medium"
               />
             </div>

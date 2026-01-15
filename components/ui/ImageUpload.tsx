@@ -13,6 +13,7 @@ interface ImageUploadProps {
     onRemove: (value: string) => void;
     value: string[];
     maxFiles?: number;
+    showGallery?: boolean;
 }
 
 const ImageUpload: React.FC<ImageUploadProps> = ({
@@ -20,7 +21,8 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
     onChange,
     onRemove,
     value,
-    maxFiles
+    maxFiles,
+    showGallery = true
 }) => {
     const [isMounted, setIsMounted] = useState(false);
 
@@ -96,9 +98,11 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
                     }}
                 </CldUploadWidget>
 
-                <MediaGalleryModal
-                    onSelect={(url) => onChange(url)}
-                />
+                {showGallery && (
+                    <MediaGalleryModal
+                        onSelect={(url) => onChange(url)}
+                    />
+                )}
             </div>
         </div>
     );
