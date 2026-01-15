@@ -90,6 +90,10 @@ const UserManagementPage = () => {
         const querySnapshot = await getDocs(collection(db, 'users'));
         const userData = querySnapshot.docs.map(doc => {
           const data = doc.data();
+          // Debug logging
+          if (data.email === 'rudrakshfanse64@gmail.com' || data.isBanned) {
+            console.log('User Data Debug:', { name: data.name, email: data.email, isBanned: data.isBanned, role: data.role });
+          }
           return {
             id: doc.id,
             name: data.name,
@@ -142,6 +146,43 @@ const UserManagementPage = () => {
     } catch (error) {
       console.error('Error updating ban status:', error);
       await showAlert('Failed to update ban status', 'error');
+    }
+  };
+
+  const handleSyncBanStatus = async () => {
+    setLoading(true);
+    try {
+      let updatedCount = 0;
+      const querySnapshot = await getDocs(collection(db, 'users'));
+
+      const updates = querySnapshot.docs.map(async (userDoc) => {
+        const data = userDoc.data();
+        if (data.isBanned === undefined) {
+          await updateDoc(doc(db, 'users', userDoc.id), {
+            isBanned: false
+          });
+          updatedCount++;
+        }
+      });
+
+      await Promise.all(updates);
+
+      // Refresh list
+      const refreshedSnapshot = await getDocs(collection(db, 'users'));
+      const userData = refreshedSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        isBanned: doc.data().isBanned || false,
+        created_at: doc.data().created_at
+      } as User));
+      setUsers(userData);
+
+      await showAlert(`Database Fixed: Updated ${updatedCount} users.`, 'success');
+    } catch (error) {
+      console.error('Error syncing:', error);
+      await showAlert('Failed to sync database', 'error');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -249,7 +290,7 @@ const UserManagementPage = () => {
               </div>
             </div>
             <h1 className="text-5xl font-header font-black text-[#2D3436] mb-2 tracking-tighter uppercase">
-              User Management
+              User Management (Admin Console)
             </h1>
             <p className="text-lg text-[#2D3436]/60 max-w-2xl mx-auto font-medium">
               Manage user accounts, roles, and permissions across the platform.
@@ -263,15 +304,17 @@ const UserManagementPage = () => {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="mb-8"
           >
-            <div className="relative max-w-md mx-auto lg:mx-0">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[#2D3436]/40 w-5 h-5" />
-              <input
-                type="text"
-                placeholder="Search users..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 border-2 border-black rounded-xl bg-white text-[#2D3436] placeholder-[#2D3436]/40 focus:outline-none focus:ring-0 neo-shadow transition-all duration-300 font-bold"
-              />
+            <div className="flex justify-center items-center gap-4 max-w-2xl mx-auto mb-8">
+              <div className="relative flex-1 max-w-md">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[#2D3436]/40 w-5 h-5" />
+                <input
+                  type="text"
+                  placeholder="Search users..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-12 pr-4 py-3 border-2 border-black rounded-xl bg-white text-[#2D3436] placeholder-[#2D3436]/40 focus:outline-none focus:ring-0 neo-shadow transition-all duration-300 font-bold"
+                />
+              </div>
             </div>
           </motion.div>
 
@@ -280,7 +323,7 @@ const UserManagementPage = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="bg-white rounded-xl border-2 border-black overflow-hidden neo-shadow"
+            className="bg-white rounded-xl border-2 border-black overflow-x-auto neo-shadow"
           >
             {loading ? (
               <div className="flex flex-col items-center justify-center py-12">
@@ -343,6 +386,7 @@ const UserManagementPage = () => {
                       <TableCell>
                         <div className="flex gap-2">
                           <button
+                            key={`ban-btn-${user.id}-${user.isBanned}`}
                             onClick={() => handleBanToggle(user)}
                             className={`inline-flex items-center px-3 py-2 rounded-lg transition-all duration-200 text-xs font-black uppercase tracking-wider border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none ${user.isBanned
                               ? 'bg-green-400 hover:bg-green-500 text-black'

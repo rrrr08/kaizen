@@ -303,6 +303,7 @@ export const createUserProfile = async (userId: string, data: UserProfile) => {
     id: userId,
     role: existingRole || data.role || "member", // Prioritize existing role
     ...data,
+    isBanned: false, // Default to not banned
     ...avatarData, // Add multiavatar data if generated
     created_at:
       data.created_at &&

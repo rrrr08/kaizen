@@ -5,12 +5,15 @@ import { User } from 'firebase/auth';
 
 import { UserProfile } from '@/lib/types';
 
+import BannedScreen from '@/components/auth/BannedScreen';
+
 interface AuthContextType {
   user: User | null;
   userProfile: UserProfile | null;
   loading: boolean;
   role: string | null;
   isAdmin: boolean;
+  isBanned: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -21,6 +24,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [role, setRole] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isBanned, setIsBanned] = useState(false);
 
   useEffect(() => {
     console.log('[AuthContext] Mounting - initializing auth listener');
@@ -49,9 +53,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               // Fetch user role from Firestore
               try {
                 if (!db) {
-                  // CRITICAL FIX: If DB is not ready, DO NOT load the user as "member" with empty data.
-                  // Keep loading state true so the UI waits for DB to be ready or for a reload.
-                  console.error('[AuthContext] Critical: Firebase db not initialized - keeping app in loading state to prevent data corruption');
+                  console.error('[AuthContext] Critical: Firebase db not initialized');
                   setLoading(true);
                   return;
                 }
@@ -64,41 +66,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
                   // Check for Ban Status
                   if (userData.isBanned) {
-                    console.warn('[AuthContext] User is banned. Logging out.');
-                    await signOut(auth);
-                    setUser(null);
-                    setUserProfile(null);
-                    setRole(null);
-                    setIsAdmin(false);
-                    setLoading(false);
-                    // Optional: Redirect or Alert
-                    if (typeof window !== 'undefined') {
-                      alert("Your account has been suspended. Please contact support.");
-                      window.location.href = "/";
-                    }
-                    return;
+                    setIsBanned(true);
+                  } else {
+                    setIsBanned(false);
                   }
 
                   const userRole = userData?.role || null;
                   setUserProfile(userData);
                   setRole(userRole);
                   setIsAdmin(userRole === 'admin');
-                  console.log('[AuthContext] User role:', userRole);
                 } else {
                   setUserProfile(null);
                   setRole(null);
                   setIsAdmin(false);
+                  setIsBanned(false);
                 }
               } catch (error) {
                 console.error('[AuthContext] Error fetching user role:', error);
                 setUserProfile(null);
                 setRole(null);
                 setIsAdmin(false);
+                setIsBanned(false);
               }
             } else {
               setUserProfile(null);
               setRole(null);
               setIsAdmin(false);
+              setIsBanned(false);
             }
 
             setLoading(false);
@@ -109,6 +103,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setRole(null);
             setIsAdmin(false);
             setLoading(false);
+            setIsBanned(false);
           });
 
           return () => {
@@ -121,8 +116,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, userProfile, loading, role, isAdmin }}>
-      {children}
+    <AuthContext.Provider value={{ user, userProfile, loading, role, isAdmin, isBanned }}>
+      {isBanned ? <BannedScreen /> : children}
     </AuthContext.Provider>
   );
 }
