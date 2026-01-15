@@ -150,13 +150,7 @@ export default function RootLayout({
           }}
         />
 
-        {/* Razorpay Script */}
-        <script
-          key="razorpay-checkout"
-          src="https://checkout.razorpay.com/v1/checkout.js"
-          async
-          defer
-        ></script>
+
       </head>
       <body className={`${outfit.variable} ${fredoka.variable} ${instrumentSerif.variable} antialiased bg-[#FFFDF5] text-[#2D3436] font-sans`}>
         <ErrorBoundary>

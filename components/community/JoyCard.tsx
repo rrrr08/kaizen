@@ -1,6 +1,7 @@
 import React from 'react';
 import { Quote } from 'lucide-react';
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 
 interface JoyCardProps {
     name: string;
@@ -34,9 +35,15 @@ export default function JoyCard({ name, role, quote, image, index }: JoyCardProp
 
             {/* Author */}
             <div className="flex items-center gap-4 pt-6 border-t-2 border-black/5">
-                <div className="w-12 h-12 rounded-full border-2 border-black bg-gray-100 overflow-hidden flex-shrink-0">
+                <div className="w-12 h-12 rounded-full border-2 border-black bg-gray-100 overflow-hidden flex-shrink-0 relative">
                     {image ? (
-                        <img src={image} alt={name} className="w-full h-full object-cover" />
+                        <Image
+                            src={image}
+                            alt={name}
+                            fill
+                            sizes="48px"
+                            className="object-cover"
+                        />
                     ) : (
                         <div className="w-full h-full flex items-center justify-center bg-[#6C5CE7] text-white font-black text-lg">
                             {name.charAt(0)}
