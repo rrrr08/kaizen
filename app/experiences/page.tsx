@@ -35,14 +35,21 @@ export default function Experiences() {
     <div className="min-h-screen pt-28 pb-16 bg-[#FFFDF5]">
       <div className="max-w-7xl mx-auto px-6 md:px-12">
         {/* Header */}
-        <div className="mb-20 border-b-2 border-black pb-12">
-          <div className="text-[#6C5CE7] font-black text-sm tracking-[0.2em] mb-4 uppercase font-display">Custom & Hosted Experiences</div>
-          <h1 className="font-header text-4xl md:text-8xl tracking-tighter mb-8 text-[#2D3436]">
-            PLAY FOR <br /><span className="text-[#FFD93D] drop-shadow-[2px_2px_0px_#000] italic font-serif">OCCASIONS</span>
-          </h1>
-          <p className="text-black/80 font-bold text-xl max-w-3xl leading-relaxed">
-            From corporate team-building to intimate celebrations, we design unforgettable experiences around game-based engagement.
-          </p>
+        <div className="mb-20 border-b-4 border-black pb-12">
+          <div className="flex flex-col items-start">
+            <div className="text-[#6C5CE7] font-black text-xs md:text-sm tracking-[0.3em] mb-6 uppercase font-display bg-white px-3 py-1 border-2 border-black rounded-lg shadow-[2px_2px_0px_#000]">
+              Custom & Hosted Experiences
+            </div>
+            <h1 className="font-header tracking-tighter text-[#2D3436] flex flex-col items-start leading-none mb-8">
+              <span className="text-3xl md:text-4xl font-black uppercase mb-1">PLAY FOR</span>
+              <span className="text-6xl md:text-9xl italic font-serif text-black drop-shadow-[4px_4px_0px_#FFD93D] relative z-10">
+                OCCASIONS
+              </span>
+            </h1>
+            <p className="text-black/80 font-bold text-lg md:text-2xl max-w-3xl leading-relaxed">
+              From corporate team-building to intimate celebrations, we design unforgettable experiences around game-based engagement.
+            </p>
+          </div>
         </div>
 
         {/* Loading State */}

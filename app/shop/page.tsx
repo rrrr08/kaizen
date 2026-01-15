@@ -138,24 +138,32 @@ export default function Shop() {
     <div className="min-h-screen pt-28 pb-16 bg-[#FFFDF5]">
       <div className="max-w-7xl mx-auto px-6 md:px-12">
         {/* Header */}
-        <div className="mb-12 border-b-2 border-black pb-12">
-          <div className="flex flex-col md:flex-row items-end justify-between gap-8">
-            <div>
-              <div className="text-[#6C5CE7] font-black text-sm tracking-[0.2em] mb-4 uppercase font-display">Archive of Curiosities</div>
-              <h1 className="font-header text-4xl md:text-8xl tracking-tighter text-[#2D3436]">
-                THE <br /><span className="italic font-serif text-[#FFD93D] drop-shadow-[2px_2px_0px_#000]">REPOSITORY</span>
+        <div className="mb-12 border-b-4 border-black pb-12">
+          <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-8">
+            <div className="flex flex-col items-start">
+              <div className="text-[#6C5CE7] font-black text-xs md:text-sm tracking-[0.3em] mb-6 uppercase font-display bg-white px-3 py-1 border-2 border-black rounded-lg shadow-[2px_2px_0px_#000]">
+                Archive of Curiosities
+              </div>
+              <h1 className="font-header tracking-tighter text-[#2D3436] flex flex-col items-start leading-none">
+                <span className="text-2xl md:text-4xl font-black uppercase mb-1">THE</span>
+                <span className="text-5xl md:text-9xl italic font-serif text-black drop-shadow-[4px_4px_0px_#FFD93D] relative z-10">
+                  REPOSITORY
+                </span>
               </h1>
-              <p className="text-black/60 font-bold text-lg mt-4">Showing {filteredProducts.length} of {products.length} games</p>
+              <p className="text-[#2D3436]/60 font-black text-sm md:text-xl mt-6 uppercase tracking-wider flex items-center gap-2">
+                <span className="w-2 h-2 bg-[#6C5CE7] rounded-full animate-pulse"></span>
+                Showing {filteredProducts.length} of {products.length} games
+              </p>
             </div>
 
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className="px-6 py-3 bg-black text-white font-black text-xs tracking-wider uppercase rounded-xl neo-shadow hover:bg-[#6C5CE7] transition-all flex items-center gap-2"
+              className="w-full md:w-auto px-8 py-4 bg-black text-white font-black text-sm tracking-[0.2em] uppercase rounded-full border-2 border-black shadow-[6px_6px_0px_#6C5CE7] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all flex items-center justify-center gap-3 active:scale-95"
             >
-              <Filter size={16} />
+              <Filter size={20} className={showFilters ? "text-[#FFD93D]" : "text-white"} />
               FILTERS
               {activeFiltersCount > 0 && (
-                <span className="bg-[#FFD93D] text-black rounded-full w-6 h-6 flex items-center justify-center text-xs">
+                <span className="bg-[#FFD93D] text-black rounded-full w-6 h-6 flex items-center justify-center text-xs font-black shadow-[2px_2px_0px_rgba(0,0,0,1)]">
                   {activeFiltersCount}
                 </span>
               )}

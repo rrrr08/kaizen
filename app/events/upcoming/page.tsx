@@ -131,15 +131,21 @@ export default function UpcomingEvents() {
     <div className="min-h-screen pt-28 pb-16 bg-[#FFFDF5]">
       <div className="max-w-7xl mx-auto px-6 md:px-12">
         {/* Header */}
-        <div className="mb-20 border-b-2 border-black pb-12">
-          <div className="text-[#6C5CE7] font-black text-sm tracking-[0.2em] mb-4 uppercase font-display">
-            Upcoming Game Nights
-          </div>
-          <h1 className="font-header text-4xl md:text-8xl tracking-tighter text-[#2D3436]">
-            UPCOMING <br /><span className="text-[#FFD93D] drop-shadow-[2px_2px_0px_#000] italic font-serif">EVENTS</span>
-          </h1>
-          <div className="mt-6 text-black/60 font-medium font-serif italic text-xl">
-            {events.length} events scheduled
+        <div className="mb-20 border-b-4 border-black pb-12">
+          <div className="flex flex-col items-start">
+            <div className="text-[#6C5CE7] font-black text-xs md:text-sm tracking-[0.3em] mb-6 uppercase font-display bg-white px-3 py-1 border-2 border-black rounded-lg shadow-[2px_2px_0px_#000]">
+              Upcoming Game Nights
+            </div>
+            <h1 className="font-header tracking-tighter text-[#2D3436] flex flex-col items-start leading-none">
+              <span className="text-3xl md:text-4xl font-black uppercase mb-1">UPCOMING</span>
+              <span className="text-6xl md:text-9xl italic font-serif text-black drop-shadow-[4px_4px_0px_#FFD93D] relative z-10">
+                EVENTS
+              </span>
+            </h1>
+            <p className="text-[#2D3436]/60 font-black text-sm md:text-xl mt-6 uppercase tracking-wider flex items-center gap-2">
+              <span className="w-2 h-2 bg-[#6C5CE7] rounded-full animate-pulse"></span>
+              {events.length} events scheduled
+            </p>
           </div>
         </div>
 

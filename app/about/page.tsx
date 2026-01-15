@@ -57,19 +57,26 @@ export default function About() {
     <div className="min-h-screen pt-32 pb-16 bg-[#FFFDF5] text-[#2D3436] selection:bg-[#FFD93D]/50 font-sans">
       <div className="max-w-7xl mx-auto px-6 md:px-12">
         {/* SECTION 1 — PAGE HERO */}
-        <section className="mb-32">
-          <div className="text-[#6C5CE7] font-black text-sm tracking-[0.2em] mb-4 uppercase font-header">Our Story</div>
-          <h1 className="font-header text-4xl md:text-8xl tracking-tighter mb-8 leading-none text-black">
-            OUR <br /><span className="text-[#FFD93D] drop-shadow-[2px_2px_0px_#000] italic font-serif">(accidentally awesome)</span> STORY
-          </h1>
-          <p className="text-black/80 font-bold text-xl max-w-3xl leading-relaxed">
-            A digital playground built on the belief that games are more than products—they&apos;re moments, memories, and shared joy.
-          </p>
-          <div className="max-w-2xl border-l-4 border-black pl-8 py-2 mt-8">
-            <p className="text-black/70 font-medium italic text-xl md:text-2xl leading-relaxed">
-              Honestly? There&apos;s no dramatic lifelong passion story here.
-              Just two people who realized they&apos;re pretty good at creating chaos, laughter, and the kind of competitive tension that turns friends into frenemies.
+        <section className="mb-32 border-b-4 border-black pb-12">
+          <div className="flex flex-col items-start">
+            <div className="text-[#6C5CE7] font-black text-xs md:text-sm tracking-[0.3em] mb-6 uppercase font-display bg-white px-3 py-1 border-2 border-black rounded-lg shadow-[2px_2px_0px_#000]">
+              Our Story
+            </div>
+            <h1 className="font-header tracking-tighter text-[#2D3436] flex flex-col items-start leading-none mb-8">
+              <span className="text-3xl md:text-4xl font-black uppercase mb-1">OUR (accidentally awesome)</span>
+              <span className="text-6xl md:text-9xl italic font-serif text-black drop-shadow-[4px_4px_0px_#FFD93D] relative z-10">
+                STORY
+              </span>
+            </h1>
+            <p className="text-black/80 font-bold text-lg md:text-2xl max-w-3xl leading-relaxed mb-8">
+              A digital playground built on the belief that games are more than products—they&apos;re moments, memories, and shared joy.
             </p>
+            <div className="max-w-2xl border-l-4 border-black pl-8 py-2">
+              <p className="text-black/70 font-medium italic text-xl md:text-2xl leading-relaxed">
+                Honestly? There&apos;s no dramatic lifelong passion story here.
+                Just two people who realized they&apos;re pretty good at creating chaos, laughter, and the kind of competitive tension that turns friends into frenemies.
+              </p>
+            </div>
           </div>
         </section>
 

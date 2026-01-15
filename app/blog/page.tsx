@@ -118,14 +118,21 @@ export default function Blog() {
         <div className="min-h-screen pt-32 pb-16 bg-[#FFFDF5] text-[#2D3436] font-sans selection:bg-[#FFD93D]/50">
             <div className="max-w-7xl mx-auto px-6 md:px-12">
                 {/* SECTION 1 — HERO */}
-                <div className="text-center mb-24 max-w-4xl mx-auto">
-                    <p className="text-[#6C5CE7] font-black text-sm tracking-[0.4em] mb-6 uppercase font-header bg-white inline-block px-4 py-1 border-2 border-black rounded-full shadow-[4px_4px_0px_#000]">The Joy Juncture</p>
-                    <h1 className="font-header text-6xl md:text-8xl mb-8 text-black leading-none tracking-tight">
-                        Blog Journal
-                    </h1>
-                    <p className="font-bold italic text-2xl text-black/70">
-                        Stories from the table — games, people, strategies, and shared joy.
-                    </p>
+                <div className="mb-20 border-b-4 border-black pb-12">
+                    <div className="flex flex-col items-start">
+                        <div className="text-[#6C5CE7] font-black text-xs md:text-sm tracking-[0.3em] mb-6 uppercase font-display bg-white px-3 py-1 border-2 border-black rounded-lg shadow-[2px_2px_0px_#000]">
+                            The Joy Juncture
+                        </div>
+                        <h1 className="font-header tracking-tighter text-[#2D3436] flex flex-col items-start leading-none mb-8">
+                            <span className="text-3xl md:text-4xl font-black uppercase mb-1">BLOG</span>
+                            <span className="text-6xl md:text-9xl italic font-serif text-black drop-shadow-[4px_4px_0px_#FFD93D] relative z-10">
+                                JOURNAL
+                            </span>
+                        </h1>
+                        <p className="text-black/70 font-bold italic text-xl md:text-2xl max-w-3xl leading-relaxed">
+                            Stories from the table — games, people, strategies, and shared joy.
+                        </p>
+                    </div>
                 </div>
 
                 {/* SECTION 2 — FEATURED STORY */}
