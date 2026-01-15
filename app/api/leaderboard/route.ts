@@ -1,11 +1,27 @@
 import { adminDb } from '@/app/api/auth/firebase-admin';
 import { NextResponse } from 'next/server';
+import { cacheGet, cacheSet } from '@/lib/redis';
+import { withRateLimit, RateLimitPresets } from '@/lib/redis-rate-limit';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+async function handler() {
   try {
-    // Fetch top 10 users by XP
+    const CACHE_KEY_TYPE = 'leaderboard';
+    const CACHE_KEY_ID = 'top10';
+    const CACHE_TTL = 60; // 1 minute cache
+
+    // Try to get from Redis cache first
+    const cached = await cacheGet<any[]>(CACHE_KEY_TYPE, CACHE_KEY_ID);
+    if (cached) {
+      return NextResponse.json({
+        success: true,
+        leaderboard: cached,
+        cached: true
+      });
+    }
+
+    // Fetch from Firestore if not cached
     const snapshot = await adminDb
       .collection('users')
       .orderBy('game_xp', 'desc')
@@ -23,7 +39,14 @@ export async function GET() {
       };
     });
 
-    return NextResponse.json({ success: true, leaderboard });
+    // Cache the result in Redis
+    await cacheSet(CACHE_KEY_TYPE, CACHE_KEY_ID, leaderboard, CACHE_TTL);
+
+    return NextResponse.json({
+      success: true,
+      leaderboard,
+      cached: false
+    });
   } catch (error: any) {
     console.error('Error fetching leaderboard:', error);
     return NextResponse.json(
@@ -32,3 +55,12 @@ export async function GET() {
     );
   }
 }
+
+// Export with rate limiting (100 requests per minute)
+export const GET = withRateLimit(
+  {
+    endpoint: 'api:leaderboard',
+    ...RateLimitPresets.read,
+  },
+  handler
+);
