@@ -1,6 +1,7 @@
 import { adminDb, adminAuth } from '@/lib/firebaseAdmin';
 import admin from 'firebase-admin';
 import twilio from 'twilio';
+import { SmsTemplates } from './sms-templates';
 
 interface NotificationOptions {
     title: string;
@@ -183,7 +184,7 @@ async function sendSmsNotification(userData: any, title: string, message: string
         }
 
         const client = twilio(accountSid, authToken);
-        const smsBody = `${title}\n\n${message}${actionUrl ? `\n\nLink: ${actionUrl}` : ''}`;
+        const smsBody = SmsTemplates.notification(title, message, actionUrl || undefined);
 
         await client.messages.create({
             body: smsBody,

@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminAuth, adminDb } from '@/lib/firebaseAdmin';
 import { headers } from 'next/headers';
+import { withRateLimit, RateLimitPresets } from '@/lib/redis-rate-limit';
 
-// POST /api/games/award - Award points after game completion
-export async function POST(req: NextRequest) {
+// POST /api/games/claim - Award points after game completion
+async function claimHandler(req: NextRequest) {
   try {
     // Get Firebase Auth token from Authorization header
     const headersList = await headers();
@@ -206,3 +207,12 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
+// Export with rate limiting (30 requests per minute - more lenient for game claims)
+export const POST = withRateLimit(
+  {
+    endpoint: 'api:games:claim',
+    ...RateLimitPresets.api,
+  },
+  claimHandler
+);

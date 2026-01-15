@@ -85,8 +85,21 @@ export function getWindowTimestamp(windowSeconds: number): number {
 export async function cacheGet<T>(type: string, id: string): Promise<T | null> {
     try {
         const key = RedisKeys.cache(type, id);
-        const data = await redis.get<string>(key);
-        return data ? JSON.parse(data) : null;
+        const data = await redis.get(key);
+
+        if (!data) return null;
+
+        // If data is already an object, return it directly
+        if (typeof data === 'object') {
+            return data as T;
+        }
+
+        // If data is a string, parse it as JSON
+        if (typeof data === 'string') {
+            return JSON.parse(data);
+        }
+
+        return null;
     } catch (error) {
         console.error('Redis cache get error:', error);
         return null;
