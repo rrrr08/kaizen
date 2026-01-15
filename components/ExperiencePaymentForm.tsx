@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { usePopup } from '@/app/context/PopupContext';
 import { useGamification } from '@/app/context/GamificationContext';
 import { X, Check, Zap } from 'lucide-react';
+import Script from 'next/script';
 
 interface ExperiencePaymentFormProps {
     enquiry: any;
@@ -34,6 +35,7 @@ export default function ExperiencePaymentForm({
     const [error, setError] = useState<string | null>(null);
     const [isProcessing, setIsProcessing] = useState(false);
     const [showErrorModal, setShowErrorModal] = useState(false);
+    const [isRazorpayLoaded, setIsRazorpayLoaded] = useState(false);
 
     // Form Data
     const [formData, setFormData] = useState({
@@ -153,94 +155,97 @@ export default function ExperiencePaymentForm({
             const razorpayOrderId = orderData.orderId || orderData.id;
 
             // Load Razorpay
-            const script = document.createElement('script');
-            script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-            script.async = true;
+            if (!window.Razorpay) {
+                throw new Error('Payment system is not ready. Please try again in a moment.');
+            }
 
-            script.onload = () => {
-                const options = {
-                    key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-                    amount: orderData.amount,
-                    currency: orderData.currency,
-                    name: 'Joy Juncture',
-                    description: `Experience: ${enquiry.categoryName}`,
-                    order_id: razorpayOrderId,
-                    prefill: {
-                        name: formData.name,
-                        email: formData.email,
-                        contact: formData.phone, // KEY FIX: Razorpay expects 'contact', not 'phone'
-                    },
-                    handler: async (response: any) => {
-                        try {
-                            // Verify Payment
-                            const paymentResponse = await fetch('/api/experiences/payment/verify', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({
-                                    razorpay_payment_id: response.razorpay_payment_id,
-                                    razorpay_order_id: response.razorpay_order_id,
-                                    razorpay_signature: response.razorpay_signature,
-                                    enquiryId: enquiry.id,
-                                    userId: user.uid,
-                                    amount: orderData.amount,
-                                    walletPointsUsed: 0
-                                }),
-                            });
+            const options = {
+                key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+                amount: orderData.amount,
+                currency: orderData.currency,
+                name: 'Joy Juncture',
+                description: `Experience: ${enquiry.categoryName}`,
+                order_id: razorpayOrderId,
+                prefill: {
+                    name: formData.name,
+                    email: formData.email,
+                    contact: formData.phone, // KEY FIX: Razorpay expects 'contact', not 'phone'
+                },
+                handler: async (response: any) => {
+                    try {
+                        // Verify Payment
+                        const paymentResponse = await fetch('/api/experiences/payment/verify', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                razorpay_payment_id: response.razorpay_payment_id,
+                                razorpay_order_id: response.razorpay_order_id,
+                                razorpay_signature: response.razorpay_signature,
+                                enquiryId: enquiry.id,
+                                userId: user.uid,
+                                amount: orderData.amount,
+                                walletPointsUsed: 0
+                            }),
+                        });
 
-                            const paymentData = await paymentResponse.json();
+                        const paymentData = await paymentResponse.json();
 
-                            if (paymentData.success) {
-                                // Redeem Voucher if used
-                                if (appliedVoucherId) {
-                                    try {
-                                        const token = await user.getIdToken();
-                                        await fetch('/api/rewards/use', {
-                                            method: 'POST',
-                                            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                                            body: JSON.stringify({ voucherId: appliedVoucherId, orderId: razorpayOrderId })
-                                        });
-                                    } catch (e) { console.error("Voucher use failed", e); }
-                                }
-
-                                await showAlert('Payment Successful! Your experience is confirmed.', 'success');
-
-                                // Save checkout info
+                        if (paymentData.success) {
+                            // Redeem Voucher if used
+                            if (appliedVoucherId) {
                                 try {
-                                    const { getFirestore, doc, updateDoc } = await import('firebase/firestore');
-                                    const { app } = await import('@/lib/firebase');
-                                    const db = getFirestore(app);
-                                    await updateDoc(doc(db, 'users', user.uid), {
-                                        checkoutInfo: {
-                                            name: formData.name,
-                                            email: formData.email,
-                                            phone: formData.phone,
-                                            updatedAt: new Date().toISOString()
-                                        }
+                                    const token = await user.getIdToken();
+                                    await fetch('/api/rewards/use', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                                        body: JSON.stringify({ voucherId: appliedVoucherId, orderId: razorpayOrderId })
                                     });
-                                } catch (e) { }
-
-                                onSuccess();
-                                onClose();
-                            } else {
-                                setError(paymentData.error || 'Payment verification failed');
-                                setShowErrorModal(true);
-                                setIsProcessing(false);
+                                } catch (e) { console.error("Voucher use failed", e); }
                             }
-                        } catch (err: any) {
-                            setError(err.message || 'Payment verification failed');
+
+                            await showAlert('Payment Successful! Your experience is confirmed.', 'success');
+
+                            // Save checkout info
+                            try {
+                                const { getFirestore, doc, updateDoc } = await import('firebase/firestore');
+                                const { app } = await import('@/lib/firebase');
+                                const db = getFirestore(app);
+                                await updateDoc(doc(db, 'users', user.uid), {
+                                    checkoutInfo: {
+                                        name: formData.name,
+                                        email: formData.email,
+                                        phone: formData.phone,
+                                        updatedAt: new Date().toISOString()
+                                    }
+                                });
+                            } catch (e) { }
+
+                            onSuccess();
+                            onClose();
+                        } else {
+                            setError(paymentData.error || 'Payment verification failed');
                             setShowErrorModal(true);
                             setIsProcessing(false);
                         }
-                    },
-                    theme: { color: '#6C5CE7' },
-                    modal: { ondismiss: function () { setIsProcessing(false); } }
-                };
-
-                const razorpay = new window.Razorpay(options);
-                razorpay.open();
+                    } catch (err: any) {
+                        setError(err.message || 'Payment verification failed');
+                        setShowErrorModal(true);
+                        setIsProcessing(false);
+                    }
+                },
+                theme: { color: '#6C5CE7' },
+                modal: { ondismiss: function () { setIsProcessing(false); } }
             };
 
-            document.body.appendChild(script);
+            const razorpay = new window.Razorpay(options);
+            razorpay.on('payment.failed', function (response: any) {
+                console.error('Payment Failed:', response.error);
+                setError(response.error.description || 'Payment Failed');
+                setShowErrorModal(true);
+                setIsProcessing(false);
+            });
+            razorpay.open();
+
 
         } catch (err: any) {
             console.error("Payment failed", err);
@@ -252,6 +257,13 @@ export default function ExperiencePaymentForm({
 
     return (
         <>
+            <Script
+                id="razorpay-experience-checkout"
+                src="https://checkout.razorpay.com/v1/checkout.js"
+                strategy="lazyOnload"
+                onLoad={() => setIsRazorpayLoaded(true)}
+            />
+
             {/* Error Modal */}
             {showErrorModal && error && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4">

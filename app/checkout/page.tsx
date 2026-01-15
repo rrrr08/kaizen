@@ -4,6 +4,7 @@ import { useCart } from '@/app/context/CartContext';
 import { useAuth } from '@/app/context/AuthContext';
 import { useGamification } from '@/app/context/GamificationContext';
 import Link from 'next/link';
+import Script from 'next/script'; // Import Script
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
@@ -31,6 +32,7 @@ export default function CheckoutPage() {
   const [shippingCost, setShippingCost] = useState(50);
   const [freeShippingThreshold, setFreeShippingThreshold] = useState(500);
   const [checkoutInfoLoaded, setCheckoutInfoLoaded] = useState(false);
+  const [isRazorpayLoaded, setIsRazorpayLoaded] = useState(false);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -231,6 +233,11 @@ export default function CheckoutPage() {
       return;
     }
 
+    if (!isRazorpayLoaded) {
+      addToast({ title: 'System Loading', description: 'Payment system is initializing. Please wait a moment.' });
+      return;
+    }
+
     setIsProcessing(true);
 
     try {
@@ -253,23 +260,6 @@ export default function CheckoutPage() {
         throw new Error(errorData.error || errorData.details || 'Failed to create payment order');
       }
       const { orderId, amount, dbOrderId } = await response.json();
-
-      // Load Razorpay script dynamically
-      const loadRazorpayScript = () => {
-        return new Promise((resolve, reject) => {
-          const script = document.createElement('script');
-          script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-          script.async = true;
-          script.onload = resolve;
-          script.onerror = () => reject(new Error('Failed to load Razorpay SDK'));
-          document.body.appendChild(script);
-        });
-      };
-
-      // Check if Razorpay is already loaded, if not load it
-      if (!window.Razorpay) {
-        await loadRazorpayScript();
-      }
 
       const RazorpayOptions = {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
@@ -312,7 +302,18 @@ export default function CheckoutPage() {
         theme: { color: '#000000' },
       };
 
+      if (!window.Razorpay) {
+        throw new Error('Payment SDK not loaded');
+      }
+
       const rzp = new window.Razorpay(RazorpayOptions);
+      rzp.on('payment.failed', function (response: any) {
+        addToast({
+          title: 'Payment Failed',
+          description: response.error.description || 'Payment was declined',
+          variant: 'destructive'
+        });
+      });
       rzp.open();
     } catch (error: any) {
       addToast({ title: 'Payment Failed', description: error.message, variant: 'destructive' });
@@ -323,6 +324,13 @@ export default function CheckoutPage() {
 
   return (
     <div className="min-h-screen pt-28 pb-16 bg-[#FFFDF5] text-[#2D3436]">
+      <Script
+        id="razorpay-checkout-js"
+        src="https://checkout.razorpay.com/v1/checkout.js"
+        strategy="lazyOnload"
+        onLoad={() => setIsRazorpayLoaded(true)}
+      />
+
       <div className="max-w-7xl mx-auto px-6 md:px-12">
         <div className="mb-16">
           <Link href="/shop" className="font-black text-xs uppercase tracking-[0.3em] text-[#6C5CE7] hover:text-black mb-8 inline-flex items-center gap-2 transition-colors">
