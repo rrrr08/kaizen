@@ -73,7 +73,7 @@ export default function ThreadList() {
             </div>
 
             {/* List */}
-            <div className="space-y-4">
+            <div className="flex flex-col gap-8">
                 {loading ? (
                     <div className="text-center py-10">Loading threads...</div>
                 ) : filteredThreads.length === 0 ? (
@@ -82,7 +82,7 @@ export default function ThreadList() {
                     </div>
                 ) : (
                     filteredThreads.map(thread => (
-                        <Link key={thread.id} href={`/community/${thread.id}`}>
+                        <Link key={thread.id} href={`/community/${thread.id}`} className="block">
                             <div className="group bg-white border-2 border-black p-6 rounded-[20px] neo-shadow hover:translate-y-[-2px] transition-all cursor-pointer relative overflow-hidden">
                                 {thread.category === 'announcement' && (
                                     <div className="absolute top-0 right-0 bg-red-500 text-white text-[10px] font-black uppercase px-3 py-1 rounded-bl-xl tracking-widest">
