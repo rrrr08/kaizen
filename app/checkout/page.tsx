@@ -257,18 +257,37 @@ export default function CheckoutPage() {
       // Load Razorpay script dynamically
       const loadRazorpayScript = () => {
         return new Promise((resolve, reject) => {
+          // Check if already loaded
+          if (window.Razorpay) {
+            resolve(true);
+            return;
+          }
+
           const script = document.createElement('script');
           script.src = 'https://checkout.razorpay.com/v1/checkout.js';
           script.async = true;
-          script.onload = resolve;
+          
+          script.onload = () => {
+            // Wait a bit for Razorpay to be available on window
+            setTimeout(() => {
+              if (window.Razorpay) {
+                resolve(true);
+              } else {
+                reject(new Error('Razorpay loaded but not available'));
+              }
+            }, 100);
+          };
+          
           script.onerror = () => reject(new Error('Failed to load Razorpay SDK'));
           document.body.appendChild(script);
         });
       };
 
-      // Check if Razorpay is already loaded, if not load it
+      // Load Razorpay script
+      await loadRazorpayScript();
+
       if (!window.Razorpay) {
-        await loadRazorpayScript();
+        throw new Error('Razorpay SDK failed to initialize. Please refresh and try again.');
       }
 
       const RazorpayOptions = {

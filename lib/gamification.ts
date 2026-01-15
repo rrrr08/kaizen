@@ -14,7 +14,7 @@ const DEFAULT_TIERS = [
     badge: 'Grey Meeple',
     perk: 'None',
     color: 'text-slate-400',
-    icon: '♟️',
+    icon: '♙',
     unlockPrice: 0
   },
   {
@@ -24,7 +24,7 @@ const DEFAULT_TIERS = [
     badge: 'Green Pawn',
     perk: 'Early access to Event Tickets',
     color: 'text-emerald-400',
-    icon: '♟️',
+    icon: '♟',
     unlockPrice: 2000
   },
   {
@@ -44,7 +44,7 @@ const DEFAULT_TIERS = [
     badge: 'Gold Crown',
     perk: 'VIP Seating at Game Nights',
     color: 'text-amber-400',
-    icon: '👑',
+    icon: '♚',
     unlockPrice: 10000
   }
 ];

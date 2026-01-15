@@ -59,10 +59,10 @@ export default function ProgressPage() {
   };
 
   const getDefaultTiers = (): Tier[] => [
-    { name: 'Newbie', minXP: 0, multiplier: 1.0, badge: 'Grey Meeple', perk: 'None', color: '#94a3b8', icon: '♟️', unlockPrice: 0 },
-    { name: 'Player', minXP: 500, multiplier: 1.1, badge: 'Green Pawn', perk: 'Early access to Event Tickets', color: '#34d399', icon: '♟️', unlockPrice: 2000 },
+    { name: 'Newbie', minXP: 0, multiplier: 1.0, badge: 'Grey Meeple', perk: 'None', color: '#94a3b8', icon: '♙', unlockPrice: 0 },
+    { name: 'Player', minXP: 500, multiplier: 1.1, badge: 'Green Pawn', perk: 'Early access to Event Tickets', color: '#34d399', icon: '♟', unlockPrice: 2000 },
     { name: 'Strategist', minXP: 2000, multiplier: 1.25, badge: 'Blue Rook', perk: '5% off all Workshops', color: '#60a5fa', icon: '♜', unlockPrice: 5000 },
-    { name: 'Grandmaster', minXP: 5000, multiplier: 1.5, badge: 'Gold Crown', perk: 'VIP Seating at Game Nights', color: '#fbbf24', icon: '👑', unlockPrice: 10000 }
+    { name: 'Grandmaster', minXP: 5000, multiplier: 1.5, badge: 'Gold Crown', perk: 'VIP Seating at Game Nights', color: '#fbbf24', icon: '♚', unlockPrice: 10000 }
   ];
 
   const handleUnlockTier = async (tierToUnlock: Tier) => {
