@@ -135,7 +135,7 @@ export default function UpcomingEvents() {
           <div className="text-[#6C5CE7] font-black text-sm tracking-[0.2em] mb-4 uppercase font-display">
             Upcoming Game Nights
           </div>
-          <h1 className="font-header text-6xl md:text-8xl tracking-tighter text-[#2D3436]">
+          <h1 className="font-header text-4xl md:text-8xl tracking-tighter text-[#2D3436]">
             UPCOMING <br /><span className="text-[#FFD93D] drop-shadow-[2px_2px_0px_#000] italic font-serif">EVENTS</span>
           </h1>
           <div className="mt-6 text-black/60 font-medium font-serif italic text-xl">

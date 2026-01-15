@@ -137,7 +137,7 @@ export default function Blog() {
                         }}
                         className="relative group cursor-pointer border-3 border-black rounded-[30px] overflow-hidden neo-shadow hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all"
                     >
-                        <div className="aspect-[21/9] w-full bg-white relative">
+                        <div className="aspect-[4/5] md:aspect-[21/9] w-full bg-white relative">
                             <div className="absolute inset-0 bg-[#FFD93D] mix-blend-multiply opacity-20 z-10"></div>
                             <Image
                                 src={featuredStory.image}
@@ -147,19 +147,21 @@ export default function Blog() {
                                 className="object-cover transition-transform duration-700 group-hover:scale-105"
                             />
                         </div>
-                        <div className="absolute bottom-0 left-0 w-full p-8 md:p-12 bg-gradient-to-t from-white via-white/90 to-transparent text-black flex flex-col items-start justify-end h-full z-20">
-                            <span className="bg-[#00B894] text-black text-[10px] font-black tracking-[0.2em] px-3 py-1 rounded-lg border-2 border-black mb-4 uppercase shadow-[2px_2px_0px_#000]">
-                                Featured Story
-                            </span>
-                            <h2 className="font-header text-4xl md:text-6xl mb-4 leading-tight group-hover:text-[#6C5CE7] transition-colors text-black drop-shadow-sm">
-                                {featuredStory.title}
-                            </h2>
-                            <p className="font-medium text-lg md:text-xl text-black/80 max-w-2xl mb-6 leading-relaxed">
-                                {featuredStory.excerpt}
-                            </p>
-                            <button className="flex items-center gap-2 text-xs font-black tracking-[0.3em] hover:gap-4 transition-all text-black uppercase bg-[#FFD93D] px-6 py-3 rounded-lg border-2 border-black shadow-[3px_3px_0px_#000]">
-                                READ STORY <ArrowRight size={14} />
-                            </button>
+                        <div className="absolute bottom-0 left-0 w-full p-6 md:p-12 bg-gradient-to-t from-white via-white/95 to-transparent text-black flex flex-col items-start justify-end h-full z-20">
+                            <div className="mt-auto">
+                                <span className="bg-[#00B894] text-black text-[10px] font-black tracking-[0.2em] px-3 py-1 rounded-lg border-2 border-black mb-3 md:mb-4 uppercase shadow-[2px_2px_0px_#000] inline-block">
+                                    Featured Story
+                                </span>
+                                <h2 className="font-header text-3xl md:text-6xl mb-2 md:mb-4 leading-tight group-hover:text-[#6C5CE7] transition-colors text-black drop-shadow-sm">
+                                    {featuredStory.title}
+                                </h2>
+                                <p className="font-medium text-sm md:text-xl text-black/80 max-w-2xl mb-4 md:mb-6 leading-relaxed line-clamp-3 md:line-clamp-none">
+                                    {featuredStory.excerpt}
+                                </p>
+                                <button className="flex items-center gap-2 text-[10px] md:text-xs font-black tracking-[0.2em] md:tracking-[0.3em] hover:gap-4 transition-all text-black uppercase bg-[#FFD93D] px-5 py-3 md:px-6 md:py-3 rounded-lg border-2 border-black shadow-[3px_3px_0px_#000]">
+                                    READ STORY <ArrowRight size={14} />
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </section>

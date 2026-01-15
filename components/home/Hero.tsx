@@ -39,20 +39,20 @@ const Hero: React.FC<HeroProps> = ({
                     </div>
 
                     <h1
-                        className="text-6xl lg:text-[100px] font-black leading-[0.9] tracking-tighter"
+                        className="text-4xl md:text-6xl lg:text-[100px] font-black leading-[0.9] tracking-tighter"
                         dangerouslySetInnerHTML={{ __html: title }}
                     />
 
-                    <p className="text-2xl text-charcoal/90 max-w-xl font-semibold leading-relaxed">
+                    <p className="text-lg md:text-2xl text-charcoal/90 max-w-xl font-semibold leading-relaxed">
                         {subtitle}
                     </p>
 
-                    <div className="flex flex-wrap gap-8 pt-6">
+                    <div className="flex flex-wrap gap-4 md:gap-8 pt-6">
                         <Link href="/events/upcoming">
                             <motion.button
                                 whileHover={{ scale: 1.05, y: -8, rotate: -2 }}
                                 whileTap={{ scale: 0.95 }}
-                                className="bg-[#FFD93D] text-black px-12 py-6 rounded-[25px] font-black text-2xl neo-border-thick neo-shadow-lg hover:bg-yellow-400 transition-colors"
+                                className="bg-[#FFD93D] text-black px-8 py-4 md:px-12 md:py-6 rounded-[20px] md:rounded-[25px] font-black text-lg md:text-2xl neo-border-thick neo-shadow-lg hover:bg-yellow-400 transition-colors"
                             >
                                 {ctaTextShops}
                             </motion.button>
@@ -61,7 +61,7 @@ const Hero: React.FC<HeroProps> = ({
                             <motion.button
                                 whileHover={{ scale: 1.05, y: -8, rotate: 2 }}
                                 whileTap={{ scale: 0.95 }}
-                                className="bg-transparent text-black px-12 py-6 rounded-[25px] font-black text-2xl neo-border-thick hover:bg-black/5 transition-colors"
+                                className="bg-transparent text-black px-8 py-4 md:px-12 md:py-6 rounded-[20px] md:rounded-[25px] font-black text-lg md:text-2xl neo-border-thick hover:bg-black/5 transition-colors"
                             >
                                 {ctaTextJoin}
                             </motion.button>

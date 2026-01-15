@@ -117,7 +117,7 @@ export default function Play() {
         {/* Header */}
         <motion.div variants={itemVariants} className="mb-20 border-b-2 border-black pb-12">
           <div className="text-[#6C5CE7] font-black text-sm tracking-[0.2em] mb-4 uppercase font-display">Points-Based Games</div>
-          <h1 className="font-header text-6xl md:text-8xl tracking-tighter mb-8 text-[#2D3436]">
+          <h1 className="font-header text-4xl md:text-8xl tracking-tighter mb-8 text-[#2D3436]">
             PLAY & <span className="text-[#FFD93D] drop-shadow-[2px_2px_0px_#000] italic font-serif">EARN</span>
           </h1>
           <p className="text-black/80 font-bold text-xl max-w-3xl leading-relaxed">
@@ -151,7 +151,7 @@ export default function Play() {
                   <Sparkles size={14} className="text-[#FFD93D]" />
                   Daily Bonus
                 </div>
-                <h2 className="font-header text-5xl md:text-6xl mb-4 text-white drop-shadow-[4px_4px_0px_#000] leading-none">
+                <h2 className="font-header text-4xl md:text-6xl mb-4 text-white drop-shadow-[4px_4px_0px_#000] leading-none">
                   SPIN & WIN
                 </h2>
                 <p className="text-white font-bold text-xl mb-8 max-w-lg leading-relaxed drop-shadow-md">
@@ -468,58 +468,60 @@ export default function Play() {
 
         {/* Leaderboard Section */}
         <div className="mb-24">
-          <h2 className="font-header text-4xl md:text-5xl mb-8 text-black">Top Players</h2>
+          <h2 className="font-header text-3xl md:text-5xl mb-8 text-black">Top Players</h2>
           <div className="bg-white border-2 border-black rounded-[30px] overflow-hidden neo-shadow">
-            <table className="w-full">
-              <thead className="border-b-2 border-black bg-[#FFD93D]">
-                <tr>
-                  <th className="text-left p-6 font-black text-[10px] tracking-widest text-black">RANK</th>
-                  <th className="text-left p-6 font-black text-[10px] tracking-widest text-black">PLAYER</th>
-                  <th className="text-left p-6 font-black text-[10px] tracking-widest text-black">GAME XP</th>
-
-                </tr>
-              </thead>
-              <tbody>
-                {leaderboardLoading ? (
-                  // Loading Skeleton
-                  [1, 2, 3, 4, 5].map((i) => (
-                    <tr key={i} className="border-b border-black/10">
-                      <td colSpan={3} className="p-6">
-                        <div className="h-4 bg-black/5 rounded animate-pulse"></div>
-                      </td>
-                    </tr>
-                  ))
-                ) : leaderboard.length > 0 ? (
-                  leaderboard.map((player, i) => (
-                    <tr key={player.id} className={`border-b border-black/10 hover:bg-[#FFFDF5] transition-colors ${i === leaderboard.length - 1 ? 'border-b-0' : ''}`}>
-                      <td className="p-6 font-black text-xl text-[#00B894]">#{i + 1}</td>
-                      <td className="p-6">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-black/10 overflow-hidden border border-black/20">
-                            {player.avatar_url ? (
-                              <img src={player.avatar_url} alt={player.name} className="w-full h-full object-cover" />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center text-xs font-bold text-black/30">
-                                {player.name.charAt(0)}
-                              </div>
-                            )}
-                          </div>
-                          <span className="font-bold text-sm tracking-wide text-black">{player.name}</span>
-                        </div>
-                      </td>
-                      <td className="p-6 font-black text-xl text-black">{(player.game_xp || 0).toLocaleString()} XP</td>
-
-                    </tr>
-                  ))
-                ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[500px]">
+                <thead className="border-b-2 border-black bg-[#FFD93D]">
                   <tr>
-                    <td colSpan={3} className="p-12 text-center text-black/40 font-bold italic">
-                      No players found yet. Be the first to verify!
-                    </td>
+                    <th className="text-left p-6 font-black text-[10px] tracking-widest text-black">RANK</th>
+                    <th className="text-left p-6 font-black text-[10px] tracking-widest text-black">PLAYER</th>
+                    <th className="text-left p-6 font-black text-[10px] tracking-widest text-black">GAME XP</th>
+
                   </tr>
-                )}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {leaderboardLoading ? (
+                    // Loading Skeleton
+                    [1, 2, 3, 4, 5].map((i) => (
+                      <tr key={i} className="border-b border-black/10">
+                        <td colSpan={3} className="p-6">
+                          <div className="h-4 bg-black/5 rounded animate-pulse"></div>
+                        </td>
+                      </tr>
+                    ))
+                  ) : leaderboard.length > 0 ? (
+                    leaderboard.map((player, i) => (
+                      <tr key={player.id} className={`border-b border-black/10 hover:bg-[#FFFDF5] transition-colors ${i === leaderboard.length - 1 ? 'border-b-0' : ''}`}>
+                        <td className="p-6 font-black text-xl text-[#00B894]">#{i + 1}</td>
+                        <td className="p-6">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-black/10 overflow-hidden border border-black/20">
+                              {player.avatar_url ? (
+                                <img src={player.avatar_url} alt={player.name} className="w-full h-full object-cover" />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center text-xs font-bold text-black/30">
+                                  {player.name.charAt(0)}
+                                </div>
+                              )}
+                            </div>
+                            <span className="font-bold text-sm tracking-wide text-black">{player.name}</span>
+                          </div>
+                        </td>
+                        <td className="p-6 font-black text-xl text-black">{(player.game_xp || 0).toLocaleString()} XP</td>
+
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={3} className="p-12 text-center text-black/40 font-bold italic">
+                        No players found yet. Be the first to verify!
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
 

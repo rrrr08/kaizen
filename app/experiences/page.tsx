@@ -37,7 +37,7 @@ export default function Experiences() {
         {/* Header */}
         <div className="mb-20 border-b-2 border-black pb-12">
           <div className="text-[#6C5CE7] font-black text-sm tracking-[0.2em] mb-4 uppercase font-display">Custom & Hosted Experiences</div>
-          <h1 className="font-header text-6xl md:text-8xl tracking-tighter mb-8 text-[#2D3436]">
+          <h1 className="font-header text-4xl md:text-8xl tracking-tighter mb-8 text-[#2D3436]">
             PLAY FOR <br /><span className="text-[#FFD93D] drop-shadow-[2px_2px_0px_#000] italic font-serif">OCCASIONS</span>
           </h1>
           <p className="text-black/80 font-bold text-xl max-w-3xl leading-relaxed">

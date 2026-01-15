@@ -142,7 +142,7 @@ export default function Shop() {
           <div className="flex flex-col md:flex-row items-end justify-between gap-8">
             <div>
               <div className="text-[#6C5CE7] font-black text-sm tracking-[0.2em] mb-4 uppercase font-display">Archive of Curiosities</div>
-              <h1 className="font-header text-6xl md:text-8xl tracking-tighter text-[#2D3436]">
+              <h1 className="font-header text-4xl md:text-8xl tracking-tighter text-[#2D3436]">
                 THE <br /><span className="italic font-serif text-[#FFD93D] drop-shadow-[2px_2px_0px_#000]">REPOSITORY</span>
               </h1>
               <p className="text-black/60 font-bold text-lg mt-4">Showing {filteredProducts.length} of {products.length} games</p>

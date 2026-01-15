@@ -115,7 +115,7 @@ export default function Home() {
       <section className="px-6 py-20 bg-white">
         <div className="container mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-5xl font-black mb-4">Choose Your Play Style</h2>
+            <h2 className="text-3xl md:text-5xl font-black mb-4">Choose Your Play Style</h2>
             <p className="text-xl font-medium text-charcoal/60">Find your perfect way to play</p>
           </div>
 
@@ -319,7 +319,7 @@ export default function Home() {
         <div className="container mx-auto relative z-10">
           <div className="text-center mb-8 max-w-4xl mx-auto">
             <div className="text-[#00B894] font-black text-[10px] tracking-[0.4em] mb-2 uppercase font-display">Economic Protocol</div>
-            <h2 className="font-header text-4xl font-black uppercase tracking-tighter leading-[0.9]">Play <br /> <span className="italic font-serif text-[#FFD93D]">Earn</span> <br /> Redeem</h2>
+            <h2 className="font-header text-3xl md:text-4xl font-black uppercase tracking-tighter leading-[0.9]">Play <br /> <span className="italic font-serif text-[#FFD93D]">Earn</span> <br /> Redeem</h2>
             <p className="text-white/40 font-medium text-base mt-4 italic">Every interaction within the grid generates value. Accumulate assets, unlock experiences.</p>
           </div>
 
@@ -433,7 +433,7 @@ export default function Home() {
               <motion.button
                 whileHover={{ scale: 1.05, rotate: -1 }}
                 whileTap={{ scale: 0.95 }}
-                className="bg-[#00B894] text-black px-16 py-8 rounded-[30px] font-header font-black text-3xl md:text-5xl uppercase tracking-tighter neo-border-thick neo-shadow-lg hover:bg-white transition-all group"
+                className="bg-[#00B894] text-black px-8 py-4 md:px-16 md:py-8 rounded-[20px] md:rounded-[30px] font-header font-black text-2xl md:text-5xl uppercase tracking-tighter neo-border-thick neo-shadow-lg hover:bg-white transition-all group"
               >
                 {user ? (
                   <span>Start <span className="group-hover:text-[#6C5CE7] transition-colors">Earning</span></span>

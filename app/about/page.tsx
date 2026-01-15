@@ -59,7 +59,7 @@ export default function About() {
         {/* SECTION 1 — PAGE HERO */}
         <section className="mb-32">
           <div className="text-[#6C5CE7] font-black text-sm tracking-[0.2em] mb-4 uppercase font-header">Our Story</div>
-          <h1 className="font-header text-6xl md:text-8xl tracking-tighter mb-8 leading-none text-black">
+          <h1 className="font-header text-4xl md:text-8xl tracking-tighter mb-8 leading-none text-black">
             OUR <br /><span className="text-[#FFD93D] drop-shadow-[2px_2px_0px_#000] italic font-serif">(accidentally awesome)</span> STORY
           </h1>
           <p className="text-black/80 font-bold text-xl max-w-3xl leading-relaxed">
@@ -99,7 +99,7 @@ export default function About() {
             <div className="inline-block bg-black text-white px-6 py-2 rounded-full font-black text-xs tracking-[0.3em] uppercase mb-4 shadow-[4px_4px_0px_#FFD93D] hover:translate-y-1 hover:shadow-none transition-all">
               The Quest Log
             </div>
-            <h2 className="font-header text-6xl md:text-7xl text-black leading-none uppercase drop-shadow-[5px_5px_0px_rgba(0,0,0,0.1)]">
+            <h2 className="font-header text-4xl md:text-7xl text-black leading-none uppercase drop-shadow-[5px_5px_0px_rgba(0,0,0,0.1)]">
               Leveling Up <br /> Since 2020
             </h2>
           </div>
@@ -167,7 +167,7 @@ export default function About() {
               transition={{ duration: 0.6 }}
               className="relative flex flex-col md:flex-row items-center gap-12 mb-36 group"
             >
-              <div className="md:w-1/2 md:pr-16 text-right order-1 md:order-1 relative">
+              <div className="md:w-1/2 md:pr-16 text-center md:text-right order-2 md:order-1 relative">
                 <div className="inline-block bg-[#FFD93D] border-2 border-black px-4 py-1 font-black text-xs mb-4 shadow-[3px_3px_0px_#000] rotate-2">
                   LEVEL 1
                 </div>
@@ -182,12 +182,12 @@ export default function About() {
                 <span className="text-4xl">💡</span>
               </div>
 
-              <div className="md:w-1/2 md:pl-16 order-2 md:order-2">
+              <div className="md:w-1/2 md:pl-16 order-1 md:order-2">
                 <div className="relative bg-[#FFD93D] p-2 rounded-3xl border-4 border-black rotate-3 group-hover:rotate-6 transition-transform hover:scale-105 duration-300">
-                  <div className="bg-black rounded-2xl h-48 flex items-center justify-center relative overflow-hidden">
+                  <div className="bg-white rounded-2xl h-48 flex items-center justify-center relative overflow-hidden">
                     {/* Pattern */}
                     <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#FFD93D_2px,transparent_2px)] [background-size:12px_12px]"></div>
-                    <span className="font-header text-[#FFD93D] text-8xl drop-shadow-[4px_4px_0px_#FFF]">2020</span>
+                    <span className="font-header text-[#FFD93D] text-6xl md:text-8xl drop-shadow-[4px_4px_0px_#FFF]">2020</span>
                   </div>
                 </div>
               </div>
@@ -206,7 +206,6 @@ export default function About() {
                   <div className="bg-white rounded-2xl h-48 flex items-center justify-center relative overflow-hidden text-center p-4">
                     <div className="absolute inset-0 opacity-10 bg-[linear-gradient(45deg,#FF7675_25%,transparent_25%,transparent_50%,#FF7675_50%,#FF7675_75%,transparent_75%,transparent)] [background-size:20px_20px]"></div>
                     <div className="relative z-10 flex flex-col items-center">
-                      {/* Emoji Removed */}
                       <span className="font-header text-white text-5xl bg-black px-4 py-1 -rotate-3 inline-block shadow-[4px_4px_0px_rgba(0,0,0,0.1)]">FAIL?</span>
                     </div>
                   </div>
@@ -259,8 +258,8 @@ export default function About() {
                   <div className="bg-black rounded-2xl h-48 flex items-center justify-center relative overflow-hidden">
                     <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#6C5CE7_2px,transparent_2px)] [background-size:12px_12px]"></div>
                     <div className="relative z-10 flex items-baseline">
-                      <span className="font-header text-[#6C5CE7] text-[8rem] leading-none drop-shadow-[4px_4px_0px_#FFF]">W</span>
-                      <span className="font-header text-white text-6xl ml-1">IN!</span>
+                      <span className="font-header text-[#6C5CE7] text-[5rem] md:text-[8rem] leading-none drop-shadow-[4px_4px_0px_#FFF]">W</span>
+                      <span className="font-header text-white text-4xl md:text-6xl ml-1">IN!</span>
                     </div>
                   </div>
                 </div>
@@ -279,7 +278,7 @@ export default function About() {
                 <div className="relative bg-[#00B894] p-2 rounded-3xl border-4 border-black -rotate-2 group-hover:-rotate-4 transition-transform hover:scale-105 duration-300">
                   <div className="bg-white rounded-2xl h-48 flex items-center justify-center relative overflow-hidden">
                     <div className="absolute inset-x-0 bottom-0 h-1/2 bg-[#00B894]/20"></div>
-                    <span className="font-header text-black text-7xl z-10 tracking-widest">FAM</span>
+                    <span className="font-header text-black text-5xl md:text-7xl z-10 tracking-widest">FAM</span>
                     <div className="absolute -top-4 -right-4 w-12 h-12 bg-[#00B894] rounded-full border-2 border-black"></div>
                   </div>
                 </div>
@@ -314,7 +313,7 @@ export default function About() {
                 <p className="text-xl text-gray-300 font-medium leading-relaxed mb-8">
                   New worlds. New games. Same mission: To rid the world of boring evenings, one dice roll at a time.
                 </p>
-                <Link href="/play" className="bg-[#FFD93D] text-black font-black text-lg px-8 py-4 rounded-xl border-b-4 border-[#C5A300] active:border-b-0 active:translate-y-1 transition-all hover:bg-white hover:scale-105">
+                <Link href="/play" className="inline-block bg-[#FFD93D] text-black font-black text-sm md:text-lg px-6 py-3 md:px-8 md:py-4 rounded-xl border-b-4 border-[#C5A300] active:border-b-0 active:translate-y-1 transition-all hover:bg-white hover:scale-105">
                   JOIN THE ADVENTURE
                 </Link>
               </div>
@@ -391,7 +390,7 @@ export default function About() {
         <section className="mb-32 relative">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[120%] h-full bg-[#FFD93D]/10 -skew-y-3 pointer-events-none rounded-[60px] -z-10"></div>
 
-          <h2 className="font-header text-5xl md:text-7xl mb-24 text-center text-black leading-[0.9] drop-shadow-[4px_4px_0px_#00B894]">
+          <h2 className="font-header text-4xl md:text-7xl mb-24 text-center text-black leading-[0.9] drop-shadow-[4px_4px_0px_#00B894]">
             THE MINDS BEHIND <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#6C5CE7] to-[#FF7675]">THE MADNESS</span>
           </h2>

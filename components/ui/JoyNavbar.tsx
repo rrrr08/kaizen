@@ -29,6 +29,7 @@ const Navbar: React.FC = () => {
   const pathname = usePathname();
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMobileEventsOpen, setIsMobileEventsOpen] = useState(false);
   const { items } = useCart();
   const { balance } = useGamification(); // Use centralized balance from GamificationContext
   const [user, setUser] = useState<any>(null);
@@ -284,22 +285,44 @@ const Navbar: React.FC = () => {
               {navItems.map((item) => {
                 if (item.name === 'Events') {
                   return (
-                    <div key={item.path} className="flex flex-col gap-2">
-                      <span className="text-4xl font-black text-black/40 uppercase tracking-tighter">Events</span>
-                      <Link
-                        href="/events/upcoming"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className="text-2xl font-black text-black hover:text-[#FFD93D] uppercase tracking-tighter pl-4 flex items-center gap-2"
+                    <div key={item.path} className="flex flex-col">
+                      <button
+                        onClick={() => setIsMobileEventsOpen(!isMobileEventsOpen)}
+                        className="flex items-center justify-between text-3xl sm:text-4xl font-black text-black hover:text-[#6C5CE7] uppercase tracking-tighter w-full text-left"
                       >
-                        <ArrowRight size={16} /> Upcoming
-                      </Link>
-                      <Link
-                        href="/events/past"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className="text-2xl font-black text-black hover:text-[#6C5CE7] uppercase tracking-tighter pl-4 flex items-center gap-2"
-                      >
-                        <ArrowRight size={16} /> Past
-                      </Link>
+                        {item.name}
+                        <ChevronDown
+                          size={24}
+                          className={`transition-transform duration-300 ${isMobileEventsOpen ? 'rotate-180' : ''
+                            }`}
+                        />
+                      </button>
+                      <AnimatePresence>
+                        {isMobileEventsOpen && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.3, ease: 'easeInOut' }}
+                            className="overflow-hidden flex flex-col gap-3 pl-6 mt-2 border-l-4 border-black/10 ml-2"
+                          >
+                            <Link
+                              href="/events/upcoming"
+                              onClick={() => setIsMobileMenuOpen(false)}
+                              className="text-xl sm:text-2xl font-black text-black/80 hover:text-[#FFD93D] uppercase tracking-tighter flex items-center gap-2 py-1"
+                            >
+                              <ArrowRight size={16} /> Upcoming
+                            </Link>
+                            <Link
+                              href="/events/past"
+                              onClick={() => setIsMobileMenuOpen(false)}
+                              className="text-xl sm:text-2xl font-black text-black/80 hover:text-[#6C5CE7] uppercase tracking-tighter flex items-center gap-2 py-1"
+                            >
+                              <ArrowRight size={16} /> Past
+                            </Link>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </div>
                   );
                 }
@@ -308,21 +331,12 @@ const Navbar: React.FC = () => {
                     key={item.path}
                     href={item.path}
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="text-4xl font-black text-black hover:text-[#6C5CE7] uppercase tracking-tighter"
+                    className="text-3xl sm:text-4xl font-black text-black hover:text-[#6C5CE7] uppercase tracking-tighter"
                   >
                     {item.name}
                   </Link>
                 );
               })}
-              {isAdmin && (
-                <Link
-                  href="/admin"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="text-4xl font-black text-red-500 hover:text-red-600 uppercase tracking-tighter"
-                >
-                  Admin Panel
-                </Link>
-              )}
               <div className="h-px bg-black/10 my-4" />
               <Link href={user ? "/profile" : "/auth/login"} className="text-xl font-bold text-black/60 uppercase tracking-widest">
                 {user ? "My Profile" : "Login / Sign Up"}
@@ -331,17 +345,6 @@ const Navbar: React.FC = () => {
                 <p className="font-black text-black uppercase tracking-widest mb-2">My Balance</p>
                 <p className="text-4xl font-black text-black">{balance.toLocaleString()} JP</p>
               </div>
-              {user && (
-                <button
-                  onClick={() => {
-                    handleLogout();
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className="mt-4 w-full py-4 bg-black text-white font-black uppercase tracking-widest rounded-xl"
-                >
-                  Log Out
-                </button>
-              )}
             </div>
           </motion.div>
         )}
