@@ -21,6 +21,7 @@ export default function Blog() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [activeCategory, setActiveCategory] = useState('All');
+    const [selectedPost, setSelectedPost] = useState<any | null>(null);
 
     // Dynamic Content State
     const [featuredStory, setFeaturedStory] = useState({
@@ -129,7 +130,13 @@ export default function Blog() {
 
                 {/* SECTION 2 — FEATURED STORY */}
                 <section className="mb-32">
-                    <div className="relative group cursor-pointer border-3 border-black rounded-[30px] overflow-hidden neo-shadow hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all">
+                    <div
+                        onClick={() => {
+                            const post = blogPosts.find(p => p.title === featuredStory.title) || { ...featuredStory, content: '<p>Content coming soon...</p>', category: 'Featured' };
+                            setSelectedPost(post);
+                        }}
+                        className="relative group cursor-pointer border-3 border-black rounded-[30px] overflow-hidden neo-shadow hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all"
+                    >
                         <div className="aspect-[21/9] w-full bg-white relative">
                             <div className="absolute inset-0 bg-[#FFD93D] mix-blend-multiply opacity-20 z-10"></div>
                             <Image
@@ -178,7 +185,11 @@ export default function Blog() {
                 {/* SECTION 4 — BLOG GRID */}
                 <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-16 mb-32">
                     {filteredPosts.map((post) => (
-                        <article key={post.id} className="group cursor-pointer flex flex-col h-full bg-white border-2 border-black p-4 rounded-[20px] neo-shadow hover:scale-[1.02] transition-transform">
+                        <article
+                            key={post.id}
+                            onClick={() => setSelectedPost(post)}
+                            className="group cursor-pointer flex flex-col h-full bg-white border-2 border-black p-4 rounded-[20px] neo-shadow hover:scale-[1.02] transition-transform"
+                        >
                             <div className="aspect-[4/3] overflow-hidden rounded-[15px] mb-6 border-2 border-black relative">
                                 {post.image ? (
                                     <Image
@@ -288,6 +299,152 @@ export default function Blog() {
                     </div>
                 </div>
             </div>
+
+            {/* BLOG POST DETAILED MODAL */}
+            {selectedPost && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-200"
+                    onClick={() => setSelectedPost(null)}
+                >
+                    <div
+                        className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-[#FFFDF5] border-4 border-black rounded-[30px] shadow-[8px_8px_0px_#000] p-0 flex flex-col"
+                        onClick={e => e.stopPropagation()}
+                    >
+                        {/* Sticky Header with Close Button */}
+                        <div className="sticky top-0 right-0 z-10 flex justify-end p-4 bg-gradient-to-b from-[#FFFDF5] via-[#FFFDF5] to-transparent">
+                            <button
+                                onClick={() => setSelectedPost(null)}
+                                className="w-12 h-12 flex items-center justify-center bg-[#FF7675] text-black border-2 border-black rounded-full hover:scale-110 active:scale-95 transition-all shadow-[2px_2px_0px_#000]"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                            </button>
+                        </div>
+
+                        <div className="px-8 md:px-12 pb-12">
+                            {/* Header Image */}
+                            {selectedPost.image && (
+                                <div className="relative w-full aspect-video rounded-[20px] overflow-hidden border-2 border-black mb-8 shadow-[4px_4px_0px_#000]">
+                                    <Image
+                                        src={selectedPost.image}
+                                        alt={selectedPost.title}
+                                        fill
+                                        className="object-cover"
+                                    />
+                                </div>
+                            )}
+
+                            {/* Meta & Title */}
+                            <div className="mb-8">
+                                <div className="flex flex-wrap items-center gap-4 mb-4">
+                                    <span className="bg-[#00B894] text-black border-2 border-black px-3 py-1 rounded-lg font-black text-xs tracking-[0.2em] uppercase shadow-[2px_2px_0px_#000]">
+                                        {selectedPost.category}
+                                    </span>
+                                    {selectedPost.readTime && (
+                                        <span className="flex items-center gap-2 text-black/60 font-bold text-xs uppercase tracking-wider bg-black/5 px-3 py-1 rounded-lg border border-black/10">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                            {selectedPost.readTime}
+                                        </span>
+                                    )}
+                                    {selectedPost.author && (
+                                        <span className="flex items-center gap-2 text-black/60 font-bold text-xs uppercase tracking-wider bg-black/5 px-3 py-1 rounded-lg border border-black/10">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                            {selectedPost.author.split('@')[0]}
+                                        </span>
+                                    )}
+                                </div>
+                                <h1 className="font-header text-4xl md:text-6xl text-black leading-tight mb-6">
+                                    {selectedPost.title}
+                                </h1>
+                                <p className="font-medium text-xl md:text-2xl text-black/60 leading-relaxed italic border-l-4 border-[#FFD93D] pl-6 py-2">
+                                    {selectedPost.excerpt}
+                                </p>
+                            </div>
+
+                            {/* Separator */}
+                            <hr className="border-t-2 border-black/10 mb-8" />
+
+                            {/* Content */}
+                            <div
+                                className="blog-content-renderer max-w-none"
+                                dangerouslySetInnerHTML={{ __html: selectedPost.content }}
+                            />
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            <style jsx global>{`
+                .blog-content-renderer {
+                    color: rgba(0, 0, 0, 0.8);
+                    line-height: 1.8;
+                    font-size: 1.125rem;
+                }
+                .blog-content-renderer h1, 
+                .blog-content-renderer h2, 
+                .blog-content-renderer h3 {
+                    font-family: var(--font-fredoka), sans-serif;
+                    color: #000;
+                    margin-top: 2.5rem;
+                    margin-bottom: 1.25rem;
+                    line-height: 1.2;
+                    font-weight: 900;
+                    text-transform: uppercase;
+                    letter-spacing: -0.02em;
+                }
+                .blog-content-renderer h1 { font-size: 2.5rem; }
+                .blog-content-renderer h2 { font-size: 2rem; border-bottom: 3px solid #000; display: inline-block; padding-bottom: 4px; margin-bottom: 1.5rem; }
+                .blog-content-renderer h3 { font-size: 1.5rem; }
+                .blog-content-renderer p {
+                    margin-bottom: 1.5rem;
+                    font-weight: 500;
+                }
+                .blog-content-renderer ul, 
+                .blog-content-renderer ol {
+                    margin-bottom: 1.5rem;
+                    padding-left: 1.5rem;
+                }
+                .blog-content-renderer ul { list-style-type: disc; }
+                .blog-content-renderer ol { list-style-type: decimal; }
+                .blog-content-renderer li {
+                    margin-bottom: 0.75rem;
+                    padding-left: 0.5rem;
+                }
+                .blog-content-renderer img {
+                    border-radius: 20px;
+                    border: 3px solid black;
+                    margin: 2.5rem 0;
+                    box-shadow: 6px 6px 0px #000;
+                    width: 100%;
+                    height: auto;
+                    object-fit: cover;
+                }
+                .blog-content-renderer blockquote {
+                    border-left: 6px solid #FFD93D;
+                    padding: 1.5rem 2rem;
+                    font-style: italic;
+                    margin: 2.5rem 0;
+                    background: rgba(255, 217, 61, 0.1);
+                    border-radius: 0 15px 15px 0;
+                    font-size: 1.25rem;
+                    color: #000;
+                    font-weight: 600;
+                }
+                .blog-content-renderer strong {
+                    font-weight: 900;
+                    color: #000;
+                }
+                .blog-content-renderer a {
+                    color: #6C5CE7;
+                    text-decoration: underline;
+                    text-decoration-thickness: 2px;
+                    text-underline-offset: 4px;
+                    font-weight: 900;
+                }
+                .blog-content-renderer a:hover {
+                    background: #FFD93D;
+                    color: #000;
+                }
+            `}</style>
         </div>
     );
 }
