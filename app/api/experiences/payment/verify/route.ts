@@ -33,7 +33,15 @@ export async function POST(request: NextRequest) {
         }
 
         /* ---------------- UPDATE DB ---------------- */
+        const enquiryRef = db.collection('experience_enquiries').doc(enquiryId);
+        const enquiryDoc = await enquiryRef.get();
+        const enquiryData = enquiryDoc.exists ? enquiryDoc.data() : null;
 
+        if (!enquiryData) {
+            return NextResponse.json({ success: false, error: 'Enquiry not found' }, { status: 404 });
+        }
+
+        // 1. Deduct Points if used
         // 1. Deduct Points if used
         if (userId && walletPointsUsed > 0) {
             const userRef = db.collection('users').doc(userId);
@@ -71,24 +79,19 @@ export async function POST(request: NextRequest) {
                 const userData = userSnap.exists ? userSnap.data() : {};
                 const currentXP = userData?.xp || 0;
 
-                // Fetch Settings (assuming standard paths)
-                const settingsSnap = await db.collection('settings').doc('xpSystem').get();
-                const xpSettings = settingsSnap.exists ? settingsSnap.data() : null;
+                // Fetch Settings
+                const xpSettingsSnap = await db.collection('settings').doc('xpSystem').get();
+                const xpSettings = xpSettingsSnap.exists ? xpSettingsSnap.data() : null;
 
-                // Purchase Reward Config
-                const shopXPSource = xpSettings?.xpSources?.find((s: any) => s.name.includes('Shop Purchase'));
-                const xpPer100 = shopXPSource?.baseXP || 10;
-                const jpPer100 = shopXPSource?.baseJP || 10;
+                // Experiences Registration Reward Config (Flat Reward)
+                const experienceXPSource = xpSettings?.xpSources?.find((s: any) => s.name.includes('Experiences Registration'));
+                const baseXP = experienceXPSource?.baseXP || 60;
+                const baseJP = experienceXPSource?.baseJP || 60;
 
-                // Purchase Amount (in Rupees, amount is in paise usually from Razorpay? No, usually verify ensures amount is passed.
-                // In create-order we pass amount in paise to razorpay...
-                // The API receives 'amount' from frontend. ExperiencePaymentForm sends orderData.amount (paise).
-                const amountInRupees = amount / 100;
+                // XP is flat as per configured source
+                const purchaseXP = baseXP;
 
-                const purchaseXP = Math.floor(amountInRupees * (xpPer100 / 100)); // xpPer100 usually means per 100 rupees. So (Amt/100) * XpPer100
-                // Wait, if xpPer100 is "10", does it mean 10 XP for every 100 Rupees? Yes.
-
-                // Tier Config
+                // Tier Config for JP Multiplier
                 const TIERS = xpSettings?.tiers || [
                     { name: 'Newbie', minXP: 0, multiplier: 1.0 },
                     { name: 'Player', minXP: 500, multiplier: 1.1 },
@@ -97,7 +100,8 @@ export async function POST(request: NextRequest) {
                 ];
                 const currentTier = [...TIERS].reverse().find((tier: any) => currentXP >= tier.minXP) || TIERS[0];
 
-                const purchaseJP = Math.floor((amountInRupees / 100) * jpPer100 * currentTier.multiplier);
+                // JP is base * multiplier
+                const purchaseJP = Math.floor(baseJP * currentTier.multiplier);
 
                 if (purchaseXP > 0 || purchaseJP > 0) {
                     await userRef.update({
@@ -108,9 +112,13 @@ export async function POST(request: NextRequest) {
                     await userRef.collection('transactions').add({
                         type: 'EARN',
                         amount: purchaseJP,
-                        source: 'EXPERIENCE_BOOKING',
-                        description: 'Experience Booking Reward',
-                        metadata: { enquiryId, xpEarned: purchaseXP, amountPaid: amountInRupees },
+                        source: 'EXPERIENCE_REGISTRATION',
+                        description: `Experience: ${enquiryData?.categoryName || 'Booking'} Reward`,
+                        metadata: {
+                            enquiryId,
+                            xpEarned: purchaseXP,
+                            amountPaid: amount / 100
+                        },
                         timestamp: FieldValue.serverTimestamp()
                     });
                 }
@@ -120,7 +128,7 @@ export async function POST(request: NextRequest) {
         }
 
         // 3. Update Enquiry
-        await db.collection('experience_enquiries').doc(enquiryId).update({
+        await enquiryRef.update({
             status: 'completed',
             paymentStatus: 'paid',
             paymentId: razorpay_payment_id,
@@ -132,8 +140,7 @@ export async function POST(request: NextRequest) {
         });
 
         // 4. Send Email Notification
-        const enquiryDoc = await db.collection('experience_enquiries').doc(enquiryId).get();
-        const enquiryData = enquiryDoc.data();
+        // enquiryData is already fetched above
 
         if (enquiryData?.email) {
             const { sendEmail } = await import('@/lib/email-service');

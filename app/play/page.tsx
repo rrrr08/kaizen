@@ -149,7 +149,7 @@ export default function Play() {
         <motion.div
           variants={itemVariants}
           whileHover={{ scale: 1.02 }}
-          className="mb-24 bg-gradient-to-r from-[#FFD93D] via-[#FF7675] to-[#6C5CE7] border-2 border-black p-1 rounded-[40px] shadow-[8px_8px_0px_#000] overflow-hidden"
+          className="mb-24 bg-gradient-to-r from-[#6C5CE7] via-[#FF7675] to-[#FFD93D] border-2 border-black p-1 rounded-[40px] shadow-[8px_8px_0px_#000] overflow-hidden"
         >
           <div className="bg-white/10 backdrop-blur-sm p-8 md:p-12 rounded-[36px] border-2 border-white/20 h-full">
             <div className="flex flex-col md:flex-row items-center justify-between gap-8 relative z-10">
@@ -162,7 +162,7 @@ export default function Play() {
                   SPIN & WIN
                 </h2>
                 <p className="text-white font-bold text-xl mb-8 max-w-lg leading-relaxed drop-shadow-md">
-                  Get your daily dose of luck! Spin the wheel to win up to <span className="text-[#FFD93D] underline decoration-wavy">500 XP</span> and exclusive power-ups.
+                  Get your daily dose of luck! Spin the wheel to win up to <span className="text-[#FFD93D]">500 XP</span> and exclusive power-ups.
                 </p>
                 <Link href="/play/daily-spin" className="group inline-flex items-center gap-3 px-8 py-4 bg-white text-black font-black text-sm tracking-[0.3em] border-2 border-black shadow-[6px_6px_0px_#000] hover:translate-y-1 hover:shadow-none transition-all rounded-xl">
                   SPIN NOW
@@ -177,7 +177,7 @@ export default function Play() {
                 <motion.div
                   animate={{ y: [-10, 10, -10] }}
                   transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                  className="absolute -top-6 -right-6 text-[#FFD93D] drop-shadow-[2px_2px_0px_#000]"
+                  className="absolute -top-6 -right-6 text-[#FF7675] drop-shadow-[2px_2px_0px_#000]"
                 >
                   <Star size={32} fill="currentColor" />
                 </motion.div>
