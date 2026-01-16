@@ -1,4 +1,4 @@
-# 🎮 Joy Juncture - The Digital Playground
+# 🎮 joy Juncture - The Digital Playground
 
 <div align="center">
 
