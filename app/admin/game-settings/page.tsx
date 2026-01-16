@@ -136,7 +136,51 @@ export default function GameSettingsDashboard() {
     const fetchGamesSettings = async () => {
         const res = await fetch('/api/games/settings');
         const data = await res.json();
-        setSettings(data.settings || {});
+
+        // Default settings for all games if not in database
+        const defaultGames: AllSettings = {
+            '2048': { name: '2048', basePoints: 100, retryPenalty: 5, maxRetries: 3, scratcher: { enabled: false, drops: [] } },
+            riddle: { name: 'Riddle', basePoints: 50, retryPenalty: 5, maxRetries: 3, scratcher: { enabled: false, drops: [] } },
+            sudoku: { name: 'Sudoku', basePoints: 150, retryPenalty: 10, maxRetries: 2, scratcher: { enabled: false, drops: [] } },
+            wordsearch: { name: 'Word Search', basePoints: 80, retryPenalty: 5, maxRetries: 3, scratcher: { enabled: false, drops: [] } },
+            wordle: { name: 'Wordle', basePoints: 100, retryPenalty: 0, maxRetries: 6, scratcher: { enabled: false, drops: [] } },
+            hangman: { name: 'Hangman', basePoints: 60, retryPenalty: 5, maxRetries: 6, scratcher: { enabled: false, drops: [] } },
+            trivia: { name: 'Trivia', basePoints: 50, retryPenalty: 5, maxRetries: 3, scratcher: { enabled: false, drops: [] } },
+            chess: { name: 'Chess', basePoints: 200, retryPenalty: 20, maxRetries: 1, scratcher: { enabled: false, drops: [] } },
+            minesweeper: { name: 'Minesweeper', basePoints: 120, retryPenalty: 10, maxRetries: 3, scratcher: { enabled: false, drops: [] } },
+            snake: { name: 'Snake', basePoints: 100, retryPenalty: 5, maxRetries: 5, scratcher: { enabled: false, drops: [] } },
+            mathquiz: { name: 'Math Quiz', basePoints: 80, retryPenalty: 5, maxRetries: 3, scratcher: { enabled: false, drops: [] } },
+            puzzles: { name: 'Puzzles', basePoints: 90, retryPenalty: 5, maxRetries: 3, scratcher: { enabled: false, drops: [] } }
+        };
+
+        // Merge: Start with defaults, then override with Firebase data
+        // Merge: Start with defaults, then override with Firebase data
+        const firebaseSettings = data.settings || {};
+
+        // Deep merge to preserve defaults (especially name) if missing in Firebase
+        const mergedSettings: AllSettings = { ...defaultGames };
+
+        Object.entries(firebaseSettings).forEach(([key, value]) => {
+            if (mergedSettings[key]) {
+                // Determine if we need to merge specific sub-objects like 'scratcher'
+                const existing = mergedSettings[key];
+                const incoming = value as GameSettings;
+
+                mergedSettings[key] = {
+                    ...existing,
+                    ...incoming,
+                    // If scratcher exists in both, merge it (optional, but good practice)
+                    scratcher: {
+                        ...existing.scratcher,
+                        ...(incoming.scratcher || {})
+                    }
+                };
+            } else {
+                mergedSettings[key] = value as GameSettings;
+            }
+        });
+
+        setSettings(mergedSettings);
     };
 
     const fetchGameOfTheDay = async () => {
@@ -224,7 +268,7 @@ export default function GameSettingsDashboard() {
             badge: 'Grey Meeple',
             perk: 'None',
             color: '#94a3b8',
-            icon: '♟️',
+            icon: '♙',
             unlockPrice: 0
         },
         {
@@ -234,7 +278,7 @@ export default function GameSettingsDashboard() {
             badge: 'Green Pawn',
             perk: 'Early access to Event Tickets',
             color: '#34d399',
-            icon: '♟️',
+            icon: '♟',
             unlockPrice: 2000
         },
         {
@@ -264,7 +308,7 @@ export default function GameSettingsDashboard() {
             badge: 'Gold Crown',
             perk: 'VIP Seating at Game Nights',
             color: '#fbbf24',
-            icon: '👑',
+            icon: '♚',
             unlockPrice: 10000
         }
     ];
@@ -608,87 +652,121 @@ export default function GameSettingsDashboard() {
                                 )}
 
                                 {/* Games List Container */}
-                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                                    {Object.entries(settings).map(([id, config]) => (
-                                        <div key={id} className="bg-white border-4 border-black p-8 rounded-[40px] neo-shadow group relative transition-all hover:translate-y-[-4px]">
-                                            <div className="flex justify-between items-start mb-8">
-                                                <div className="flex items-center gap-4">
-                                                    <div className="w-14 h-14 bg-[#F0EDFF] border-2 border-black rounded-2xl flex items-center justify-center text-[#6C5CE7]">
-                                                        <Gamepad2 size={28} />
+                                <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                                    {Object.entries(settings).map(([id, config]) => {
+                                        // Game-specific icons and colors
+                                        const gameStyles: Record<string, { icon: string; color: string; bg: string }> = {
+                                            '2048': { icon: '🎯', color: '#FF6B6B', bg: '#FFE5E5' },
+                                            riddle: { icon: '🧩', color: '#6C5CE7', bg: '#F0EDFF' },
+                                            sudoku: { icon: '📊', color: '#00B894', bg: '#E5F9F4' },
+                                            wordsearch: { icon: '🔍', color: '#FDCB6E', bg: '#FFF9E5' },
+                                            wordle: { icon: '🎮', color: '#A29BFE', bg: '#F0EDFF' },
+                                            hangman: { icon: '🎭', color: '#FF7675', bg: '#FFE9E9' },
+                                            trivia: { icon: '💡', color: '#74B9FF', bg: '#E8F4FF' },
+                                            chess: { icon: '♟️', color: '#2D3436', bg: '#F5F6FA' },
+                                            memory: { icon: '🧠', color: '#A29BFE', bg: '#F0EDFF' },
+                                            tictactoe: { icon: '❌', color: '#FD79A8', bg: '#FFE9F5' },
+                                            minesweeper: { icon: '💣', color: '#E17055', bg: '#FFE9E3' },
+                                            snake: { icon: '🐍', color: '#55EFC4', bg: '#E5FFF8' }
+                                        };
+
+                                        const style = gameStyles[id] || { icon: '🎲', color: '#6C5CE7', bg: '#F0EDFF' };
+
+                                        return (
+                                            <motion.div
+                                                key={id}
+                                                initial={{ opacity: 0, y: 20 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                className="bg-white border-3 border-black rounded-3xl overflow-hidden neo-shadow group hover:translate-y-[-4px] transition-all"
+                                            >
+                                                {/* Header with Game Icon & Name */}
+                                                <div className="p-6" style={{ backgroundColor: style.bg }}>
+                                                    <div className="flex items-start justify-between mb-4">
+                                                        <div className="flex items-center gap-4 flex-1 min-w-0">
+                                                            <div className="w-20 h-20 rounded-3xl border-3 border-black flex-shrink-0 flex items-center justify-center text-5xl bg-white shadow-[4px_4px_0px_rgba(0,0,0,0.15)]">
+                                                                {style.icon}
+                                                            </div>
+                                                            <div className="min-w-0 flex-1">
+                                                                <h3 className="font-header text-xl md:text-2xl font-black text-black uppercase tracking-tight leading-tight break-words pr-2">
+                                                                    {id}
+                                                                </h3>
+                                                            </div>
+                                                        </div>
+                                                        <button
+                                                            onClick={() => handleSaveGeneral(id)}
+                                                            title="Save Settings"
+                                                            className="p-3 rounded-xl border-2 border-black hover:translate-y-[-2px] transition-all bg-white shadow-[3px_3px_0px_rgba(0,0,0,1)]"
+                                                            style={{ color: style.color }}
+                                                        >
+                                                            <Save size={20} />
+                                                        </button>
+                                                    </div>
+                                                </div>
+
+                                                {/* Stats Section */}
+                                                <div className="p-6 space-y-4">
+                                                    <div>
+                                                        <label className="text-[10px] font-black uppercase tracking-[0.2em] mb-2 block" style={{ color: style.color, opacity: 0.6 }}>
+                                                            Base Points
+                                                        </label>
+                                                        <input
+                                                            type="number"
+                                                            value={config.basePoints}
+                                                            onChange={e => setSettings(p => ({ ...p, [id]: { ...p[id], basePoints: +e.target.value } }))}
+                                                            className="w-full px-4 py-3 bg-[#FFFDF5] border-2 border-black/10 rounded-xl font-black text-3xl focus:border-black outline-none transition-all focus:bg-white"
+                                                        />
                                                     </div>
                                                     <div>
-                                                        <h3 className="font-header text-3xl mb-0">{config.name}</h3>
-                                                        <span className="text-[10px] font-black text-black/20 tracking-[.3em] uppercase">ID_REF: {id}</span>
+                                                        <label className="text-[10px] font-black uppercase tracking-[0.2em] mb-2 block" style={{ color: style.color, opacity: 0.6 }}>
+                                                            Max Retries
+                                                        </label>
+                                                        <input
+                                                            type="number"
+                                                            value={config.maxRetries}
+                                                            onChange={e => setSettings(p => ({ ...p, [id]: { ...p[id], maxRetries: +e.target.value } }))}
+                                                            className="w-full px-4 py-3 bg-[#FFFDF5] border-2 border-black/10 rounded-xl font-black text-xl focus:border-black outline-none transition-all focus:bg-white"
+                                                        />
                                                     </div>
                                                 </div>
-                                                <div className="flex flex-col gap-2">
+
+                                                {/* Action Buttons */}
+                                                <div className="p-6 pt-0 flex gap-2">
                                                     <button
-                                                        onClick={() => handleSaveGeneral(id)}
-                                                        title="Save Settings"
-                                                        className="p-3 bg-[#6C5CE7] text-white rounded-2xl border-2 border-black shadow-[3px_3px_0px_#000] hover:translate-y-[-2px] hover:shadow-none transition-all"
+                                                        onClick={async () => {
+                                                            const token = await user?.getIdToken();
+                                                            await fetch('/api/games/game-of-the-day', {
+                                                                method: 'POST',
+                                                                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                                                                body: JSON.stringify({ gameId: id, gameName: config.name || id }),
+                                                            });
+                                                            fetchGameOfTheDay();
+                                                            showAlert(`Set ${config.name} as GOTD!`, 'success');
+                                                        }}
+                                                        className="flex-1 px-3 py-2.5 bg-[#FFD93D] text-black font-black text-[10px] tracking-[0.15em] uppercase rounded-xl border-2 border-black hover:translate-y-[-2px] transition-all shadow-[2px_2px_0px_rgba(0,0,0,1)]"
                                                     >
-                                                        <Save size={20} />
+                                                        Set AS GOTD
+                                                    </button>
+                                                    <button
+                                                        onClick={async () => {
+                                                            const today = new Date().toISOString().slice(0, 10);
+                                                            const schedule = { ...rotationPolicy?.rotationSchedule };
+                                                            const todayGames = schedule[today] || [];
+                                                            if (!todayGames.includes(id)) {
+                                                                schedule[today] = [...todayGames, id];
+                                                                setRotationPolicy(p => p ? { ...p, rotationSchedule: schedule } : null);
+                                                                showAlert(`Added ${config.name} to Today's Games!`, 'success');
+                                                            } else {
+                                                                showAlert(`${config.name} is already active today.`, 'info');
+                                                            }
+                                                        }}
+                                                        className="flex-1 px-3 py-2.5 bg-white text-black font-black text-[10px] tracking-[0.15em] uppercase rounded-xl border-2 border-black hover:translate-y-[-2px] transition-all shadow-[2px_2px_0px_rgba(0,0,0,1)]"
+                                                    >
+                                                        ADD TO TODAY
                                                     </button>
                                                 </div>
-                                            </div>
-
-                                            <div className="grid grid-cols-2 gap-6 mb-8">
-                                                <div>
-                                                    <label className="text-[10px] font-black uppercase text-black/30 tracking-widest mb-2 block">Base Points</label>
-                                                    <input
-                                                        type="number"
-                                                        value={config.basePoints}
-                                                        onChange={e => setSettings(p => ({ ...p, [id]: { ...p[id], basePoints: +e.target.value } }))}
-                                                        className="w-full px-5 py-3 bg-[#FFFDF5] border-2 border-black/10 rounded-2xl font-black text-lg focus:border-black outline-none transition-all focus:bg-white"
-                                                    />
-                                                </div>
-                                                <div>
-                                                    <label className="text-[10px] font-black uppercase text-black/30 tracking-widest mb-2 block">Max Retries</label>
-                                                    <input
-                                                        type="number"
-                                                        value={config.maxRetries}
-                                                        onChange={e => setSettings(p => ({ ...p, [id]: { ...p[id], maxRetries: +e.target.value } }))}
-                                                        className="w-full px-5 py-3 bg-[#FFFDF5] border-2 border-black/10 rounded-2xl font-black text-lg focus:border-black outline-none transition-all focus:bg-white"
-                                                    />
-                                                </div>
-                                            </div>
-
-                                            <div className="flex flex-wrap gap-2 mt-auto">
-                                                <button
-                                                    onClick={async () => {
-                                                        const token = await user?.getIdToken();
-                                                        await fetch('/api/games/game-of-the-day', {
-                                                            method: 'POST',
-                                                            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                                                            body: JSON.stringify({ gameId: id, gameName: config.name || id }),
-                                                        });
-                                                        fetchGameOfTheDay();
-                                                        showAlert(`Set ${config.name} as GOTD!`, 'success');
-                                                    }}
-                                                    className="flex-1 px-4 py-2 bg-[#FFD93D] text-black font-black text-[10px] tracking-widest uppercase rounded-xl border-2 border-black hover:translate-y-[-2px] transition-all"
-                                                >
-                                                    Set AS GOTD
-                                                </button>
-                                                <button
-                                                    onClick={async () => {
-                                                        const today = new Date().toISOString().slice(0, 10);
-                                                        const schedule = { ...rotationPolicy?.rotationSchedule };
-                                                        const todayGames = schedule[today] || [];
-                                                        if (!todayGames.includes(id)) {
-                                                            schedule[today] = [...todayGames, id];
-                                                            setRotationPolicy(p => p ? { ...p, rotationSchedule: schedule } : null);
-                                                            showAlert(`Added ${config.name} to Today's Games!`, 'success');
-                                                        } else {
-                                                            showAlert(`${config.name} is already active today.`, 'info');
-                                                        }
-                                                    }}
-                                                    className="flex-1 px-4 py-2 bg-white text-black font-black text-[10px] tracking-widest uppercase rounded-xl border-2 border-black hover:translate-y-[-2px] transition-all"
-                                                >
-                                                    ADD TO TODAY
-                                                </button>
-                                            </div>
-                                        </div>
-                                    ))}
+                                            </motion.div>
+                                        );
+                                    })}
                                 </div>
                             </div>
                         )}
@@ -939,3 +1017,4 @@ export default function GameSettingsDashboard() {
         </div >
     );
 }
+// Force rebuild - 01/16/2026 01:41:40

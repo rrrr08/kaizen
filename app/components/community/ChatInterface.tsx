@@ -21,10 +21,8 @@ export default function ChatInterface({ containerId, containerType, isLocked = f
     const [newMessage, setNewMessage] = useState('');
     const [sending, setSending] = useState(false);
     const [loadingMore, setLoadingMore] = useState(false);
-    const messagesEndRef = useRef<HTMLDivElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const hasScrolledRef = useRef(false);
-    const isInitialLoadRef = useRef(true);
 
     // Initial load and real-time subscription
     useEffect(() => {
@@ -32,54 +30,47 @@ export default function ChatInterface({ containerId, containerType, isLocked = f
         if (!containerId) return;
 
         const unsubscribe = CommunityService.subscribeToMessages(containerId, containerType, (msgs) => {
-            // Merge with existing messages to avoid overwriting history if we have it
-            // Strategy: 
-            // - The subscription gives us the recent 50 messages (reversed to be New -> Old).
-            // - We display Old -> New.
-            // - If we have loaded older history, we want to keep it.
-            // - HOWEVER, simplest is to just setMessages and let pagination handle appending if user scrolls up.
-            // - BUT, if user has scrolled up and loaded history, a new incoming message (from subscription)
-            //   will trigger this callback with only the last 50. We'd lose history.
-
-            // Fix: Check if we have history. 
-            // Best way: Store 'oldestLoadedTimestamp'. 
-            // Actually, let's keep it simple: If we are just starting, setMessages.
-            // If we have messages, we need to intelligently merge.
-
             setMessages(prev => {
-                if (prev.length === 0) return msgs;
+                // If this is the initial load (prev is empty), replacing is fine
+                if (prev.length === 0) {
+                    // Force scroll to bottom on initial load
+                    requestAnimationFrame(() => {
+                        if (containerRef.current) {
+                            containerRef.current.scrollTop = containerRef.current.scrollHeight;
+                        }
+                    });
+                    return msgs;
+                }
 
+                // If we have history, we need to intelligently merge
                 // Get IDs of new chunk
                 const newIds = new Set(msgs.map(m => m.id));
                 // Keep existing messages that are NOT in the new chunk (i.e., older history)
                 const olderHistory = prev.filter(m => !newIds.has(m.id));
+
+                // Check if we should auto-scroll (user is near bottom)
+                // We check this BEFORE updating state/DOM, but applying it AFTER render
+                let shouldAutoScroll = false;
+                if (containerRef.current) {
+                    const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
+                    const isNearBottom = scrollHeight - scrollTop - clientHeight < 150;
+                    shouldAutoScroll = isNearBottom;
+                }
+
+                if (shouldAutoScroll) {
+                    requestAnimationFrame(() => {
+                        if (containerRef.current) {
+                            containerRef.current.scrollTop = containerRef.current.scrollHeight;
+                        }
+                    });
+                }
+
                 // Combine: olderHistory + newChunk (msgs is already ordered Old -> New by service callback)
                 return [...olderHistory, ...msgs];
             });
-
-            // Only auto-scroll if: 
-            // 1. Initial load (first time messages arrive)
-            // 2. User is near bottom (actively viewing)
-            if (containerRef.current) {
-                const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
-                const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
-                
-                if (isInitialLoadRef.current || (isNearBottom && hasScrolledRef.current)) {
-                    setTimeout(scrollToBottom, 100);
-                    isInitialLoadRef.current = false;
-                }
-            } else if (isInitialLoadRef.current) {
-                // Only scroll on initial load when container not yet rendered
-                setTimeout(scrollToBottom, 100);
-                isInitialLoadRef.current = false;
-            }
         });
         return () => unsubscribe();
     }, [containerId, containerType]);
-
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    };
 
     const handleScroll = async () => {
         if (!containerRef.current || loadingMore) return;
@@ -143,7 +134,12 @@ export default function ChatInterface({ containerId, containerType, isLocked = f
         );
         setNewMessage('');
         setSending(false);
-        setTimeout(scrollToBottom, 100);
+        // Scroll to bottom after sending
+        requestAnimationFrame(() => {
+            if (containerRef.current) {
+                containerRef.current.scrollTop = containerRef.current.scrollHeight;
+            }
+        });
     };
 
     const getRoleBadge = (role?: string) => {
@@ -233,7 +229,6 @@ export default function ChatInterface({ containerId, containerType, isLocked = f
                         </div>
                     );
                 })}
-                <div ref={messagesEndRef} />
             </div>
 
             {/* Input Area */}
