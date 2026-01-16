@@ -78,15 +78,20 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
                         // publicId removed to allow unique IDs
                     }}
                 >
-                    {({ open }) => {
+                    {(widget) => {
+                        const { open } = widget || {};
                         const onClick = () => {
-                            open();
+                            if (open) {
+                                open();
+                            } else {
+                                console.error("Cloudinary widget not initialized", widget);
+                            }
                         };
 
                         return (
                             <Button
                                 type="button"
-                                disabled={disabled}
+                                disabled={disabled || !open}
                                 variant="secondary"
                                 onClick={onClick}
                                 className="bg-[#FFD93D] text-black font-black uppercase tracking-wide border-2 border-black neo-shadow hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all flex items-center gap-2 whitespace-nowrap"
