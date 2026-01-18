@@ -16,9 +16,9 @@ const Footer = () => {
     <footer className="bg-[#FFFDF5] border-t-2 border-black py-12 px-6">
       <div className="container mx-auto grid grid-cols-1 md:grid-cols-3 gap-12">
         <div className="space-y-6">
-          <h2 className="text-3xl font-black font-display">Joy Juncture</h2>
+          <h2 className="text-3xl font-black font-display text-black">Joy Juncture</h2>
           <p className="font-medium text-[#2D3436]/60">
-            Making the world a more playful place, one game night at a time.
+            Joy Juncture is your premium online shopping platform for board games and community experiences. Discover amazing deals at joy-juncture.com.
           </p>
           <div className="flex gap-4">
             <a href="https://twitter.com/joyjuncture" target="_blank" rel="noopener noreferrer" className="p-3 bg-white neo-border neo-shadow hover:translate-y-[-2px] transition-transform text-black">
@@ -55,7 +55,7 @@ const Footer = () => {
       </div>
 
       <div className="container mx-auto mt-12 pt-8 border-t border-black/10 flex flex-col md:flex-row justify-between items-center gap-6 font-bold text-[#2D3436]/40 text-sm">
-        <p>© 2026 Joy Juncture Inc. Play Responsibly.</p>
+        <p>© 2026 Joy Juncture. All rights reserved.</p>
         <div className="flex gap-8">
           <Link href="/about" className="hover:text-black">Privacy Policy</Link>
           <Link href="/about" className="hover:text-black">Terms of Service</Link>

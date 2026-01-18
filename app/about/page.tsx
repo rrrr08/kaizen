@@ -69,7 +69,7 @@ export default function About() {
               </span>
             </h1>
             <p className="text-black/80 font-bold text-lg md:text-2xl max-w-3xl leading-relaxed mb-8">
-              A digital playground built on the belief that games are more than products—they&apos;re moments, memories, and shared joy.
+              Founded in 2024, <span className="text-[#6C5CE7]">Joy Juncture</span> (also known as <span className="italic">joy-juncture</span>) has been committed to providing exceptional gaming and online shopping experiences. It&apos;s a digital playground built on the belief that games are more than products—they&apos;re moments, memories, and shared joy.
             </p>
             <div className="max-w-2xl border-l-4 border-black pl-8 py-2">
               <p className="text-black/70 font-medium italic text-xl md:text-2xl leading-relaxed">

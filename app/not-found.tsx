@@ -38,7 +38,7 @@ export default function NotFound() {
             PAGE NOT FOUND
           </p>
           <p style={{ fontSize: '18px', color: '#6B7280', marginBottom: '16px' }}>
-            The page you&apos;re looking for doesn&apos;t exist or has been moved.
+            The page you&apos;re looking for doesn&apos;t exist at Joy Juncture or has been moved.
           </p>
         </div>
 

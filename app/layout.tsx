@@ -38,6 +38,9 @@ const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://joy-juncture.vercel
 
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
+  alternates: {
+    canonical: '/',
+  },
   title: {
     default: defaultMetadata.title,
     template: '%s | Joy Juncture',
@@ -117,9 +120,15 @@ export default function RootLayout({
               '@context': 'https://schema.org',
               '@type': 'Organization',
               name: 'Joy Juncture',
+              alternateName: ['joy-juncture', 'JoyJuncture'],
               url: baseUrl,
               logo: `${baseUrl}/icon.png`,
               description: 'Experience board games, events, and community engagement like never before.',
+              sameAs: [
+                'https://facebook.com/joyjuncture',
+                'https://twitter.com/joyjuncture',
+                'https://instagram.com/joyjuncture',
+              ],
               contactPoint: {
                 '@type': 'ContactPoint',
                 contactType: 'Customer Service',

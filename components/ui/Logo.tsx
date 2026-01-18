@@ -52,7 +52,7 @@ export default function Logo({ size = 'medium', linkTo = '/', className = '', sh
                 ) : logoUrl ? (
                     <Image
                         src={logoUrl}
-                        alt="Logo"
+                        alt="Joy Juncture Logo"
                         fill
                         className="object-cover"
                     />

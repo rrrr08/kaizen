@@ -115,8 +115,8 @@ export default function Home() {
       <section className="px-6 py-20 bg-white">
         <div className="container mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-5xl font-black mb-4">Choose Your Play Style</h2>
-            <p className="text-xl font-medium text-charcoal/60">Find your perfect way to play</p>
+            <h2 className="text-3xl md:text-5xl font-black mb-4">Choose Your Play Style at Joy Juncture</h2>
+            <p className="text-xl font-medium text-charcoal/60">Find your perfect way to play and connect with our community</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -169,8 +169,8 @@ export default function Home() {
       <section className="px-6 py-12 bg-gradient-to-br from-[#6C5CE7] to-[#8B7FE8] text-white">
         <div className="container mx-auto">
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-black mb-2">What's Happening Now</h2>
-            <p className="text-lg font-medium text-white/80">Stay updated with live activities</p>
+            <h2 className="text-3xl font-black mb-2">What's Happening Now at Joy Juncture</h2>
+            <p className="text-lg font-medium text-white/80">Stay updated with live activities and community events</p>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

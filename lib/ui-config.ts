@@ -16,8 +16,8 @@ export const DEFAULT_HOMEPAGE_CONTENT: HomepageContent = {
     ctaTextJoin: "View Drops"
   },
   heroSocial: {
-    title: "Games are Moments, Memories, and Shared Joy.",
-    subtitle: "Analog connection for a digital world. Join the movement of people playing, belonging, and earning joy.",
+    title: "Welcome to Joy Juncture",
+    subtitle: "At Joy Juncture, we believe in analog connection for a digital world. Discover amazing board games, events, and community moments at joy-juncture.com.",
     ctaTextShops: "Join Game Night",
     ctaTextJoin: "Shop Games",
     backgroundImage: "/hero-image.png"

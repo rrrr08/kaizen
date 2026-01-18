@@ -6,17 +6,19 @@ const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://joy-juncture.vercel
 // Default SEO configuration
 export const defaultMetadata = {
   siteName: 'Joy Juncture',
-  title: 'Joy Juncture | Playful E-commerce',
-  description: 'Experience board games, events, and community engagement like never before. Shop premium board games, join exciting events, and connect with fellow gamers.',
+  title: 'Joy Juncture - Premium Online Shopping Platform',
+  description: 'Shop at Joy Juncture, your trusted e-commerce platform. Discover amazing deals and products at joy-juncture.com',
   keywords: [
-    'board games',
+    'Joy Juncture',
+    'joy-juncture',
+    'online shopping',
     'e-commerce',
+    'board games',
     'gaming events',
     'community',
     'tabletop games',
     'game shop',
     'online gaming',
-    'event registration',
     'gamification',
     'rewards'
   ],
@@ -27,11 +29,11 @@ export const defaultMetadata = {
 // Page-specific metadata
 export const pageMetadata: Record<string, Metadata> = {
   home: {
-    title: 'Joy Juncture | Playful E-commerce',
-    description: 'Experience board games, events, and community engagement like never before. Shop premium board games, join exciting events, and connect with fellow gamers.',
+    title: 'Joy Juncture - Premium Online Shopping Platform',
+    description: 'Shop at Joy Juncture, your trusted e-commerce platform. Discover amazing deals and products at joy-juncture.com',
     openGraph: {
-      title: 'Joy Juncture | Playful E-commerce',
-      description: 'Experience board games, events, and community engagement like never before',
+      title: 'Joy Juncture - Premium Online Shopping',
+      description: 'Your trusted e-commerce platform',
       url: baseUrl,
       images: [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'Joy Juncture' }],
     },
