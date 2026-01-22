@@ -6,6 +6,7 @@ import { splitDateTime } from '@/lib/utils';
 import Link from 'next/link';
 import EventRegistrationForm from '@/components/EventRegistrationForm';
 import { Calendar, MapPin, Users } from 'lucide-react';
+import EventCalendar from '@/components/events/EventCalendar';
 
 export const dynamic = 'force-dynamic';
 
@@ -148,6 +149,9 @@ export default function UpcomingEvents() {
             </p>
           </div>
         </div>
+
+        {/* Calendar Section */}
+        <EventCalendar events={events} registeredEventIds={registeredEventIds} />
 
         {/* Events Grid */}
         <div className="space-y-6">

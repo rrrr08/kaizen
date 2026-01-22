@@ -5,6 +5,7 @@ import { GameEvent } from '@/lib/types';
 import { splitDateTime } from '@/lib/utils';
 import Link from 'next/link';
 import { Calendar, MapPin, Users } from 'lucide-react';
+import EventCalendar from '@/components/events/EventCalendar';
 
 export default function PastEvents() {
   const [events, setEvents] = useState<GameEvent[]>([]);
@@ -93,6 +94,9 @@ export default function PastEvents() {
             </p>
           </div>
         </div>
+
+        {/* Calendar Section */}
+        <EventCalendar events={events} mode="past" />
 
         {/* Events Grid */}
         <div className="space-y-6">
