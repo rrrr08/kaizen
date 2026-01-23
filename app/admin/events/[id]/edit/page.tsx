@@ -9,6 +9,7 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { usePopup } from '@/app/context/PopupContext';
+import CategorySelect from '@/components/events/CategorySelect';
 
 
 export default function EditEventPage() {
@@ -27,6 +28,7 @@ export default function EditEventPage() {
     price: string;
     description: string;
     image: string;
+    category: 'Workshop' | 'Game Night' | 'Other';
     capacity: string;
     highlights: string[];
     gallery: string[];
@@ -37,6 +39,7 @@ export default function EditEventPage() {
     price: '',
     description: '',
     image: '',
+    category: 'Other',
     capacity: '',
     highlights: [''],
     gallery: [],
@@ -104,6 +107,7 @@ export default function EditEventPage() {
             : '',
           price: e.price?.toString() ?? '',
           capacity: e.capacity?.toString() ?? '',
+          category: e.category ?? 'Other',
           highlights: e.highlights?.map((h: any) => h.text) ?? [''],
           gallery: e.gallery ?? [],
         });
@@ -167,6 +171,7 @@ export default function EditEventPage() {
       datetime: new Date(form.datetime),
       location: form.location,
       capacity: Number(form.capacity),
+      category: form.category,
     };
 
     if (form.image) payload.image = form.image;
@@ -271,6 +276,12 @@ export default function EditEventPage() {
               value={form.description}
               onChange={handleChange}
             />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <CategorySelect
+                value={form.category}
+                onChange={(val) => setForm(prev => ({ ...prev, category: val }))}
+              />
+            </div>
             <div className="bg-white border-2 border-black rounded-xl p-6">
               <label className="font-black text-xs tracking-widest text-black/40 mb-3 uppercase block">Cover Image</label>
               <ImageUpload

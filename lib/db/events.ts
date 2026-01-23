@@ -23,6 +23,7 @@ export type CreateEventInput = {
   location: string;
   registered: number;
   capacity: number;
+  category: 'Workshop' | 'Game Night' | 'Other';
 
   image?: string;
   price?: number;
@@ -111,6 +112,7 @@ export async function createEvent(input: CreateEventInput): Promise<string> {
       datetime: Timestamp.fromDate(input.datetime),
       location: input.location,
       capacity: input.capacity,
+      category: input.category,
       registered: input.registered,
       createdAt: FieldValue.serverTimestamp(),
       updatedAt: FieldValue.serverTimestamp(),
@@ -150,6 +152,7 @@ export async function updateEventById(
 
   if (typeof updates.capacity === 'number') payload.capacity = updates.capacity;
   if (typeof updates.price === 'number') payload.price = updates.price;
+  if (typeof updates.category === 'string') payload.category = updates.category;
 
   // Datetime → Admin Timestamp
   if (updates.datetime) {
