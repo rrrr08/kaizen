@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { getAuth } from 'firebase/auth';
 import { usePopup } from '@/app/context/PopupContext';
+import CategorySelect from '@/components/events/CategorySelect';
 
 
 
@@ -22,6 +23,7 @@ export default function CreateEventPage() {
     price: '',
     description: '',
     image: '',
+    category: 'Game Night' as 'Workshop' | 'Game Night' | 'Other',
     capacity: '',
     highlights: [''],
     gallery: [] as string[],
@@ -86,6 +88,7 @@ export default function CreateEventPage() {
       location: form.location,
       description: form.description,
       capacity: Number(form.capacity),
+      category: form.category,
       status: isPast ? 'past' : 'upcoming'
     };
 
@@ -162,6 +165,12 @@ export default function CreateEventPage() {
               maxLength={2000}
               showCounter
             />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <CategorySelect
+                value={form.category}
+                onChange={(val) => setForm(prev => ({ ...prev, category: val }))}
+              />
+            </div>
             <div className="bg-white border-2 border-black rounded-xl p-6">
               <label className="font-black text-xs tracking-widest text-black/40 mb-3 uppercase block">Cover Image</label>
               <ImageUpload

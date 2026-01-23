@@ -33,6 +33,7 @@ export interface GameEvent {
   price: number;
   description: string;
   image?: string;
+  category: 'Workshop' | 'Game Night' | 'Other';
   capacity: number;
   registered: number;
   createdAt: Date;

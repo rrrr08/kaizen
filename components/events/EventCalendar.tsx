@@ -180,15 +180,25 @@ export default function EventCalendar({ events, registeredEventIds = new Set(), 
                     let textStyles = "text-black";
 
                     if (isSelected && hasEvents) {
+                        const firstEvent = dayEvents[0];
+                        const catColor = firstEvent.category === 'Workshop' ? '#FFD93D' :
+                            firstEvent.category === 'Game Night' ? '#6C5CE7' : '#00B894';
+                        const isLight = firstEvent.category === 'Workshop';
+
                         if (mode === 'upcoming') {
                             if (isRegistered) {
                                 dayStyles = "bg-[#00B894] border-[#000] shadow-[3px_3px_0px_#000]";
                                 textStyles = "text-white";
                             } else if (!isPast) {
-                                dayStyles = "bg-[#6C5CE7] border-[#000] shadow-[3px_3px_0px_#000]";
-                                textStyles = "text-white";
+                                dayStyles = `border-[#000] shadow-[3px_3px_0px_#000]`;
+                                // We'll use style attribute for dynamic color if needed, 
+                                // but Tailwind colors are better. Let's map them.
+                                const bgClass = firstEvent.category === 'Workshop' ? 'bg-[#FFD93D]' :
+                                    firstEvent.category === 'Game Night' ? 'bg-[#6C5CE7]' : 'bg-[#00B894]';
+                                dayStyles = `${bgClass} border-[#000] shadow-[3px_3px_0px_#000]`;
+                                textStyles = isLight ? "text-black" : "text-white";
                             }
-                        } else if (mode === 'past' && isPast) {
+                        } else if (mode === 'past') {
                             dayStyles = "bg-[#FF7675] border-[#000] shadow-[3px_3px_0px_#000]";
                             textStyles = "text-white";
                         }

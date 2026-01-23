@@ -97,6 +97,7 @@ export async function POST(req: NextRequest) {
       highlights,
       testimonials,
       gallery,
+      category,
     } = body;
 
     if (!title || !description || !datetime || !location || capacity === undefined) {
@@ -114,6 +115,7 @@ export async function POST(req: NextRequest) {
       status: status ?? 'upcoming',
       registered: 0,
       capacity: Number(capacity),
+      category: category ?? 'Other',
       createdAt: FieldValue.serverTimestamp(),
       updatedAt: FieldValue.serverTimestamp(),
     };
