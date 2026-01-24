@@ -44,7 +44,7 @@ export default function ProgressPage() {
     try {
       const settingsRef = doc(db, 'settings', 'xpSystem');
       const snap = await getDoc(settingsRef);
-      
+
       if (snap.exists()) {
         setAllTiers(snap.data().tiers || getDefaultTiers());
       } else {
@@ -101,7 +101,7 @@ export default function ProgressPage() {
       });
 
       const data = await response.json();
-      
+
       if (data.success) {
         await showAlert(`🎉 ${tierToUnlock.name} tier unlocked! You now have ${tierToUnlock.minXP} XP!`, 'success');
         window.location.reload();
@@ -127,27 +127,27 @@ export default function ProgressPage() {
 
   const currentTierIndex = allTiers.findIndex(t => t.name === tier.name);
   const xpToNext = nextTier ? nextTier.minXP - xp : 0;
-  const progressPercent = nextTier 
-    ? ((xp - tier.minXP) / (nextTier.minXP - tier.minXP)) * 100 
+  const progressPercent = nextTier
+    ? ((xp - tier.minXP) / (nextTier.minXP - tier.minXP)) * 100
     : 100;
 
   return (
     <div className="min-h-screen bg-[#FFFDF5] pt-28 pb-16 px-4">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-12"
         >
-          <h1 className="font-header text-6xl md:text-7xl font-black text-black mb-4 tracking-tight">
+          <h1 className="font-header text-4xl sm:text-6xl md:text-7xl font-black text-black mb-4 tracking-tight break-words">
             YOUR JOURNEY
           </h1>
           <p className="text-xl text-black/60 font-bold uppercase tracking-wider">Track Progress • Unlock Rewards</p>
         </motion.div>
 
         {/* Current Status Card */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           className="bg-[#FFD93D] border-4 border-black rounded-3xl p-8 mb-8 neo-shadow-lg"
@@ -162,24 +162,24 @@ export default function ProgressPage() {
                 {tier.multiplier}x MULTIPLIER
               </div>
             </div>
-            
+
             {/* XP Stats */}
             <div className="text-center border-l-4 border-r-4 border-black/20 px-4">
               <div className="flex items-center justify-center gap-2 mb-2">
                 <TrendingUp className="w-5 h-5" />
                 <span className="text-sm font-black uppercase tracking-wider text-black/60">Experience</span>
               </div>
-              <div className="font-header text-6xl font-black text-black mb-2">{xp.toLocaleString()}</div>
+              <div className="font-header text-4xl sm:text-6xl font-black text-black mb-2 truncate">{xp.toLocaleString()}</div>
               <div className="text-sm font-bold text-black/70">XP</div>
             </div>
-            
+
             {/* JP Balance */}
             <div className="text-center">
               <div className="flex items-center justify-center gap-2 mb-2">
                 <Zap className="w-5 h-5 text-[#6C5CE7]" />
                 <span className="text-sm font-black uppercase tracking-wider text-black/60">Joy Points</span>
               </div>
-              <div className="font-header text-6xl font-black text-[#6C5CE7] mb-2">{balance.toLocaleString()}</div>
+              <div className="font-header text-4xl sm:text-6xl font-black text-[#6C5CE7] mb-2 truncate">{balance.toLocaleString()}</div>
               <div className="text-sm font-bold text-black/70">JP</div>
             </div>
           </div>
@@ -192,7 +192,7 @@ export default function ProgressPage() {
                 <span className="font-bold text-black/70">{xpToNext.toLocaleString()} XP to go</span>
               </div>
               <div className="w-full h-6 bg-white border-4 border-black rounded-full overflow-hidden">
-                <motion.div 
+                <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${Math.min(progressPercent, 100)}%` }}
                   transition={{ duration: 1, ease: "easeOut" }}
@@ -206,7 +206,7 @@ export default function ProgressPage() {
         </motion.div>
 
         {/* Tier Roadmap */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
@@ -216,71 +216,72 @@ export default function ProgressPage() {
             <Trophy className="w-8 h-8" />
             <h2 className="font-header text-4xl font-black text-black">TIER ROADMAP</h2>
           </div>
-          
+
           <div className="space-y-4">
             {allTiers.map((t, index) => {
               const isUnlocked = xp >= t.minXP;
               const isCurrent = t.name === tier.name;
-              
+
               return (
-                <motion.div 
+                <motion.div
                   key={index}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.1 * index }}
-                  className={`relative rounded-2xl p-6 border-4 border-black transition-all ${
-                    isCurrent 
-                      ? 'bg-[#FFD93D] neo-shadow scale-105' 
-                      : isUnlocked
+                  className={`relative rounded-2xl p-6 border-4 border-black transition-all ${isCurrent
+                    ? 'bg-[#FFD93D] neo-shadow scale-105'
+                    : isUnlocked
                       ? 'bg-[#00B894]/20'
                       : 'bg-gray-100 opacity-70'
-                  }`}
+                    }`}
                 >
-                  <div className="flex items-center gap-6">
+                  <div className="flex flex-col sm:flex-row items-center gap-6">
                     {/* Icon */}
                     <div className="text-6xl">{t.icon}</div>
-                    
+
                     {/* Info */}
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <h3 className="font-header text-3xl font-black text-black">{t.name}</h3>
-                        {isCurrent && (
-                          <span className="px-3 py-1 bg-black text-[#FFD93D] text-xs font-black rounded-full uppercase">
-                            CURRENT
-                          </span>
-                        )}
-                        {isUnlocked && !isCurrent && (
-                          <span className="px-3 py-1 bg-[#00B894] text-white text-xs font-black rounded-full uppercase flex items-center gap-1">
-                            <Unlock className="w-3 h-3" /> UNLOCKED
-                          </span>
-                        )}
-                        {!isUnlocked && (
-                          <span className="px-3 py-1 bg-gray-400 text-white text-xs font-black rounded-full uppercase flex items-center gap-1">
-                            <Lock className="w-3 h-3" /> LOCKED
-                          </span>
-                        )}
+                    <div className="flex-1 text-center sm:text-left w-full">
+                      <div className="flex flex-col sm:flex-row items-center gap-3 mb-2">
+                        <h3 className="font-header text-2xl sm:text-3xl font-black text-black break-words">{t.name}</h3>
+                        <div className="flex gap-2">
+                          {isCurrent && (
+                            <span className="px-3 py-1 bg-black text-[#FFD93D] text-[10px] font-black rounded-full uppercase shrink-0">
+                              CURRENT
+                            </span>
+                          )}
+                          {isUnlocked && !isCurrent && (
+                            <span className="px-3 py-1 bg-[#00B894] text-white text-[10px] font-black rounded-full uppercase flex items-center gap-1 shrink-0">
+                              <Unlock className="w-3 h-3" /> UNLOCKED
+                            </span>
+                          )}
+                          {!isUnlocked && (
+                            <span className="px-3 py-1 bg-gray-400 text-white text-[10px] font-black rounded-full uppercase flex items-center gap-1 shrink-0">
+                              <Lock className="w-3 h-3" /> LOCKED
+                            </span>
+                          )}
+                        </div>
                       </div>
                       <div className="text-black/70 font-bold mb-2">{t.badge}</div>
-                      <div className="flex items-center gap-4 text-sm font-bold">
-                        <span className="px-3 py-1 bg-[#6C5CE7] text-white rounded-lg">{t.multiplier}x Multiplier</span>
-                        <span className="text-black/60">{t.minXP.toLocaleString()} XP Required</span>
+                      <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 sm:gap-4 text-xs font-bold">
+                        <span className="px-3 py-1 bg-[#6C5CE7] text-white rounded-lg shrink-0">{t.multiplier}x Multiplier</span>
+                        <span className="text-black/60 whitespace-nowrap">{t.minXP.toLocaleString()} XP Required</span>
                       </div>
                     </div>
-                    
+
                     {/* Perk & Action */}
-                    <div className="text-right min-w-[200px]">
-                      <div className="text-xs font-black uppercase tracking-wider text-black/40 mb-1">Perk</div>
-                      <div className="text-black font-bold mb-3">{t.perk}</div>
-                      
+                    <div className="text-center sm:text-right w-full sm:min-w-[200px] pt-4 sm:pt-0 border-t sm:border-t-0 border-black/10">
+                      <div className="text-[10px] font-black uppercase tracking-wider text-black/40 mb-1">Perk</div>
+                      <div className="text-black font-bold mb-3 text-sm sm:text-base">{t.perk}</div>
+
                       {!isUnlocked && t.unlockPrice && t.unlockPrice > 0 && (
                         <button
                           onClick={() => handleUnlockTier(t)}
-                          className="px-4 py-2 bg-[#6C5CE7] hover:bg-[#5f4fd1] text-white font-black rounded-xl border-2 border-black neo-shadow-hover transition-all uppercase text-sm"
+                          className="w-full sm:w-auto px-4 py-2 bg-[#6C5CE7] hover:bg-[#5f4fd1] text-white font-black rounded-xl border-2 border-black neo-shadow-hover transition-all uppercase text-xs"
                         >
                           Unlock {t.unlockPrice.toLocaleString()} JP
                         </button>
                       )}
-                      
+
                       {!isUnlocked && (!t.unlockPrice || t.unlockPrice === 0) && (
                         <div className="text-sm text-black/40 italic font-bold">Earn XP to unlock</div>
                       )}
@@ -293,7 +294,7 @@ export default function ProgressPage() {
         </motion.div>
 
         {/* How to Earn XP */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
@@ -303,7 +304,7 @@ export default function ProgressPage() {
             <Star className="w-8 h-8 text-[#FFD93D]" />
             <h2 className="font-header text-4xl font-black text-black">HOW TO EARN XP & JP</h2>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {[
               { icon: '🎮', title: 'Play Games', desc: 'Complete daily games to earn XP and JP with your tier multiplier', color: '#6C5CE7' },
@@ -311,7 +312,7 @@ export default function ProgressPage() {
               { icon: '🎪', title: 'Event Registration', desc: 'Register for events and workshops to gain bonus XP', color: '#00B894' },
               { icon: '🎡', title: 'Wheel of Joy', desc: 'Spin the wheel daily for chances to win XP and JP', color: '#FF6B6B' }
             ].map((item, index) => (
-              <motion.div 
+              <motion.div
                 key={index}
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}

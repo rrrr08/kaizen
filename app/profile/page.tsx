@@ -27,11 +27,12 @@ import {
   Star
 } from 'lucide-react';
 import LevelBadge from '@/components/gamification/LevelBadge';
+import Image from 'next/image';
 
 export const dynamic = 'force-dynamic';
 
 export default function ProfilePage() {
-  const { user, loading: authLoading } = useAuth();
+  const { user, userProfile, loading: authLoading } = useAuth();
   const { xp, balance, tier, nextTier, loading: gamificationLoading, history, streak, fetchHistory } = useGamification();
   const router = useRouter();
 
@@ -59,6 +60,9 @@ export default function ProfilePage() {
   const nextTierMin = nextTier?.minXP || (xp + 1000);
   const progress = ((xp - currentTierMin) / (nextTierMin - currentTierMin)) * 100;
 
+  const profileImage = userProfile?.image || userProfile?.photoURL || user?.photoURL;
+  const displayName = userProfile?.name || user?.displayName || user?.email?.split('@')[0];
+
   return (
     <div className="min-h-screen pt-28 pb-20 bg-[#FFFDF5] text-black">
       <div className="max-w-6xl mx-auto px-6 md:px-12">
@@ -71,9 +75,14 @@ export default function ProfilePage() {
 
             {/* Avatar Block */}
             <div className="relative z-10">
-              <div className="w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-black bg-[#6C5CE7] flex items-center justify-center overflow-hidden neo-shadow bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]">
-                {user.photoURL ? (
-                  <img src={user.photoURL} alt="Profile" className="w-full h-full object-cover" />
+              <div className="w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-black bg-[#6C5CE7] flex items-center justify-center overflow-hidden neo-shadow bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] relative">
+                {profileImage ? (
+                  <Image
+                    src={profileImage}
+                    alt="Profile"
+                    fill
+                    className="object-cover"
+                  />
                 ) : (
                   <span className="text-5xl md:text-6xl font-black text-white">
                     {user.email?.[0].toUpperCase()}
@@ -95,13 +104,13 @@ export default function ProfilePage() {
                   Verified Member
                 </span>
               </div>
-              <h1 className="text-4xl md:text-6xl font-black font-header tracking-tighter mb-2 uppercase leading-none">
-                {user.displayName || user.email?.split('@')[0]}
+              <h1 className="text-4xl sm:text-5xl md:text-6xl font-black font-header tracking-tighter mb-2 uppercase leading-none break-words">
+                {displayName}
               </h1>
-              <div className="flex items-center justify-center md:justify-start gap-4 text-black/60 font-bold">
-                <div className="flex items-center gap-1.5">
-                  <Mail size={16} />
-                  <span>{user.email}</span>
+              <div className="flex flex-col sm:flex-row items-center justify-center md:justify-start gap-2 sm:gap-4 text-black/60 font-bold">
+                <div className="flex items-center gap-1.5 break-all text-center sm:text-left">
+                  <Mail size={16} className="shrink-0" />
+                  <span className="text-xs sm:text-base">{user.email}</span>
                 </div>
                 <div className="hidden sm:flex items-center gap-1.5">
                   <Star size={16} className="text-[#FFD93D]" fill="#FFD93D" />
@@ -147,9 +156,9 @@ export default function ProfilePage() {
                   className="h-full bg-gradient-to-r from-[#6C5CE7] to-[#8B7FE8] rounded-full border-r-2 border-black shadow-[2px_0_10px_rgba(108,92,231,0.3)]"
                 />
               </div>
-              <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-black/40">
+              <div className="flex flex-col sm:flex-row justify-between text-[10px] font-black uppercase tracking-widest text-black/40 gap-1">
                 <span>{tier.minXP} XP</span>
-                <span>Next Rank: {nextTier?.name || 'MAX'} ({nextTier?.minXP || '---'})</span>
+                <span className="text-right">Next Rank: {nextTier?.name || 'MAX'} ({nextTier?.minXP || '---'})</span>
               </div>
             </div>
 
@@ -173,10 +182,10 @@ export default function ProfilePage() {
             </div>
             <div className="flex-1">
               <p className="text-[10px] font-black text-black/60 uppercase tracking-widest mb-1">Joy Points Capital</p>
-              <h3 className="text-6xl font-black text-black font-header tracking-tighter mb-4">{balance.toLocaleString()}</h3>
+              <h3 className="text-4xl sm:text-5xl md:text-6xl font-black text-black font-header tracking-tighter mb-4">{balance.toLocaleString()}</h3>
               <p className="text-sm font-bold text-black/70 mb-8 max-w-[240px]">Redeem these points for discounts, games, and exclusive items in our store.</p>
             </div>
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-3">
               <Link href="/rewards" className="flex-1 text-center py-4 bg-black text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-[4px_4px_0px_rgba(0,0,0,0.3)] hover:scale-[1.02] transition-all">
                 Spend Points
               </Link>
@@ -213,12 +222,12 @@ export default function ProfilePage() {
                     <div className={`p-3 rounded-2xl ${item.text === 'text-white' ? 'bg-white/20' : 'bg-black/5'} border-2 ${item.text === 'text-white' ? 'border-white/20' : 'border-black/10'}`}>
                       <item.icon className={item.text || 'text-black'} size={24} strokeWidth={3} />
                     </div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-1">
-                        <h4 className={`text-xl font-black uppercase tracking-tight ${item.text || 'text-black'}`}>{item.title}</h4>
-                        <ChevronRight className={`w-4 h-4 opacity-0 group-hover:opacity-100 transition-all ${item.text || 'text-black'}`} />
+                    <div className="flex-1 min-w-0 pr-2">
+                      <div className="flex items-center justify-between mb-1 gap-2">
+                        <h4 className={`text-lg sm:text-xl font-black uppercase tracking-tight truncate ${item.text || 'text-black'}`}>{item.title}</h4>
+                        <ChevronRight className={`w-4 h-4 shrink-0 opacity-0 group-hover:opacity-100 transition-all ${item.text || 'text-black'}`} />
                       </div>
-                      <p className={`text-[10px] font-bold uppercase tracking-widest ${item.text ? 'text-white/60' : 'text-black/40'}`}>{item.desc}</p>
+                      <p className={`text-[9px] sm:text-[10px] font-bold uppercase tracking-widest leading-tight ${item.text ? 'text-white/60' : 'text-black/40'}`}>{item.desc}</p>
                     </div>
                   </motion.div>
                 </Link>
@@ -244,9 +253,9 @@ export default function ProfilePage() {
                       {i !== 4 && <div className="absolute top-3 left-[5px] w-0.5 h-full bg-black/10"></div>}
                     </div>
                     <div>
-                      <div className="flex justify-between gap-4 mb-1">
-                        <p className="text-xs font-black uppercase tracking-tight leading-tight">{log.description}</p>
-                        <span className={`text-xs font-black whitespace-nowrap ${log.type === 'EARN' ? 'text-[#00B894]' : 'text-[#FF7675]'}`}>
+                      <div className="flex justify-between items-start gap-4 mb-1">
+                        <p className="text-[10px] sm:text-xs font-black uppercase tracking-tight leading-tight flex-1 min-w-0 break-words">{log.description}</p>
+                        <span className={`text-xs font-black whitespace-nowrap shrink-0 ${log.type === 'EARN' ? 'text-[#00B894]' : 'text-[#FF7675]'}`}>
                           {log.type === 'EARN' ? '+' : '-'}{log.amount}
                         </span>
                       </div>
