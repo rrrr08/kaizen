@@ -166,35 +166,32 @@ export default function NotificationsPage() {
 
       {/* Filters */}
       <div className="max-w-4xl mx-auto px-4 py-6">
-        <div className="flex items-center justify-between gap-4 flex-wrap">
-          <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex gap-2 flex-wrap">
             <button
               onClick={() => setFilter('all')}
-              className={`px-4 py-2 font-header text-sm rounded-lg border-2 border-black transition-all ${
-                filter === 'all'
+              className={`px-4 py-2 font-header text-sm rounded-lg border-2 border-black transition-all ${filter === 'all'
                   ? 'bg-primary text-primary-foreground shadow-brutal'
                   : 'bg-background hover:translate-x-0.5 hover:translate-y-0.5'
-              }`}
+                }`}
             >
               All ({totalCount})
             </button>
             <button
               onClick={() => setFilter('unread')}
-              className={`px-4 py-2 font-header text-sm rounded-lg border-2 border-black transition-all ${
-                filter === 'unread'
+              className={`px-4 py-2 font-header text-sm rounded-lg border-2 border-black transition-all ${filter === 'unread'
                   ? 'bg-primary text-primary-foreground shadow-brutal'
                   : 'bg-background hover:translate-x-0.5 hover:translate-y-0.5'
-              }`}
+                }`}
             >
               Unread ({unreadCount})
             </button>
             <button
               onClick={() => setFilter('read')}
-              className={`px-4 py-2 font-header text-sm rounded-lg border-2 border-black transition-all ${
-                filter === 'read'
+              className={`px-4 py-2 font-header text-sm rounded-lg border-2 border-black transition-all ${filter === 'read'
                   ? 'bg-primary text-primary-foreground shadow-brutal'
                   : 'bg-background hover:translate-x-0.5 hover:translate-y-0.5'
-              }`}
+                }`}
             >
               Read ({totalCount - unreadCount})
             </button>
@@ -236,34 +233,31 @@ export default function NotificationsPage() {
             {filteredNotifications.map((notif) => (
               <div
                 key={notif.id}
-                className={`p-6 rounded-lg border-2 border-black ${
-                  typeColors[notif.type]
-                } ${
-                  !notif.read ? 'shadow-brutal' : 'opacity-75'
-                } transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none`}
+                className={`p-6 rounded-lg border-2 border-black ${typeColors[notif.type]
+                  } ${!notif.read ? 'shadow-brutal' : 'opacity-75'
+                  } transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none`}
               >
-                <div className="flex justify-between items-start gap-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
+                <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+                  <div className="flex-1 min-w-0 w-full">
+                    <div className="flex items-center gap-3 mb-2 flex-wrap">
                       <span
-                        className={`px-2 py-1 rounded text-xs font-header font-semibold uppercase ${
-                          typeBadges[notif.type]
-                        }`}
+                        className={`px-2 py-1 rounded text-[10px] sm:text-xs font-header font-semibold uppercase shrink-0 ${typeBadges[notif.type]
+                          }`}
                       >
                         {notif.type}
                       </span>
                       {!notif.read && (
-                        <span className="flex items-center gap-1.5 text-xs font-header text-primary">
+                        <span className="flex items-center gap-1.5 text-[10px] sm:text-xs font-header text-primary shrink-0">
                           <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
                           New
                         </span>
                       )}
                     </div>
-                    <h3 className="font-display text-lg font-bold mb-2">
+                    <h3 className="font-display text-base sm:text-lg font-bold mb-2 break-words">
                       {notif.title}
                     </h3>
-                    <p className="text-foreground/80 mb-3">{notif.message}</p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm sm:text-base text-foreground/80 mb-3 break-words">{notif.message}</p>
+                    <p className="text-[10px] sm:text-sm text-muted-foreground">
                       {new Date(notif.createdAt).toLocaleString('en-US', {
                         dateStyle: 'medium',
                         timeStyle: 'short',
@@ -273,16 +267,16 @@ export default function NotificationsPage() {
                       <Link
                         href={notif.actionUrl}
                         onClick={() => !notif.read && markAsRead(notif.id)}
-                        className="inline-block mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-lg border-2 border-black shadow-brutal hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all font-header text-sm"
+                        className="inline-block mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-lg border-2 border-black shadow-brutal hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all font-header text-xs sm:text-sm"
                       >
                         View Details →
                       </Link>
                     )}
                   </div>
-                  <div className="flex flex-col gap-2">
+                  <div className="flex sm:flex-col gap-2 w-full sm:w-auto justify-end sm:justify-start pt-4 sm:pt-0 border-t sm:border-t-0 border-black/5">
                     <button
                       onClick={() => dismiss(notif.id)}
-                      className="p-2 hover:bg-black/10 rounded-lg transition-colors"
+                      className="p-2 hover:bg-black/10 rounded-lg transition-colors order-2 sm:order-1"
                       aria-label="Dismiss notification"
                     >
                       <X className="w-5 h-5" />
@@ -290,7 +284,7 @@ export default function NotificationsPage() {
                     {!notif.read && (
                       <button
                         onClick={() => markAsRead(notif.id)}
-                        className="px-3 py-1 bg-background text-foreground rounded border-2 border-black text-xs font-header hover:translate-x-0.5 hover:translate-y-0.5 transition-all"
+                        className="px-3 py-1 bg-background text-foreground rounded border-2 border-black text-[10px] sm:text-xs font-header hover:translate-x-0.5 hover:translate-y-0.5 transition-all order-1 sm:order-2"
                       >
                         Mark read
                       </button>

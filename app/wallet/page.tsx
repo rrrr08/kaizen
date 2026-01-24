@@ -97,14 +97,14 @@ export default function WalletPage() {
             <Link href="/shop" className="font-header text-[10px] tracking-[0.2em] text-[#2D3436]/40 hover:text-[#6C5CE7] mb-6 inline-flex items-center gap-2 transition-colors uppercase font-black">
               <ArrowLeft size={14} /> Back to Repository
             </Link>
-            <h1 className="font-display text-6xl md:text-7xl font-black mb-2 tracking-tighter uppercase leading-none">The Vault</h1>
+            <h1 className="font-display text-4xl sm:text-6xl md:text-7xl font-black mb-2 tracking-tighter uppercase leading-none break-words">The Vault</h1>
             <p className="text-xl text-[#2D3436]/60 font-bold max-w-md">Track your progress, manage your currency, and master the playground economy.</p>
           </motion.div>
 
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="flex items-center gap-6 bg-white border-2 border-black p-4 rounded-[25px] neo-shadow"
+            className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 bg-white border-2 border-black p-4 rounded-[25px] neo-shadow w-full sm:w-auto"
           >
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 bg-[#FF7675] border-2 border-black rounded-xl flex items-center justify-center shadow-[3px_3px_0px_#000]">
@@ -159,8 +159,8 @@ export default function WalletPage() {
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-5xl font-black text-black leading-none">{balance.toLocaleString()}</div>
-                  <div className="text-xs font-black text-black/40 mt-1 uppercase tracking-widest">Available JP</div>
+                  <div className="text-3xl sm:text-5xl font-black text-black leading-none truncate max-w-[150px] sm:max-w-none ml-auto">{balance.toLocaleString()}</div>
+                  <div className="text-[10px] sm:text-xs font-black text-black/40 mt-1 uppercase tracking-widest">Available JP</div>
                 </div>
               </div>
 
@@ -203,8 +203,8 @@ export default function WalletPage() {
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-5xl font-black text-black leading-none">{xp.toLocaleString()}</div>
-                  <div className="text-xs font-black text-black/40 mt-1 uppercase tracking-widest">Lifetime XP</div>
+                  <div className="text-3xl sm:text-5xl font-black text-black leading-none truncate max-w-[150px] sm:max-w-none ml-auto">{xp.toLocaleString()}</div>
+                  <div className="text-[10px] sm:text-xs font-black text-black/40 mt-1 uppercase tracking-widest">Lifetime XP</div>
                 </div>
               </div>
 
@@ -299,22 +299,22 @@ export default function WalletPage() {
               ) : (
                 <div className="space-y-4">
                   {history.map((tx) => (
-                    <div key={tx.id} className="flex items-center justify-between p-4 bg-[#F9F9F9] border-2 border-black/5 rounded-2xl md:hover:scale-[1.01] transition-transform">
+                    <div key={tx.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-[#F9F9F9] border-2 border-black/5 rounded-2xl md:hover:scale-[1.01] transition-transform gap-4">
                       <div className="flex items-center gap-4">
-                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center border-2 border-black font-black text-lg ${tx.type === 'EARN' ? 'bg-[#55EFC4] text-[#00B894]' : 'bg-[#fab1a0] text-[#d63031]'
+                        <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center border-2 border-black font-black text-base sm:text-lg shrink-0 ${tx.type === 'EARN' ? 'bg-[#55EFC4] text-[#00B894]' : 'bg-[#fab1a0] text-[#d63031]'
                           }`}>
                           {tx.type === 'EARN' ? '+' : '-'}
                         </div>
-                        <div>
-                          <p className="font-black text-black text-lg leading-none mb-1">{tx.description}</p>
-                          <div className="flex items-center gap-2 text-xs font-bold text-black/40 uppercase tracking-wider">
+                        <div className="min-w-0">
+                          <p className="font-black text-black text-base sm:text-lg leading-tight mb-1 truncate">{tx.description}</p>
+                          <div className="flex items-center gap-2 text-[10px] sm:text-xs font-bold text-black/40 uppercase tracking-wider">
                             <span>{tx.source}</span>
                             <span>•</span>
                             <span>{(tx.timestamp as any)?.seconds ? new Date((tx.timestamp as any).seconds * 1000).toLocaleDateString() : 'Just now'}</span>
                           </div>
                         </div>
                       </div>
-                      <div className={`font-display text-2xl font-black ${tx.type === 'EARN' ? 'text-[#00B894]' : 'text-[#d63031]'
+                      <div className={`font-display text-xl sm:text-2xl font-black self-end sm:self-auto ${tx.type === 'EARN' ? 'text-[#00B894]' : 'text-[#d63031]'
                         }`}>
                         {tx.type === 'EARN' ? '+' : '-'}{tx.amount}
                       </div>
