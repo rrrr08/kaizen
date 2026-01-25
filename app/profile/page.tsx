@@ -134,15 +134,15 @@ export default function ProfilePage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
           {/* Level Progress Card */}
           <div className="bg-white border-4 border-black rounded-[35px] p-8 neo-shadow relative overflow-hidden group">
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 mb-8">
               <div className="flex items-center gap-4">
-                <LevelBadge size="lg" />
+                <LevelBadge size="lg" hideText />
                 <div>
                   <h3 className="text-2xl font-black font-header uppercase tracking-tight leading-none mb-1">{tier.name}</h3>
                   <p className="text-[10px] font-bold text-black/40 uppercase tracking-widest leading-none">Your Current Rank</p>
                 </div>
               </div>
-              <div className="text-right">
+              <div className="text-left sm:text-right">
                 <p className="text-3xl font-black text-black leading-none">{xp.toLocaleString()}</p>
                 <p className="text-[10px] font-bold text-black/40 uppercase tracking-widest">Total XP</p>
               </div>
