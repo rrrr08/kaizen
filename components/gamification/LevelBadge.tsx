@@ -5,10 +5,11 @@ import { useGamification } from '@/app/context/GamificationContext';
 
 interface LevelBadgeProps {
     showProgress?: boolean;
+    hideText?: boolean;
     size?: 'sm' | 'md' | 'lg';
 }
 
-const LevelBadge: React.FC<LevelBadgeProps> = ({ showProgress = false, size = 'md' }) => {
+const LevelBadge: React.FC<LevelBadgeProps> = ({ showProgress = false, hideText = false, size = 'md' }) => {
     const { tier, xp, nextTier } = useGamification();
 
     // Calculate Progress
@@ -22,22 +23,22 @@ const LevelBadge: React.FC<LevelBadgeProps> = ({ showProgress = false, size = 'm
     }
 
     const sizeClasses = {
-        sm: 'text-xs px-2 py-0.5',
-        md: 'text-sm px-3 py-1',
-        lg: 'text-base px-4 py-2'
+        sm: `text-xs ${hideText ? 'pr-2' : 'px-2'} py-0.5`,
+        md: `text-sm ${hideText ? 'pr-3' : 'px-3'} py-1`,
+        lg: `text-base ${hideText ? 'pr-4' : 'px-4'} py-2`
     };
 
     const iconSizes = {
-        sm: 'text-sm',
-        md: 'text-base',
-        lg: 'text-xl'
+        sm: 'text-3xl md:text-4xl',
+        md: 'text-4xl md:text-5xl',
+        lg: 'text-6xl md:text-8xl'
     };
 
     return (
         <div className="flex flex-col gap-1">
-            <div className={`inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 backdrop-blur-sm ${sizeClasses[size]} ${tier.color} transition-all hover:bg-white/10`}>
-                <span className={iconSizes[size]}>{tier.icon}</span>
-                <span className="font-header tracking-widest uppercase font-bold">{tier.name}</span>
+            <div className={`inline-flex items-center gap-2 rounded-full ${!hideText ? 'border border-white/10 bg-white/5 backdrop-blur-sm' : ''} ${sizeClasses[size]} ${tier.color} transition-all hover:bg-white/10`}>
+                <span className={`${iconSizes[size]} leading-none`}>{tier.icon}</span>
+                {!hideText && <span className="font-header tracking-widest uppercase font-bold">{tier.name}</span>}
             </div>
 
             {showProgress && nextTier && (

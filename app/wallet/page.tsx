@@ -148,7 +148,7 @@ export default function WalletPage() {
             <div className="p-10 rounded-[40px] bg-[#FFD93D] border-3 border-black overflow-hidden relative">
               <div className="absolute -right-10 -top-10 w-40 h-40 bg-black/5 rounded-full blur-2xl"></div>
 
-              <div className="flex items-center justify-between mb-8">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 mb-8">
                 <div className="flex items-center gap-4">
                   <div className="w-14 h-14 bg-black rounded-2xl flex items-center justify-center shadow-[4px_4px_0px_rgba(255,255,255,0.2)]">
                     <Coins className="w-8 h-8 text-[#FFD93D]" />
@@ -158,8 +158,8 @@ export default function WalletPage() {
                     <p className="font-display text-4xl font-black text-black uppercase">Capital</p>
                   </div>
                 </div>
-                <div className="text-right">
-                  <div className="text-3xl sm:text-5xl font-black text-black leading-none truncate max-w-[150px] sm:max-w-none ml-auto">{balance.toLocaleString()}</div>
+                <div className="text-left sm:text-right">
+                  <div className="text-3xl sm:text-5xl font-black text-black leading-none truncate max-w-[150px] sm:max-w-none ml-auto sm:ml-0">{balance.toLocaleString()}</div>
                   <div className="text-[10px] sm:text-xs font-black text-black/40 mt-1 uppercase tracking-widest">Available JP</div>
                 </div>
               </div>
@@ -192,7 +192,7 @@ export default function WalletPage() {
           >
             <div className="absolute inset-0 bg-[#6C5CE7] rounded-[40px] translate-x-3 translate-y-3 -z-10 transition-transform group-hover:translate-x-4 group-hover:translate-y-4"></div>
             <div className="p-10 rounded-[40px] bg-white border-3 border-black overflow-hidden relative h-full">
-              <div className="flex items-center justify-between mb-8">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 mb-8">
                 <div className="flex items-center gap-4">
                   <div className="w-14 h-14 bg-[#6C5CE7] border-2 border-black rounded-2xl flex items-center justify-center shadow-[4px_4px_0px_#000]">
                     <Crown className="w-8 h-8 text-white" />
@@ -202,17 +202,17 @@ export default function WalletPage() {
                     <p className="font-display text-4xl font-black text-black uppercase">Status</p>
                   </div>
                 </div>
-                <div className="text-right">
-                  <div className="text-3xl sm:text-5xl font-black text-black leading-none truncate max-w-[150px] sm:max-w-none ml-auto">{xp.toLocaleString()}</div>
+                <div className="text-left sm:text-right">
+                  <div className="text-3xl sm:text-5xl font-black text-black leading-none truncate max-w-[150px] sm:max-w-none ml-auto sm:ml-0">{xp.toLocaleString()}</div>
                   <div className="text-[10px] sm:text-xs font-black text-black/40 mt-1 uppercase tracking-widest">Lifetime XP</div>
                 </div>
               </div>
 
               {/* Progress Section */}
               <div className="mb-10">
-                <div className="flex items-center justify-between mb-3">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-3">
                   <div className="flex items-center gap-3">
-                    <LevelBadge size="sm" />
+                    <LevelBadge size="sm" hideText />
                     <span className="font-black text-black font-display uppercase text-xl">{tier.name}</span>
                   </div>
                   {nextTier && (
@@ -307,9 +307,9 @@ export default function WalletPage() {
                         </div>
                         <div className="min-w-0">
                           <p className="font-black text-black text-base sm:text-lg leading-tight mb-1 truncate">{tx.description}</p>
-                          <div className="flex items-center gap-2 text-[10px] sm:text-xs font-bold text-black/40 uppercase tracking-wider">
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 text-[10px] sm:text-xs font-bold text-black/40 uppercase tracking-wider">
                             <span>{tx.source}</span>
-                            <span>•</span>
+                            <span className="hidden sm:inline">•</span>
                             <span>{(tx.timestamp as any)?.seconds ? new Date((tx.timestamp as any).seconds * 1000).toLocaleDateString() : 'Just now'}</span>
                           </div>
                         </div>
