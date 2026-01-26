@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Bell, Send, Clock, BarChart3, Users, Smartphone, MessageSquare, Mail, CheckCircle } from 'lucide-react';
+import { Bell, Send, Clock, BarChart3, Users, Smartphone, MessageSquare, Mail, CheckCircle, Check, AlertTriangle, Eye } from 'lucide-react';
 import { getCampaigns, addCampaign, Campaign } from '@/lib/firebase';
 import { auth } from '@/lib/firebase';
 
@@ -437,7 +437,7 @@ export default function PushNotificationsPage() {
                           : 'bg-white border-black'
                         }
                       `}>
-                        {formData.channels.includes('push') && '✓'}
+                        {formData.channels.includes('push') && <Check size={16} strokeWidth={3} />}
                       </div>
                       <div className="flex-1">
                         <p className="font-black text-sm uppercase">Push Notifications</p>
@@ -470,7 +470,7 @@ export default function PushNotificationsPage() {
                           : 'bg-white border-black'
                         }
                       `}>
-                        {formData.channels.includes('in-app') && '✓'}
+                        {formData.channels.includes('in-app') && <Check size={16} strokeWidth={3} />}
                       </div>
                       <div className="flex-1">
                         <p className="font-black text-sm uppercase">In-App Notifications</p>
@@ -503,7 +503,7 @@ export default function PushNotificationsPage() {
                           : 'bg-white border-black'
                         }
                       `}>
-                        {formData.channels.includes('sms') && '✓'}
+                        {formData.channels.includes('sms') && <Check size={16} strokeWidth={3} />}
                       </div>
                       <div className="flex-1">
                         <p className="font-black text-sm uppercase">SMS Notifications</p>
@@ -515,7 +515,7 @@ export default function PushNotificationsPage() {
                     </div>
                   </div>
                   <p className="text-xs text-black/40 font-bold mt-2 uppercase tracking-wide">
-                    {formData.channels.length === 0 && '⚠️ Select at least one channel'}
+                    {formData.channels.length === 0 && <span className="flex items-center gap-2"><AlertTriangle className="w-4 h-4 text-orange-500" /> Select at least one channel</span>}
                     {formData.channels.length === 1 && `Selected: ${formData.channels[0] === 'push' ? 'Push only' : formData.channels[0] === 'sms' ? 'SMS only' : 'In-App only'}`}
                     {formData.channels.length > 1 && `${formData.channels.length} channels selected`}
                   </p>
@@ -587,7 +587,7 @@ export default function PushNotificationsPage() {
                   />
                   {formData.scheduledFor && (
                     <p className="text-xs text-black/60 font-bold mt-2 uppercase tracking-wide">
-                      ⏰ Will be sent automatically on {new Date(formData.scheduledFor).toLocaleString()}
+                      <span className="flex items-center gap-1"><Clock size={14} className="text-[#6C5CE7]" /> Will be sent automatically on {new Date(formData.scheduledFor).toLocaleString()}</span>
                     </p>
                   )}
                   <p className="text-xs text-black/40 font-bold mt-1 uppercase tracking-wide">
@@ -647,9 +647,9 @@ export default function PushNotificationsPage() {
                           {campaign.message}
                         </p>
                         <div className="flex gap-6 mt-4 text-xs font-black text-[#2D3436]/40 uppercase tracking-widest">
-                          <span>📧 {campaign.recipientCount} recipients</span>
-                          <span>✓ {campaign.deliveredCount} delivered</span>
-                          <span>👁️ {campaign.interactionCount} clicks</span>
+                          <span className="flex items-center gap-1"><Mail size={12} /> {campaign.recipientCount} recipients</span>
+                          <span className="flex items-center gap-1"><Check size={12} /> {campaign.deliveredCount} delivered</span>
+                          <span className="flex items-center gap-1"><Eye size={12} /> {campaign.interactionCount} clicks</span>
                         </div>
                       </div>
                       <div className="text-right">
@@ -876,7 +876,7 @@ export default function PushNotificationsPage() {
                               <span>📧 {campaign.recipientCount} recipients</span>
                               <span>⏰ Scheduled for: {scheduledTime ? scheduledTime.toLocaleString() : 'N/A'}</span>
                               {isOverdue && (
-                                <span className="text-red-500">⚠️ Should have been sent already</span>
+                                <span className="text-red-500 flex items-center gap-1"><AlertTriangle size={12} /> Should have been sent already</span>
                               )}
                             </div>
                           </div>

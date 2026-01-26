@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import ImageUpload from '@/components/ui/ImageUpload';
 import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, X } from 'lucide-react';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
@@ -356,7 +356,7 @@ export default function EditEventPage() {
                           onClick={() => removeArrayItem('highlights', index)}
                           className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-colors font-bold text-lg mt-2"
                         >
-                          ×
+                          <X size={20} />
                         </button>
                       )}
                     </div>

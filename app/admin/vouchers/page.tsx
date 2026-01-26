@@ -3,8 +3,16 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/app/context/AuthContext';
 import { usePopup } from '@/app/context/PopupContext';
-import { Plus, Edit2, Trash2, Save, Ticket, AlertCircle } from 'lucide-react';
+import { Plus, Edit2, Trash2, Save, Ticket, AlertCircle, ShoppingBag, Gamepad2, Star, Gift, Tag, Utensils, Coffee, Shirt, Diamond, Sparkles, Palette, Car, Clapperboard, Music, Headphones, Camera, Book, Backpack, Trophy, Flame, Pizza, Cake, Monitor, Smartphone, Watch, Glasses } from 'lucide-react';
 import { motion } from 'framer-motion';
+
+const ICON_MAP: Record<string, React.ElementType> = {
+  Gift, Ticket, Tag, ShoppingBag, Gamepad2, Utensils, Coffee, Shirt, Diamond, Sparkles,
+  Star, Palette, Car, Clapperboard, Music, Headphones, Camera, Book, Backpack, Trophy,
+  Flame, Pizza, Cake, Monitor, Smartphone, Watch, Glasses
+};
+
+const SUGGESTED_ICONS = Object.keys(ICON_MAP);
 
 interface VoucherTemplate {
   id: string;
@@ -38,7 +46,7 @@ export default function AdminVouchersPage() {
     pointsCost: 500,
     discountType: 'percentage',
     discountValue: 10,
-    icon: '🎁',
+    icon: 'Gift',
     color: 'from-blue-500 to-cyan-500',
     category: 'shop',
     expiryDays: 30,
@@ -50,19 +58,15 @@ export default function AdminVouchersPage() {
 
   const [isIconDropdownOpen, setIsIconDropdownOpen] = useState(false);
 
-  const SUGGESTED_ICONS = [
-    '🎁', '🎟️', '🎫', '🛍️', '🎮', '🍔', '☕', '👕', '💎', '✨',
-    '🌟', '🌈', '🍕', '🍰', '🚗', '🎬', '👗', '👟', '🕶️', '🧴',
-    '📱', '🎧', '📷', '📚', '🎒', '🎨', '🎸', '⚽', '🏆', '🔥'
-  ];
+
 
 
 
   const categoryIconMap: Record<string, string> = {
-    shop: '🛍️',
-    events: '🎫',
-    experiences: '🎮',
-    all: '🌟'
+    shop: 'ShoppingBag',
+    events: 'Ticket',
+    experiences: 'Gamepad2',
+    all: 'Star'
   };
 
 
@@ -100,7 +104,7 @@ export default function AdminVouchersPage() {
       });
 
       if (response.ok) {
-        setMessage('✅ Voucher saved successfully!');
+        setMessage('Success: Voucher saved successfully!');
         fetchVouchers();
         setEditingId(null);
         setShowAddForm(false);
@@ -110,7 +114,7 @@ export default function AdminVouchersPage() {
           pointsCost: 500,
           discountType: 'percentage',
           discountValue: 10,
-          icon: '🎁',
+          icon: 'Gift',
           color: 'from-blue-500 to-cyan-500',
           category: 'shop',
           expiryDays: 30,
@@ -118,10 +122,10 @@ export default function AdminVouchersPage() {
           enabled: true
         });
       } else {
-        setMessage('❌ Failed to save voucher');
+        setMessage('Error: Failed to save voucher');
       }
     } catch (error) {
-      setMessage('❌ Network error');
+      setMessage('Error: Network error');
     } finally {
       setSaving(false);
       setTimeout(() => setMessage(''), 3000);
@@ -152,13 +156,13 @@ export default function AdminVouchersPage() {
       });
 
       if (response.ok) {
-        setMessage('✅ Voucher deleted successfully!');
+        setMessage('Success: Voucher deleted successfully!');
         fetchVouchers();
       } else {
-        setMessage('❌ Failed to delete voucher');
+        setMessage('Error: Failed to delete voucher');
       }
     } catch (error) {
-      setMessage('❌ Network error');
+      setMessage('Error: Network error');
     } finally {
       setSaving(false);
       setTimeout(() => setMessage(''), 3000);
@@ -193,13 +197,13 @@ export default function AdminVouchersPage() {
       const data = await response.json();
 
       if (response.ok) {
-        setMessage(`✅ ${data.message}`);
+        setMessage(`Success: ${data.message}`);
         fetchVouchers();
       } else {
-        setMessage(`❌ ${data.error || 'Failed to initialize vouchers'}`);
+        setMessage(`Error: ${data.error || 'Failed to initialize vouchers'}`);
       }
     } catch (error) {
-      setMessage('❌ Network error');
+      setMessage('Error: Network error');
     } finally {
       setSaving(false);
       setTimeout(() => setMessage(''), 5000);
@@ -241,7 +245,7 @@ export default function AdminVouchersPage() {
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className={`mb-6 p-4 rounded-2xl border-3 md:border-4 border-black font-bold flex items-center gap-3 ${message.startsWith('✅')
+          className={`mb-6 p-4 rounded-2xl border-3 md:border-4 border-black font-bold flex items-center gap-3 ${message.startsWith('Success:')
             ? 'bg-[#00B894] text-white'
             : 'bg-[#FF6B6B] text-white'
             }`}
@@ -297,14 +301,19 @@ export default function AdminVouchersPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-black uppercase tracking-wider text-black/60 mb-2">Icon (Emoji)</label>
+              <label className="block text-xs font-black uppercase tracking-wider text-black/60 mb-2">Icon</label>
               <div className="relative">
                 <button
                   type="button"
                   onClick={() => setIsIconDropdownOpen(!isIconDropdownOpen)}
                   className="w-full flex items-center justify-between px-6 py-4 bg-white border-3 border-black rounded-xl font-black text-3xl neo-shadow hover:bg-gray-50 transition-all"
                 >
-                  <span className="flex-1 text-center ml-6">{formData.icon}</span>
+                  <span className="flex-1 text-center ml-6 flex justify-center">
+                    {(() => {
+                      const Icon = ICON_MAP[formData.icon || 'Gift'] || Gift;
+                      return <Icon size={28} />;
+                    })()}
+                  </span>
                   <div className={`transition-transform duration-200 ${isIconDropdownOpen ? 'rotate-180' : ''}`}>
                     <Plus size={24} className="text-black/40 rotate-45" />
                   </div>
@@ -317,19 +326,22 @@ export default function AdminVouchersPage() {
                       onClick={() => setIsIconDropdownOpen(false)}
                     />
                     <div className="absolute top-full left-0 right-0 mt-3 p-4 bg-white border-4 border-black rounded-2xl neo-shadow z-20 max-h-64 overflow-y-auto grid grid-cols-6 gap-2">
-                      {SUGGESTED_ICONS.map(emoji => (
-                        <button
-                          key={emoji}
-                          type="button"
-                          onClick={() => {
-                            setFormData({ ...formData, icon: emoji });
-                            setIsIconDropdownOpen(false);
-                          }}
-                          className={`text-2xl p-3 rounded-xl hover:bg-[#FFD93D] transition-all border-2 border-transparent ${formData.icon === emoji ? 'bg-[#FFD93D] !border-black' : ''}`}
-                        >
-                          {emoji}
-                        </button>
-                      ))}
+                      {SUGGESTED_ICONS.map(iconName => {
+                        const Icon = ICON_MAP[iconName];
+                        return (
+                          <button
+                            key={iconName}
+                            type="button"
+                            onClick={() => {
+                              setFormData({ ...formData, icon: iconName });
+                              setIsIconDropdownOpen(false);
+                            }}
+                            className={`text-2xl p-3 rounded-xl hover:bg-[#FFD93D] transition-all border-2 border-transparent flex items-center justify-center ${formData.icon === iconName ? 'bg-[#FFD93D] !border-black' : ''}`}
+                          >
+                            <Icon size={24} />
+                          </button>
+                        );
+                      })}
                     </div>
                   </>
                 )}
@@ -398,10 +410,10 @@ export default function AdminVouchersPage() {
                 }}
                 className="w-full px-4 py-3 bg-white border-3 border-black rounded-xl font-bold focus:outline-none focus:ring-4 focus:ring-[#FFD93D]"
               >
-                <option value="shop">🛍️ Shop</option>
-                <option value="events">🎫 Events</option>
-                <option value="experiences">🎮 Experiences</option>
-                <option value="all">🌟 All Categories</option>
+                <option value="shop">Shop</option>
+                <option value="events">Events</option>
+                <option value="experiences">Experiences</option>
+                <option value="all">All Categories</option>
               </select>
             </div>
 
@@ -482,7 +494,12 @@ export default function AdminVouchersPage() {
           >
             <div className="flex flex-col md:flex-row md:items-start justify-between mb-4 gap-4">
               <div className="flex items-start gap-4">
-                <div className="text-4xl md:text-5xl">{voucher.icon}</div>
+                <div className="text-4xl md:text-5xl">
+                  {(() => {
+                    const Icon = ICON_MAP[voucher.icon] || Gift;
+                    return <Icon size={48} />;
+                  })()}
+                </div>
                 <div>
                   <div className="flex flex-wrap items-center gap-2 mb-1">
                     <h3 className="font-header text-xl md:text-2xl font-black text-[#2D3436]">{voucher.name}</h3>
@@ -491,10 +508,10 @@ export default function AdminVouchersPage() {
                         voucher.category === 'experiences' ? 'bg-[#00B894] text-white' :
                           'bg-gradient-to-r from-[#FFD93D] via-[#6C5CE7] to-[#00B894] text-white'
                       }`}>
-                      {voucher.category === 'shop' ? '🛍️ SHOP' :
-                        voucher.category === 'events' ? '🎫 EVENTS' :
-                          voucher.category === 'experiences' ? '🎮 EXPERIENCES' :
-                            '🌟 ALL'}
+                      {voucher.category === 'shop' ? 'SHOP' :
+                        voucher.category === 'events' ? 'EVENTS' :
+                          voucher.category === 'experiences' ? 'EXPERIENCES' :
+                            'ALL'}
                     </span>
                   </div>
                   <p className="text-[#2D3436]/60 font-bold text-xs md:text-sm">{voucher.description}</p>

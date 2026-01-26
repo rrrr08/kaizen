@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { BarChart3, Users, ShoppingBag, TrendingUp, Clock, Zap, Calendar, Package, ArrowUpRight, ArrowDownRight, Activity } from 'lucide-react';
+import { BarChart3, Users, ShoppingBag, TrendingUp, Clock, Zap, Calendar, Package, ArrowUpRight, ArrowDownRight, Activity, Rocket } from 'lucide-react';
 import { useAuth } from '@/app/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { getDocs, collection, query, orderBy, limit, Timestamp } from 'firebase/firestore';
@@ -359,8 +359,8 @@ export default function AdminDashboard() {
 
           {/* Extensive Quick Actions */}
           <div className="bg-[#FFFDF5] border-2 border-black rounded-[25px] p-4 md:p-8 neo-shadow border-dashed">
-            <h2 className="font-header text-lg md:text-2xl font-black text-black mb-6 md:mb-8 uppercase tracking-tighter">
-              🚀 Quick Links
+            <h2 className="font-header text-lg md:text-2xl font-black text-black mb-6 md:mb-8 uppercase tracking-tighter flex items-center gap-2">
+              <Rocket className="w-5 h-5 md:w-6 md:h-6 text-[#FFD93D]" /> Quick Links
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-3">
               <QuickLink href="/admin/game-settings" label="Game Console" color="#FFD93D" desc="Consolidated game management" />

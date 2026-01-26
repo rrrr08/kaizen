@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Clock, AlertCircle, Info, AlertTriangle, RefreshCw, Download, Search, Filter } from 'lucide-react';
+import { Clock, AlertCircle, Info, AlertTriangle, RefreshCw, Download, Search, Filter, ArrowLeft, Zap, Pause, BarChart3, AlertOctagon, User, Globe, ClipboardList, Timer } from 'lucide-react';
 import Link from 'next/link';
 
 interface LogEntry {
@@ -120,7 +120,7 @@ export default function LogsPage() {
                         href="/admin"
                         className="inline-block mb-6 font-black text-xs tracking-[0.2em] uppercase text-black/40 hover:text-black transition-colors"
                     >
-                        ← Back to Admin
+                        <ArrowLeft className="w-4 h-4 mr-2 inline" /> Back to Admin
                     </Link>
 
                     <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
@@ -140,11 +140,11 @@ export default function LogsPage() {
                             <button
                                 onClick={() => setAutoRefresh(!autoRefresh)}
                                 className={`px-4 py-2 rounded-xl border-4 border-black font-black uppercase text-xs transition-all ${autoRefresh
-                                        ? 'bg-[#00B894] text-white shadow-[4px_4px_0px_#000]'
-                                        : 'bg-white text-black shadow-[2px_2px_0px_#000] hover:shadow-[4px_4px_0px_#000]'
+                                    ? 'bg-[#00B894] text-white shadow-[4px_4px_0px_#000]'
+                                    : 'bg-white text-black shadow-[2px_2px_0px_#000] hover:shadow-[4px_4px_0px_#000]'
                                     }`}
                             >
-                                {autoRefresh ? '⚡ Live' : '⏸️ Paused'}
+                                {autoRefresh ? <span className="flex items-center gap-1"><Zap className="w-3 h-3" /> Live</span> : <span className="flex items-center gap-1"><Pause className="w-3 h-3" /> Paused</span>}
                             </button>
                             <button
                                 onClick={() => loadLogs(true)}
@@ -166,10 +166,10 @@ export default function LogsPage() {
                     {/* Stats Cards */}
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
                         {[
-                            { label: 'Total', count: stats.total, color: 'from-black to-gray-800', icon: '📊', trend: '+12%' },
-                            { label: 'Info', count: stats.info, color: 'from-[#74B9FF] to-[#0984e3]', icon: 'ℹ️', trend: '+8%' },
-                            { label: 'Warnings', count: stats.warn, color: 'from-[#FFD93D] to-[#fdcb6e]', icon: '⚠️', trend: '+3%' },
-                            { label: 'Errors', count: stats.error, color: 'from-[#FF7675] to-[#d63031]', icon: '🚨', trend: '-5%' }
+                            { label: 'Total', count: stats.total, color: 'from-black to-gray-800', icon: <BarChart3 className="w-8 h-8" />, trend: '+12%' },
+                            { label: 'Info', count: stats.info, color: 'from-[#74B9FF] to-[#0984e3]', icon: <Info className="w-8 h-8" />, trend: '+8%' },
+                            { label: 'Warnings', count: stats.warn, color: 'from-[#FFD93D] to-[#fdcb6e]', icon: <AlertTriangle className="w-8 h-8" />, trend: '+3%' },
+                            { label: 'Errors', count: stats.error, color: 'from-[#FF7675] to-[#d63031]', icon: <AlertOctagon className="w-8 h-8" />, trend: '-5%' }
                         ].map((stat) => (
                             <div
                                 key={stat.label}
@@ -214,8 +214,8 @@ export default function LogsPage() {
                                         key={level}
                                         onClick={() => setFilter(level as any)}
                                         className={`px-6 py-3 rounded-xl border-4 border-black font-black uppercase text-sm transition-all ${filter === level
-                                                ? 'bg-[#6C5CE7] text-white shadow-[4px_4px_0px_#000] -translate-y-1'
-                                                : 'bg-white text-black shadow-[2px_2px_0px_#000] hover:shadow-[4px_4px_0px_#000] hover:-translate-y-1'
+                                            ? 'bg-[#6C5CE7] text-white shadow-[4px_4px_0px_#000] -translate-y-1'
+                                            : 'bg-white text-black shadow-[2px_2px_0px_#000] hover:shadow-[4px_4px_0px_#000] hover:-translate-y-1'
                                             }`}
                                     >
                                         <Filter className="w-4 h-4 inline mr-2" />
@@ -280,21 +280,21 @@ export default function LogsPage() {
                                                     {log.level}
                                                 </span>
                                                 {log.userId && (
-                                                    <span className="text-xs font-bold text-black/50 bg-black/10 px-3 py-1 rounded-lg border border-black/20">
-                                                        👤 {log.userId.slice(0, 8)}...
+                                                    <span className="text-xs font-bold text-black/50 bg-black/10 px-3 py-1 rounded-lg border border-black/20 flex items-center gap-1">
+                                                        <User className="w-3 h-3" /> {log.userId.slice(0, 8)}...
                                                     </span>
                                                 )}
                                                 {log.metadata?.ip && (
-                                                    <span className="text-xs font-bold text-black/50 bg-black/10 px-3 py-1 rounded-lg border border-black/20">
-                                                        🌐 {log.metadata.ip}
+                                                    <span className="text-xs font-bold text-black/50 bg-black/10 px-3 py-1 rounded-lg border border-black/20 flex items-center gap-1">
+                                                        <Globe className="w-3 h-3" /> {log.metadata.ip}
                                                     </span>
                                                 )}
                                             </div>
 
                                             {log.data && (
                                                 <details className="mb-3 group/details">
-                                                    <summary className="cursor-pointer text-xs font-bold text-black/60 hover:text-black uppercase mb-2">
-                                                        📋 View Data
+                                                    <summary className="cursor-pointer text-xs font-bold text-black/60 hover:text-black uppercase mb-2 flex items-center gap-1">
+                                                        <ClipboardList className="w-3 h-3" /> View Data
                                                     </summary>
                                                     <pre className="text-xs font-mono bg-black/5 p-4 rounded-lg border-2 border-black/20 overflow-x-auto">
                                                         {JSON.stringify(log.data, null, 2)}
@@ -303,8 +303,8 @@ export default function LogsPage() {
                                             )}
 
                                             <div className="flex items-center gap-4 text-xs font-bold text-black/40">
-                                                <span>🕐 {new Date(log.timestamp).toLocaleString()}</span>
-                                                <span>⏱️ {Math.floor((Date.now() - log.timestamp) / 1000 / 60)}m ago</span>
+                                                <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {new Date(log.timestamp).toLocaleString()}</span>
+                                                <span className="flex items-center gap-1"><Timer className="w-3 h-3" /> {Math.floor((Date.now() - log.timestamp) / 1000 / 60)}m ago</span>
                                             </div>
                                         </div>
                                     </div>

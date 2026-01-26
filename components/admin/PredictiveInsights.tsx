@@ -109,7 +109,7 @@ export default function PredictiveInsights() {
                     </div>
                 </div>
                 <p className="text-sm font-medium text-gray-500">
-                    <span className="text-red-500 font-bold">↑ {stats.churnTrend}%</span> vs last week
+                    <span className="text-red-500 font-bold flex items-center gap-1"><TrendingUp size={16} /> {stats.churnTrend}%</span> vs last week
                 </p>
                 <div className="w-full bg-gray-100 h-2 rounded-full mt-4">
                     <div
@@ -131,7 +131,7 @@ export default function PredictiveInsights() {
                     </div>
                 </div>
                 <p className="text-sm font-medium text-gray-500">
-                    <span className="text-[#00B894] font-bold">↑ {stats.growthTrend}%</span> vs last week
+                    <span className="text-[#00B894] font-bold flex items-center gap-1"><TrendingUp size={16} /> {stats.growthTrend}%</span> vs last week
                 </p>
                 <div className="w-full bg-gray-100 h-2 rounded-full mt-4">
                     <div

@@ -5,6 +5,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 
+import { ArrowLeft } from 'lucide-react';
+
 export default function ShipmentDetailsPage() {
     const params = useParams();
     const router = useRouter();
@@ -37,7 +39,7 @@ export default function ShipmentDetailsPage() {
                 onClick={() => router.back()}
                 className="mb-8 flex items-center gap-2 font-bold hover:translate-x-[-4px] transition-transform"
             >
-                ← Back to shipments
+                <ArrowLeft className="w-4 h-4" /> Back to shipments
             </button>
 
             <div className="flex flex-col md:flex-row justify-between items-start mb-8 gap-4">
