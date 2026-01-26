@@ -33,6 +33,7 @@ const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 export default function EventCalendar({ events, registeredEventIds = new Set(), onDateClick, mode = 'upcoming' }: EventCalendarProps) {
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const [showYearPicker, setShowYearPicker] = useState(false);
+    const [isExpanded, setIsExpanded] = useState(false);
 
     const days = useMemo(() => {
         const monthStart = startOfMonth(currentMonth);
@@ -46,9 +47,18 @@ export default function EventCalendar({ events, registeredEventIds = new Set(), 
         });
     }, [currentMonth]);
 
-    const nextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));
-    const prevMonth = () => setCurrentMonth(subMonths(currentMonth, 1));
-    const resetToToday = () => setCurrentMonth(new Date());
+    const nextMonth = () => {
+        setCurrentMonth(addMonths(currentMonth, 1));
+        setIsExpanded(false);
+    };
+    const prevMonth = () => {
+        setCurrentMonth(subMonths(currentMonth, 1));
+        setIsExpanded(false);
+    };
+    const resetToToday = () => {
+        setCurrentMonth(new Date());
+        setIsExpanded(false);
+    };
 
     const getEventsForDay = (day: Date) => {
         return events.filter(event => {
@@ -118,7 +128,10 @@ export default function EventCalendar({ events, registeredEventIds = new Set(), 
             <div className="flex flex-wrap gap-2 mb-6 items-center">
                 <select
                     value={currentMonth.getMonth()}
-                    onChange={(e) => setCurrentMonth(setMonth(currentMonth, parseInt(e.target.value)))}
+                    onChange={(e) => {
+                        setCurrentMonth(setMonth(currentMonth, parseInt(e.target.value)));
+                        setIsExpanded(false);
+                    }}
                     className="px-2 py-1.5 border-2 border-black rounded-lg font-black text-xs uppercase cursor-pointer hover:bg-[#FFD93D] transition-colors focus:outline-none"
                 >
                     {months.map((month, idx) => (
@@ -127,7 +140,10 @@ export default function EventCalendar({ events, registeredEventIds = new Set(), 
                 </select>
                 <select
                     value={getYear(currentMonth)}
-                    onChange={(e) => setCurrentMonth(setYear(currentMonth, parseInt(e.target.value)))}
+                    onChange={(e) => {
+                        setCurrentMonth(setYear(currentMonth, parseInt(e.target.value)));
+                        setIsExpanded(false);
+                    }}
                     className="px-2 py-1.5 border-2 border-black rounded-lg font-black text-xs uppercase cursor-pointer hover:bg-[#A8E6CF] transition-colors focus:outline-none"
                 >
                     {years.map(year => (
@@ -157,17 +173,17 @@ export default function EventCalendar({ events, registeredEventIds = new Set(), 
                 </div>
             </div>
 
-            {/* Days Header */}
-            <div className="grid grid-cols-7 gap-2 md:gap-4 mb-4">
+            {/* Days Header - Desktop Only */}
+            <div className="hidden md:grid grid-cols-7 gap-4 mb-4">
                 {DAYS.map(day => (
-                    <div key={day} className="text-center font-black text-xs md:text-sm uppercase tracking-widest text-black/40 py-2">
+                    <div key={day} className="text-center font-black text-xs uppercase tracking-widest text-black/40 py-2">
                         {day}
                     </div>
                 ))}
             </div>
 
-            {/* Calendar Grid */}
-            <div className="grid grid-cols-7 gap-1 md:gap-2">
+            {/* Calendar Grid - Desktop Only */}
+            <div className="hidden md:grid grid-cols-7 gap-2">
                 {days.map((day, idx) => {
                     const dayEvents = getEventsForDay(day);
                     const isSelected = isSameMonth(day, currentMonth);
@@ -181,8 +197,6 @@ export default function EventCalendar({ events, registeredEventIds = new Set(), 
 
                     if (isSelected && hasEvents) {
                         const firstEvent = dayEvents[0];
-                        const catColor = firstEvent.category === 'Workshop' ? '#FFD93D' :
-                            firstEvent.category === 'Game Night' ? '#6C5CE7' : '#00B894';
                         const isLight = firstEvent.category === 'Workshop';
 
                         if (mode === 'upcoming') {
@@ -190,9 +204,6 @@ export default function EventCalendar({ events, registeredEventIds = new Set(), 
                                 dayStyles = "bg-[#00B894] border-[#000] shadow-[3px_3px_0px_#000]";
                                 textStyles = "text-white";
                             } else if (!isPast) {
-                                dayStyles = `border-[#000] shadow-[3px_3px_0px_#000]`;
-                                // We'll use style attribute for dynamic color if needed, 
-                                // but Tailwind colors are better. Let's map them.
                                 const bgClass = firstEvent.category === 'Workshop' ? 'bg-[#FFD93D]' :
                                     firstEvent.category === 'Game Night' ? 'bg-[#6C5CE7]' : 'bg-[#00B894]';
                                 dayStyles = `${bgClass} border-[#000] shadow-[3px_3px_0px_#000]`;
@@ -207,9 +218,18 @@ export default function EventCalendar({ events, registeredEventIds = new Set(), 
                     return (
                         <div
                             key={day.toString()}
-                            onClick={() => isSelected && onDateClick?.(day)}
+                            onClick={() => {
+                                if (isSelected && hasEvents) {
+                                    const eventId = dayEvents[0].id;
+                                    const element = document.getElementById(`event-${eventId}`);
+                                    if (element) {
+                                        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                    }
+                                }
+                                if (isSelected) onDateClick?.(day);
+                            }}
                             className={cn(
-                                "relative min-h-[60px] md:min-h-[90px] p-1.5 md:p-2 border-2 border-black rounded-xl transition-all duration-200 group flex flex-col justify-between",
+                                "relative min-h-[90px] p-2 border-2 border-black rounded-xl transition-all duration-200 group flex flex-col justify-between",
                                 !isSelected && "bg-gray-50 opacity-20 select-none",
                                 isSelected && !hasEvents && "bg-white cursor-pointer hover:bg-[#FFFDF5] neo-shadow-sm",
                                 isSelected && hasEvents && `cursor-pointer hover:scale-[1.05] ${dayStyles}`,
@@ -218,7 +238,7 @@ export default function EventCalendar({ events, registeredEventIds = new Set(), 
                         >
                             <div className="flex justify-between items-start">
                                 <span className={cn(
-                                    "text-base md:text-lg font-black",
+                                    "text-lg font-black",
                                     isTodayDate && !hasEvents ? "text-[#6C5CE7]" : textStyles
                                 )}>
                                     {format(day, 'd')}
@@ -231,9 +251,8 @@ export default function EventCalendar({ events, registeredEventIds = new Set(), 
                                 )}
                             </div>
 
-                            {/* Event Titles (only if space allows) */}
                             {hasEvents && (
-                                <div className="mt-1 hidden md:block">
+                                <div className="mt-1">
                                     <div className={cn(
                                         "text-[8px] font-black uppercase tracking-tighter truncate",
                                         textStyles
@@ -253,6 +272,98 @@ export default function EventCalendar({ events, registeredEventIds = new Set(), 
                         </div>
                     );
                 })}
+            </div>
+
+            {/* Mobile View - Dated Cards */}
+            <div className="md:hidden space-y-4">
+                {(() => {
+                    const daysWithEvents = days.filter(day => isSameMonth(day, currentMonth) && getEventsForDay(day).length > 0);
+                    const hasEvents = daysWithEvents.length > 0;
+                    const visibleDays = isExpanded ? daysWithEvents : daysWithEvents.slice(0, 4);
+
+                    if (!hasEvents) {
+                        return (
+                            <div className="text-center py-8 px-4 border-2 border-black border-dashed rounded-2xl bg-gray-50">
+                                <CalendarIcon className="w-8 h-8 text-black/20 mx-auto mb-3" />
+                                <p className="text-black/40 font-black text-xs uppercase tracking-widest">No scheduled events</p>
+                                <p className="text-black/20 font-bold text-[10px] mt-1 italic">Try switching months or checking past events!</p>
+                            </div>
+                        );
+                    }
+
+                    return (
+                        <>
+                            <div className="mb-4">
+                                <p className="text-black/40 font-black text-[10px] uppercase tracking-widest px-2">
+                                    Showing {visibleDays.length} of {daysWithEvents.length} days with events
+                                </p>
+                            </div>
+                            <div className="space-y-4">
+                                {visibleDays.map((day) => {
+                                    const dayEvents = getEventsForDay(day);
+                                    const isRegistered = dayEvents.some(e => registeredEventIds.has(e.id));
+                                    const firstEvent = dayEvents[0];
+
+                                    const bgClass = mode === 'past' ? 'bg-[#FF7675]' :
+                                        isRegistered ? 'bg-[#00B894]' :
+                                            firstEvent.category === 'Workshop' ? 'bg-[#FFD93D]' :
+                                                firstEvent.category === 'Game Night' ? 'bg-[#6C5CE7]' : 'bg-[#00B894]';
+
+                                    const textColor = (mode === 'past' || isRegistered || firstEvent.category !== 'Workshop') ? 'text-white' : 'text-black';
+
+                                    return (
+                                        <div
+                                            key={day.toString()}
+                                            className={cn(
+                                                "flex gap-4 p-3 border-2 border-black rounded-2xl neo-shadow transition-transform active:translate-x-1 active:translate-y-1 active:shadow-none",
+                                                bgClass
+                                            )}
+                                            onClick={() => {
+                                                const eventId = firstEvent.id;
+                                                const element = document.getElementById(`event-${eventId}`);
+                                                if (element) {
+                                                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                                }
+                                                onDateClick?.(day);
+                                            }}
+                                        >
+                                            <div className="flex flex-col items-center justify-center min-w-[50px] border-r-2 border-black/20 pr-3">
+                                                <span className={cn("text-xl font-black leading-none", textColor)}>{format(day, 'd')}</span>
+                                                <span className={cn("text-[10px] font-black uppercase tracking-widest opacity-70", textColor)}>{format(day, 'MMM')}</span>
+                                            </div>
+                                            <div className="flex-1 min-w-0 py-0.5">
+                                                <div className={cn("text-[9px] font-black uppercase tracking-widest opacity-70 mb-0.5", textColor)}>
+                                                    {firstEvent.category || 'Event'} • {format(new Date(firstEvent.datetime), 'hh:mm a')}
+                                                </div>
+                                                <div className={cn("text-sm font-black uppercase tracking-tight truncate", textColor)}>
+                                                    {firstEvent.title}
+                                                </div>
+                                                {dayEvents.length > 1 && (
+                                                    <div className={cn("text-[9px] font-black uppercase mt-0.5 opacity-70", textColor)}>
+                                                        + {dayEvents.length - 1} OTHER EVENTS
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+
+                            {daysWithEvents.length > 4 && (
+                                <button
+                                    onClick={() => setIsExpanded(!isExpanded)}
+                                    className="w-full mt-4 py-3 border-2 border-black rounded-xl font-black text-xs uppercase tracking-widest bg-white hover:bg-gray-50 neo-shadow-sm transition-all flex items-center justify-center gap-2"
+                                >
+                                    {isExpanded ? (
+                                        <>SHOW LESS <ChevronRight className="w-4 h-4 rotate-90" /></>
+                                    ) : (
+                                        <>SHOW {daysWithEvents.length - 4} MORE EVENTS <ChevronRight className="w-4 h-4 -rotate-90" /></>
+                                    )}
+                                </button>
+                            )}
+                        </>
+                    );
+                })()}
             </div>
         </div>
     );
