@@ -30,11 +30,33 @@
   }
 }
 
+/* Mobile viewport fixes */
+html {
+  -webkit-text-size-adjust: 100%;
+  -moz-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 body {
   font-family: var(--font-outfit), sans-serif;
   background-color: var(--cream);
   color: var(--charcoal);
   overflow-x: hidden;
+  min-width: 320px;
+  /* Prevent content from being too narrow */
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  position: relative;
 }
 
 h1,

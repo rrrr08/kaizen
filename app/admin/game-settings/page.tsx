@@ -458,7 +458,7 @@ export default function GameSettingsDashboard() {
     if (!user || !isAdmin) return null;
 
     return (
-        <div className="min-h-screen bg-[#FFFDF5] flex flex-col md:flex-row gap-8 pb-12">
+        <div className="min-h-screen bg-[#FFFDF5] flex flex-col md:flex-row gap-8 pb-12 px-3 md:px-8 md:p-8 overflow-x-hidden">
             {/* Internal Navigation Sidebar */}
             <div className="w-full md:w-72 flex-shrink-0">
                 <div className="sticky top-8 space-y-3">

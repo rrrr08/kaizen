@@ -288,7 +288,7 @@ const UserManagementPage = () => {
 
   return (
     <RoleProtected allowedRoles={[USER_ROLES.ADMIN]}>
-      <div className="p-4 pb-16 md:p-8 md:pb-16 min-h-screen bg-[#FFFDF5]">
+      <div className="px-3 py-4 pb-16 md:p-8 md:pb-16 min-h-screen bg-[#FFFDF5] overflow-x-hidden">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <motion.div

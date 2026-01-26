@@ -166,15 +166,15 @@ export default function AdminExperiencesPage() {
   }
 
   return (
-    <div className="p-8 pb-32 min-h-screen bg-[#FFFDF5]">
-      <div className="flex items-center justify-between mb-8 border-b-2 border-black pb-8">
+    <div className="p-4 md:p-8 pb-32 min-h-screen bg-[#FFFDF5]">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 border-b-2 border-black pb-8 gap-4">
         <div>
-          <h1 className="font-header text-5xl font-black text-[#2D3436] mb-2 uppercase tracking-tighter">Experience Categories</h1>
-          <p className="text-[#2D3436]/60 font-bold text-lg">Manage your custom experience offerings</p>
+          <h1 className="font-header text-3xl md:text-5xl font-black text-[#2D3436] mb-2 uppercase tracking-tighter">Experience Categories</h1>
+          <p className="text-[#2D3436]/60 font-bold text-sm md:text-lg">Manage your custom experience offerings</p>
         </div>
         <Link
           href="/admin/experiences/new"
-          className="inline-flex items-center gap-2 px-6 py-3 bg-[#6C5CE7] text-white font-black uppercase tracking-wider border-2 border-black neo-shadow hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all rounded-xl"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-[#6C5CE7] text-white font-black uppercase tracking-wider border-2 border-black neo-shadow hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all rounded-xl w-full md:w-auto justify-center"
         >
           <Plus size={20} />
           Add Category

@@ -285,43 +285,43 @@ export default function PushNotificationsPage() {
       <div className="max-w-6xl mx-auto px-6 md:px-12">
         {/* Header */}
         <div className="mb-12 border-b-2 border-black pb-8">
-          <div className="flex items-center gap-4 mb-4">
-            <div className="w-16 h-16 rounded-xl bg-[#6C5CE7] border-2 border-black flex items-center justify-center neo-shadow">
+          <div className="flex flex-col md:flex-row items-start md:items-center gap-4 mb-4">
+            <div className="w-16 h-16 rounded-xl bg-[#6C5CE7] border-2 border-black flex flex-shrink-0 items-center justify-center neo-shadow">
               <Bell className="w-8 h-8 text-white" />
             </div>
             <div>
-              <h1 className="font-header text-5xl font-black text-[#2D3436] uppercase tracking-tighter">Push Notifications</h1>
-              <p className="text-[#2D3436]/60 font-bold text-lg">Send mobile notifications to users in real-time</p>
+              <h1 className="font-header text-3xl md:text-5xl font-black text-[#2D3436] uppercase tracking-tighter">Push Notifications</h1>
+              <p className="text-[#2D3436]/60 font-bold text-sm md:text-lg">Send mobile notifications to users in real-time</p>
             </div>
           </div>
         </div>
 
         <Tabs defaultValue="send" className="space-y-8">
-          <TabsList className="grid grid-cols-4 w-full bg-transparent gap-4 h-auto p-0">
+          <TabsList className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 w-full bg-transparent gap-4 h-auto p-0">
             <TabsTrigger
               value="send"
-              className="flex items-center gap-2 bg-white border-2 border-black rounded-xl py-4 data-[state=active]:bg-[#FFD93D] data-[state=active]:text-black font-black uppercase tracking-widest text-[#2D3436]/40 hover:bg-gray-50 transition-all shadow-[4px_4px_0px_rgba(0,0,0,1)] data-[state=active]:shadow-none data-[state=active]:translate-x-[2px] data-[state=active]:translate-y-[2px]"
+              className="flex items-center justify-center gap-2 bg-white border-2 border-black rounded-xl py-4 data-[state=active]:bg-[#FFD93D] data-[state=active]:text-black font-black uppercase tracking-widest text-[#2D3436]/40 hover:bg-gray-50 transition-all shadow-[4px_4px_0px_rgba(0,0,0,1)] data-[state=active]:shadow-none data-[state=active]:translate-x-[2px] data-[state=active]:translate-y-[2px]"
             >
               <Send className="w-4 h-4" strokeWidth={3} />
               Notification
             </TabsTrigger>
             <TabsTrigger
               value="email"
-              className="flex items-center gap-2 bg-white border-2 border-black rounded-xl py-4 data-[state=active]:bg-[#00B894] data-[state=active]:text-black font-black uppercase tracking-widest text-[#2D3436]/40 hover:bg-gray-50 transition-all shadow-[4px_4px_0px_rgba(0,0,0,1)] data-[state=active]:shadow-none data-[state=active]:translate-x-[2px] data-[state=active]:translate-y-[2px]"
+              className="flex items-center justify-center gap-2 bg-white border-2 border-black rounded-xl py-4 data-[state=active]:bg-[#00B894] data-[state=active]:text-black font-black uppercase tracking-widest text-[#2D3436]/40 hover:bg-gray-50 transition-all shadow-[4px_4px_0px_rgba(0,0,0,1)] data-[state=active]:shadow-none data-[state=active]:translate-x-[2px] data-[state=active]:translate-y-[2px]"
             >
               <Mail className="w-4 h-4" strokeWidth={3} />
               Email
             </TabsTrigger>
             <TabsTrigger
               value="scheduled"
-              className="flex items-center gap-2 bg-white border-2 border-black rounded-xl py-4 data-[state=active]:bg-[#6C5CE7] data-[state=active]:text-black font-black uppercase tracking-widest text-[#2D3436]/40 hover:bg-gray-50 transition-all shadow-[4px_4px_0px_rgba(0,0,0,1)] data-[state=active]:shadow-none data-[state=active]:translate-x-[2px] data-[state=active]:translate-y-[2px]"
+              className="flex items-center justify-center gap-2 bg-white border-2 border-black rounded-xl py-4 data-[state=active]:bg-[#6C5CE7] data-[state=active]:text-black font-black uppercase tracking-widest text-[#2D3436]/40 hover:bg-gray-50 transition-all shadow-[4px_4px_0px_rgba(0,0,0,1)] data-[state=active]:shadow-none data-[state=active]:translate-x-[2px] data-[state=active]:translate-y-[2px]"
             >
               <Clock className="w-4 h-4" strokeWidth={3} />
               Scheduled
             </TabsTrigger>
             <TabsTrigger
               value="analytics"
-              className="flex items-center gap-2 bg-white border-2 border-black rounded-xl py-4 data-[state=active]:bg-[#FF7675] data-[state=active]:text-black font-black uppercase tracking-widest text-[#2D3436]/40 hover:bg-gray-50 transition-all shadow-[4px_4px_0px_rgba(0,0,0,1)] data-[state=active]:shadow-none data-[state=active]:translate-x-[2px] data-[state=active]:translate-y-[2px]"
+              className="flex items-center justify-center gap-2 bg-white border-2 border-black rounded-xl py-4 data-[state=active]:bg-[#FF7675] data-[state=active]:text-black font-black uppercase tracking-widest text-[#2D3436]/40 hover:bg-gray-50 transition-all shadow-[4px_4px_0px_rgba(0,0,0,1)] data-[state=active]:shadow-none data-[state=active]:translate-x-[2px] data-[state=active]:translate-y-[2px]"
             >
               <BarChart3 className="w-4 h-4" strokeWidth={3} />
               Analytics

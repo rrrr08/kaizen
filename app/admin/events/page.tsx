@@ -178,37 +178,44 @@ export default function EventsPage() {
   }
 
   return (
-    <div className="p-8 pb-16 min-h-screen bg-[#FFFDF5]">
+    <div className="px-3 py-4 pb-16 md:p-8 md:pb-16 min-h-screen bg-[#FFFDF5] overflow-x-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8 border-b-2 border-black pb-8">
-        <div>
-          <h1 className="font-header text-5xl font-black text-black mb-2 uppercase tracking-tighter">Events Management</h1>
-          <p className="text-black/60 font-bold text-lg">Organize and manage community events</p>
+      <div className="mb-8 md:mb-12 border-b-2 border-black pb-6 md:pb-8">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3 md:gap-4">
+            <div className="p-2 bg-[#6C5CE7] rounded-lg border-2 border-black neo-shadow-sm">
+              <Calendar className="w-5 h-5 md:w-6 md:h-6 text-white" />
+            </div>
+            <div>
+              <h1 className="font-header text-3xl md:text-6xl font-black text-black uppercase tracking-tighter">Events</h1>
+              <p className="text-black/60 font-bold text-sm md:text-lg">Organize and manage community events</p>
+            </div>
+          </div>
+          <button
+            onClick={handleCreateEvent}
+            className="px-4 md:px-6 py-2 md:py-3 bg-[#FFD93D] text-black font-black uppercase tracking-wide rounded-xl border-2 border-black neo-shadow hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all flex items-center gap-2 text-sm md:text-base"
+          >
+            <Plus className="w-4 h-4 md:w-5 md:h-5" strokeWidth={3} />
+            Create Event
+          </button>
         </div>
-        <button
-          onClick={handleCreateEvent}
-          className="px-6 py-3 bg-[#FFD93D] text-black font-black uppercase tracking-wide rounded-xl border-2 border-black neo-shadow hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all flex items-center gap-2"
-        >
-          <Plus className="w-5 h-5" strokeWidth={3} />
-          Create Event
-        </button>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
-        <div className="bg-[#6C5CE7] border-2 border-black rounded-[20px] p-6 neo-shadow hover:-translate-y-1 transition-transform">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6 mb-12">
+        <div className="bg-[#6C5CE7] border-2 border-black rounded-[20px] p-4 md:p-6 neo-shadow hover:-translate-y-1 transition-transform">
           <p className="text-white text-xs font-black uppercase tracking-widest mb-2">Total Events</p>
           <p className="font-header text-5xl font-black text-white">{totalEvents}</p>
         </div>
-        <div className="bg-[#FF7675] border-2 border-black rounded-[20px] p-6 neo-shadow hover:-translate-y-1 transition-transform">
+        <div className="bg-[#FF7675] border-2 border-black rounded-[20px] p-4 md:p-6 neo-shadow hover:-translate-y-1 transition-transform">
           <p className="text-black text-xs font-black uppercase tracking-widest mb-2">Registrations</p>
           <p className="font-header text-5xl font-black text-black">{totalRegistrations}</p>
         </div>
-        <div className="bg-[#74B9FF] border-2 border-black rounded-[20px] p-6 neo-shadow hover:-translate-y-1 transition-transform">
+        <div className="bg-[#74B9FF] border-2 border-black rounded-[20px] p-4 md:p-6 neo-shadow hover:-translate-y-1 transition-transform">
           <p className="text-black text-xs font-black uppercase tracking-widest mb-2">Capacity</p>
           <p className="font-header text-5xl font-black text-black">{totalCapacity}</p>
         </div>
-        <div className="bg-[#00B894] border-2 border-black rounded-[20px] p-6 neo-shadow hover:-translate-y-1 transition-transform">
+        <div className="bg-[#00B894] border-2 border-black rounded-[20px] p-4 md:p-6 neo-shadow hover:-translate-y-1 transition-transform">
           <p className="text-black text-xs font-black uppercase tracking-widest mb-2">Occupancy Rate</p>
           <p className="font-header text-5xl font-black text-black">{occupancyRate}%</p>
         </div>
@@ -296,7 +303,7 @@ export default function EventsPage() {
             </div>
 
             {/* Content */}
-            <div className="flex-1 p-8 flex flex-col justify-between">
+            <div className="flex-1 p-4 md:p-8 flex flex-col justify-between">
               <div>
                 <div className="mb-6">
                   <h3 className="font-header text-3xl font-black text-black mb-2 uppercase tracking-tight">{event.title}</h3>
