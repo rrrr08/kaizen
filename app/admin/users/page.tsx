@@ -82,6 +82,8 @@ const UserManagementPage = () => {
   const [detailsTab, setDetailsTab] = useState<'shop' | 'events'>('shop');
   const [newRole, setNewRole] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'unbanned' | 'banned'>('all');
+  const [roleFilter, setRoleFilter] = useState<'all' | 'member' | 'admin'>('all');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -268,10 +270,21 @@ const UserManagementPage = () => {
     }
   };
 
-  const filteredUsers = users.filter(user =>
-    user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.email?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredUsers = users.filter(user => {
+    // Search match
+    const matchesSearch = user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.email?.toLowerCase().includes(searchTerm.toLowerCase());
+
+    // Status match
+    const matchesStatus = statusFilter === 'all' ||
+      (statusFilter === 'unbanned' && !user.isBanned) ||
+      (statusFilter === 'banned' && user.isBanned);
+
+    // Role match (only if status filter is not 'all', but actually the user wants role selection within banned/unbanned)
+    const matchesRole = roleFilter === 'all' || user.role === roleFilter;
+
+    return matchesSearch && matchesStatus && matchesRole;
+  });
 
   return (
     <RoleProtected allowedRoles={[USER_ROLES.ADMIN]}>
@@ -315,6 +328,53 @@ const UserManagementPage = () => {
                   className="w-full pl-12 pr-4 py-3 border-2 border-black rounded-xl bg-white text-[#2D3436] placeholder-[#2D3436]/40 focus:outline-none focus:ring-0 neo-shadow transition-all duration-300 font-bold"
                 />
               </div>
+            </div>
+
+            {/* Filters */}
+            <div className="flex flex-col items-center gap-6 max-w-4xl mx-auto">
+              {/* Status Filter */}
+              <div className="flex gap-1 bg-white p-1 rounded-2xl border-2 border-black neo-shadow">
+                {(['all', 'unbanned', 'banned'] as const).map((status) => (
+                  <button
+                    key={status}
+                    onClick={() => {
+                      setStatusFilter(status);
+                      if (status === 'all') setRoleFilter('all');
+                    }}
+                    className={`px-8 py-2.5 rounded-xl font-black uppercase tracking-wider text-sm transition-all duration-200 ${statusFilter === status
+                      ? 'bg-[#FFD93D] text-black shadow-[2px_2px_0px_rgba(0,0,0,1)]'
+                      : 'text-black/40 hover:text-black hover:bg-gray-50'
+                      }`}
+                  >
+                    {status}
+                  </button>
+                ))}
+              </div>
+
+              {/* Role Filter (Sub-filter) */}
+              <AnimatePresence>
+                {statusFilter !== 'all' && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="flex gap-1 bg-white p-1 rounded-2xl border-2 border-black neo-shadow"
+                  >
+                    {(['all', 'member', 'admin'] as const).map((role) => (
+                      <button
+                        key={role}
+                        onClick={() => setRoleFilter(role)}
+                        className={`px-6 py-2 rounded-xl font-black uppercase tracking-wider text-xs transition-all duration-200 ${roleFilter === role
+                          ? 'bg-[#74B9FF] text-black shadow-[2px_2px_0px_rgba(0,0,0,1)]'
+                          : 'text-black/40 hover:text-black hover:bg-gray-50'
+                          }`}
+                      >
+                        {role === 'all' ? 'Any Role' : role}
+                      </button>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </motion.div>
 

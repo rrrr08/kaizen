@@ -194,7 +194,7 @@ export default function Home() {
                       <p className="text-xs font-bold text-black/60 mb-2">
                         {new Date(event.datetime).toLocaleDateString()} @ {event.location}
                       </p>
-                      <Link href={`/events/${event.id}`}>
+                      <Link href={`/events/upcoming/${event.id}`}>
                         <button className="text-[#6C5CE7] font-black text-xs hover:underline">
                           Register Now →
                         </button>

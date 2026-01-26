@@ -33,6 +33,7 @@ export interface GameEvent {
   price: number;
   description: string;
   image?: string;
+  category: 'Workshop' | 'Game Night' | 'Other';
   capacity: number;
   registered: number;
   createdAt: Date;
@@ -158,6 +159,7 @@ export interface UserProfile {
   first_name?: string;
   last_name?: string;
   photoURL?: string | null;
+  image?: string | null;
   avatar_url?: string | null;
   phoneNumber?: string;
   phoneVerified?: boolean;

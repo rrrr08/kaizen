@@ -5,11 +5,13 @@ import { GameEvent } from '@/lib/types';
 import { splitDateTime } from '@/lib/utils';
 import Link from 'next/link';
 import { Calendar, MapPin, Users } from 'lucide-react';
+import EventCalendar from '@/components/events/EventCalendar';
 
 export default function PastEvents() {
   const [events, setEvents] = useState<GameEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<'All' | 'Workshop' | 'Game Night' | 'Other'>('All');
 
   useEffect(() => {
     fetchEvents();
@@ -94,89 +96,110 @@ export default function PastEvents() {
           </div>
         </div>
 
+        {/* Category Filters */}
+        <div className="flex flex-wrap gap-4 mb-12">
+          {['All', 'Workshop', 'Game Night', 'Other'].map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setSelectedCategory(cat as any)}
+              className={`px-6 py-2 rounded-xl font-black text-xs tracking-widest uppercase transition-all border-2 border-black ${selectedCategory === cat
+                ? 'bg-[#FFD93D] text-black shadow-[4px_4px_0px_#000]'
+                : 'bg-white text-black/40 hover:text-black hover:border-black'
+                }`}
+            >
+              {cat === 'All' ? 'All' : cat === 'Other' ? 'Others' : `${cat}s`}
+            </button>
+          ))}
+        </div>
+
+        {/* Calendar Section */}
+        <EventCalendar events={events.filter(e => selectedCategory === 'All' || (e.category || 'Other') === selectedCategory)} mode="past" />
+
         {/* Events Grid */}
         <div className="space-y-6">
-          {events.map(event => (
-            <Link key={event.id} href={`/events/past/${event.id}`}>
-              <div className="bg-white border-2 border-black rounded-[25px] overflow-hidden hover:translate-x-1 hover:-translate-y-1 transition-transform duration-300 neo-shadow group flex flex-col md:flex-row cursor-pointer mb-3">
-                {/* Image */}
-                <div className="w-full md:w-80 min-h-[256px] md:h-auto md:self-stretch bg-gray-100 flex-shrink-0 overflow-hidden border-b-2 md:border-b-0 md:border-r-2 border-black relative">
-                  {event.image !== "" ? (
-                    <img
-                      src={event.image}
-                      alt={event.title}
-                      loading="lazy"
-                      className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                      <Calendar className="w-12 h-12 text-black/20" />
+          {events
+            .filter(event => selectedCategory === 'All' || (event.category || 'Other') === selectedCategory)
+            .map(event => (
+              <Link key={event.id} href={`/events/past/${event.id}`}>
+                <div className="bg-white border-2 border-black rounded-[25px] overflow-hidden hover:translate-x-1 hover:-translate-y-1 transition-transform duration-300 neo-shadow group flex flex-col md:flex-row cursor-pointer mb-3">
+                  {/* Image */}
+                  <div className="w-full md:w-80 min-h-[256px] md:h-auto md:self-stretch bg-gray-100 flex-shrink-0 overflow-hidden border-b-2 md:border-b-0 md:border-r-2 border-black relative">
+                    {event.image !== "" ? (
+                      <img
+                        src={event.image}
+                        alt={event.title}
+                        loading="lazy"
+                        className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                        <Calendar className="w-12 h-12 text-black/20" />
+                      </div>
+                    )}
+                    <div className="absolute top-4 left-4">
+                      <span className="px-3 py-1 text-black text-xs font-black uppercase tracking-wider rounded-lg border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] bg-gray-300">
+                        Past
+                      </span>
                     </div>
-                  )}
-                  <div className="absolute top-4 left-4">
-                    <span className="px-3 py-1 text-black text-xs font-black uppercase tracking-wider rounded-lg border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] bg-gray-300">
-                      Past
-                    </span>
+                  </div>
+
+                  {/* Content */}
+                  <div className="flex-1 p-8 flex flex-col justify-between">
+                    <div>
+                      <div className="mb-6">
+                        <h3 className="font-header text-3xl font-black text-black mb-2 uppercase tracking-tight">{event.title}</h3>
+                        <p className="text-black/60 text-sm font-medium leading-relaxed">{event.description}</p>
+                      </div>
+
+                      {/* Event Details */}
+                      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        <div className="bg-[#FFFDF5] p-3 rounded-xl border-2 border-black">
+                          <p className="text-black/40 text-xs font-black uppercase tracking-wider mb-1 flex items-center gap-1">
+                            <Calendar className="w-3 h-3" /> Date
+                          </p>
+                          <p className="text-black font-black">{splitDateTime(event.datetime).date}</p>
+                          <p className="text-black/60 text-xs font-bold">{splitDateTime(event.datetime).time}</p>
+                        </div>
+                        <div className="bg-[#FFFDF5] p-3 rounded-xl border-2 border-black">
+                          <p className="text-black/40 text-xs font-black uppercase tracking-wider mb-1 flex items-center gap-1">
+                            <MapPin className="w-3 h-3" /> Location
+                          </p>
+                          <p className="text-black font-black text-sm truncate" title={event.location}>{event.location}</p>
+                        </div>
+                        <div className="bg-[#FFFDF5] p-3 rounded-xl border-2 border-black">
+                          <p className="text-black/40 text-xs font-black uppercase tracking-wider mb-1">Capacity</p>
+                          <p className="text-black font-black">{event.capacity}</p>
+                        </div>
+                        <div className="bg-[#FFFDF5] p-3 rounded-xl border-2 border-black">
+                          <p className="text-black/40 text-xs font-black uppercase tracking-wider mb-1 flex items-center gap-1">
+                            <Users className="w-3 h-3" /> Attended
+                          </p>
+                          <p className="text-[#00B894] font-black">{event.registered}</p>
+                          <p className="text-black/40 text-xs font-bold">{Math.round((event.registered / event.capacity) * 100)}% full</p>
+                        </div>
+                      </div>
+
+                      {/* Registration Bar */}
+                      <div className="mb-6">
+                        <div className="w-full h-4 bg-gray-100 rounded-full overflow-hidden border-2 border-black">
+                          <div
+                            className="h-full bg-[#FFD93D] border-r-2 border-black"
+                            style={{ width: `${Math.min((event.registered / event.capacity) * 100, 100)}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Past Event Label */}
+                    <div className="pt-6 border-t-2 border-black/5">
+                      <div className="w-full px-6 py-4 border-2 border-black/10 text-black/40 font-black text-xs tracking-[0.3em] rounded-xl uppercase text-center">
+                        EVENT CONCLUDED
+                      </div>
+                    </div>
                   </div>
                 </div>
-
-                {/* Content */}
-                <div className="flex-1 p-8 flex flex-col justify-between">
-                  <div>
-                    <div className="mb-6">
-                      <h3 className="font-header text-3xl font-black text-black mb-2 uppercase tracking-tight">{event.title}</h3>
-                      <p className="text-black/60 text-sm font-medium leading-relaxed">{event.description}</p>
-                    </div>
-
-                    {/* Event Details */}
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                      <div className="bg-[#FFFDF5] p-3 rounded-xl border-2 border-black">
-                        <p className="text-black/40 text-xs font-black uppercase tracking-wider mb-1 flex items-center gap-1">
-                          <Calendar className="w-3 h-3" /> Date
-                        </p>
-                        <p className="text-black font-black">{splitDateTime(event.datetime).date}</p>
-                        <p className="text-black/60 text-xs font-bold">{splitDateTime(event.datetime).time}</p>
-                      </div>
-                      <div className="bg-[#FFFDF5] p-3 rounded-xl border-2 border-black">
-                        <p className="text-black/40 text-xs font-black uppercase tracking-wider mb-1 flex items-center gap-1">
-                          <MapPin className="w-3 h-3" /> Location
-                        </p>
-                        <p className="text-black font-black text-sm truncate" title={event.location}>{event.location}</p>
-                      </div>
-                      <div className="bg-[#FFFDF5] p-3 rounded-xl border-2 border-black">
-                        <p className="text-black/40 text-xs font-black uppercase tracking-wider mb-1">Capacity</p>
-                        <p className="text-black font-black">{event.capacity}</p>
-                      </div>
-                      <div className="bg-[#FFFDF5] p-3 rounded-xl border-2 border-black">
-                        <p className="text-black/40 text-xs font-black uppercase tracking-wider mb-1 flex items-center gap-1">
-                          <Users className="w-3 h-3" /> Attended
-                        </p>
-                        <p className="text-[#00B894] font-black">{event.registered}</p>
-                        <p className="text-black/40 text-xs font-bold">{Math.round((event.registered / event.capacity) * 100)}% full</p>
-                      </div>
-                    </div>
-
-                    {/* Registration Bar */}
-                    <div className="mb-6">
-                      <div className="w-full h-4 bg-gray-100 rounded-full overflow-hidden border-2 border-black">
-                        <div
-                          className="h-full bg-[#FFD93D] border-r-2 border-black"
-                          style={{ width: `${Math.min((event.registered / event.capacity) * 100, 100)}%` }}
-                        ></div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Past Event Label */}
-                  <div className="pt-6 border-t-2 border-black/5">
-                    <div className="w-full px-6 py-4 border-2 border-black/10 text-black/40 font-black text-xs tracking-[0.3em] rounded-xl uppercase text-center">
-                      EVENT CONCLUDED
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            ))}
         </div>
 
         {/* Empty State */}

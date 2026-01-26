@@ -110,8 +110,8 @@ export default function ProfileEnquiriesPage() {
           >
             <ArrowLeft className="w-4 h-4" /> Back to Base
           </Link>
-          <h1 className="font-header text-6xl font-black tracking-tighter uppercase leading-none mb-4">
-            Experience <br />Enquiries
+          <h1 className="font-header text-4xl sm:text-5xl md:text-6xl font-black tracking-tighter uppercase leading-none mb-4 break-words">
+            Experience <br className="hidden sm:block" />Enquiries
           </h1>
           <p className="text-xl font-bold text-black/60 max-w-md">Track and manage your incoming custom event requests.</p>
         </div>
@@ -142,17 +142,19 @@ export default function ProfileEnquiriesPage() {
                   className="bg-white border-4 border-black rounded-[35px] neo-shadow p-8 group relative overflow-hidden"
                 >
                   <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-8">
-                    <div>
-                      <div className="flex items-center gap-3 mb-2">
-                        <h3 className="font-header text-3xl font-black uppercase tracking-tight group-hover:text-[#6C5CE7] transition-colors">{enquiry.categoryName}</h3>
-                        {enquiry.status === 'confirmed' && <Zap size={20} className="text-[#FFD93D] fill-[#FFD93D]" />}
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-3 mb-2 flex-wrap">
+                        <h3 className="font-header text-2xl sm:text-3xl font-black uppercase tracking-tight group-hover:text-[#6C5CE7] transition-colors break-words">
+                          {enquiry.categoryName}
+                        </h3>
+                        {enquiry.status === 'confirmed' && <Zap size={20} className="text-[#FFD93D] fill-[#FFD93D] shrink-0" />}
                       </div>
                       <p className="text-[10px] font-black uppercase tracking-widest text-black/40">
                         Received: {enquiry.createdAt ? new Date(enquiry.createdAt).toLocaleDateString() : 'N/A'} // Log ID: {enquiry.id.slice(0, 8)}
                       </p>
                     </div>
-                    <div className="flex flex-col items-end gap-2">
-                      <div className={`px-5 py-2 rounded-full border-2 ${status.color} flex items-center gap-2 font-black text-[10px] uppercase tracking-widest shadow-[3px_3px_0px_#000]`}>
+                    <div className="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-start gap-3 w-full md:w-auto">
+                      <div className={`px-5 py-2 rounded-full border-2 ${status.color} flex items-center gap-2 font-black text-[10px] uppercase tracking-widest shadow-[3px_3px_0px_#000] shrink-0`}>
                         <StatusIcon size={14} /> {status.label}
                       </div>
                       {enquiry.adminReply ? (
@@ -161,12 +163,12 @@ export default function ProfileEnquiriesPage() {
                             setSelectedEnquiry(enquiry);
                             setShowPaymentForm(true);
                           }}
-                          className="px-10 py-4 bg-[#00B894] text-white border-2 border-black rounded-xl font-black text-xs uppercase tracking-widest neo-shadow hover:scale-105 transition-all"
+                          className="w-auto px-6 py-4 bg-[#00B894] text-white border-2 border-black rounded-xl font-black text-xs uppercase tracking-widest neo-shadow hover:scale-105 transition-all text-center"
                         >
-                          Complete Registration
+                          Register
                         </button>
                       ) : (
-                        <div className="bg-black/5 text-black/40 px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest border-2 border-black/10">
+                        <div className="bg-black/5 text-black/40 px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest border-2 border-black/10 shrink-0">
                           Waiting for HQ
                         </div>
                       )}

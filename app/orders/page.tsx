@@ -268,7 +268,7 @@ export default function OrdersPage() {
           </Link>
           <div className="flex justify-between items-start">
             <div>
-              <h1 className="font-header text-6xl md:text-7xl font-black text-black leading-none mb-4">
+              <h1 className="font-header text-4xl sm:text-6xl md:text-7xl font-black text-black leading-none mb-4 break-words">
                 ORDER HISTORY
               </h1>
               <p className="text-black/60 font-bold text-lg">
@@ -279,62 +279,62 @@ export default function OrdersPage() {
         </div>
 
         {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <div className="bg-[#FFD93D] border-2 border-black rounded-[15px] p-6 neo-shadow">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <div className="bg-[#FFD93D] border-2 border-black rounded-[15px] p-4 sm:p-6 neo-shadow">
             <div className="flex items-center gap-3 mb-2">
-              <Package className="w-5 h-5 text-black" strokeWidth={2.5} />
-              <span className="text-[10px] font-black uppercase tracking-widest text-black/70">Total Orders</span>
+              <Package className="w-4 h-4 sm:w-5 sm:h-5 text-black" strokeWidth={2.5} />
+              <span className="text-[8px] sm:text-[10px] font-black uppercase tracking-widest text-black/70">Total Orders</span>
             </div>
-            <span className="font-header text-4xl font-black text-black block">{orders.length + eventRegistrations.length}</span>
+            <span className="font-header text-2xl sm:text-4xl font-black text-black block">{orders.length + eventRegistrations.length}</span>
           </div>
 
-          <div className="bg-[#00B894] border-2 border-black rounded-[15px] p-6 neo-shadow">
+          <div className="bg-[#00B894] border-2 border-black rounded-[15px] p-4 sm:p-6 neo-shadow">
             <div className="flex items-center gap-3 mb-2">
-              <TrendingUp className="w-5 h-5 text-white" strokeWidth={2.5} />
-              <span className="text-[10px] font-black uppercase tracking-widest text-white/90">Total Spent</span>
+              <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-white" strokeWidth={2.5} />
+              <span className="text-[8px] sm:text-[10px] font-black uppercase tracking-widest text-white/90">Total Spent</span>
             </div>
-            <span className="font-header text-4xl font-black text-white block">₹{(totalSpent + totalEventsSpent).toLocaleString()}</span>
+            <span className="font-header text-2xl sm:text-4xl font-black text-white block">₹{(totalSpent + totalEventsSpent).toLocaleString()}</span>
           </div>
 
-          <div className="bg-[#6C5CE7] border-2 border-black rounded-[15px] p-6 neo-shadow">
+          <div className="bg-[#6C5CE7] border-2 border-black rounded-[15px] p-4 sm:p-6 neo-shadow">
             <div className="flex items-center gap-3 mb-2">
-              <Award className="w-5 h-5 text-white" strokeWidth={2.5} />
-              <span className="text-[10px] font-black uppercase tracking-widest text-white/90">Points Earned</span>
+              <Award className="w-4 h-4 sm:w-5 sm:h-5 text-white" strokeWidth={2.5} />
+              <span className="text-[8px] sm:text-[10px] font-black uppercase tracking-widest text-white/90">Points Earned</span>
             </div>
-            <span className="font-header text-4xl font-black text-white block">{totalPointsEarned.toLocaleString()}</span>
+            <span className="font-header text-2xl sm:text-4xl font-black text-white block">{totalPointsEarned.toLocaleString()}</span>
           </div>
 
-          <div className="bg-white border-2 border-black rounded-[15px] p-6 neo-shadow">
+          <div className="bg-white border-2 border-black rounded-[15px] p-4 sm:p-6 neo-shadow">
             <div className="flex items-center gap-3 mb-2">
-              <Coins className="w-5 h-5 text-[#FF7675]" strokeWidth={2.5} />
-              <span className="text-[10px] font-black uppercase tracking-widest text-black/70">Points Redeemed</span>
+              <Coins className="w-4 h-4 sm:w-5 sm:h-5 text-[#FF7675]" strokeWidth={2.5} />
+              <span className="text-[8px] sm:text-[10px] font-black uppercase tracking-widest text-black/70">Points Redeemed</span>
             </div>
-            <span className="font-header text-4xl font-black text-black block">{totalPointsRedeemed.toLocaleString()}</span>
+            <span className="font-header text-2xl sm:text-4xl font-black text-black block">{totalPointsRedeemed.toLocaleString()}</span>
           </div>
         </div>
 
         {/* Tab Buttons */}
-        <div className="flex gap-3 mb-8">
+        <div className="flex flex-col sm:flex-row gap-3 mb-8">
           <button
             onClick={() => setActiveTab('shop')}
-            className={`flex items-center gap-2 px-6 py-3 font-black text-sm uppercase tracking-widest rounded-xl border-2 border-black transition-all neo-shadow ${activeTab === 'shop'
+            className={`flex items-center justify-center gap-2 px-6 py-4 sm:py-3 font-black text-[10px] sm:text-sm uppercase tracking-widest rounded-xl border-2 border-black transition-all neo-shadow w-full sm:w-auto ${activeTab === 'shop'
               ? 'bg-black text-white'
               : 'bg-white text-black hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none'
               }`}
           >
             <ShoppingBag size={20} strokeWidth={2.5} />
-            SHOP ORDERS ({orders.length})
+            SHOP ({orders.length})
           </button>
 
           <button
             onClick={() => setActiveTab('events')}
-            className={`flex items-center gap-2 px-6 py-3 font-black text-sm uppercase tracking-widest rounded-xl border-2 border-black transition-all neo-shadow ${activeTab === 'events'
+            className={`flex items-center justify-center gap-2 px-6 py-4 sm:py-3 font-black text-[10px] sm:text-sm uppercase tracking-widest rounded-xl border-2 border-black transition-all neo-shadow w-full sm:w-auto ${activeTab === 'events'
               ? 'bg-black text-white'
               : 'bg-white text-black hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none'
               }`}
           >
             <Ticket size={20} strokeWidth={2.5} />
-            EVENT REGISTRATIONS ({eventRegistrations.length})
+            EVENTS ({eventRegistrations.length})
           </button>
         </div>
 

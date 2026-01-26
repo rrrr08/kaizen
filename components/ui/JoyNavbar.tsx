@@ -13,6 +13,8 @@ import { app } from '@/lib/firebase';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import Logo from '@/components/ui/Logo';
 import NotificationCenter from '@/app/components/NotificationCenter';
+import { useAuth } from '@/app/context/AuthContext';
+import Image from 'next/image';
 
 const navItems = [
   { name: 'Shop', path: '/shop' },
@@ -31,30 +33,8 @@ const Navbar: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobileEventsOpen, setIsMobileEventsOpen] = useState(false);
   const { items } = useCart();
-  const { balance } = useGamification(); // Use centralized balance from GamificationContext
-  const [user, setUser] = useState<any>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
-
-  useEffect(() => {
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      setUser(currentUser);
-      if (currentUser) {
-        // Check admin status
-        const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
-        if (userDoc.exists()) {
-          const data = userDoc.data();
-          setIsAdmin(data.role === 'admin' || data.isAdmin === true);
-        }
-      } else {
-        setIsAdmin(false);
-      }
-    });
-
-    return () => unsubscribe();
-  }, []);
+  const { balance } = useGamification();
+  const { user, userProfile, isAdmin } = useAuth();
 
   const handleLogout = async () => {
     const auth = getAuth(app);
@@ -201,8 +181,17 @@ const Navbar: React.FC = () => {
                   aria-label="User menu"
                   className="w-10 h-10 bg-[#6C5CE7] flex items-center justify-center rounded-full border-2 border-black neo-shadow cursor-pointer outline-none"
                 >
-                  <div className="w-full h-full flex items-center justify-center text-white font-black text-sm">
-                    {user.email?.[0].toUpperCase()}
+                  <div className="w-full h-full flex items-center justify-center text-white font-black text-sm relative">
+                    {userProfile?.image || user?.photoURL ? (
+                      <Image
+                        src={userProfile?.image || user?.photoURL || ''}
+                        alt="Profile"
+                        fill
+                        className="object-cover rounded-full"
+                      />
+                    ) : (
+                      user.email?.[0].toUpperCase()
+                    )}
                   </div>
                 </motion.button>
               </DropdownMenu.Trigger>

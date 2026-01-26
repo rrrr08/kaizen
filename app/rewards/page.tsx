@@ -144,7 +144,7 @@ export default function RewardsPage() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-12"
         >
-          <h1 className="font-header text-6xl md:text-7xl font-black tracking-tight mb-4 text-black">
+          <h1 className="font-header text-4xl sm:text-6xl md:text-7xl font-black tracking-tight mb-4 text-black break-words">
             REWARDS <span className="text-[#6C5CE7]">STORE</span>
           </h1>
           <p className="text-black/70 font-bold text-xl mb-6">
@@ -154,7 +154,7 @@ export default function RewardsPage() {
             <Zap size={32} className="text-black" />
             <div>
               <p className="text-black/60 text-xs font-black uppercase tracking-wider">Your Balance</p>
-              <p className="text-black font-header text-3xl font-black">{balance.toLocaleString()} JP</p>
+              <p className="text-black font-header text-xl sm:text-3xl font-black truncate max-w-[120px] sm:max-w-none">{balance.toLocaleString()} JP</p>
             </div>
           </div>
         </motion.div>
@@ -165,10 +165,10 @@ export default function RewardsPage() {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             className={`mb-6 p-4 rounded-2xl border-4 border-black font-bold flex items-center gap-2 ${message.startsWith('✅')
-                ? 'bg-[#00B894] text-white'
-                : message.startsWith('❌')
-                  ? 'bg-[#FF6B6B] text-white'
-                  : 'bg-[#6C5CE7] text-white'
+              ? 'bg-[#00B894] text-white'
+              : message.startsWith('❌')
+                ? 'bg-[#FF6B6B] text-white'
+                : 'bg-[#6C5CE7] text-white'
               }`}
           >
             {message.startsWith('✅') && <CheckCircle2 size={20} />}
@@ -189,8 +189,8 @@ export default function RewardsPage() {
               key={cat}
               onClick={() => setSelectedCategory(cat)}
               className={`px-6 py-3 font-black text-sm uppercase rounded-xl border-4 border-black transition-all flex items-center gap-2 ${selectedCategory === cat
-                  ? 'bg-[#6C5CE7] text-white neo-shadow scale-105'
-                  : 'bg-white text-black hover:bg-black/5 neo-shadow-hover'
+                ? 'bg-[#6C5CE7] text-white neo-shadow scale-105'
+                : 'bg-white text-black hover:bg-black/5 neo-shadow-hover'
                 }`}
             >
               {cat === 'all' && <Target size={16} />}
@@ -221,12 +221,12 @@ export default function RewardsPage() {
                 <h3 className="font-header text-2xl font-black text-black mb-2">{voucher.name}</h3>
                 <p className="text-black/60 font-bold text-sm mb-4">{voucher.description}</p>
 
-                <div className="flex items-center justify-between mb-4 pb-4 border-b-2 border-black/10">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 pb-4 border-b-2 border-black/10 gap-2">
                   <div className="flex items-center gap-2">
-                    <Sparkles size={20} className="text-[#FFD93D]" />
-                    <span className="font-black text-xl text-black">{voucher.pointsCost} JP</span>
+                    <Sparkles size={20} className="text-[#FFD93D] shrink-0" />
+                    <span className="font-black text-lg sm:text-xl text-black truncate">{voucher.pointsCost} JP</span>
                   </div>
-                  <span className="text-xs text-black/60 font-bold uppercase">
+                  <span className="text-[10px] sm:text-xs text-black/60 font-bold uppercase shrink-0">
                     {voucher.expiryDays}d Valid
                   </span>
                 </div>
@@ -245,8 +245,8 @@ export default function RewardsPage() {
                   onClick={() => handleRedeem(voucher)}
                   disabled={!canAfford || loading}
                   className={`w-full py-3 font-black text-sm uppercase rounded-xl border-4 border-black transition-all ${canAfford
-                      ? 'bg-[#6C5CE7] text-white hover:bg-[#5B4CD6] neo-shadow-hover'
-                      : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                    ? 'bg-[#6C5CE7] text-white hover:bg-[#5B4CD6] neo-shadow-hover'
+                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                     }`}
                 >
                   {canAfford ? 'REDEEM NOW' : 'INSUFFICIENT POINTS'}
@@ -287,16 +287,16 @@ export default function RewardsPage() {
                   key={voucher.id}
                   className="p-6 bg-[#FFFDF5] border-3 border-black rounded-2xl neo-shadow"
                 >
-                  <div className="flex items-start justify-between mb-3">
-                    <div>
-                      <h4 className="font-black text-black text-lg">{voucher.name}</h4>
-                      <div className="flex items-center gap-2 mt-1">
-                        <p className="text-xs text-black/60 font-bold">
-                          Code: <span className="font-mono font-black text-[#6C5CE7]">{voucher.code}</span>
+                  <div className="flex flex-col sm:flex-row items-start justify-between mb-3 gap-2">
+                    <div className="min-w-0 flex-1">
+                      <h4 className="font-black text-black text-base sm:text-lg truncate">{voucher.name}</h4>
+                      <div className="flex items-center gap-2 mt-1 flex-wrap">
+                        <p className="text-[10px] sm:text-xs text-black/60 font-bold">
+                          Code: <span className="font-mono font-black text-[#6C5CE7] break-all">{voucher.code}</span>
                         </p>
                         <button
                           onClick={() => copyToClipboard(voucher.code)}
-                          className="p-1 hover:bg-[#6C5CE7]/10 rounded transition-colors"
+                          className="p-1 hover:bg-[#6C5CE7]/10 rounded transition-colors shrink-0"
                           title="Copy code"
                         >
                           {copiedCode === voucher.code ? (
@@ -307,16 +307,18 @@ export default function RewardsPage() {
                         </button>
                       </div>
                     </div>
-                    {!voucher.used && (
-                      <span className="px-3 py-1 bg-[#00B894] text-white text-xs font-black rounded-full uppercase">
-                        ACTIVE
-                      </span>
-                    )}
-                    {voucher.used && (
-                      <span className="px-3 py-1 bg-gray-400 text-white text-xs font-black rounded-full uppercase">
-                        USED
-                      </span>
-                    )}
+                    <div className="shrink-0 pt-1 sm:pt-0">
+                      {!voucher.used && (
+                        <span className="px-3 py-1 bg-[#00B894] text-white text-[10px] sm:text-xs font-black rounded-full uppercase">
+                          ACTIVE
+                        </span>
+                      )}
+                      {voucher.used && (
+                        <span className="px-3 py-1 bg-gray-400 text-white text-[10px] sm:text-xs font-black rounded-full uppercase">
+                          USED
+                        </span>
+                      )}
+                    </div>
                   </div>
                   <p className="text-sm text-black/70 font-bold mb-3">{voucher.description}</p>
                   <p className="text-xs text-black/40 font-bold">

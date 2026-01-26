@@ -2,7 +2,6 @@
 
 import { useAuth } from '@/app/context/AuthContext';
 import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
 import {
   ArrowLeft,
   User,
@@ -17,10 +16,13 @@ import {
   X,
   Lock,
   Database,
-  Palette
+  Palette,
+  Send,
+  Loader2
 } from 'lucide-react';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Dialog,
   DialogContent,
@@ -37,7 +39,7 @@ import DataManagement from '@/components/settings/DataManagement';
 import AppearanceSettings, { AppearanceSettings as AppearanceSettingsType } from '@/components/settings/AppearanceSettings';
 
 export default function SettingsPage() {
-  const { user, userProfile, loading } = useAuth();
+  const { user, userProfile, loading, refreshProfile } = useAuth();
   const router = useRouter();
   const { addToast } = useToast();
 
@@ -55,9 +57,9 @@ export default function SettingsPage() {
   const [deactivateConfirm, setDeactivateConfirm] = useState('');
 
   useEffect(() => {
-    if (user) {
-      setDisplayName(userProfile?.name || user.displayName || '');
-      setPhotoURL(userProfile?.photoURL || user.photoURL || '');
+    if (userProfile || user) {
+      setDisplayName(userProfile?.name || user?.displayName || '');
+      setPhotoURL(userProfile?.image || userProfile?.photoURL || user?.photoURL || '');
       setPhoneNumber(userProfile?.phoneNumber || userProfile?.checkoutInfo?.phone || '');
     }
   }, [user, userProfile]);
@@ -103,6 +105,10 @@ export default function SettingsPage() {
       });
 
       addToast({ title: 'Success', description: 'Profile updated successfully!', variant: 'success' });
+
+      // Trigger refresh in AuthContext to sync Navbar and local state
+      await refreshProfile();
+
       setIsEditingProfile(false);
     } catch (error: any) {
       console.error('Profile update error:', error);
@@ -233,8 +239,8 @@ export default function SettingsPage() {
           >
             <ArrowLeft className="w-4 h-4" /> Back to Base
           </Link>
-          <h1 className="font-header text-6xl font-black tracking-tighter uppercase leading-none mb-4">
-            System <br />Preferences
+          <h1 className="font-header text-4xl sm:text-5xl md:text-6xl font-black tracking-tighter uppercase leading-none mb-4 break-words">
+            System <br className="hidden sm:block" />Preferences
           </h1>
           <p className="text-xl font-bold text-black/60 max-w-md">Configure your JOY account settings and security protocols.</p>
         </div>
@@ -263,9 +269,9 @@ export default function SettingsPage() {
                     <div className={`w-14 h-14 ${opt.color} border-2 border-black rounded-xl flex items-center justify-center shadow-[4px_4px_0px_#000] rotate-2 group-hover:rotate-0 transition-transform`}>
                       <opt.icon className={opt.text || 'text-black'} size={28} />
                     </div>
-                    <div>
-                      <h4 className="text-xl font-black uppercase tracking-tight text-left">{opt.title}</h4>
-                      <p className="text-xs font-bold text-black/40 uppercase tracking-widest text-left">{opt.desc}</p>
+                    <div className="flex-1 min-w-0 pr-2">
+                      <h4 className="text-lg sm:text-xl font-black uppercase tracking-tight text-left truncate">{opt.title}</h4>
+                      <p className="text-[10px] sm:text-xs font-bold text-black/40 uppercase tracking-widest text-left truncate">{opt.desc}</p>
                     </div>
                   </div>
                   <ChevronRight className="w-6 h-6 text-black/10 group-hover:text-black transition-colors" />
@@ -301,12 +307,12 @@ export default function SettingsPage() {
             </h3>
 
             <div className="space-y-6">
-              <div className="flex justify-between items-center py-4 border-b-2 border-black/5">
-                <div>
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-4 border-b-2 border-black/5 gap-4">
+                <div className="min-w-0 flex-1">
                   <p className="text-[10px] font-black uppercase tracking-widest text-black/40 mb-1">Registered Email</p>
-                  <p className="text-lg font-black text-black">{user.email}</p>
+                  <p className="text-base sm:text-lg font-black text-black truncate">{user.email}</p>
                 </div>
-                <div className="flex items-center gap-2 bg-[#00B894]/10 text-[#00B894] px-4 py-2 rounded-full border-2 border-[#00B894] text-xs font-black uppercase">
+                <div className="flex items-center gap-2 bg-[#00B894]/10 text-[#00B894] px-4 py-2 rounded-full border-2 border-[#00B894] text-[10px] sm:text-xs font-black uppercase shrink-0">
                   <CheckCircle2 size={14} /> Verified
                 </div>
               </div>
@@ -345,57 +351,98 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      {/* Edit Profile Dialog */}
-      <Dialog open={isEditingProfile} onOpenChange={setIsEditingProfile}>
-        <DialogContent className="sm:max-w-md max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="font-header text-3xl font-black uppercase">Edit Identity</DialogTitle>
-            <DialogDescription className="font-bold text-black/60">
-              Update your persona on the grid.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-6 py-4">
-            <div className="flex flex-col items-center">
-              <label className="text-xs font-black uppercase tracking-widest mb-2 w-full text-left">Profile Avatar</label>
-              <ImageUpload
-                value={photoURL ? [photoURL] : []}
-                onChange={(url) => setPhotoURL(url)}
-                onRemove={() => setPhotoURL('')}
-                maxFiles={1}
-                showGallery={false}
-              />
-            </div>
+      {/* Edit Profile Manual Modal */}
+      <AnimatePresence>
+        {isEditingProfile && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsEditingProfile(false)}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            />
 
-            <div className="space-y-2">
-              <label className="text-xs font-black uppercase tracking-widest">Display Name</label>
-              <Input
-                value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
-                className="border-2 border-black font-bold text-lg"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-xs font-black uppercase tracking-widest text-black/40">Phone Number (Linked)</label>
-              <div className="flex items-center gap-3 p-4 bg-black/5 border-2 border-dashed border-black/20 rounded-xl">
-                <span className="font-bold text-black/40">{phoneNumber || 'No phone number linked'}</span>
-                {phoneNumber && userProfile?.phoneVerified && (
-                  <span className="ml-auto bg-[#00B894] text-white text-[10px] px-2 py-0.5 rounded-full font-black uppercase">Verified</span>
-                )}
+            {/* Modal Content */}
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="relative w-full max-w-md bg-[#FFFDF5] border-4 border-black rounded-[32px] neo-shadow max-h-[85vh] flex flex-col overflow-hidden"
+            >
+              {/* Header section (Fixed) */}
+              <div className="p-8 pb-4 flex justify-between items-start shrink-0 z-10 bg-[#FFFDF5] rounded-t-[28px]">
+                <div>
+                  <h3 className="font-header text-4xl text-black uppercase tracking-tighter">Edit Identity</h3>
+                  <p className="font-bold text-black/60 text-sm mt-1">Update your persona on the grid.</p>
+                </div>
+                <button
+                  onClick={() => setIsEditingProfile(false)}
+                  className="p-2 hover:bg-black/5 rounded-full transition-colors -mr-2 -mt-2"
+                >
+                  <X size={24} className="text-black" />
+                </button>
               </div>
-              <p className="text-[10px] font-bold text-black/30 uppercase mt-1">
-                You can manage your phone number in <Link href="/notification-preferences" className="underline hover:text-black">Notification Settings</Link>
-              </p>
-            </div>
+
+              {/* Scrollable Content */}
+              <div className="p-8 pt-0 overflow-y-auto custom-scrollbar flex-1 space-y-6">
+                <div className="flex flex-col items-center pt-4">
+                  <label className="text-xs font-black uppercase tracking-widest mb-4 w-full text-left">Profile Avatar</label>
+                  <ImageUpload
+                    value={photoURL ? [photoURL] : []}
+                    onChange={(url) => setPhotoURL(url)}
+                    onRemove={() => setPhotoURL('')}
+                    maxFiles={1}
+                    showGallery={false}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-black uppercase tracking-widest text-black/60">Display Name</label>
+                  <Input
+                    value={displayName}
+                    onChange={(e) => setDisplayName(e.target.value)}
+                    className="border-2 border-black font-bold text-lg p-6 rounded-xl focus-visible:ring-[#FFD93D]"
+                    placeholder="Enter reveal name"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-black uppercase tracking-widest text-black/40">Phone Number (Linked)</label>
+                  <div className="flex items-center gap-3 p-4 bg-black/5 border-2 border-dashed border-black/20 rounded-xl">
+                    <span className="font-bold text-black/40 text-sm">{phoneNumber || 'No phone number linked'}</span>
+                    {phoneNumber && userProfile?.phoneVerified && (
+                      <span className="ml-auto bg-[#00B894] text-white text-[8px] px-2 py-0.5 rounded-full font-black uppercase">Verified</span>
+                    )}
+                  </div>
+                  <p className="text-[10px] font-bold text-black/30 uppercase mt-1 leading-tight">
+                    Manage phone via <Link href="/notification-preferences" className="underline hover:text-black">Notification Settings</Link>
+                  </p>
+                </div>
+              </div>
+
+              {/* Footer Section (Fixed) */}
+              <div className="p-8 pt-4 bg-[#FFFDF5] border-t-2 border-black/5 flex gap-4 shrink-0">
+                <button
+                  onClick={() => setIsEditingProfile(false)}
+                  className="flex-1 py-4 border-2 border-black rounded-xl font-black text-xs uppercase tracking-widest hover:bg-black/5 transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleUpdateProfile}
+                  disabled={isSaving}
+                  className="flex-1 py-4 bg-[#FFD93D] text-black border-4 border-black rounded-xl font-black text-xs uppercase tracking-widest hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_#000] active:translate-y-[0px] active:shadow-none transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                >
+                  {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
+                  <span>{isSaving ? 'Saving...' : 'Confirm'}</span>
+                </button>
+              </div>
+            </motion.div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEditingProfile(false)} className="border-2 border-black font-black uppercase">Cancel</Button>
-            <Button onClick={handleUpdateProfile} disabled={isSaving} className="bg-[#FFD93D] text-black hover:bg-[#FFD93D]/80 border-2 border-black font-black uppercase">
-              {isSaving ? 'Saving...' : 'Save Changes'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        )}
+      </AnimatePresence>
 
       {/* Security Dialog */}
       <Dialog open={isSecurityOpen} onOpenChange={setIsSecurityOpen}>

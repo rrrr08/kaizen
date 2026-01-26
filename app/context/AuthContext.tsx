@@ -2,9 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User } from 'firebase/auth';
-
 import { UserProfile } from '@/lib/types';
-
 import BannedScreen from '@/components/auth/BannedScreen';
 
 interface AuthContextType {
@@ -14,6 +12,7 @@ interface AuthContextType {
   role: string | null;
   isAdmin: boolean;
   isBanned: boolean;
+  refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -26,97 +25,83 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isBanned, setIsBanned] = useState(false);
 
+  const fetchUserData = async (currentUser: User) => {
+    try {
+      const { db } = await import('@/lib/firebase');
+      if (!db) return;
+
+      const { doc, getDoc } = await import('firebase/firestore');
+      const userDocRef = doc(db, 'users', currentUser.uid);
+      const userDocSnap = await getDoc(userDocRef);
+
+      if (userDocSnap.exists()) {
+        const userData = userDocSnap.data() as UserProfile;
+
+        // Ensure photoURL and image are synced in the object for consistency
+        const normalizedData: UserProfile = {
+          ...userData,
+          photoURL: userData.photoURL || userData.image || currentUser.photoURL || null,
+          image: userData.image || userData.photoURL || currentUser.photoURL || null,
+        };
+
+        setIsBanned(!!normalizedData.isBanned);
+        setUserProfile(normalizedData);
+        setRole(normalizedData.role || null);
+        setIsAdmin(normalizedData.role === 'admin');
+      } else {
+        setUserProfile(null);
+        setRole(null);
+        setIsAdmin(false);
+        setIsBanned(false);
+      }
+    } catch (error) {
+      console.error('[AuthContext] Error fetching user data:', error);
+      setUserProfile(null);
+      setRole(null);
+      setIsAdmin(false);
+      setIsBanned(false);
+    }
+  };
+
+  const refreshProfile = async () => {
+    if (user) {
+      await fetchUserData(user);
+    }
+  };
+
   useEffect(() => {
-    console.log('[AuthContext] Mounting - initializing auth listener');
+    let unsubscribe: () => void;
 
     // Lazy load Firebase
-    import('@/lib/firebase').then(({ auth, db }) => {
-      // Check if Firebase is initialized
+    import('@/lib/firebase').then(({ auth }) => {
       if (!auth) {
-        console.warn('[AuthContext] Firebase auth not initialized');
         setLoading(false);
         return;
       }
 
-      import('firebase/auth').then(({ onAuthStateChanged, signOut }) => {
-        import('firebase/firestore').then(({ doc, getDoc }) => {
-          const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-            console.log('[AuthContext] Auth state changed:', {
-              email: currentUser?.email || 'logged out',
-              uid: currentUser?.uid,
-              timestamp: new Date().toLocaleTimeString()
-            });
-
-            setUser(currentUser);
-
-            if (currentUser) {
-              // Fetch user role from Firestore
-              try {
-                if (!db) {
-                  console.error('[AuthContext] Critical: Firebase db not initialized');
-                  setLoading(true);
-                  return;
-                }
-
-                const userDocRef = doc(db, 'users', currentUser.uid);
-                const userDocSnap = await getDoc(userDocRef);
-
-                if (userDocSnap.exists()) {
-                  const userData = userDocSnap.data() as UserProfile;
-
-                  // Check for Ban Status
-                  if (userData.isBanned) {
-                    setIsBanned(true);
-                  } else {
-                    setIsBanned(false);
-                  }
-
-                  const userRole = userData?.role || null;
-                  setUserProfile(userData);
-                  setRole(userRole);
-                  setIsAdmin(userRole === 'admin');
-                } else {
-                  setUserProfile(null);
-                  setRole(null);
-                  setIsAdmin(false);
-                  setIsBanned(false);
-                }
-              } catch (error) {
-                console.error('[AuthContext] Error fetching user role:', error);
-                setUserProfile(null);
-                setRole(null);
-                setIsAdmin(false);
-                setIsBanned(false);
-              }
-            } else {
-              setUserProfile(null);
-              setRole(null);
-              setIsAdmin(false);
-              setIsBanned(false);
-            }
-
-            setLoading(false);
-          }, (error) => {
-            console.error('[AuthContext] Auth error:', error);
-            setUser(null);
+      import('firebase/auth').then(({ onAuthStateChanged }) => {
+        unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+          setUser(currentUser);
+          if (currentUser) {
+            await fetchUserData(currentUser);
+          } else {
             setUserProfile(null);
             setRole(null);
             setIsAdmin(false);
-            setLoading(false);
             setIsBanned(false);
-          });
-
-          return () => {
-            console.log('[AuthContext] Cleaning up auth listener');
-            unsubscribe();
-          };
+          }
+          setLoading(false);
         });
       });
     });
+
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, userProfile, loading, role, isAdmin, isBanned }}>
+    <AuthContext.Provider value={{ user, userProfile, loading, role, isAdmin, isBanned, refreshProfile }}>
       {isBanned ? <BannedScreen /> : children}
     </AuthContext.Provider>
   );

@@ -20,6 +20,7 @@ export default function EventsPage() {
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'upcoming' | 'past'>('upcoming');
+  const [categoryFilter, setCategoryFilter] = useState<'All' | 'Workshop' | 'Game Night' | 'Other'>('All');
 
   useEffect(() => {
     const auth = getAuth();
@@ -77,7 +78,14 @@ export default function EventsPage() {
     }
   };
 
-  const filteredEvents = events;
+  const filteredEvents = events.filter(event => {
+    const matchesSearch = event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      event.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      event.location.toLowerCase().includes(searchTerm.toLowerCase());
+    const eventCategory = event.category || 'Other';
+    const matchesCategory = categoryFilter === 'All' || eventCategory === categoryFilter;
+    return matchesSearch && matchesCategory;
+  });
 
   const totalEvents = filteredEvents.length;
   const totalRegistrations = filteredEvents.reduce((sum, e) => sum + e.registered, 0);
@@ -238,6 +246,23 @@ export default function EventsPage() {
                   <path d="M2.5 4.5L6 8L9.5 4.5" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </div>
+            </div>
+          </div>
+          <div>
+            <label className="block text-black font-black text-xs uppercase tracking-widest mb-2">Filter by Category</label>
+            <div className="flex flex-wrap gap-2">
+              {['All', 'Workshop', 'Game Night', 'Other'].map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setCategoryFilter(cat as any)}
+                  className={`px-4 py-2 rounded-xl font-black text-[10px] tracking-widest uppercase transition-all border-2 border-black ${categoryFilter === cat
+                    ? 'bg-[#FFD93D] text-black shadow-[2px_2px_0px_#000]'
+                    : 'bg-[#FFFDF5] text-black/40 hover:text-black hover:border-black'
+                    }`}
+                >
+                  {cat === 'All' ? 'All' : cat === 'Other' ? 'Others' : `${cat}s`}
+                </button>
+              ))}
             </div>
           </div>
         </div>
