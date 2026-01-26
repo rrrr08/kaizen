@@ -64,6 +64,10 @@ h6,
   box-shadow: 4px 4px 0px #000000;
 }
 
+.neo-shadow-sm {
+  box-shadow: 2px 2px 0px #000000;
+}
+
 .neo-shadow-lg {
   box-shadow: 8px 8px 0px #000000;
 }
