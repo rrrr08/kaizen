@@ -275,24 +275,24 @@ const UserManagementPage = () => {
 
   return (
     <RoleProtected allowedRoles={[USER_ROLES.ADMIN]}>
-      <div className="min-h-screen bg-[#FFFDF5] pb-8 px-4 sm:px-6 lg:px-8">
+      <div className="p-4 pb-16 md:p-8 md:pb-16 min-h-screen bg-[#FFFDF5]">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="text-center mb-12 border-b-2 border-black pb-8"
+            className="mb-8 md:mb-12 border-b-2 border-black pb-6 md:pb-8"
           >
-            <div className="flex items-center justify-center mb-4">
-              <div className="p-3 bg-[#6C5CE7] rounded-xl border-2 border-black neo-shadow">
-                <Users className="w-8 h-8 text-white" />
+            <div className="flex items-center gap-3 md:gap-4 mb-2">
+              <div className="p-2 bg-[#6C5CE7] rounded-lg border-2 border-black neo-shadow-sm">
+                <Users className="w-5 h-5 md:w-6 md:h-6 text-white" />
               </div>
+              <h1 className="font-header text-3xl md:text-6xl font-black text-black uppercase tracking-tighter">
+                User Management
+              </h1>
             </div>
-            <h1 className="text-5xl font-header font-black text-[#2D3436] mb-2 tracking-tighter uppercase">
-              User Management (Admin Console)
-            </h1>
-            <p className="text-lg text-[#2D3436]/60 max-w-2xl mx-auto font-medium">
+            <p className="text-black/60 font-bold text-sm md:text-xl md:ml-12 lg:ml-12">
               Manage user accounts, roles, and permissions across the platform.
             </p>
           </motion.div>

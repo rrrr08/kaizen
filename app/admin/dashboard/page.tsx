@@ -158,27 +158,27 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="p-8 pb-16 min-h-screen bg-[#FFFDF5]">
+    <div className="p-4 pb-16 md:p-8 md:pb-16 min-h-screen bg-[#FFFDF5]">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="mb-12 border-b-2 border-black pb-8"
+        className="mb-8 md:mb-12 border-b-2 border-black pb-6 md:pb-8"
       >
-        <div className="flex items-center gap-4 mb-2">
+        <div className="flex items-center gap-3 md:gap-4 mb-2">
           <div className="bg-[#FFD93D] p-2 rounded-lg border-2 border-black neo-shadow-sm">
-            <Activity className="w-6 h-6 text-black" />
+            <Activity className="w-5 h-5 md:w-6 md:h-6 text-black" />
           </div>
-          <h1 className="font-header text-6xl font-black text-black uppercase tracking-tighter">DASHBOARD</h1>
+          <h1 className="font-header text-3xl md:text-6xl font-black text-black uppercase tracking-tighter">DASHBOARD</h1>
         </div>
-        <p className="text-black/60 font-bold text-xl ml-12">Platform overview and real-time statistics</p>
+        <p className="text-black/60 font-bold text-sm md:text-xl md:ml-12 lg:ml-12">Platform overview and real-time statistics</p>
       </motion.div>
 
       {/* Deep Analytics Section */}
       <DeepAnalytics />
 
       {/* Main Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8 md:mb-12">
         <StatCard
           title="Total Users"
           value={stats?.totalUsers || 0}
@@ -209,19 +209,19 @@ export default function AdminDashboard() {
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 h-[400px]">
+      <div className="flex flex-col lg:grid lg:grid-cols-3 gap-6 mb-8">
         {/* User Distribution Chart */}
-        <div className="lg:col-span-2 bg-white p-6 rounded-2xl neo-border shadow-sm flex flex-col">
-          <h3 className="text-xl font-black mb-6 uppercase italic">User Distribution</h3>
-          <div className="flex-1 w-full relative">
+        <div className="lg:col-span-2 bg-white p-4 md:p-6 rounded-2xl neo-border shadow-sm flex flex-col">
+          <h3 className="text-lg md:text-xl font-black mb-4 md:mb-6 uppercase italic">User Distribution</h3>
+          <div className="w-full relative" style={{ height: '300px' }}>
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
                   data={roleData}
                   cx="50%"
                   cy="50%"
-                  innerRadius={60}
-                  outerRadius={100}
+                  innerRadius={50}
+                  outerRadius={90}
                   fill="#8884d8"
                   paddingAngle={5}
                   dataKey="value"
@@ -235,53 +235,53 @@ export default function AdminDashboard() {
             </ResponsiveContainer>
             {/* Legend Overlay */}
             <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none">
-              <span className="text-3xl font-black">{stats?.totalUsers || 0}</span>
-              <p className="text-xs font-bold text-gray-400 uppercase">Users</p>
+              <span className="text-2xl md:text-3xl font-black">{stats?.totalUsers || 0}</span>
+              <p className="text-[10px] md:text-xs font-bold text-gray-400 uppercase">Users</p>
             </div>
           </div>
-          <div className="mt-4 flex justify-center gap-4 flex-wrap">
+          <div className="mt-4 flex justify-center gap-x-4 gap-y-2 flex-wrap">
             {roleData.map((entry, index) => (
               <div key={index} className="flex items-center gap-2 text-xs font-bold uppercase">
-                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }} />
-                {entry.name} ({entry.value})
+                <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: COLORS[index % COLORS.length] }} />
+                <span>{entry.name} ({entry.value})</span>
               </div>
             ))}
           </div>
         </div>
 
         {/* Live Pulse Feed */}
-        <div className="lg:col-span-1 h-full">
+        <div className="lg:col-span-1 h-[400px] lg:h-auto">
           <LivePulse />
         </div>
       </div>
 
       {/* Operations Overview */}
-      <h2 className="font-header text-3xl font-black text-black mb-6 uppercase tracking-tighter flex items-center gap-2">
-        <Zap className="w-6 h-6 text-[#FFD93D]" fill="#FFD93D" />
+      <h2 className="font-header text-xl md:text-3xl font-black text-black mb-4 md:mb-6 uppercase tracking-tighter flex items-center gap-2">
+        <Zap className="w-5 h-5 md:w-6 md:h-6 text-[#FFD93D]" fill="#FFD93D" />
         Operations Overview
       </h2>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-8 mb-8 md:mb-12">
         {/* Events Statistics */}
-        <div className="bg-white border-2 border-black rounded-[25px] p-8 neo-shadow">
-          <div className="flex items-center justify-between mb-8">
-            <h3 className="font-header text-2xl font-black text-black uppercase tracking-tight flex items-center gap-3">
+        <div className="bg-white border-2 border-black rounded-[25px] p-4 md:p-8 neo-shadow">
+          <div className="flex items-center justify-between mb-6 md:mb-8">
+            <h3 className="font-header text-lg md:text-2xl font-black text-black uppercase tracking-tight flex items-center gap-3">
               <div className="bg-[#FF7675] p-2 rounded-lg border-2 border-black">
-                <Calendar className="w-5 h-5 text-white" />
+                <Calendar className="w-4 h-4 md:w-5 md:h-5 text-white" />
               </div>
               Events Performance
             </h3>
-            <Link href="/admin/events" className="text-[10px] font-black uppercase tracking-widest text-[#6C5CE7] hover:underline underline-offset-4">Manage Events &rarr;</Link>
+            <Link href="/admin/events" className="text-[10px] font-black uppercase tracking-widest text-[#6C5CE7] hover:underline underline-offset-4 whitespace-nowrap">Manage Events &rarr;</Link>
           </div>
-          <div className="grid grid-cols-2 gap-8">
+          <div className="grid grid-cols-2 gap-4 md:gap-8">
             <div>
-              <p className="text-black/40 text-xs font-black uppercase tracking-widest mb-1">Total Events</p>
-              <p className="text-4xl font-black text-black">{stats?.totalEvents}</p>
+              <p className="text-black/40 text-[10px] md:text-xs font-black uppercase tracking-widest mb-1">Total Events</p>
+              <p className="text-2xl md:text-4xl font-black text-black">{stats?.totalEvents}</p>
             </div>
             <div>
-              <p className="text-black/40 text-xs font-black uppercase tracking-widest mb-1">Occupancy</p>
+              <p className="text-black/40 text-[10px] md:text-xs font-black uppercase tracking-widest mb-1">Occupancy</p>
               <div className="flex items-end gap-2">
-                <p className="text-4xl font-black text-[#00B894]">{stats?.occupancyRate}%</p>
-                <div className="h-6 w-full bg-gray-100 rounded-full border border-black overflow-hidden mb-2">
+                <p className="text-2xl md:text-4xl font-black text-[#00B894]">{stats?.occupancyRate}%</p>
+                <div className="h-6 w-full bg-gray-100 rounded-full border border-black overflow-hidden mb-2 hidden sm:block">
                   <div className="h-full bg-[#00B894]" style={{ width: `${stats?.occupancyRate}%` }} />
                 </div>
               </div>
@@ -290,24 +290,24 @@ export default function AdminDashboard() {
         </div>
 
         {/* Shop Statistics */}
-        <div className="bg-white border-2 border-black rounded-[25px] p-8 neo-shadow">
-          <div className="flex items-center justify-between mb-8">
-            <h3 className="font-header text-2xl font-black text-black uppercase tracking-tight flex items-center gap-3">
+        <div className="bg-white border-2 border-black rounded-[25px] p-4 md:p-8 neo-shadow">
+          <div className="flex items-center justify-between mb-6 md:mb-8">
+            <h3 className="font-header text-lg md:text-2xl font-black text-black uppercase tracking-tight flex items-center gap-3">
               <div className="bg-[#74B9FF] p-2 rounded-lg border-2 border-black">
-                <Package className="w-5 h-5 text-white" />
+                <Package className="w-4 h-4 md:w-5 md:h-5 text-white" />
               </div>
               Shop Metrics
             </h3>
-            <Link href="/admin/products" className="text-[10px] font-black uppercase tracking-widest text-[#6C5CE7] hover:underline underline-offset-4">Manage Shop &rarr;</Link>
+            <Link href="/admin/products" className="text-[10px] font-black uppercase tracking-widest text-[#6C5CE7] hover:underline underline-offset-4 whitespace-nowrap">Manage Shop &rarr;</Link>
           </div>
-          <div className="grid grid-cols-2 gap-8">
+          <div className="grid grid-cols-2 gap-4 md:gap-8">
             <div>
-              <p className="text-black/40 text-xs font-black uppercase tracking-widest mb-1">Live Products</p>
-              <p className="text-4xl font-black text-black">{stats?.totalProducts}</p>
+              <p className="text-black/40 text-[10px] md:text-xs font-black uppercase tracking-widest mb-1">Live Products</p>
+              <p className="text-2xl md:text-4xl font-black text-black">{stats?.totalProducts}</p>
             </div>
             <div>
-              <p className="text-black/40 text-xs font-black uppercase tracking-widest mb-1">Stock Alerts</p>
-              <p className={`text-4xl font-black ${stats?.outOfStockCount ? 'text-[#FF7675]' : 'text-black/20'}`}>
+              <p className="text-black/40 text-[10px] md:text-xs font-black uppercase tracking-widest mb-1">Stock Alerts</p>
+              <p className={`text-2xl md:text-4xl font-black ${stats?.outOfStockCount ? 'text-[#FF7675]' : 'text-black/20'}`}>
                 {stats?.outOfStockCount || 'None'}
               </p>
             </div>
@@ -316,17 +316,17 @@ export default function AdminDashboard() {
       </div>
 
       {/* Recent Activity & Quick Actions */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
         {/* Recent Orders Table */}
-        <div className="lg:col-span-2 bg-white border-2 border-black rounded-[25px] p-8 neo-shadow overflow-hidden">
-          <h2 className="font-header text-2xl font-black text-black mb-8 flex items-center gap-3 uppercase tracking-tighter">
+        <div className="lg:col-span-2 bg-white border-2 border-black rounded-[25px] p-4 md:p-8 neo-shadow overflow-hidden">
+          <h2 className="font-header text-lg md:text-2xl font-black text-black mb-6 md:mb-8 flex items-center gap-3 uppercase tracking-tighter">
             <div className="bg-black p-2 rounded-lg">
               <ShoppingBag className="w-4 h-4 text-white" />
             </div>
             RECENT ORDERS
           </h2>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+          <div className="overflow-x-auto -mx-4 md:mx-0 px-4 md:px-0">
+            <table className="w-full text-left border-collapse min-w-[500px] md:min-w-0">
               <thead>
                 <tr className="border-b-2 border-black">
                   <th className="py-4 px-2 text-black font-black uppercase tracking-wider text-[10px]">ID</th>
@@ -341,11 +341,11 @@ export default function AdminDashboard() {
                     <td className="py-4 px-2 text-black font-bold font-mono text-xs">{order.id.substring(0, 8)}</td>
                     <td className="py-4 px-2 text-black font-black text-md">₹{order.totalPrice.toLocaleString()}</td>
                     <td className="py-4 px-2">
-                      <span className="px-2 py-0.5 bg-[#00B894] border border-black rounded text-black text-[10px] font-black uppercase">
+                      <span className="px-2 py-0.5 bg-[#00B894] border border-black rounded text-black text-[10px] font-black uppercase whitespace-nowrap">
                         {order.paymentStatus}
                       </span>
                     </td>
-                    <td className="py-4 px-2 text-black/40 font-bold text-[10px] uppercase">
+                    <td className="py-4 px-2 text-black/40 font-bold text-[10px] uppercase whitespace-nowrap">
                       {new Date(order.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                     </td>
                   </tr>
@@ -356,11 +356,11 @@ export default function AdminDashboard() {
         </div>
 
         {/* Extensive Quick Actions */}
-        <div className="bg-[#FFFDF5] border-2 border-black rounded-[25px] p-8 neo-shadow border-dashed">
-          <h2 className="font-header text-2xl font-black text-black mb-8 uppercase tracking-tighter">
+        <div className="bg-[#FFFDF5] border-2 border-black rounded-[25px] p-4 md:p-8 neo-shadow border-dashed">
+          <h2 className="font-header text-lg md:text-2xl font-black text-black mb-6 md:mb-8 uppercase tracking-tighter">
             🚀 Quick Links
           </h2>
-          <div className="space-y-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-3">
             <QuickLink href="/admin/game-settings" label="Game Console" color="#FFD93D" desc="Consolidated game management" />
             <QuickLink href="/admin/users" label="Users" color="#6C5CE7" desc="Member database & roles" />
             <QuickLink href="/admin/events" label="Events" color="#FF7675" desc="Booking & registrations" />
@@ -378,7 +378,7 @@ export default function AdminDashboard() {
 const StatCard = ({ title, value, icon: Icon, color, detail }: any) => (
   <motion.div
     whileHover={{ y: -4, x: 4 }}
-    className="border-2 border-black rounded-[20px] p-6 neo-shadow bg-white hover:shadow-none transition-all cursor-default"
+    className="border-2 border-black rounded-[20px] p-4 md:p-6 neo-shadow bg-white hover:shadow-none transition-all cursor-default"
   >
     <div className="flex items-center justify-between mb-4">
       <p className="font-black text-black/40 text-[10px] uppercase tracking-widest">{title}</p>
@@ -386,7 +386,7 @@ const StatCard = ({ title, value, icon: Icon, color, detail }: any) => (
         <Icon className="w-4 h-4 text-white" />
       </div>
     </div>
-    <p className="font-header text-4xl font-black text-black mb-2">{value}</p>
+    <p className="font-header text-2xl md:text-4xl font-black text-black mb-2 truncate">{value}</p>
     <p className="text-[10px] font-bold text-black/60 bg-[#FFFDF5] border border-black/10 px-2 py-1 rounded inline-block uppercase tracking-wider">{detail}</p>
   </motion.div>
 );
@@ -394,12 +394,12 @@ const StatCard = ({ title, value, icon: Icon, color, detail }: any) => (
 const QuickLink = ({ href, label, color, desc }: any) => (
   <Link
     href={href}
-    className="flex items-center gap-4 p-4 bg-white border-2 border-black rounded-xl hover:translate-x-1 hover:border-[#6C5CE7] transition-all group"
+    className="flex items-center gap-4 p-3 md:p-4 bg-white border-2 border-black rounded-xl hover:translate-x-1 hover:border-[#6C5CE7] transition-all group"
   >
-    <div className="w-2 h-10 rounded-full border border-black/20" style={{ backgroundColor: color }} />
-    <div>
-      <h4 className="font-black text-black text-sm uppercase group-hover:text-[#6C5CE7]">{label}</h4>
-      <p className="text-[10px] font-bold text-black/40">{desc}</p>
+    <div className="w-2 h-10 rounded-full border border-black/20 flex-shrink-0" style={{ backgroundColor: color }} />
+    <div className="min-w-0">
+      <h4 className="font-black text-black text-sm uppercase group-hover:text-[#6C5CE7] truncate">{label}</h4>
+      <p className="text-[10px] font-bold text-black/40 truncate">{desc}</p>
     </div>
   </Link>
 );
