@@ -405,7 +405,7 @@ const SiteContentManager = () => {
 // --- MAIN PAGE LAYOUT ---
 export default function MediaPage() {
     return (
-        <div className="p-8 pb-32 min-h-screen bg-[#FFFDF5]">
+        <div className="p-4 md:p-8 pb-32 min-h-screen bg-[#FFFDF5]">
             <div className="mb-8 border-b-2 border-black pb-8">
                 <h1 className="font-header text-5xl font-black text-[#2D3436] mb-2 uppercase tracking-tighter">Media & Content</h1>
                 <p className="text-[#2D3436]/60 font-bold text-lg">Manage site assets and page content in one place.</p>

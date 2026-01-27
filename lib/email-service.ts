@@ -1,6 +1,7 @@
 
 import nodemailer from 'nodemailer';
 import { getBaseEmailTemplate } from './email-templates';
+import { Logger } from '@/lib/logger';
 
 interface EmailOptions {
     to: string;
@@ -15,7 +16,7 @@ export const sendEmail = async ({ to, subject, text, html }: EmailOptions) => {
 
     if (!emailUser || !emailPass) {
         const msg = 'Email credentials not configured (EMAIL_USER/EMAIL_APP_PASSWORD).';
-        console.warn(msg);
+        Logger.warn(msg);
         return { success: false, error: msg };
     }
 
@@ -42,10 +43,10 @@ export const sendEmail = async ({ to, subject, text, html }: EmailOptions) => {
             html: html || getBaseEmailTemplate(subject, text || ''),
         });
 
-        console.log(`Email sent successfully: ${info.messageId}`);
+        Logger.info(`Email sent successfully: ${info.messageId}`);
         return { success: true, messageId: info.messageId };
     } catch (error: any) {
-        console.error('SMTP Transmission Error:', error);
+        Logger.error('SMTP Transmission Error:', error);
         return {
             success: false,
             error: error.message || 'Unknown SMTP error',

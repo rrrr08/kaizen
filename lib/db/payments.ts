@@ -10,6 +10,7 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 import { getFirebaseDb } from "@/lib/firebase";
+import { Logger } from '@/lib/logger';
 
 export async function createPaymentOrder(
   eventId: string,
@@ -39,7 +40,7 @@ export async function createPaymentOrder(
       walletPointsUsed,
     };
   } catch (error) {
-    console.error('Error creating payment order:', error);
+    Logger.error('Error creating payment order:', error);
     throw error;
   }
 }
@@ -113,12 +114,9 @@ export async function completeRegistration(
       registrationData.orderId = orderId;
     }
 
-    console.log('Creating event registration:', registrationData);
-    console.log('User ID:', userId);
-    console.log('Event ID:', eventId);
+    Logger.info('Creating event registration:', { ...registrationData, userId, eventId });
     const regRef = await addDoc(registrations, registrationData);
-    console.log('Registration created successfully with ID:', regRef.id);
-    console.log('Saved to Firestore with userId:', userId);
+    Logger.info('Registration created successfully with ID:', regRef.id);
 
     // Update payment order status only if orderId exists
     if (orderId) {
@@ -143,7 +141,7 @@ export async function completeRegistration(
           });
         }
       } catch (error) {
-        console.error('Error updating wallet:', error);
+        Logger.error('Error updating wallet:', error);
       }
     }
 
@@ -154,12 +152,9 @@ export async function completeRegistration(
         registered: increment(1),
         updatedAt: serverTimestamp(),
       });
-      console.log(`Successfully incremented registered count for event ${eventId}`);
+      Logger.info(`Successfully incremented registered count for event ${eventId}`);
     } catch (error) {
-      console.error('Error updating event count:', error);
-      // Log more details about the error
-      console.error('Event ID:', eventId);
-      console.error('Error details:', JSON.stringify(error, null, 2));
+      Logger.error('Error updating event count:', { error, eventId });
     }
 
     return {
@@ -171,7 +166,7 @@ export async function completeRegistration(
       userId,
     };
   } catch (error) {
-    console.error('Error completing registration:', error);
+    Logger.error('Error completing registration:', error);
     throw error;
   }
 }
@@ -197,7 +192,7 @@ export async function getUserWallet(userId: string) {
       updatedAt: data.updatedAt?.toDate(),
     };
   } catch (error) {
-    console.error('Error getting wallet:', error);
+    Logger.error('Error getting wallet:', error);
     throw error;
   }
 }

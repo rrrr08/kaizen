@@ -348,7 +348,7 @@ export default function AdminBlogPage() {
               </button>
             </div>
 
-            <form onSubmit={onSubmit} className="p-8 space-y-6">
+            <form onSubmit={onSubmit} className="p-5 md:p-8 space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="md:col-span-2">
                   <label className="block text-black font-black text-xs uppercase tracking-widest mb-2">Title *</label>

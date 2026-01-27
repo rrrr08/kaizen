@@ -24,6 +24,7 @@ import { USER_ROLES, ROLE_LABELS, getRoleColor, getRoleIcon } from '@/lib/roles'
 import { Users, Search, Edit3, Shield, Check, X, Eye, Calendar, ShoppingBag, Package } from 'lucide-react';
 import RoleProtected from '@/components/auth/RoleProtected';
 import { usePopup } from '@/app/context/PopupContext';
+import { Logger } from '@/lib/logger';
 
 interface User {
   id: string;
@@ -94,7 +95,7 @@ const UserManagementPage = () => {
           const data = doc.data();
           // Debug logging
           if (data.email === 'rudrakshfanse64@gmail.com' || data.isBanned) {
-            console.log('User Data Debug:', { name: data.name, email: data.email, isBanned: data.isBanned, role: data.role });
+            Logger.info('User Data Debug:', { name: data.name, email: data.email, isBanned: data.isBanned, role: data.role });
           }
           return {
             id: doc.id,
@@ -107,7 +108,7 @@ const UserManagementPage = () => {
         });
         setUsers(userData);
       } catch (error) {
-        console.error('Error fetching users:', error);
+        Logger.error('Error fetching users:', error);
       } finally {
         setLoading(false);
       }
@@ -124,7 +125,7 @@ const UserManagementPage = () => {
         setSelectedUser(null);
         await showAlert('User role updated successfully!', 'success');
       } catch (error) {
-        console.error('Error updating role:', error);
+        Logger.error('Error updating role:', error);
         await showAlert('Failed to update role. Please check your permissions.', 'error');
       }
     }
@@ -146,7 +147,7 @@ const UserManagementPage = () => {
         'success'
       );
     } catch (error) {
-      console.error('Error updating ban status:', error);
+      Logger.error('Error updating ban status:', error);
       await showAlert('Failed to update ban status', 'error');
     }
   };
@@ -181,7 +182,7 @@ const UserManagementPage = () => {
 
       await showAlert(`Database Fixed: Updated ${updatedCount} users.`, 'success');
     } catch (error) {
-      console.error('Error syncing:', error);
+      Logger.error('Error syncing:', error);
       await showAlert('Failed to sync database', 'error');
     } finally {
       setLoading(false);
@@ -221,7 +222,7 @@ const UserManagementPage = () => {
               eventName = eventResult.event?.title || 'Unknown Event';
             }
           } catch (error) {
-            console.error('Error fetching event details:', error);
+            Logger.error('Error fetching event details:', error);
           }
         }
 
@@ -264,7 +265,7 @@ const UserManagementPage = () => {
 
       setUserPurchases(purchases);
     } catch (error) {
-      console.error('Error fetching user details:', error);
+      Logger.error('Error fetching user details:', error);
     } finally {
       setLoadingDetails(false);
     }

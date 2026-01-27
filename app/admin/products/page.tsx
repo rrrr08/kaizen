@@ -506,7 +506,7 @@ export default function ProductsPage() {
             </div>
 
             {/* Form */}
-            <form onSubmit={handleSubmit} className="p-8 space-y-6">
+            <form onSubmit={handleSubmit} className="p-5 md:p-8 space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Name */}
                 <div className="md:col-span-2">
@@ -729,13 +729,13 @@ export default function ProductsPage() {
                     <button type="button" onClick={addFeature} className="text-xs bg-black text-white px-2 py-1 rounded">Add Feature</button>
                   </div>
                   {formData.features.map((feature, index) => (
-                    <div key={index} className="flex gap-2 mb-2">
+                    <div key={index} className="flex flex-col sm:flex-row gap-2 mb-2">
                       <input
                         type="text"
                         placeholder="Title"
                         value={feature.title}
                         onChange={(e) => updateFeature(index, 'title', e.target.value)}
-                        className="flex-1 bg-white border-2 border-black rounded-lg px-2 py-1 text-sm font-bold"
+                        className="w-full sm:flex-1 bg-white border-2 border-black rounded-lg px-2 py-1 text-sm font-bold"
                         maxLength={50}
                       />
                       <input
@@ -743,10 +743,10 @@ export default function ProductsPage() {
                         placeholder="Description"
                         value={feature.description}
                         onChange={(e) => updateFeature(index, 'description', e.target.value)}
-                        className="flex-1 bg-white border-2 border-black rounded-lg px-2 py-1 text-sm"
+                        className="w-full sm:flex-1 bg-white border-2 border-black rounded-lg px-2 py-1 text-sm"
                         maxLength={200}
                       />
-                      <button type="button" onClick={() => removeFeature(index)} className="text-red-500"><X size={16} /></button>
+                      <button type="button" onClick={() => removeFeature(index)} className="text-red-500 self-end sm:self-center"><X size={16} /></button>
                     </div>
                   ))}
                 </div>
@@ -759,13 +759,13 @@ export default function ProductsPage() {
                     <button type="button" onClick={addHowToPlay} className="text-xs bg-black text-white px-2 py-1 rounded">Add Step</button>
                   </div>
                   {formData.howToPlay.map((step, index) => (
-                    <div key={index} className="flex gap-2 mb-2">
+                    <div key={index} className="flex flex-col sm:flex-row gap-2 mb-2">
                       <input
                         type="text"
                         placeholder="Step Title (e.g. Step 1)"
                         value={step.title}
                         onChange={(e) => updateHowToPlay(index, 'title', e.target.value)}
-                        className="w-1/4 bg-white border-2 border-black rounded-lg px-2 py-1 text-sm font-bold"
+                        className="w-full sm:w-1/4 bg-white border-2 border-black rounded-lg px-2 py-1 text-sm font-bold"
                         maxLength={50}
                       />
                       <textarea
@@ -776,7 +776,7 @@ export default function ProductsPage() {
                         rows={2}
                         maxLength={500}
                       />
-                      <button type="button" onClick={() => removeHowToPlay(index)} className="text-red-500"><X size={16} /></button>
+                      <button type="button" onClick={() => removeHowToPlay(index)} className="text-red-500 self-end sm:self-center"><X size={16} /></button>
                     </div>
                   ))}
                 </div>
