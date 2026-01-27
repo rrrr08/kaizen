@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Plus, Save } from 'lucide-react';
+import { ArrowLeft, Plus, Save, X } from 'lucide-react';
 import Link from 'next/link';
 import ImageUpload from '@/components/ui/ImageUpload';
 import { ExperienceCategory } from '@/lib/types';
@@ -244,7 +244,7 @@ export default function NewExperienceCategoryPage() {
                       onClick={() => removeArrayItem('problemsSolved', index)}
                       className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-colors font-bold text-lg"
                     >
-                      ×
+                      <X size={20} />
                     </button>
                   )}
                 </div>
@@ -278,7 +278,7 @@ export default function NewExperienceCategoryPage() {
                       onClick={() => removeArrayItem('gamesFormats', index)}
                       className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-colors font-bold text-lg"
                     >
-                      ×
+                      <X size={20} />
                     </button>
                   )}
                 </div>

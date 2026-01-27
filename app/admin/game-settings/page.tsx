@@ -7,7 +7,8 @@ import { useRouter } from 'next/navigation';
 import {
     Gamepad2, Trophy, TrendingUp, Database,
     Plus, Trash2, Edit2, Save, AlertCircle,
-    Settings, Zap, CheckCircle, Info
+    Settings, Zap, CheckCircle, Info,
+    Grid3x3, HelpCircle, Search, Type, Skull, Lightbulb, Crown, Bomb, Activity, Calculator, Puzzle, Disc, Target, Shield, Swords, Coins, Users
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { doc, getDoc, setDoc, getFirestore } from 'firebase/firestore';
@@ -59,6 +60,14 @@ interface XPSource {
 type GameType = 'riddle' | 'trivia' | 'wordle' | 'hangman' | 'wordsearch' | 'chess';
 
 const db = getFirestore(app);
+
+const TIER_ICONS: Record<string, any> = {
+    'User': Users,
+    'Target': Target,
+    'Shield': Shield,
+    'Swords': Swords,
+    'Crown': Crown
+};
 
 export default function GameSettingsDashboard() {
     const { user, loading: authLoading, isAdmin } = useAuth();
@@ -268,7 +277,7 @@ export default function GameSettingsDashboard() {
             badge: 'Grey Meeple',
             perk: 'None',
             color: '#94a3b8',
-            icon: '♙',
+            icon: 'User',
             unlockPrice: 0
         },
         {
@@ -278,7 +287,7 @@ export default function GameSettingsDashboard() {
             badge: 'Green Pawn',
             perk: 'Early access to Event Tickets',
             color: '#34d399',
-            icon: '♟',
+            icon: 'Target',
             unlockPrice: 2000
         },
         {
@@ -288,7 +297,7 @@ export default function GameSettingsDashboard() {
             badge: 'Blue Rook',
             perk: '5% off all Workshops',
             color: '#60a5fa',
-            icon: '♜',
+            icon: 'Shield',
             unlockPrice: 5000
         },
         {
@@ -298,7 +307,7 @@ export default function GameSettingsDashboard() {
             badge: 'Purple Knight',
             perk: 'Priority access & bonus XP on Experiences',
             color: '#a78bfa',
-            icon: '♞',
+            icon: 'Swords',
             unlockPrice: 7500
         },
         {
@@ -308,7 +317,7 @@ export default function GameSettingsDashboard() {
             badge: 'Gold Crown',
             perk: 'VIP Seating at Game Nights',
             color: '#fbbf24',
-            icon: '♚',
+            icon: 'Crown',
             unlockPrice: 10000
         }
     ];
@@ -655,22 +664,25 @@ export default function GameSettingsDashboard() {
                                 <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
                                     {Object.entries(settings).map(([id, config]) => {
                                         // Game-specific icons and colors
-                                        const gameStyles: Record<string, { icon: string; color: string; bg: string }> = {
-                                            '2048': { icon: '🎯', color: '#FF6B6B', bg: '#FFE5E5' },
-                                            riddle: { icon: '🧩', color: '#6C5CE7', bg: '#F0EDFF' },
-                                            sudoku: { icon: '📊', color: '#00B894', bg: '#E5F9F4' },
-                                            wordsearch: { icon: '🔍', color: '#FDCB6E', bg: '#FFF9E5' },
-                                            wordle: { icon: '🎮', color: '#A29BFE', bg: '#F0EDFF' },
-                                            hangman: { icon: '🎭', color: '#FF7675', bg: '#FFE9E9' },
-                                            trivia: { icon: '💡', color: '#74B9FF', bg: '#E8F4FF' },
-                                            chess: { icon: '♟️', color: '#2D3436', bg: '#F5F6FA' },
-                                            memory: { icon: '🧠', color: '#A29BFE', bg: '#F0EDFF' },
-                                            tictactoe: { icon: '❌', color: '#FD79A8', bg: '#FFE9F5' },
-                                            minesweeper: { icon: '💣', color: '#E17055', bg: '#FFE9E3' },
-                                            snake: { icon: '🐍', color: '#55EFC4', bg: '#E5FFF8' }
+                                        // Game-specific icons and colors
+                                        const gameStyles: Record<string, { icon: React.ReactNode; color: string; bg: string }> = {
+                                            '2048': { icon: <Grid3x3 size={40} />, color: '#FF6B6B', bg: '#FFE5E5' },
+                                            riddle: { icon: <HelpCircle size={40} />, color: '#6C5CE7', bg: '#F0EDFF' },
+                                            sudoku: { icon: <Grid3x3 size={40} />, color: '#00B894', bg: '#E5F9F4' },
+                                            wordsearch: { icon: <Search size={40} />, color: '#FDCB6E', bg: '#FFF9E5' },
+                                            wordle: { icon: <Type size={40} />, color: '#A29BFE', bg: '#F0EDFF' },
+                                            hangman: { icon: <Skull size={40} />, color: '#FF7675', bg: '#FFE9E9' },
+                                            trivia: { icon: <Lightbulb size={40} />, color: '#74B9FF', bg: '#E8F4FF' },
+                                            chess: { icon: <Crown size={40} />, color: '#2D3436', bg: '#F5F6FA' },
+                                            memory: { icon: <Puzzle size={40} />, color: '#A29BFE', bg: '#F0EDFF' },
+                                            tictactoe: { icon: <Activity size={40} />, color: '#FD79A8', bg: '#FFE9F5' },
+                                            minesweeper: { icon: <Bomb size={40} />, color: '#E17055', bg: '#FFE9E3' },
+                                            snake: { icon: <Activity size={40} />, color: '#55EFC4', bg: '#E5FFF8' },
+                                            mathquiz: { icon: <Calculator size={40} />, color: '#74B9FF', bg: '#E8F4FF' },
+                                            puzzles: { icon: <Puzzle size={40} />, color: '#94a3b8', bg: '#f1f5f9' }
                                         };
 
-                                        const style = gameStyles[id] || { icon: '🎲', color: '#6C5CE7', bg: '#F0EDFF' };
+                                        const style = gameStyles[id] || { icon: <Gamepad2 size={40} />, color: '#6C5CE7', bg: '#F0EDFF' };
 
                                         return (
                                             <motion.div
@@ -775,7 +787,7 @@ export default function GameSettingsDashboard() {
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                                 <div className="bg-white border-2 border-black p-8 rounded-[40px] neo-shadow h-fit">
                                     <div className="flex justify-between items-center mb-8">
-                                        <h2 className="font-header text-3xl italic">🎡 WHEEL ODDS</h2>
+                                        <h2 className="font-header text-3xl italic flex items-center gap-2"><Disc size={32} /> WHEEL ODDS</h2>
                                         <button
                                             onClick={() => setPrizes([...prizes, { id: `new_${Date.now()}`, type: 'JP', value: 10, label: '10 JP', probability: 0, color: '#000000' }])}
                                             className="p-3 bg-[#00B894] text-white rounded-xl border-2 border-black neo-shadow-sm"
@@ -808,7 +820,7 @@ export default function GameSettingsDashboard() {
                                 </div>
 
                                 <div className="bg-white border-2 border-black p-8 rounded-[40px] neo-shadow">
-                                    <h2 className="font-header text-3xl mb-6 italic text-[#6C5CE7]">💰 ECONOMY & POINTS</h2>
+                                    <h2 className="font-header text-3xl mb-6 italic text-[#6C5CE7] flex items-center gap-2"><Coins size={32} /> ECONOMY & POINTS</h2>
 
                                     {/* Store Economy Settings */}
                                     <div className="grid gap-6 mb-8 pb-8 border-b-2 border-dashed border-black/10">
@@ -888,7 +900,23 @@ export default function GameSettingsDashboard() {
                                                 <div key={i} className="p-6 bg-[#FFFDF5] border-2 border-black rounded-3xl relative">
                                                     <span className="absolute -top-3 left-6 px-3 py-1 bg-black text-white text-[10px] font-black rounded-full uppercase italic">TIER 0{i + 1}</span>
                                                     <div className="flex gap-4 items-center mb-4">
-                                                        <input value={t.icon} onChange={e => { const n = [...tiers]; n[i].icon = e.target.value; setTiers(n); }} className="w-16 h-16 text-4xl border-2 border-black/10 rounded-2xl bg-white text-center" />
+                                                        <div className="relative">
+                                                            <div className="w-16 h-16 border-2 border-black/10 rounded-2xl bg-white flex items-center justify-center text-[#2D3436]">
+                                                                {(() => {
+                                                                    const Icon = TIER_ICONS[t.icon] || Users;
+                                                                    return <Icon size={32} />;
+                                                                })()}
+                                                            </div>
+                                                            <select
+                                                                value={t.icon}
+                                                                onChange={e => { const n = [...tiers]; n[i].icon = e.target.value; setTiers(n); }}
+                                                                className="absolute inset-0 opacity-0 cursor-pointer"
+                                                            >
+                                                                {Object.keys(TIER_ICONS).map(iconKey => (
+                                                                    <option key={iconKey} value={iconKey}>{iconKey}</option>
+                                                                ))}
+                                                            </select>
+                                                        </div>
                                                         <div className="flex-1">
                                                             <input value={t.name} onChange={e => { const n = [...tiers]; n[i].name = e.target.value; setTiers(n); }} className="w-full bg-transparent font-header text-2xl outline-none" />
                                                             <input value={t.perk} onChange={e => { const n = [...tiers]; n[i].perk = e.target.value; setTiers(n); }} className="w-full bg-transparent font-bold text-xs text-black/40 outline-none" placeholder="Perk details..." />

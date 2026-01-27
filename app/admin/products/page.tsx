@@ -411,8 +411,9 @@ export default function ProductsPage() {
                 </div>
               )}
 
-              <div className="absolute top-4 right-4 bg-white border-2 border-black px-3 py-1 rounded-full neo-shadow-sm z-10">
-                <p className="text-black font-black text-sm">⭐ {product.rating}</p>
+              <div className="absolute top-4 right-4 bg-white border-2 border-black px-3 py-1 rounded-full neo-shadow-sm z-10 flex items-center gap-1">
+                <Star size={14} fill="#FFD93D" className="text-[#FFD93D]" />
+                <p className="text-black font-black text-sm">{product.rating}</p>
               </div>
               {product.stock === 0 && (
                 <div className="absolute inset-0 bg-black/60 flex items-center justify-center backdrop-blur-sm z-20">
