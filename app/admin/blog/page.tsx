@@ -215,19 +215,19 @@ export default function AdminBlogPage() {
   }
 
   return (
-    <div className="p-8 pb-16 min-h-screen bg-[#FFFDF5]">
+    <div className="px-3 py-4 pb-16 md:p-8 md:pb-16 min-h-screen bg-[#FFFDF5] overflow-x-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8 border-b-2 border-black pb-8">
+      <div className="flex flex-col md:flex-row items-center md:items-start justify-between mb-8 border-b-2 border-black pb-8 gap-4 text-center md:text-left">
         <div>
-          <h1 className="font-header text-5xl font-black text-[#2D3436] mb-2 uppercase tracking-tighter">Blog Management</h1>
-          <p className="text-[#2D3436]/60 font-bold text-lg">Create, edit, and manage blog posts</p>
+          <h1 className="font-header text-3xl md:text-5xl font-black text-[#2D3436] mb-2 uppercase tracking-tighter">Blog Management</h1>
+          <p className="text-[#2D3436]/60 font-bold text-sm md:text-lg">Create, edit, and manage blog posts</p>
         </div>
         <button
           onClick={onAdd}
           className="px-6 py-3 bg-[#FFD93D] text-black font-black uppercase tracking-wide rounded-xl border-2 border-black neo-shadow hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all flex items-center gap-2"
         >
           <Plus className="w-5 h-5" strokeWidth={3} />
-          New Post
+          <span className="text-sm md:text-base">New Post</span>
         </button>
       </div>
 

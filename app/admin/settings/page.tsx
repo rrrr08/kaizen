@@ -145,12 +145,12 @@ export default function AdminSettingsPage() {
   }
 
   return (
-    <div className="min-h-screen pt-24 pb-16 px-6 md:px-12 bg-[#FFFDF5]">
+    <div className="min-h-screen pt-24 pb-16 px-3 md:px-12 bg-[#FFFDF5] overflow-x-hidden">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="mb-12 border-b-2 border-black pb-8">
-          <h1 className="font-header text-6xl font-black text-black mb-2 uppercase tracking-tighter">Admin Settings</h1>
-          <p className="text-xl text-black/60 font-bold">Customize all platform configurations</p>
+        <div className="mb-8 md:mb-12 border-b-2 border-black pb-8 text-center md:text-left">
+          <h1 className="font-header text-4xl md:text-6xl font-black text-black mb-2 uppercase tracking-tighter">Admin Settings</h1>
+          <p className="text-sm md:text-xl text-black/60 font-bold">Customize all platform configurations</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

@@ -14,8 +14,8 @@ const Footer = () => {
 
   return (
     <footer className="bg-[#FFFDF5] border-t-2 border-black py-12 px-6">
-      <div className="container mx-auto grid grid-cols-1 md:grid-cols-3 gap-12">
-        <div className="space-y-6">
+      <div className="container mx-auto grid grid-cols-2 md:grid-cols-3 gap-8 md:gap-12">
+        <div className="space-y-6 col-span-2 md:col-span-1">
           <h2 className="text-3xl font-black font-display text-black">Joy Juncture</h2>
           <p className="font-medium text-[#2D3436]/60">
             Joy Juncture is your premium online shopping platform for board games and community experiences. Discover amazing deals at joy-juncture.com.

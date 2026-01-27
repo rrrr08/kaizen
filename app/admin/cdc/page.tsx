@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Activity, Database, TrendingUp, RefreshCw, Download, Search, Filter, Zap, Package, Users, Gamepad2, Calendar } from 'lucide-react';
+import { Activity, Database, TrendingUp, RefreshCw, Download, Search, Filter, Zap, Package, Users, Gamepad2, Calendar, Sparkles, FileText, Trash2, BarChart3, Clock, Timer, Pause, ArrowLeft, File, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
 
 interface ChangeEvent {
@@ -58,10 +58,10 @@ export default function CDCPage() {
 
     const getOperationIcon = (operation: string) => {
         switch (operation) {
-            case 'create': return '✨';
-            case 'update': return '📝';
-            case 'delete': return '🗑️';
-            default: return '📊';
+            case 'create': return <Sparkles className="w-4 h-4" />;
+            case 'update': return <FileText className="w-4 h-4" />;
+            case 'delete': return <Trash2 className="w-4 h-4" />;
+            default: return <BarChart3 className="w-4 h-4" />;
         }
     };
 
@@ -130,7 +130,7 @@ export default function CDCPage() {
                         href="/admin"
                         className="inline-block mb-6 font-black text-xs tracking-[0.2em] uppercase text-black/40 hover:text-black transition-colors"
                     >
-                        ← Back to Admin
+                        <ArrowLeft className="w-4 h-4 inline mr-2" /> Back to Admin
                     </Link>
 
                     <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
@@ -150,11 +150,11 @@ export default function CDCPage() {
                             <button
                                 onClick={() => setAutoRefresh(!autoRefresh)}
                                 className={`px-4 py-2 rounded-xl border-4 border-black font-black uppercase text-xs transition-all ${autoRefresh
-                                        ? 'bg-[#00B894] text-white shadow-[4px_4px_0px_#000]'
-                                        : 'bg-white text-black shadow-[2px_2px_0px_#000] hover:shadow-[4px_4px_0px_#000]'
+                                    ? 'bg-[#00B894] text-white shadow-[4px_4px_0px_#000]'
+                                    : 'bg-white text-black shadow-[2px_2px_0px_#000] hover:shadow-[4px_4px_0px_#000]'
                                     }`}
                             >
-                                {autoRefresh ? '⚡ Live' : '⏸️ Paused'}
+                                {autoRefresh ? <span className="flex items-center gap-2"><Zap className="w-3 h-3" /> Live</span> : <span className="flex items-center gap-2"><Pause className="w-3 h-3" /> Paused</span>}
                             </button>
                             <button
                                 onClick={() => loadChanges(true)}
@@ -176,10 +176,10 @@ export default function CDCPage() {
                     {/* Stats Cards */}
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
                         {[
-                            { label: 'Total', count: stats.total, color: 'from-black to-gray-800', icon: '📊' },
-                            { label: 'Created', count: stats.creates, color: 'from-[#00B894] to-[#00a180]', icon: '✨' },
-                            { label: 'Updated', count: stats.updates, color: 'from-[#74B9FF] to-[#0984e3]', icon: '📝' },
-                            { label: 'Deleted', count: stats.deletes, color: 'from-[#FF7675] to-[#d63031]', icon: '🗑️' }
+                            { label: 'Total', count: stats.total, color: 'from-black to-gray-800', icon: <BarChart3 className="w-8 h-8" /> },
+                            { label: 'Created', count: stats.creates, color: 'from-[#00B894] to-[#00a180]', icon: <Sparkles className="w-8 h-8" /> },
+                            { label: 'Updated', count: stats.updates, color: 'from-[#74B9FF] to-[#0984e3]', icon: <FileText className="w-8 h-8" /> },
+                            { label: 'Deleted', count: stats.deletes, color: 'from-[#FF7675] to-[#d63031]', icon: <Trash2 className="w-8 h-8" /> }
                         ].map((stat) => (
                             <div
                                 key={stat.label}
@@ -235,8 +235,8 @@ export default function CDCPage() {
                                         key={collection.value}
                                         onClick={() => setFilter(collection.value)}
                                         className={`px-4 py-2 rounded-xl border-4 border-black font-black uppercase text-xs transition-all flex items-center gap-2 ${filter === collection.value
-                                                ? 'bg-[#FF7675] text-white shadow-[4px_4px_0px_#000] -translate-y-1'
-                                                : 'bg-white text-black shadow-[2px_2px_0px_#000] hover:shadow-[4px_4px_0px_#000] hover:-translate-y-1'
+                                            ? 'bg-[#FF7675] text-white shadow-[4px_4px_0px_#000] -translate-y-1'
+                                            : 'bg-white text-black shadow-[2px_2px_0px_#000] hover:shadow-[4px_4px_0px_#000] hover:-translate-y-1'
                                             }`}
                                     >
                                         <Icon className="w-4 h-4" />
@@ -292,19 +292,19 @@ export default function CDCPage() {
                                                     <span>{getOperationIcon(change.operation)}</span>
                                                     {change.operation}
                                                 </span>
-                                                <span className="text-xs font-bold text-black/50 bg-black/10 px-3 py-1 rounded-lg border border-black/20">
-                                                    📄 {change.documentId.slice(0, 12)}...
+                                                <span className="text-xs font-bold text-black/50 bg-black/10 px-3 py-1 rounded-lg border border-black/20 flex items-center gap-1">
+                                                    <File className="w-3 h-3" /> {change.documentId.slice(0, 12)}...
                                                 </span>
                                                 {change.userId && (
-                                                    <span className="text-xs font-bold text-black/50 bg-black/10 px-3 py-1 rounded-lg border border-black/20">
-                                                        👤 {change.userId.slice(0, 8)}...
+                                                    <span className="text-xs font-bold text-black/50 bg-black/10 px-3 py-1 rounded-lg border border-black/20 flex items-center gap-1">
+                                                        <Users className="w-3 h-3" /> {change.userId.slice(0, 8)}...
                                                     </span>
                                                 )}
                                             </div>
 
                                             <div className="flex items-center gap-4 text-xs font-bold text-black/40">
-                                                <span>🕐 {new Date(change.timestamp).toLocaleString()}</span>
-                                                <span>⏱️ {Math.floor((Date.now() - change.timestamp) / 1000 / 60)}m ago</span>
+                                                <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {new Date(change.timestamp).toLocaleString()}</span>
+                                                <span className="flex items-center gap-1"><Timer className="w-3 h-3" /> {Math.floor((Date.now() - change.timestamp) / 1000 / 60)}m ago</span>
                                             </div>
                                         </div>
                                     </div>
@@ -322,10 +322,10 @@ export default function CDCPage() {
                             Order Changes
                         </h3>
                         <ul className="space-y-2 text-sm font-bold text-black/70">
-                            <li className="flex items-center gap-2">✅ Inventory updated</li>
-                            <li className="flex items-center gap-2">✅ Email sent</li>
-                            <li className="flex items-center gap-2">✅ SMS sent</li>
-                            <li className="flex items-center gap-2">✅ Analytics tracked</li>
+                            <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-[#00B894]" /> Inventory updated</li>
+                            <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-[#00B894]" /> Email sent</li>
+                            <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-[#00B894]" /> SMS sent</li>
+                            <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-[#00B894]" /> Analytics tracked</li>
                         </ul>
                     </div>
 
@@ -335,10 +335,10 @@ export default function CDCPage() {
                             Game Changes
                         </h3>
                         <ul className="space-y-2 text-sm font-bold text-black/70">
-                            <li className="flex items-center gap-2">✅ Leaderboard updated</li>
-                            <li className="flex items-center gap-2">✅ Achievements checked</li>
-                            <li className="flex items-center gap-2">✅ Notifications sent</li>
-                            <li className="flex items-center gap-2">✅ Analytics tracked</li>
+                            <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-[#FFD93D]" /> Leaderboard updated</li>
+                            <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-[#FFD93D]" /> Achievements checked</li>
+                            <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-[#FFD93D]" /> Notifications sent</li>
+                            <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-[#FFD93D]" /> Analytics tracked</li>
                         </ul>
                     </div>
 
@@ -348,10 +348,10 @@ export default function CDCPage() {
                             User Changes
                         </h3>
                         <ul className="space-y-2 text-sm font-bold text-black/70">
-                            <li className="flex items-center gap-2">✅ Cache invalidated</li>
-                            <li className="flex items-center gap-2">✅ Search index updated</li>
-                            <li className="flex items-center gap-2">✅ Leaderboard synced</li>
-                            <li className="flex items-center gap-2">✅ Profile refreshed</li>
+                            <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-[#6C5CE7]" /> Cache invalidated</li>
+                            <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-[#6C5CE7]" /> Search index updated</li>
+                            <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-[#6C5CE7]" /> Leaderboard synced</li>
+                            <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-[#6C5CE7]" /> Profile refreshed</li>
                         </ul>
                     </div>
                 </div>

@@ -273,24 +273,31 @@ export default function ProductsPage() {
   }
 
   return (
-    <div className="p-8 pb-16 min-h-screen bg-[#FFFDF5]">
+    <div className="px-3 py-4 pb-16 md:p-8 md:pb-16 min-h-screen bg-[#FFFDF5] overflow-x-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8 border-b-2 border-black pb-8">
-        <div>
-          <h1 className="font-header text-5xl font-black text-[#2D3436] mb-2 uppercase tracking-tighter">Products</h1>
-          <p className="text-[#2D3436]/60 font-bold text-lg">Manage all products in your shop</p>
+      <div className="mb-8 md:mb-12 border-b-2 border-black pb-6 md:pb-8">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3 md:gap-4">
+            <div className="p-2 bg-[#6C5CE7] rounded-lg border-2 border-black neo-shadow-sm">
+              <LayoutGrid className="w-5 h-5 md:w-6 md:h-6 text-white" />
+            </div>
+            <div>
+              <h1 className="font-header text-3xl md:text-6xl font-black text-[#2D3436] uppercase tracking-tighter">Products</h1>
+              <p className="text-[#2D3436]/60 font-bold text-sm md:text-lg">Manage all products in your shop</p>
+            </div>
+          </div>
+          <button
+            onClick={handleAdd}
+            className="px-4 md:px-6 py-2 md:py-3 bg-[#FFD93D] text-[#2D3436] font-black uppercase tracking-wide rounded-xl border-2 border-black neo-shadow hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all flex items-center gap-2 text-sm md:text-base"
+          >
+            <Plus className="w-4 h-4 md:w-5 md:h-5" strokeWidth={3} />
+            Add Product
+          </button>
         </div>
-        <button
-          onClick={handleAdd}
-          className="px-6 py-3 bg-[#FFD93D] text-[#2D3436] font-black uppercase tracking-wide rounded-xl border-2 border-black neo-shadow hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all flex items-center gap-2"
-        >
-          <Plus className="w-5 h-5" strokeWidth={3} />
-          Add Product
-        </button>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6 mb-12">
         <div className="bg-[#6C5CE7] border-2 border-black rounded-[20px] p-6 neo-shadow hover:-translate-y-1 transition-transform">
           <p className="text-white text-xs font-black uppercase tracking-widest mb-2">Total Products</p>
           <p className="font-header text-5xl font-black text-white">{filteredProducts.length}</p>
@@ -404,8 +411,9 @@ export default function ProductsPage() {
                 </div>
               )}
 
-              <div className="absolute top-4 right-4 bg-white border-2 border-black px-3 py-1 rounded-full neo-shadow-sm z-10">
-                <p className="text-black font-black text-sm">⭐ {product.rating}</p>
+              <div className="absolute top-4 right-4 bg-white border-2 border-black px-3 py-1 rounded-full neo-shadow-sm z-10 flex items-center gap-1">
+                <Star size={14} fill="#FFD93D" className="text-[#FFD93D]" />
+                <p className="text-black font-black text-sm">{product.rating}</p>
               </div>
               {product.stock === 0 && (
                 <div className="absolute inset-0 bg-black/60 flex items-center justify-center backdrop-blur-sm z-20">
