@@ -7,6 +7,7 @@ import { getTier, fetchTiersFromFirebase, fetchRewardsConfigFromFirebase, REWARD
 import { getServerTodayString, getServerYesterdayString, getDaysDifference } from '@/lib/date-utils';
 import { doc, onSnapshot, updateDoc, increment, setDoc, getFirestore, getDoc, collection, query, orderBy, limit, startAfter, getDocs, QueryDocumentSnapshot, DocumentData, Timestamp, runTransaction } from 'firebase/firestore';
 import { app } from '@/lib/firebase';
+import { Logger } from '@/lib/logger';
 
 export interface Transaction {
   id: string;
@@ -205,11 +206,11 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
         });
 
       } else {
-        console.log("User profile not found in GamificationContext (waiting for creation)");
+        Logger.info("User profile not found in GamificationContext (waiting for creation)");
       }
       setLoading(false);
     }, (error) => {
-      console.error("Firestore listener error:", error);
+      Logger.error("Firestore listener error:", error);
       // Fallback: Try one-time fetch instead of real-time listener
       import('firebase/firestore').then(({ getDoc }) => {
         getDoc(userRef).then(docSnap => {
@@ -232,7 +233,7 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
           }
           setLoading(false);
         }).catch(err => {
-          console.error("Fallback fetch failed:", err);
+          Logger.error("Fallback fetch failed:", err);
           setLoading(false);
         });
       });
@@ -261,7 +262,7 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
       // Only attempt update if local state shows it's not updated yet
       // updateStreak() has internal checks strictly against DB/logic too
       if (streak.lastActiveDate !== today) {
-        updateStreak().catch(err => console.error("Auto-streak update failed:", err));
+        updateStreak().catch(err => Logger.error("Auto-streak update failed:", err));
       }
     }
   }, [user, loading, streak.lastActiveDate]);
@@ -360,7 +361,7 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
         transaction.update(userRef, updates);
       });
     } catch (e) {
-      console.error("Streak transaction failed: ", e);
+      Logger.error("Streak transaction failed: ", e);
     }
   };
 
@@ -458,7 +459,7 @@ export function GamificationProvider({ children }: { children: ReactNode }) {
       setLastHistoryDoc(snapshot.docs[snapshot.docs.length - 1] || null);
       setHasMoreHistory(snapshot.docs.length === 20);
     } catch (error) {
-      console.error("Error fetching history:", error);
+      Logger.error("Error fetching history:", error);
     } finally {
       setHistoryLoading(false);
     }

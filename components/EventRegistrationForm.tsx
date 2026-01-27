@@ -8,6 +8,7 @@ import { useGamification } from '@/app/context/GamificationContext';
 import { usePopup } from '@/app/context/PopupContext';
 import { X, Check } from 'lucide-react';
 import Script from 'next/script';
+import { Logger } from '@/lib/logger';
 
 interface EventRegistrationFormProps {
   event: any;
@@ -93,7 +94,7 @@ export default function EventRegistrationForm({
       });
       setLockId(null);
     } catch (e) {
-      console.error('Failed to release lock', e);
+      Logger.error('Failed to release lock', e);
     } finally {
       if (notify) {
         onLockReleased?.();
@@ -126,7 +127,7 @@ export default function EventRegistrationForm({
             }
           }
         } catch (error) {
-          console.error('Error fetching user data:', error);
+          Logger.error('Error fetching user data:', error);
         }
       };
       fetchUserData();
@@ -276,7 +277,7 @@ export default function EventRegistrationForm({
         0 // No wallet points for events
       );
 
-      console.log('Registration result:', registrationResult);
+      Logger.info('Registration result:', registrationResult);
 
       if (!registrationResult.success) {
         throw new Error(registrationResult.message || 'Registration failed');
@@ -298,7 +299,7 @@ export default function EventRegistrationForm({
             })
           });
         } catch (voucherError) {
-          console.error('Error marking voucher as used:', voucherError);
+          Logger.error('Error marking voucher as used:', voucherError);
         }
       }
 
@@ -320,7 +321,7 @@ export default function EventRegistrationForm({
           })
         });
       } catch (emailError) {
-        console.error('Error sending confirmation email:', emailError);
+        Logger.error('Error sending confirmation email:', emailError);
       }
 
       // Store registration details in localStorage for the success page
@@ -360,7 +361,7 @@ export default function EventRegistrationForm({
           }
         });
       } catch (saveError) {
-        console.error('Failed to save checkout info:', saveError);
+        Logger.error('Failed to save checkout info:', saveError);
       }
 
       // Close modal and redirect to success page
@@ -377,7 +378,7 @@ export default function EventRegistrationForm({
       propsOnClose();
       router.push(`/events/registration-success/${registrationId}`);
     } catch (error) {
-      console.error('Free registration error:', error);
+      Logger.error('Free registration error:', error);
       setError(error instanceof Error ? error.message : 'Registration failed');
       setShowErrorModal(true);
     } finally {
@@ -525,7 +526,7 @@ export default function EventRegistrationForm({
                     })
                   });
                 } catch (voucherError) {
-                  console.error('Error marking voucher as used:', voucherError);
+                  Logger.error('Error marking voucher as used:', voucherError);
                 }
               }
 
@@ -568,7 +569,7 @@ export default function EventRegistrationForm({
                   }
                 });
               } catch (saveError) {
-                console.error('Failed to save checkout info:', saveError);
+                Logger.error('Failed to save checkout info:', saveError);
               }
 
               // Close modal and redirect to success page
@@ -601,7 +602,7 @@ export default function EventRegistrationForm({
 
       const razorpay = new window.Razorpay(options);
       razorpay.on('payment.failed', function (response: any) {
-        console.error('Payment Failed:', response.error);
+        Logger.error('Payment Failed:', response.error);
         setError(response.error.description || 'Payment Failed');
         setShowErrorModal(true);
         setIsProcessing(false);

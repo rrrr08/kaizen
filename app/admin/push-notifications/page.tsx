@@ -7,9 +7,10 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Bell, Send, Clock, BarChart3, Users, Smartphone, MessageSquare, Mail, CheckCircle } from 'lucide-react';
+import { Bell, Send, Clock, BarChart3, Users, Smartphone, MessageSquare, Mail, CheckCircle, MousePointerClick } from 'lucide-react';
 import { getCampaigns, addCampaign, Campaign } from '@/lib/firebase';
 import { auth } from '@/lib/firebase';
+import { Logger } from '@/lib/logger';
 
 export default function PushNotificationsPage() {
   const { addToast } = useToast();
@@ -55,7 +56,7 @@ export default function PushNotificationsPage() {
       const data = await getCampaigns();
       setCampaigns(data);
     } catch (error) {
-      console.error('Error loading campaigns:', error);
+      Logger.error('Error loading campaigns:', error);
       setCampaigns([]);
     }
   }
@@ -79,7 +80,7 @@ export default function PushNotificationsPage() {
         }
       }
     } catch (error) {
-      console.error('Error loading user count:', error);
+      Logger.error('Error loading user count:', error);
       setTotalUsers(0);
     }
   }
@@ -189,7 +190,7 @@ export default function PushNotificationsPage() {
       }
 
       const result = await response.json();
-      console.log('Campaign handled:', result);
+      Logger.info('Campaign handled:', result);
 
       // Show toast
       addToast({
@@ -212,7 +213,7 @@ export default function PushNotificationsPage() {
         channels: ['push', 'in-app'],
       });
     } catch (error) {
-      console.error('Error sending campaign:', error);
+      Logger.error('Error sending campaign:', error);
       addToast({
         title: 'Error',
         description: error instanceof Error ? error.message : 'Failed to send campaign',
@@ -270,7 +271,7 @@ export default function PushNotificationsPage() {
         });
       }
     } catch (error: any) {
-      console.error('Error sending emails:', error);
+      Logger.error('Error sending emails:', error);
       addToast({
         title: 'Error',
         description: error.message || 'Failed to send emails',
@@ -639,20 +640,24 @@ export default function PushNotificationsPage() {
                   {campaigns.slice(0, 5).map((campaign) => (
                     <div
                       key={campaign.id}
-                      className="bg-white border-2 border-black rounded-xl p-6 flex justify-between items-start hover:neo-shadow transition-all"
+                      className="bg-white border-2 border-black rounded-xl p-4 md:p-6 flex flex-col md:flex-row justify-between items-start gap-4 hover:neo-shadow transition-all"
                     >
-                      <div className="flex-1">
-                        <h3 className="font-header text-xl font-black text-[#2D3436] uppercase tracking-tight">{campaign.title}</h3>
-                        <p className="text-sm text-[#2D3436]/60 font-bold mt-2 line-clamp-2">
+                      <div className="flex-1 w-full">
+                        <div className="flex justify-between items-start md:block">
+                          <h3 className="font-header text-lg md:text-xl font-black text-[#2D3436] uppercase tracking-tight break-words pr-2">{campaign.title}</h3>
+                          {/* Mobile status visible only on small screens if we want, or just re-structure. 
+                              Actually, standard stacking is fine. Let's keep it simple. */}
+                        </div>
+                        <p className="text-sm text-[#2D3436]/60 font-bold mt-2 line-clamp-2 break-words">
                           {campaign.message}
                         </p>
-                        <div className="flex gap-6 mt-4 text-xs font-black text-[#2D3436]/40 uppercase tracking-widest">
-                          <span>📧 {campaign.recipientCount} recipients</span>
-                          <span>✓ {campaign.deliveredCount} delivered</span>
-                          <span>👁️ {campaign.interactionCount} clicks</span>
+                        <div className="flex flex-wrap gap-3 md:gap-6 mt-4 text-[10px] md:text-xs font-black text-[#2D3436]/40 uppercase tracking-widest">
+                          <span className="whitespace-nowrap flex items-center gap-1"><Users size={12} /> {campaign.recipientCount} recipients</span>
+                          <span className="whitespace-nowrap flex items-center gap-1"><CheckCircle size={12} /> {campaign.deliveredCount} delivered</span>
+                          <span className="whitespace-nowrap flex items-center gap-1"><MousePointerClick size={12} /> {campaign.interactionCount} clicks</span>
                         </div>
                       </div>
-                      <div className="text-right">
+                      <div className="w-full md:w-auto flex flex-row md:flex-col justify-between items-center md:items-end border-t-2 md:border-t-0 border-black/5 pt-4 md:pt-0">
                         <span
                           className={`inline-block px-3 py-1 rounded-lg border-2 border-black text-xs font-black uppercase tracking-wider ${campaign.status === 'sent'
                             ? 'bg-[#00B894] text-black'
@@ -663,10 +668,10 @@ export default function PushNotificationsPage() {
                         >
                           {campaign.status.charAt(0).toUpperCase() + campaign.status.slice(1)}
                         </span>
-                        <p className="text-xs text-[#2D3436]/40 font-bold mt-2 uppercase tracking-wide">
+                        <p className="text-xs text-[#2D3436]/40 font-bold md:mt-2 uppercase tracking-wide">
                           {campaign.status === 'scheduled' && campaign.scheduledFor ? (
-                            <span className="text-black font-black bg-[#FFD93D] px-1 rounded">
-                              Scheduled: {new Date(campaign.scheduledFor).toLocaleString()}
+                            <span className="text-black font-black bg-[#FFD93D] px-1 rounded block md:inline border border-black/10 md:border-none">
+                              {new Date(campaign.scheduledFor).toLocaleDateString()}
                             </span>
                           ) : (
                             new Date(campaign.createdAt).toLocaleDateString()

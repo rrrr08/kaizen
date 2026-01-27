@@ -785,17 +785,17 @@ export default function GameSettingsDashboard() {
                                     </div>
                                     <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
                                         {prizes.map((p, i) => (
-                                            <div key={p.id} className="flex items-center gap-3 p-3 bg-[#FFFDF5] border-2 border-black/10 rounded-2xl">
+                                            <div key={p.id} className="flex items-center gap-2 md:gap-3 p-3 bg-[#FFFDF5] border-2 border-black/10 rounded-2xl">
                                                 <input type="color" value={p.color} onChange={e => {
                                                     const n = [...prizes]; n[i].color = e.target.value; setPrizes(n);
-                                                }} className="w-10 h-10 rounded-lg cursor-pointer p-0 border-2 border-black" />
+                                                }} className="w-8 h-8 md:w-10 md:h-10 rounded-lg cursor-pointer p-0 border-2 border-black flex-shrink-0" />
                                                 <input value={p.label} onChange={e => {
                                                     const n = [...prizes]; n[i].label = e.target.value; setPrizes(n);
-                                                }} className="flex-1 bg-transparent font-bold text-sm outline-none px-2" />
+                                                }} className="flex-1 bg-transparent font-bold text-sm outline-none px-2 min-w-0" />
                                                 <input type="number" step="0.01" value={p.probability} onChange={e => {
                                                     const n = [...prizes]; n[i].probability = +e.target.value; setPrizes(n);
-                                                }} className="w-16 bg-white border-2 border-black/10 rounded-lg px-2 py-1 font-bold text-xs" />
-                                                <button onClick={() => setPrizes(prizes.filter((_, idx) => idx !== i))} className="text-red-400 p-1"><Trash2 size={16} /></button>
+                                                }} className="w-14 md:w-16 bg-white border-2 border-black/10 rounded-lg px-2 py-1 font-bold text-xs flex-shrink-0" />
+                                                <button onClick={() => setPrizes(prizes.filter((_, idx) => idx !== i))} className="text-red-400 p-1 flex-shrink-0"><Trash2 size={16} /></button>
                                             </div>
                                         ))}
                                     </div>
@@ -992,12 +992,12 @@ export default function GameSettingsDashboard() {
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         {gameContent?.items ? gameContent.items.map((item: any) => (
-                                            <div key={item.id} className="p-6 bg-[#FFFDF5] border-2 border-black/5 rounded-3xl group hover:border-black/20 transition-all flex justify-between items-center">
-                                                <div>
-                                                    <p className="font-black text-sm uppercase leading-tight mb-1">{item.question || item.word || item.theme}</p>
-                                                    <span className="text-[10px] font-bold opacity-30 tracking-widest uppercase">ANS: {item.answer || item.solution || 'N/A'}</span>
+                                            <div key={item.id} className="p-6 bg-[#FFFDF5] border-2 border-black/5 rounded-3xl group hover:border-black/20 transition-all flex justify-between items-center gap-4">
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="font-black text-sm uppercase leading-tight mb-1 break-words">{item.question || item.word || item.theme}</p>
+                                                    <span className="text-[10px] font-bold opacity-30 tracking-widest uppercase block truncate">ANS: {item.answer || item.solution || 'N/A'}</span>
                                                 </div>
-                                                <button onClick={() => handleDeleteContent(item.id)} className="p-3 text-red-400 opacity-0 group-hover:opacity-100 transition-all hover:bg-red-50 rounded-xl">
+                                                <button onClick={() => handleDeleteContent(item.id)} className="p-3 text-red-400 opacity-0 group-hover:opacity-100 transition-all hover:bg-red-50 rounded-xl flex-shrink-0">
                                                     <Trash2 size={16} />
                                                 </button>
                                             </div>

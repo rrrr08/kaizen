@@ -45,6 +45,7 @@ import {
 // Type imports removed for JavaScript conversion - Re-added for TypeScript
 import { UserProfile, ChatMessage, Conversation, Product, GameEvent, ExperienceCategory, ExperienceEnquiry, ExperienceCaseStudy } from "./types";
 import { generateOrderId } from "./utils";
+import { Logger } from '@/lib/logger';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -57,7 +58,7 @@ const firebaseConfig = {
 };
 
 if (process.env.NODE_ENV !== 'production') {
-  console.log('Firebase config:', {
+  Logger.info('Firebase config:', {
     apiKey: firebaseConfig.apiKey ? 'SET' : 'MISSING',
     authDomain: firebaseConfig.authDomain ? 'SET' : 'MISSING',
     projectId: firebaseConfig.projectId ? 'SET' : 'MISSING',
@@ -74,7 +75,7 @@ try {
 } catch (error) {
   if (typeof window !== 'undefined') {
     // Client-side: defer the error to when Firebase is actually used
-    console.warn('Firebase initialization deferred:', error);
+    Logger.warn('Firebase initialization deferred:', error);
     app = null;
   } else {
     // Server-side: allow error to propagate
@@ -90,7 +91,7 @@ const googleProvider = new GoogleAuthProvider();
 // Enable persistence (LOCAL is default, but let's make it explicit)
 if (auth) {
   setPersistence(auth, browserLocalPersistence).catch((error) => {
-    console.error('Error setting persistence:', error);
+    Logger.error('Error setting persistence:', error);
   });
 }
 
@@ -169,7 +170,7 @@ export const signIn = async (email: string, password: string) => {
         });
       }
     } catch (error) {
-      console.error("Error syncing user profile on sign-in:", error);
+      Logger.error("Error syncing user profile on sign-in:", error);
     }
   }
 
@@ -225,7 +226,7 @@ export const signInWithGoogle = async () => {
     } catch (popupError: any) {
       // If popup is blocked, fallback to redirect-based auth
       if (popupError.code === 'auth/popup-blocked') {
-        console.warn('Popup blocked, using redirect-based authentication instead');
+        Logger.warn('Popup blocked, using redirect-based authentication instead');
 
         // Store the redirect path in sessionStorage to retrieve after auth
         if (typeof window !== 'undefined') {
@@ -243,14 +244,14 @@ export const signInWithGoogle = async () => {
       throw popupError;
     }
   } catch (error) {
-    console.error("Google sign-in error:", error);
+    Logger.error("Google sign-in error:", error);
     throw error;
   }
 };
 
 export const logOut = async () => {
   if (!auth) {
-    console.warn('Firebase auth not initialized, skipping logout');
+    Logger.warn('Firebase auth not initialized, skipping logout');
     return;
   }
   await signOut(auth);
@@ -261,7 +262,7 @@ export const logOut = async () => {
       credentials: "same-origin",
     });
   } catch (error) {
-    console.error("Error clearing server session:", error);
+    Logger.error("Error clearing server session:", error);
   }
 };
 
@@ -279,7 +280,7 @@ export const createUserProfile = async (userId: string, data: UserProfile) => {
     const existingData = userSnap.data();
     if (existingData.role) {
       existingRole = existingData.role;
-      console.log(`[createUserProfile] User ${userId} already exists with role: ${existingRole}. Preserving role.`);
+      Logger.info(`[createUserProfile] User ${userId} already exists with role: ${existingRole}. Preserving role.`);
     }
   }
 
@@ -294,7 +295,7 @@ export const createUserProfile = async (userId: string, data: UserProfile) => {
         avatarSeed: multiavatar.seed
       };
     } catch (error) {
-      console.error('Error generating initial multiavatar:', error);
+      Logger.error('Error generating initial multiavatar:', error);
       // Continue without avatar if generation fails
     }
   }
@@ -329,7 +330,7 @@ export const checkUserExists = async (userId: string) => {
     const userSnap = await getDoc(userRef);
     return userSnap.exists();
   } catch (error) {
-    console.error('Error checking user exists:', error);
+    Logger.error('Error checking user exists:', error);
     throw error; // Re-throw to prevent "not exists" assumption
   }
 };
@@ -337,7 +338,7 @@ export const checkUserExists = async (userId: string) => {
 export const getUserProfile = async (userId: string): Promise<UserProfile | null> => {
   try {
     if (!db) {
-      console.warn('Firebase not initialized in getUserProfile');
+      Logger.warn('Firebase not initialized in getUserProfile');
       return null;
     }
     const userRef = doc(db, "users", userId);
@@ -349,7 +350,7 @@ export const getUserProfile = async (userId: string): Promise<UserProfile | null
 
     return null;
   } catch (error) {
-    console.error('Error getting user profile:', error);
+    Logger.error('Error getting user profile:', error);
     return null;
   }
 };
@@ -376,7 +377,7 @@ export const updateUserProfile = async (userId: string, data: Partial<UserProfil
 export const checkUserIsAdmin = async (userId: string) => {
   try {
     const profile = await getUserProfile(userId);
-    console.log('[Firebase] checkUserIsAdmin - Profile:', {
+    Logger.info('[Firebase] checkUserIsAdmin - Profile:', {
       uid: userId,
       role: profile?.role,
       email: profile?.email,
@@ -384,7 +385,7 @@ export const checkUserIsAdmin = async (userId: string) => {
     });
     return profile?.role === "admin";
   } catch (error) {
-    console.error('[Firebase] Error in checkUserIsAdmin:', error);
+    Logger.error('[Firebase] Error in checkUserIsAdmin:', error);
     return false;
   }
 };
@@ -435,7 +436,7 @@ if (typeof window !== "undefined" && auth) {
           }
         }
       } catch (error) {
-        console.error(
+        Logger.error(
           "Error ensuring user exists in Firestore (onAuthStateChanged):",
           error
         );
@@ -467,7 +468,7 @@ export async function updateProduct(productId: string, product: Partial<Product>
     throw new Error('Invalid product data. Must be an object.');
   }
 
-  console.log('updateProduct called with:', { productId, product });
+  Logger.info('updateProduct called with:', { productId, product });
 
   try {
     const productRef = doc(db, 'products', productId);
@@ -478,11 +479,11 @@ export async function updateProduct(productId: string, product: Partial<Product>
       updatedAt: serverTimestamp(),
     };
 
-    console.log('Updating product with data:', productData);
+    Logger.info('Updating product with data:', productData);
     await updateDoc(productRef, productData);
-    console.log('Product updated successfully');
+    Logger.info('Product updated successfully');
   } catch (error) {
-    console.error('Error in updateProduct:', error);
+    Logger.error('Error in updateProduct:', error);
     throw error;
   }
 }

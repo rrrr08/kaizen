@@ -4,6 +4,7 @@ import React, { createContext, useContext, useEffect, useState, ReactNode } from
 import { User } from 'firebase/auth';
 import { UserProfile } from '@/lib/types';
 import BannedScreen from '@/components/auth/BannedScreen';
+import { Logger } from '@/lib/logger';
 
 interface AuthContextType {
   user: User | null;
@@ -55,7 +56,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setIsBanned(false);
       }
     } catch (error) {
-      console.error('[AuthContext] Error fetching user data:', error);
+      Logger.error('[AuthContext] Error fetching user data:', error);
       setUserProfile(null);
       setRole(null);
       setIsAdmin(false);
