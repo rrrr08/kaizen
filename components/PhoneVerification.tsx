@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import JoyPhoneInput from '@/components/ui/JoyPhoneInput';
 import { useToast } from '@/hooks/use-toast';
 import { Shield, Send, Check, Phone } from 'lucide-react';
 import { auth } from '@/lib/firebase';
@@ -25,28 +26,10 @@ export default function PhoneVerification({
   const [loading, setLoading] = useState(false);
   const [countdown, setCountdown] = useState(0);
 
-  const formatPhoneNumber = (value: string) => {
-    // Remove all non-digits except leading +
-    const cleaned = value.replace(/[^\d+]/g, '');
 
-    // If it starts with +, respect the user's explicit country code
-    if (cleaned.startsWith('+')) {
-      return cleaned;
-    }
 
-    // Default to +91 if no country code provided
-    // If user clears the input, keep it empty or just '+91'? 
-    // Let's just prepend +91 to any number they type if it doesn't have a +
-    if (cleaned.length > 0) {
-      return '+91' + cleaned;
-    }
-
-    return cleaned;
-  };
-
-  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formatted = formatPhoneNumber(e.target.value);
-    setPhoneNumber(formatted);
+  const handlePhoneChange = (value: string) => {
+    setPhoneNumber(value);
   };
 
   const handleSendOTP = async () => {
@@ -206,22 +189,18 @@ export default function PhoneVerification({
             <label className="block text-xs font-black uppercase tracking-wider text-black mb-2">
               Phone Number
             </label>
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-3">
               <div className="relative flex-1">
-                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-black/40" />
-                <Input
-                  type="tel"
+                <JoyPhoneInput
                   value={phoneNumber}
                   onChange={handlePhoneChange}
-                  placeholder="+1234567890"
-                  className="w-full bg-white border-2 border-black rounded-xl pl-10 py-6 text-black font-bold focus:outline-none focus:shadow-[2px_2px_0px_#000] transition-all"
                   disabled={loading}
                 />
               </div>
               <Button
                 onClick={handleSendOTP}
                 disabled={loading || !phoneNumber || countdown > 0}
-                className="px-6 py-6 bg-[#6C5CE7] text-white font-black uppercase tracking-widest rounded-xl border-2 border-black shadow-[4px_4px_0px_#000] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2"
+                className="px-6 py-6 bg-[#6C5CE7] text-white font-black uppercase tracking-widest rounded-xl border-2 border-black shadow-[4px_4px_0px_#000] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 w-full sm:w-auto"
               >
                 {loading ? (
                   'Sending...'

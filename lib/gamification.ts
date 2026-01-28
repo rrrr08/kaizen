@@ -1,6 +1,7 @@
 import { BonusRule, LevelThreshold } from './types';
 import { doc, getDoc, getFirestore } from 'firebase/firestore';
 import { app } from './firebase';
+import { Logger } from '@/lib/logger';
 
 // ------------------------------------------------------------------
 // 1. THE JOY LADDER (TIER SYSTEM) - Now loaded from Firebase
@@ -61,7 +62,7 @@ export const fetchXPSettings = async () => {
     }
     return { tiers: DEFAULT_TIERS, xpSources: [] };
   } catch (error) {
-    console.error('Error fetching XP settings:', error);
+    Logger.error('Error fetching XP settings:', error);
     return { tiers: DEFAULT_TIERS, xpSources: [] };
   }
 };
@@ -82,7 +83,7 @@ export const fetchWheelPrizesFromFirebase = async () => {
     }
     return WHEEL_PRIZES; // Fallback
   } catch (error) {
-    console.error('Error fetching wheel prizes from Firebase:', error);
+    Logger.error('Error fetching wheel prizes from Firebase:', error);
     return WHEEL_PRIZES;
   }
 }
@@ -158,7 +159,7 @@ export const fetchRewardsConfigFromFirebase = async () => {
     }
     return DEFAULT_REWARDS;
   } catch (error) {
-    console.error('Error fetching rewards config:', error);
+    Logger.error('Error fetching rewards config:', error);
     return DEFAULT_REWARDS;
   }
 };
@@ -174,7 +175,7 @@ export const fetchStoreSettingsFromFirebase = async () => {
     }
     return null;
   } catch (error) {
-    console.error('Error fetching store settings:', error);
+    Logger.error('Error fetching store settings:', error);
     return null;
   }
 };
@@ -267,10 +268,10 @@ export const logTransaction = async (
       timestamp: serverTimestamp() // Server timestamp for accurate ordering
     });
 
-    console.log(`[Transaction] ${type} ${amount} JP logged for ${userId}`);
+    Logger.info(`[Transaction] ${type} ${amount} JP logged for ${userId}`);
     return true;
   } catch (error) {
-    console.error('Error logging transaction:', error);
+    Logger.error('Error logging transaction:', error);
     return false;
   }
 };

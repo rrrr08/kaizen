@@ -3,11 +3,15 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { User } from 'firebase/auth';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import JoyPhoneInput from '@/components/ui/JoyPhoneInput';
 import { createPaymentOrder, completeRegistration } from '@/lib/db/payments';
 import { useGamification } from '@/app/context/GamificationContext';
 import { usePopup } from '@/app/context/PopupContext';
 import { X, Check } from 'lucide-react';
 import Script from 'next/script';
+import { Logger } from '@/lib/logger';
 
 interface EventRegistrationFormProps {
   event: any;
@@ -93,7 +97,7 @@ export default function EventRegistrationForm({
       });
       setLockId(null);
     } catch (e) {
-      console.error('Failed to release lock', e);
+      Logger.error('Failed to release lock', e);
     } finally {
       if (notify) {
         onLockReleased?.();
@@ -126,7 +130,7 @@ export default function EventRegistrationForm({
             }
           }
         } catch (error) {
-          console.error('Error fetching user data:', error);
+          Logger.error('Error fetching user data:', error);
         }
       };
       fetchUserData();
@@ -165,21 +169,9 @@ export default function EventRegistrationForm({
       setShowErrorModal(true);
       return false;
     }
-    if (!formData.phone.trim()) {
-      setError('Please enter your phone number');
-      setShowErrorModal(true);
-      return false;
-    }
-    // Allow + at start, then digits, spaces, hyphens, parentheses
-    const phoneRegex = /^\+?[\d\s-()]{10,20}$/;
-    if (!phoneRegex.test(formData.phone)) {
+    // Phone validation (handled by JoyPhoneInput logic mostly, but we check length including country code)
+    if (!formData.phone.trim() || formData.phone.length < 13) {
       setError('Please enter a valid phone number');
-      setShowErrorModal(true);
-      return false;
-    }
-    const cleanPhone = formData.phone.replace(/[^\d+]/g, '');
-    if (cleanPhone.length < 10) {
-      setError('Phone number must be at least 10 digits');
       setShowErrorModal(true);
       return false;
     }
@@ -276,7 +268,7 @@ export default function EventRegistrationForm({
         0 // No wallet points for events
       );
 
-      console.log('Registration result:', registrationResult);
+      Logger.info('Registration result:', registrationResult);
 
       if (!registrationResult.success) {
         throw new Error(registrationResult.message || 'Registration failed');
@@ -298,7 +290,7 @@ export default function EventRegistrationForm({
             })
           });
         } catch (voucherError) {
-          console.error('Error marking voucher as used:', voucherError);
+          Logger.error('Error marking voucher as used:', voucherError);
         }
       }
 
@@ -320,7 +312,7 @@ export default function EventRegistrationForm({
           })
         });
       } catch (emailError) {
-        console.error('Error sending confirmation email:', emailError);
+        Logger.error('Error sending confirmation email:', emailError);
       }
 
       // Store registration details in localStorage for the success page
@@ -360,7 +352,7 @@ export default function EventRegistrationForm({
           }
         });
       } catch (saveError) {
-        console.error('Failed to save checkout info:', saveError);
+        Logger.error('Failed to save checkout info:', saveError);
       }
 
       // Close modal and redirect to success page
@@ -377,7 +369,7 @@ export default function EventRegistrationForm({
       propsOnClose();
       router.push(`/events/registration-success/${registrationId}`);
     } catch (error) {
-      console.error('Free registration error:', error);
+      Logger.error('Free registration error:', error);
       setError(error instanceof Error ? error.message : 'Registration failed');
       setShowErrorModal(true);
     } finally {
@@ -539,7 +531,7 @@ export default function EventRegistrationForm({
                     })
                   });
                 } catch (voucherError) {
-                  console.error('Error marking voucher as used:', voucherError);
+                  Logger.error('Error marking voucher as used:', voucherError);
                 }
               }
 
@@ -582,7 +574,7 @@ export default function EventRegistrationForm({
                   }
                 });
               } catch (saveError) {
-                console.error('Failed to save checkout info:', saveError);
+                Logger.error('Failed to save checkout info:', saveError);
               }
 
               // Close modal and redirect to success page
@@ -615,7 +607,7 @@ export default function EventRegistrationForm({
 
       const razorpay = new window.Razorpay(options);
       razorpay.on('payment.failed', function (response: any) {
-        console.error('Payment Failed:', response.error);
+        Logger.error('Payment Failed:', response.error);
         setError(response.error.description || 'Payment Failed');
         setShowErrorModal(true);
         setIsProcessing(false);
@@ -673,9 +665,7 @@ export default function EventRegistrationForm({
           <div className="bg-[#FFFDF5] border-4 border-black rounded-[30px] p-8 max-w-md w-full neo-shadow">
             {/* Error Icon */}
             <div className="mb-6 flex justify-center">
-              <div className="w-16 h-16 bg-[#FF7675] border-3 border-black rounded-full flex items-center justify-center neo-shadow">
-                <span className="text-3xl text-black font-black">!</span>
-              </div>
+              <div className="w-16 h-16 bg-[#FF7675] rounded-full flex items-center justify-center border border-black text-white text-xs font-black">!</div>
             </div>
 
             {/* Error Message */}
@@ -755,17 +745,14 @@ export default function EventRegistrationForm({
             </div>
 
             <div>
-              <label className="font-black text-xs tracking-widest text-black/60 mb-2 block uppercase">
+              <label className="text-xs font-black uppercase tracking-widest text-black/40 ml-2">
                 PHONE *
               </label>
-              <input
-                type="tel"
-                name="phone"
+              <JoyPhoneInput
                 value={formData.phone}
-                onChange={handleInputChange}
+                onChange={(val) => setFormData(prev => ({ ...prev, phone: val }))}
+                required
                 placeholder="+91 98765 43210"
-                maxLength={20}
-                className="w-full px-4 py-3 bg-white border-2 border-black rounded-xl text-black placeholder:text-black/30 focus:outline-none focus:shadow-[4px_4px_0px_#000] transition-all font-medium"
               />
             </div>
           </div>
@@ -824,22 +811,22 @@ export default function EventRegistrationForm({
           )}
 
           {/* Voucher Section */}
-          <div className="mb-8 p-6 bg-[#6C5CE7]/10 border-2 border-black rounded-xl">
+          <div className="mb-8 p-4 md:p-6 bg-[#6C5CE7]/10 border-2 border-black rounded-xl">
             <div className="font-black text-xs tracking-widest text-[#6C5CE7] mb-4 uppercase">HAVE A VOUCHER?</div>
 
             {!appliedVoucher ? (
-              <div className="flex gap-3">
+              <div className="flex flex-col sm:flex-row gap-3">
                 <input
                   type="text"
                   value={voucherCode}
                   onChange={(e) => setVoucherCode(e.target.value.toUpperCase())}
                   placeholder="PROMO CODE"
-                  className="flex-1 px-4 py-3 bg-white border-2 border-black rounded-xl text-black placeholder:text-black/30 focus:outline-none focus:shadow-[4px_4px_0px_#000] transition-all uppercase font-bold"
+                  className="flex-1 px-4 py-3 bg-white border-2 border-black rounded-xl text-black placeholder:text-black/30 focus:outline-none focus:shadow-[4px_4px_0px_#000] transition-all uppercase font-bold w-full"
                 />
                 <button
                   onClick={handleApplyVoucher}
                   disabled={checkingVoucher || !voucherCode.trim()}
-                  className="px-6 py-3 bg-[#6C5CE7] text-white border-2 border-black rounded-xl font-black text-xs tracking-widest hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all uppercase disabled:opacity-50 disabled:hover:translate-x-0 disabled:hover:translate-y-0"
+                  className="px-6 py-3 bg-[#6C5CE7] text-white border-2 border-black rounded-xl font-black text-xs tracking-widest hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all uppercase disabled:opacity-50 disabled:hover:translate-x-0 disabled:hover:translate-y-0 w-full sm:w-auto"
                 >
                   {checkingVoucher ? '...' : 'APPLY'}
                 </button>
@@ -907,7 +894,7 @@ export default function EventRegistrationForm({
           )}
 
           {/* Buttons */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <button
               onClick={() => {
                 if (lockId) releaseLock(lockId);

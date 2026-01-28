@@ -7,9 +7,10 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Bell, Send, Clock, BarChart3, Users, Smartphone, MessageSquare, Mail, CheckCircle } from 'lucide-react';
+import { Bell, Send, Clock, BarChart3, Users, Smartphone, MessageSquare, Mail, CheckCircle, MousePointerClick, Check, AlertTriangle } from 'lucide-react';
 import { getCampaigns, addCampaign, Campaign } from '@/lib/firebase';
 import { auth } from '@/lib/firebase';
+import { Logger } from '@/lib/logger';
 
 export default function PushNotificationsPage() {
   const { addToast } = useToast();
@@ -55,7 +56,7 @@ export default function PushNotificationsPage() {
       const data = await getCampaigns();
       setCampaigns(data);
     } catch (error) {
-      console.error('Error loading campaigns:', error);
+      Logger.error('Error loading campaigns:', error);
       setCampaigns([]);
     }
   }
@@ -79,7 +80,7 @@ export default function PushNotificationsPage() {
         }
       }
     } catch (error) {
-      console.error('Error loading user count:', error);
+      Logger.error('Error loading user count:', error);
       setTotalUsers(0);
     }
   }
@@ -189,7 +190,7 @@ export default function PushNotificationsPage() {
       }
 
       const result = await response.json();
-      console.log('Campaign handled:', result);
+      Logger.info('Campaign handled:', result);
 
       // Show toast
       addToast({
@@ -212,7 +213,7 @@ export default function PushNotificationsPage() {
         channels: ['push', 'in-app'],
       });
     } catch (error) {
-      console.error('Error sending campaign:', error);
+      Logger.error('Error sending campaign:', error);
       addToast({
         title: 'Error',
         description: error instanceof Error ? error.message : 'Failed to send campaign',
@@ -270,7 +271,7 @@ export default function PushNotificationsPage() {
         });
       }
     } catch (error: any) {
-      console.error('Error sending emails:', error);
+      Logger.error('Error sending emails:', error);
       addToast({
         title: 'Error',
         description: error.message || 'Failed to send emails',
@@ -285,43 +286,43 @@ export default function PushNotificationsPage() {
       <div className="max-w-6xl mx-auto px-6 md:px-12">
         {/* Header */}
         <div className="mb-12 border-b-2 border-black pb-8">
-          <div className="flex items-center gap-4 mb-4">
-            <div className="w-16 h-16 rounded-xl bg-[#6C5CE7] border-2 border-black flex items-center justify-center neo-shadow">
+          <div className="flex flex-col md:flex-row items-start md:items-center gap-4 mb-4">
+            <div className="w-16 h-16 rounded-xl bg-[#6C5CE7] border-2 border-black flex flex-shrink-0 items-center justify-center neo-shadow">
               <Bell className="w-8 h-8 text-white" />
             </div>
             <div>
-              <h1 className="font-header text-5xl font-black text-[#2D3436] uppercase tracking-tighter">Push Notifications</h1>
-              <p className="text-[#2D3436]/60 font-bold text-lg">Send mobile notifications to users in real-time</p>
+              <h1 className="font-header text-3xl md:text-5xl font-black text-[#2D3436] uppercase tracking-tighter">Push Notifications</h1>
+              <p className="text-[#2D3436]/60 font-bold text-sm md:text-lg">Send mobile notifications to users in real-time</p>
             </div>
           </div>
         </div>
 
         <Tabs defaultValue="send" className="space-y-8">
-          <TabsList className="grid grid-cols-4 w-full bg-transparent gap-4 h-auto p-0">
+          <TabsList className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 w-full bg-transparent gap-4 h-auto p-0">
             <TabsTrigger
               value="send"
-              className="flex items-center gap-2 bg-white border-2 border-black rounded-xl py-4 data-[state=active]:bg-[#FFD93D] data-[state=active]:text-black font-black uppercase tracking-widest text-[#2D3436]/40 hover:bg-gray-50 transition-all shadow-[4px_4px_0px_rgba(0,0,0,1)] data-[state=active]:shadow-none data-[state=active]:translate-x-[2px] data-[state=active]:translate-y-[2px]"
+              className="flex items-center justify-center gap-2 bg-white border-2 border-black rounded-xl py-4 data-[state=active]:bg-[#FFD93D] data-[state=active]:text-black font-black uppercase tracking-widest text-[#2D3436]/40 hover:bg-gray-50 transition-all shadow-[4px_4px_0px_rgba(0,0,0,1)] data-[state=active]:shadow-none data-[state=active]:translate-x-[2px] data-[state=active]:translate-y-[2px]"
             >
               <Send className="w-4 h-4" strokeWidth={3} />
               Notification
             </TabsTrigger>
             <TabsTrigger
               value="email"
-              className="flex items-center gap-2 bg-white border-2 border-black rounded-xl py-4 data-[state=active]:bg-[#00B894] data-[state=active]:text-black font-black uppercase tracking-widest text-[#2D3436]/40 hover:bg-gray-50 transition-all shadow-[4px_4px_0px_rgba(0,0,0,1)] data-[state=active]:shadow-none data-[state=active]:translate-x-[2px] data-[state=active]:translate-y-[2px]"
+              className="flex items-center justify-center gap-2 bg-white border-2 border-black rounded-xl py-4 data-[state=active]:bg-[#00B894] data-[state=active]:text-black font-black uppercase tracking-widest text-[#2D3436]/40 hover:bg-gray-50 transition-all shadow-[4px_4px_0px_rgba(0,0,0,1)] data-[state=active]:shadow-none data-[state=active]:translate-x-[2px] data-[state=active]:translate-y-[2px]"
             >
               <Mail className="w-4 h-4" strokeWidth={3} />
               Email
             </TabsTrigger>
             <TabsTrigger
               value="scheduled"
-              className="flex items-center gap-2 bg-white border-2 border-black rounded-xl py-4 data-[state=active]:bg-[#6C5CE7] data-[state=active]:text-black font-black uppercase tracking-widest text-[#2D3436]/40 hover:bg-gray-50 transition-all shadow-[4px_4px_0px_rgba(0,0,0,1)] data-[state=active]:shadow-none data-[state=active]:translate-x-[2px] data-[state=active]:translate-y-[2px]"
+              className="flex items-center justify-center gap-2 bg-white border-2 border-black rounded-xl py-4 data-[state=active]:bg-[#6C5CE7] data-[state=active]:text-black font-black uppercase tracking-widest text-[#2D3436]/40 hover:bg-gray-50 transition-all shadow-[4px_4px_0px_rgba(0,0,0,1)] data-[state=active]:shadow-none data-[state=active]:translate-x-[2px] data-[state=active]:translate-y-[2px]"
             >
               <Clock className="w-4 h-4" strokeWidth={3} />
               Scheduled
             </TabsTrigger>
             <TabsTrigger
               value="analytics"
-              className="flex items-center gap-2 bg-white border-2 border-black rounded-xl py-4 data-[state=active]:bg-[#FF7675] data-[state=active]:text-black font-black uppercase tracking-widest text-[#2D3436]/40 hover:bg-gray-50 transition-all shadow-[4px_4px_0px_rgba(0,0,0,1)] data-[state=active]:shadow-none data-[state=active]:translate-x-[2px] data-[state=active]:translate-y-[2px]"
+              className="flex items-center justify-center gap-2 bg-white border-2 border-black rounded-xl py-4 data-[state=active]:bg-[#FF7675] data-[state=active]:text-black font-black uppercase tracking-widest text-[#2D3436]/40 hover:bg-gray-50 transition-all shadow-[4px_4px_0px_rgba(0,0,0,1)] data-[state=active]:shadow-none data-[state=active]:translate-x-[2px] data-[state=active]:translate-y-[2px]"
             >
               <BarChart3 className="w-4 h-4" strokeWidth={3} />
               Analytics
@@ -437,7 +438,7 @@ export default function PushNotificationsPage() {
                           : 'bg-white border-black'
                         }
                       `}>
-                        {formData.channels.includes('push') && '✓'}
+                        {formData.channels.includes('push') && <Check size={16} strokeWidth={3} />}
                       </div>
                       <div className="flex-1">
                         <p className="font-black text-sm uppercase">Push Notifications</p>
@@ -470,7 +471,7 @@ export default function PushNotificationsPage() {
                           : 'bg-white border-black'
                         }
                       `}>
-                        {formData.channels.includes('in-app') && '✓'}
+                        {formData.channels.includes('in-app') && <Check size={16} strokeWidth={3} />}
                       </div>
                       <div className="flex-1">
                         <p className="font-black text-sm uppercase">In-App Notifications</p>
@@ -503,7 +504,7 @@ export default function PushNotificationsPage() {
                           : 'bg-white border-black'
                         }
                       `}>
-                        {formData.channels.includes('sms') && '✓'}
+                        {formData.channels.includes('sms') && <Check size={16} strokeWidth={3} />}
                       </div>
                       <div className="flex-1">
                         <p className="font-black text-sm uppercase">SMS Notifications</p>
@@ -515,7 +516,7 @@ export default function PushNotificationsPage() {
                     </div>
                   </div>
                   <p className="text-xs text-black/40 font-bold mt-2 uppercase tracking-wide">
-                    {formData.channels.length === 0 && '⚠️ Select at least one channel'}
+                    {formData.channels.length === 0 && <span className="flex items-center gap-2"><AlertTriangle className="w-4 h-4 text-orange-500" /> Select at least one channel</span>}
                     {formData.channels.length === 1 && `Selected: ${formData.channels[0] === 'push' ? 'Push only' : formData.channels[0] === 'sms' ? 'SMS only' : 'In-App only'}`}
                     {formData.channels.length > 1 && `${formData.channels.length} channels selected`}
                   </p>
@@ -587,7 +588,7 @@ export default function PushNotificationsPage() {
                   />
                   {formData.scheduledFor && (
                     <p className="text-xs text-black/60 font-bold mt-2 uppercase tracking-wide">
-                      ⏰ Will be sent automatically on {new Date(formData.scheduledFor).toLocaleString()}
+                      <span className="flex items-center gap-1"><Clock size={14} className="text-[#6C5CE7]" /> Will be sent automatically on {new Date(formData.scheduledFor).toLocaleString()}</span>
                     </p>
                   )}
                   <p className="text-xs text-black/40 font-bold mt-1 uppercase tracking-wide">
@@ -639,20 +640,24 @@ export default function PushNotificationsPage() {
                   {campaigns.slice(0, 5).map((campaign) => (
                     <div
                       key={campaign.id}
-                      className="bg-white border-2 border-black rounded-xl p-6 flex justify-between items-start hover:neo-shadow transition-all"
+                      className="bg-white border-2 border-black rounded-xl p-4 md:p-6 flex flex-col md:flex-row justify-between items-start gap-4 hover:neo-shadow transition-all"
                     >
-                      <div className="flex-1">
-                        <h3 className="font-header text-xl font-black text-[#2D3436] uppercase tracking-tight">{campaign.title}</h3>
-                        <p className="text-sm text-[#2D3436]/60 font-bold mt-2 line-clamp-2">
+                      <div className="flex-1 w-full">
+                        <div className="flex justify-between items-start md:block">
+                          <h3 className="font-header text-lg md:text-xl font-black text-[#2D3436] uppercase tracking-tight break-words pr-2">{campaign.title}</h3>
+                          {/* Mobile status visible only on small screens if we want, or just re-structure. 
+                              Actually, standard stacking is fine. Let's keep it simple. */}
+                        </div>
+                        <p className="text-sm text-[#2D3436]/60 font-bold mt-2 line-clamp-2 break-words">
                           {campaign.message}
                         </p>
-                        <div className="flex gap-6 mt-4 text-xs font-black text-[#2D3436]/40 uppercase tracking-widest">
-                          <span>📧 {campaign.recipientCount} recipients</span>
-                          <span>✓ {campaign.deliveredCount} delivered</span>
-                          <span>👁️ {campaign.interactionCount} clicks</span>
+                        <div className="flex flex-wrap gap-3 md:gap-6 mt-4 text-[10px] md:text-xs font-black text-[#2D3436]/40 uppercase tracking-widest">
+                          <span className="whitespace-nowrap flex items-center gap-1"><Users size={12} /> {campaign.recipientCount} recipients</span>
+                          <span className="whitespace-nowrap flex items-center gap-1"><CheckCircle size={12} /> {campaign.deliveredCount} delivered</span>
+                          <span className="whitespace-nowrap flex items-center gap-1"><MousePointerClick size={12} /> {campaign.interactionCount} clicks</span>
                         </div>
                       </div>
-                      <div className="text-right">
+                      <div className="w-full md:w-auto flex flex-row md:flex-col justify-between items-center md:items-end border-t-2 md:border-t-0 border-black/5 pt-4 md:pt-0">
                         <span
                           className={`inline-block px-3 py-1 rounded-lg border-2 border-black text-xs font-black uppercase tracking-wider ${campaign.status === 'sent'
                             ? 'bg-[#00B894] text-black'
@@ -663,10 +668,10 @@ export default function PushNotificationsPage() {
                         >
                           {campaign.status.charAt(0).toUpperCase() + campaign.status.slice(1)}
                         </span>
-                        <p className="text-xs text-[#2D3436]/40 font-bold mt-2 uppercase tracking-wide">
+                        <p className="text-xs text-[#2D3436]/40 font-bold md:mt-2 uppercase tracking-wide">
                           {campaign.status === 'scheduled' && campaign.scheduledFor ? (
-                            <span className="text-black font-black bg-[#FFD93D] px-1 rounded">
-                              Scheduled: {new Date(campaign.scheduledFor).toLocaleString()}
+                            <span className="text-black font-black bg-[#FFD93D] px-1 rounded block md:inline border border-black/10 md:border-none">
+                              {new Date(campaign.scheduledFor).toLocaleDateString()}
                             </span>
                           ) : (
                             new Date(campaign.createdAt).toLocaleDateString()
@@ -876,7 +881,7 @@ export default function PushNotificationsPage() {
                               <span>📧 {campaign.recipientCount} recipients</span>
                               <span>⏰ Scheduled for: {scheduledTime ? scheduledTime.toLocaleString() : 'N/A'}</span>
                               {isOverdue && (
-                                <span className="text-red-500">⚠️ Should have been sent already</span>
+                                <span className="text-red-500 flex items-center gap-1"><AlertTriangle size={12} /> Should have been sent already</span>
                               )}
                             </div>
                           </div>

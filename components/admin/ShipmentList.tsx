@@ -115,8 +115,8 @@ export default function ShipmentList() {
                 />
             </div>
 
-            <div className="overflow-hidden border-2 border-black rounded-[20px] bg-white neo-shadow relative">
-                <table className="w-full text-left border-collapse">
+            <div className="overflow-x-auto border-2 border-black rounded-[20px] bg-white neo-shadow relative">
+                <table className="w-full min-w-[1000px] text-left border-collapse">
                     <thead>
                         <tr className="bg-black text-white">
                             <th className="p-4 font-black uppercase tracking-widest text-xs">Logistic ID</th>

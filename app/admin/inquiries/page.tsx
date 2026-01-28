@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { auth } from '@/lib/firebase';
-import { Trash2, ExternalLink, Calendar, User, Mail, MessageSquare, AlertCircle, CheckCircle2, Send, MessageCircleReply } from 'lucide-react';
+import { Trash2, ExternalLink, Calendar, User, Mail, MessageSquare, AlertCircle, CheckCircle2, Send, MessageCircleReply, X } from 'lucide-react';
 import RoleProtected from '@/components/auth/RoleProtected';
 import { USER_ROLES } from '@/lib/roles';
 import { format } from 'date-fns';
@@ -267,7 +267,7 @@ export default function AdminInquiriesPage() {
                                     onClick={() => setSelectedInquiry(null)}
                                     className="w-10 h-10 bg-white border-2 border-black rounded-xl flex items-center justify-center hover:bg-black hover:text-white transition-all neo-shadow-sm"
                                 >
-                                    ✕
+                                    <X size={20} />
                                 </button>
                             </div>
                             <div className="p-8 grid grid-cols-1 md:grid-cols-2 gap-8 overflow-y-auto relative z-10 scrollbar-hide">
@@ -358,6 +358,6 @@ export default function AdminInquiriesPage() {
                     </div>
                 )}
             </div>
-        </RoleProtected>
+        </RoleProtected >
     );
 }
