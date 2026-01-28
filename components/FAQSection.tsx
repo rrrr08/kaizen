@@ -32,24 +32,24 @@ const FAQSection: React.FC<FAQSectionProps> = ({ faqs }) => {
                             initial={{ opacity: 0, x: -20 }}
                             whileInView={{ opacity: 1, x: 0 }}
                             viewport={{ once: true }}
-                            className="text-left"
+                            className="text-left bg-black p-8 border-4 border-black rounded-[30px] shadow-[8px_8px_0px_#FFF]"
                         >
                             <div className="flex items-center gap-2 mb-4">
-                                <Sparkles size={16} className="text-black" />
-                                <span className="font-black text-xs tracking-[0.3em] text-black uppercase font-display">Support</span>
+                                <Sparkles size={16} className="text-white" />
+                                <span className="font-black text-xs tracking-[0.3em] text-white uppercase font-display">Support</span>
                             </div>
 
-                            <h2 className="text-5xl md:text-6xl font-header font-black tracking-tighter uppercase mb-6 text-black leading-[0.9]">
+                            <h2 className="text-5xl md:text-6xl font-header font-black tracking-tighter uppercase mb-6 text-white leading-[0.9]">
                                 Got <br />
-                                <span className="text-[#6C5CE7]">Questions?</span>
+                                <span className="text-[#FFD93D]">Questions?</span>
                             </h2>
 
-                            <p className="font-bold text-black/60 text-lg leading-tight max-w-xs">
+                            <p className="font-bold text-white/80 text-lg leading-tight max-w-xs">
                                 Everything you need to know about earning, spending, and playing.
                             </p>
 
                             <div className="mt-8">
-                                <div className="w-12 h-1 bg-black rounded-full opacity-10"></div>
+                                <div className="w-12 h-1 bg-white rounded-full opacity-20"></div>
                             </div>
                         </motion.div>
                     </div>

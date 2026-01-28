@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Settings, Users, BarChart3, Zap, Bell, ShoppingBag, Home, Calendar, LayoutGrid, FileText, Gamepad2, Trophy, Database, Ticket, TrendingUp, MessageSquare, Mail, Truck, ChevronLeft, ChevronRight, Menu, X, Sparkles, Shield } from 'lucide-react';
+import { Settings, Users, BarChart3, Zap, Bell, ShoppingBag, Home, Calendar, LayoutGrid, FileText, Gamepad2, Trophy, Database, Ticket, TrendingUp, MessageSquare, Mail, Truck, ChevronLeft, ChevronRight, Menu, X, Sparkles, Shield, HelpCircle } from 'lucide-react';
 
 import { useAuth } from '@/app/context/AuthContext';
 
@@ -56,6 +56,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: '/admin/shipments', label: 'Shipments', icon: Truck },
     { href: '/admin/products', label: 'Products', icon: LayoutGrid },
     { href: '/admin/media', label: 'Media', icon: FileText },
+    { href: '/admin/faqs', label: 'FAQs', icon: HelpCircle },
     { href: '/admin/blog', label: 'Blog', icon: FileText },
     { href: '/admin/events', label: 'Events', icon: Calendar },
     { href: '/admin/experiences', label: 'Experiences', icon: Sparkles },

@@ -71,7 +71,7 @@ export default function ProofOfJoyGrid({ limit, showAddButton = true }: ProofOfJ
                         <Sparkles className="text-black" size={20} />
                         <span className="font-black text-xs md:text-sm uppercase tracking-[0.2em] text-black">Testimonials</span>
                     </div>
-                    <h2 className="font-header text-4xl md:text-6xl font-black text-white tracking-tighter">
+                    <h2 className="font-header text-4xl md:text-6xl font-black text-white tracking-tighter uppercase">
                         Proof of <span className="text-black">Joy</span>
                     </h2>
                 </div>
