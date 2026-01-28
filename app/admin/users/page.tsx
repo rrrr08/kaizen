@@ -334,7 +334,7 @@ const UserManagementPage = () => {
             {/* Filters */}
             <div className="flex flex-col items-center gap-6 max-w-4xl mx-auto">
               {/* Status Filter */}
-              <div className="flex gap-1 bg-white p-1 rounded-2xl border-2 border-black neo-shadow">
+              <div className="flex flex-wrap gap-1 bg-white p-1 rounded-2xl border-2 border-black neo-shadow justify-center">
                 {(['all', 'unbanned', 'banned'] as const).map((status) => (
                   <button
                     key={status}
@@ -342,7 +342,7 @@ const UserManagementPage = () => {
                       setStatusFilter(status);
                       if (status === 'all') setRoleFilter('all');
                     }}
-                    className={`px-8 py-2.5 rounded-xl font-black uppercase tracking-wider text-sm transition-all duration-200 ${statusFilter === status
+                    className={`px-4 sm:px-8 py-2.5 rounded-xl font-black uppercase tracking-wider text-xs sm:text-sm transition-all duration-200 ${statusFilter === status
                       ? 'bg-[#FFD93D] text-black shadow-[2px_2px_0px_rgba(0,0,0,1)]'
                       : 'text-black/40 hover:text-black hover:bg-gray-50'
                       }`}

@@ -72,10 +72,10 @@ export const MediaGalleryModal: React.FC<MediaGalleryModalProps> = ({
                     <Button
                         type="button"
                         variant="outline"
-                        className="bg-white text-black font-black uppercase tracking-wide border-2 border-black neo-shadow hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all flex items-center gap-2 whitespace-nowrap"
+                        className="bg-white text-black font-black uppercase tracking-wide border-2 border-black neo-shadow hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all flex items-center gap-2 h-auto text-center py-2"
                     >
-                        <Library className="h-4 w-4 mr-2" />
-                        <span className="hidden md:inline">Choose from </span>Gallery
+                        <Library className="h-4 w-4 mr-2 flex-shrink-0" />
+                        <span><span className="hidden sm:inline">Choose from </span>Gallery</span>
                     </Button>
                 )}
             </DialogTrigger>

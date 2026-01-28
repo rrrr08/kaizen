@@ -700,7 +700,7 @@ export default function GameSettingsDashboard() {
                                                             </div>
                                                             <div className="min-w-0 flex-1">
                                                                 <h3 className="font-header text-xl md:text-2xl font-black text-black uppercase tracking-tight leading-tight break-words pr-2">
-                                                                    {id}
+                                                                    {config.name || id}
                                                                 </h3>
                                                             </div>
                                                         </div>
@@ -976,12 +976,12 @@ export default function GameSettingsDashboard() {
                             <div className="space-y-8">
                                 <div className="bg-white border-2 border-black p-8 rounded-[40px] neo-shadow">
                                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
-                                        <div className="grid grid-cols-3 md:grid-cols-6 gap-3 flex-1 w-full">
+                                        <div className="grid grid-cols-2 md:grid-cols-6 gap-3 flex-1 w-full">
                                             {(['riddle', 'trivia', 'wordle', 'hangman', 'wordsearch', 'chess'] as GameType[]).map((game) => (
                                                 <button
                                                     key={game}
                                                     onClick={() => setSelectedGame(game)}
-                                                    className={`px-4 py-3 font-black text-[10px] uppercase rounded-xl border-2 transition-all ${selectedGame === game
+                                                    className={`px-2 py-3 font-black text-[10px] uppercase rounded-xl border-2 transition-all ${selectedGame === game
                                                         ? 'bg-[#6C5CE7] text-white border-black neo-shadow-sm'
                                                         : 'bg-white text-black border-black/10 hover:border-black'
                                                         }`}
@@ -1011,9 +1011,9 @@ export default function GameSettingsDashboard() {
                                                 <input placeholder="5-Letter Word" className="p-4 border-2 border-black rounded-2xl font-bold bg-white w-full uppercase" maxLength={5} value={newItem.word || ''} onChange={e => setNewItem({ ...newItem, word: e.target.value.toUpperCase() })} />
                                             )}
                                             {/* Add other specific forms if desired, truncated for clarity */}
-                                            <div className="flex gap-4 mt-8">
-                                                <button onClick={handleAddContent} className="px-8 py-3 bg-black text-white font-black text-xs uppercase rounded-xl">SAVE TO CLOUD</button>
-                                                <button onClick={() => setShowAddForm(false)} className="px-8 py-3 bg-white text-black font-black text-xs uppercase rounded-xl border-2 border-black">CANCEL</button>
+                                            <div className="flex flex-col sm:flex-row gap-4 mt-8">
+                                                <button onClick={handleAddContent} className="px-8 py-3 bg-black text-white font-black text-xs uppercase rounded-xl w-full sm:w-auto">SAVE TO CLOUD</button>
+                                                <button onClick={() => setShowAddForm(false)} className="px-8 py-3 bg-white text-black font-black text-xs uppercase rounded-xl border-2 border-black w-full sm:w-auto">CANCEL</button>
                                             </div>
                                         </div>
                                     )}
