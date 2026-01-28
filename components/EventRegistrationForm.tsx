@@ -69,6 +69,13 @@ export default function EventRegistrationForm({
   const [lockId, setLockId] = useState<string | null>(null);
   const [isRazorpayLoaded, setIsRazorpayLoaded] = useState(false);
 
+  // Check if Razorpay is already loaded
+  useEffect(() => {
+    if (window.Razorpay) {
+      setIsRazorpayLoaded(true);
+    }
+  }, []);
+
   const [formData, setFormData] = useState({
     name: user?.displayName || '',
     email: user?.email || '',
