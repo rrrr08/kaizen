@@ -432,7 +432,7 @@ const UserManagementPage = () => {
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell className="text-[#2D3436] font-medium">{user.email}</TableCell>
+                      <TableCell className="text-[#2D3436] font-medium max-w-[120px] md:max-w-xs truncate" title={user.email}>{user.email}</TableCell>
                       <TableCell>
                         <span className={`inline-flex items-center px-3 py-1 rounded-lg text-xs font-black uppercase tracking-wider border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,0.1)] ${user.role === 'admin' ? 'bg-[#FF7675] text-black' : 'bg-[#74B9FF] text-black'}`}>
                           <span className="mr-2">{getRoleIcon(user.role)}</span>

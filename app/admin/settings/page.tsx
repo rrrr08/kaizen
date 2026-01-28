@@ -261,17 +261,17 @@ export default function AdminSettingsPage() {
         </div>
 
         {/* Save Button */}
-        <div className="mt-12 flex gap-6 justify-end">
+        <div className="mt-12 flex flex-col-reverse md:flex-row gap-4 md:gap-6 justify-end">
           <button
             onClick={handleReset}
-            className="px-8 py-4 bg-white border-2 border-black text-black font-black uppercase tracking-widest rounded-xl hover:bg-gray-100 transition-all text-sm"
+            className="w-full md:w-auto px-8 py-4 bg-white border-2 border-black text-black font-black uppercase tracking-widest rounded-xl hover:bg-gray-100 transition-all text-sm"
           >
             Reset to Default
           </button>
           <button
             onClick={handleSave}
             disabled={isSaving}
-            className="px-10 py-4 bg-[#00B894] text-black font-black text-lg uppercase tracking-widest rounded-xl border-2 border-black neo-shadow hover:translate-x-[4px] hover:translate-y-[4px] hover:shadow-none disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            className="w-full md:w-auto px-10 py-4 bg-[#00B894] text-black font-black text-lg uppercase tracking-widest rounded-xl border-2 border-black neo-shadow hover:translate-x-[4px] hover:translate-y-[4px] hover:shadow-none disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >
             {isSaving ? 'Saving...' : 'Save All Settings'}
           </button>

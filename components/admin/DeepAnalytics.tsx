@@ -288,7 +288,7 @@ export default function DeepAnalytics() {
 
     return (
         <div className="mb-8">
-            <h3 className="font-header text-xl md:text-2xl font-black text-black uppercase tracking-tighter mb-6 flex items-center gap-2">
+            <h3 className="font-header text-xl md:text-2xl font-black text-black uppercase mb-6 flex items-center gap-2">
                 <Trophy className="text-[#FDCB6E]" />
                 Deep Dive Analytics
             </h3>

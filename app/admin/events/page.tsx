@@ -350,7 +350,7 @@ export default function EventsPage() {
               </div>
 
               {/* Actions */}
-              <div className="flex gap-4 pt-6 border-t-2 border-black/5">
+              <div className="flex flex-col md:flex-row gap-4 pt-6 border-t-2 border-black/5">
                 <button
                   onClick={() => handleEditEvent(event.id)}
                   className="flex-1 px-4 py-3 bg-white border-2 border-black rounded-xl text-black text-sm font-black uppercase tracking-wide hover:bg-black hover:text-white transition-all flex items-center justify-center gap-2 neo-shadow-sm active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"

@@ -393,12 +393,13 @@ export default function AdminBlogPage() {
                 </div>
                 <div className="md:col-span-2">
                   <label className="block text-black font-black text-xs uppercase tracking-widest mb-2">Excerpt *</label>
-                  <input
+                  <textarea
                     value={form.excerpt}
                     onChange={(e) => setForm({ ...form, excerpt: e.target.value })}
-                    className="w-full bg-white border-2 border-black rounded-xl px-4 py-3 text-black placeholder-black/30 focus:outline-none focus:ring-0 focus:shadow-[4px_4px_0px_#000] transition-shadow font-bold"
+                    className="w-full px-4 py-3 bg-white border-2 border-black rounded-xl text-black placeholder-black/30 focus:outline-none focus:ring-0 focus:shadow-[4px_4px_0px_#000] transition-shadow font-bold resize-none"
                     placeholder="Short summary for the card"
                     maxLength={300}
+                    rows={3}
                     required
                   />
                   <p className="text-[10px] text-black/40 font-bold mt-1 uppercase tracking-wider text-right">{form.excerpt.length}/300</p>
