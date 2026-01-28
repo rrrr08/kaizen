@@ -387,6 +387,20 @@ export default function EventRegistrationForm({
       return;
     }
 
+    // Validate email
+    try {
+      const res = await fetch(`/api/validate-email?email=${encodeURIComponent(formData.email)}`);
+      const data = await res.json();
+      if (!data.isValid) {
+        setError(data.error || "Invalid email address");
+        setShowErrorModal(true);
+        return;
+      }
+    } catch (err) {
+      console.error("Email validation failed", err);
+      // Fail open
+    }
+
     try {
       setIsProcessing(true);
       setError(null);

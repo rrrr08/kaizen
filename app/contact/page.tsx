@@ -42,6 +42,24 @@ export default function ContactPage() {
         setError('');
         setSuccess(false);
 
+        // Validate email against temp mail API
+        try {
+            const validRes = await fetch(`/api/validate-email?email=${encodeURIComponent(formData.email)}`);
+            if (validRes.ok) {
+                const validData = await validRes.json();
+                if (!validData.isValid) {
+                    throw new Error(validData.error);
+                }
+            }
+        } catch (err: any) {
+            if (err.message && (err.message.includes('Disposable') || err.message.includes('undeliverable'))) {
+                setError(err.message);
+                setLoading(false);
+                return;
+            }
+            // Ignore other errors (fail open)
+        }
+
         try {
             const response = await fetch('/api/contact', {
                 method: 'POST',
