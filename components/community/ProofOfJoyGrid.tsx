@@ -68,11 +68,11 @@ export default function ProofOfJoyGrid({ limit, showAddButton = true }: ProofOfJ
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 md:mb-16 gap-6 md:gap-8">
                 <div>
                     <div className="flex items-center gap-2 md:gap-3 mb-2 md:mb-4">
-                        <Sparkles className="text-[#00B894]" size={20} />
-                        <span className="font-black text-xs md:text-sm uppercase tracking-[0.2em] text-[#00B894]">Testimonials</span>
+                        <Sparkles className="text-black" size={20} />
+                        <span className="font-black text-xs md:text-sm uppercase tracking-[0.2em] text-black">Testimonials</span>
                     </div>
-                    <h2 className="font-header text-4xl md:text-6xl text-black tracking-tighter">
-                        Proof of <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#6C5CE7] to-[#FF7675]">Joy</span>
+                    <h2 className="font-header text-4xl md:text-6xl font-black text-white tracking-tighter">
+                        Proof of <span className="text-black">Joy</span>
                     </h2>
                 </div>
 

@@ -10,6 +10,7 @@ import { Sparkles, Plus, Flame, ChevronRight, Calendar, Puzzle, Package, Wallet,
 // import ArcadeHero from '@/components/home/ArcadeHero';
 // import EventHero from '@/components/home/EventHero';
 import Hero from '@/components/home/Hero';
+import FAQSection from '@/components/FAQSection';
 import { Product, GameEvent, HomepageContent } from '@/lib/types';
 import { useAuth } from '@/app/context/AuthContext';
 import { DEFAULT_HOMEPAGE_CONTENT } from '@/lib/ui-config';
@@ -113,6 +114,7 @@ export default function Home() {
 
       {/* Section 2: Choose Your Play Style */}
       <section className="px-6 py-20 bg-white">
+
         <div className="container mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-5xl font-black mb-4">Choose Your Play Style at Joy Juncture</h2>
@@ -192,6 +194,7 @@ export default function Home() {
 
       {/* Section 3: What's Happening Now */}
       <section className="px-6 py-12 bg-gradient-to-br from-[#6C5CE7] to-[#8B7FE8] text-white">
+
         <div className="container mx-auto">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-black mb-2">What's Happening Now at Joy Juncture</h2>
@@ -329,8 +332,9 @@ export default function Home() {
       </section>
 
       {/* Section 4: Proof of Joy */}
-      <section className="px-6 py-10 bg-[#FFD93D] overflow-hidden relative">
+      <section className="px-6 py-10 bg-[#FF7675] overflow-hidden relative">
         <div className="absolute top-0 left-0 w-full h-2 bg-black/10" />
+
         <div className="container mx-auto">
           {/* Replaced with standardized ProofOfJoyGrid to sync content across site */}
           <ProofOfJoyGrid limit={3} />
@@ -341,6 +345,7 @@ export default function Home() {
       {/* Section 5: Gamification Teaser */}
       <section className="px-6 py-12 bg-black text-[#FFFDF5] overflow-hidden relative">
         <div className="absolute top-0 right-0 w-full h-[1px] bg-white/10" />
+
         <div className="absolute bottom-20 left-20 w-96 h-96 bg-[#FF6B6B]/10 rounded-full blur-[150px] pointer-events-none" />
 
         <div className="container mx-auto relative z-10">
@@ -481,6 +486,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* FAQ Section */}
+      {content?.faqs && <FAQSection faqs={content.faqs} />}
     </motion.div>
   );
 }

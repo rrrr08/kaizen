@@ -129,5 +129,23 @@ export const DEFAULT_HOMEPAGE_CONTENT: HomepageContent = {
       actionUrl: "/shop",
       highlightColor: "bg-[#00B894]"
     }
+  ],
+  faqs: [
+    {
+      question: "What is Joy Juncture?",
+      answer: "We are a curated marketplace for premium board games, puzzles, and community experiences using gamification to reward your passion."
+    },
+    {
+      question: "How do I earn JP (Joy Points)?",
+      answer: "You earn JP by playing daily puzzles, spinning the wheel, referring friends, and purchasing items. JP can be redeemed for discounts and exclusive rewards."
+    },
+    {
+      question: "Do you ship internationally?",
+      answer: "Currently, we ship across India. We plan to expand to international shipping soon. Stay tuned!"
+    },
+    {
+      question: "What is the return policy?",
+      answer: "We offer a 7-day return policy for damaged or incorrect items. Please record an unboxing video for smooth processing."
+    }
   ]
 };

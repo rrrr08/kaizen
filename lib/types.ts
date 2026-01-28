@@ -494,6 +494,11 @@ export interface HeroContent {
   backgroundImage?: string;
 }
 
+export interface FAQItem {
+  question: string;
+  answer: string;
+}
+
 export interface HomepageContent {
   hero: HeroContent; // Default (Gamer)
   heroShopper?: HeroContent;
@@ -516,6 +521,7 @@ export interface HomepageContent {
     photos?: Array<{ title: string; subtitle: string; emoji: string; }>;
     testimonials?: Array<{ title: string; subtitle: string; emoji: string; }>;
   };
+  faqs?: FAQItem[];
 }
 
 export interface PlayStyleItem {
