@@ -6,6 +6,7 @@ import { useGamification } from '@/app/context/GamificationContext';
 import { usePopup } from '@/app/context/PopupContext';
 import { WHEEL_PRIZES, SPIN_COST, WheelPrize } from '@/lib/gamification';
 import { Trophy, Loader2 } from 'lucide-react';
+import { Logger } from '@/lib/logger';
 
 const WheelOfJoy: React.FC = () => {
     const { spinWheel, spendPoints, dailyStats, balance, loading: contextLoading } = useGamification();
@@ -88,12 +89,12 @@ const WheelOfJoy: React.FC = () => {
             const selectedPrize = data.result.prize;
             const awardedAmount = data.result.awardedValue;
 
-            console.log('🎯 Server Selected Prize:', selectedPrize.label, 'at index:', prizes.findIndex(p => p.id === selectedPrize.id));
+            Logger.info('🎯 Server Selected Prize:', { label: selectedPrize.label, index: prizes.findIndex(p => p.id === selectedPrize.id) });
 
             // 2. Calculate Rotation (accounting for current rotation)
             const prizeIndex = prizes.findIndex(p => p.id === selectedPrize.id);
             if (prizeIndex === -1) {
-                console.error("Prize returned by server not found in local configuration. Ensure admin settings match.");
+                Logger.error("Prize returned by server not found in local configuration. Ensure admin settings match.");
                 // Fallback?
             }
 
@@ -139,7 +140,7 @@ const WheelOfJoy: React.FC = () => {
             setResult({ ...selectedPrize, value: awardedAmount });
 
         } catch (error: any) {
-            console.error('Spin Loop Error:', error);
+            Logger.error('Spin Loop Error:', error);
             await showAlert(error.message, 'error');
         } finally {
             setIsSpinning(false);

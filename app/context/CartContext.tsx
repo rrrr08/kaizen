@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { CartItem, Product } from '@/lib/types';
 import { useAuth } from './AuthContext';
+import { Logger } from '@/lib/logger';
 
 interface CartContextType {
   items: CartItem[];
@@ -45,7 +46,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         localStorage.removeItem(CART_USER_KEY);
       }
     } catch (error) {
-      console.error('Failed to save to localStorage:', error);
+      Logger.error('Failed to save to localStorage:', error);
     }
   };
 
@@ -58,7 +59,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
       // If user has changed, clear localStorage cart to prevent transfer
       if (currentUserId && storedUserId && storedUserId !== currentUserId) {
-        console.log('User changed, clearing old cart from localStorage');
+        Logger.info('User changed, clearing old cart from localStorage');
         localStorage.removeItem(CART_STORAGE_KEY);
         localStorage.removeItem(CART_USER_KEY);
         return [];
@@ -77,7 +78,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             addedAtDate = new Date();
           }
         } catch (error) {
-          console.error('Error parsing addedAt date:', error);
+          Logger.error('Error parsing addedAt date:', error);
           addedAtDate = new Date();
         }
 
@@ -87,7 +88,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         } as CartItem;
       });
     } catch (error) {
-      console.error('Failed to load from localStorage:', error);
+      Logger.error('Failed to load from localStorage:', error);
       return [];
     }
   };
@@ -99,7 +100,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const { updateUserCart } = await import('@/lib/firebase');
       await updateUserCart(user.uid, cartItems);
     } catch (error) {
-      console.error('Failed to save to Firebase:', error);
+      Logger.error('Failed to save to Firebase:', error);
     }
   };
 
@@ -120,7 +121,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             addedAtDate = new Date();
           }
         } catch (error) {
-          console.error('Error parsing addedAt date:', error);
+          Logger.error('Error parsing addedAt date:', error);
           addedAtDate = new Date();
         }
 
@@ -130,7 +131,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         } as CartItem;
       });
     } catch (error) {
-      console.error('Failed to load from Firebase:', error);
+      Logger.error('Failed to load from Firebase:', error);
       return [];
     }
   };
@@ -145,7 +146,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
         // Detect user change (logout or switch)
         if (lastUserId && lastUserId !== (user?.uid || null)) {
-          console.log('User changed from', lastUserId, 'to', user?.uid);
+          Logger.info('User changed from ' + lastUserId + ' to ' + (user?.uid || 'null'));
           // Clear everything when user changes
           setItems([]);
           saveToLocalStorage([], null);
@@ -196,7 +197,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           setItems(localCart);
         }
       } catch (error) {
-        console.error('Failed to load cart:', error);
+        Logger.error('Failed to load cart:', error);
         // Fallback to localStorage
         const localCart = loadFromLocalStorage(user?.uid || null);
         setItems(localCart);
@@ -257,7 +258,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       saveToLocalStorage([], user.uid);
       setHasSynced(true);
     } catch (error) {
-      console.error('Error merging cart:', error);
+      Logger.error('Error merging cart:', error);
     }
   };
 
@@ -317,7 +318,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   };
 
   const clearCart = async () => {
-    console.log('clearCart called');
+    Logger.info('clearCart called');
     setIsClearing(true);
 
     try {
@@ -328,9 +329,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           localStorage.removeItem(CART_USER_KEY);
           localStorage.removeItem('kaizen_cart');
           localStorage.removeItem('joy-juncture-cart');
-          console.log('localStorage cleared');
+          Logger.info('localStorage cleared');
         } catch (error) {
-          console.error('Failed to clear localStorage:', error);
+          Logger.error('Failed to clear localStorage:', error);
         }
       }
 
@@ -339,16 +340,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         try {
           const { clearUserCart } = await import('@/lib/firebase');
           await clearUserCart(user.uid);
-          console.log('Firebase cart cleared');
+          Logger.info('Firebase cart cleared');
         } catch (error) {
-          console.error('Failed to clear Firebase cart:', error);
+          Logger.error('Failed to clear Firebase cart:', error);
         }
       }
 
       // Clear state LAST
       setItems([]);
       setAppliedPointsDiscount(0);
-      console.log('Cart state cleared');
+      Logger.info('Cart state cleared');
     } finally {
       // Reset clearing flag immediately to allow reloads
       setIsClearing(false);

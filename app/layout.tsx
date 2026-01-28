@@ -36,6 +36,13 @@ const instrumentSerif = Instrument_Serif({
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://joy-juncture.vercel.app';
 
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
+};
+
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
   alternates: {
@@ -100,6 +107,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        {/* Charset must be first */}
+        <meta charSet="utf-8" />
+
+        {/* Viewport must be early - CRITICAL for mobile */}
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+
         {/* Preconnect to external domains for faster loading */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -111,6 +124,15 @@ export default function RootLayout({
         <meta httpEquiv="X-Frame-Options" content="SAMEORIGIN" />
         <meta httpEquiv="X-XSS-Protection" content="1; mode=block" />
         <meta name="referrer" content="origin-when-cross-origin" />
+
+        {/* Debug viewport - remove after testing */}
+        <script dangerouslySetInnerHTML={{
+          __html: `
+            console.log('Viewport width:', window.innerWidth);
+            console.log('Device pixel ratio:', window.devicePixelRatio);
+            console.log('Screen width:', screen.width);
+          `
+        }} />
 
         {/* Structured Data - Organization */}
         <script

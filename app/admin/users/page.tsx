@@ -24,6 +24,7 @@ import { USER_ROLES, ROLE_LABELS, getRoleColor, getRoleIcon } from '@/lib/roles'
 import { Users, Search, Edit3, Shield, Check, X, Eye, Calendar, ShoppingBag, Package } from 'lucide-react';
 import RoleProtected from '@/components/auth/RoleProtected';
 import { usePopup } from '@/app/context/PopupContext';
+import { Logger } from '@/lib/logger';
 
 interface User {
   id: string;
@@ -94,7 +95,7 @@ const UserManagementPage = () => {
           const data = doc.data();
           // Debug logging
           if (data.email === 'rudrakshfanse64@gmail.com' || data.isBanned) {
-            console.log('User Data Debug:', { name: data.name, email: data.email, isBanned: data.isBanned, role: data.role });
+            Logger.info('User Data Debug:', { name: data.name, email: data.email, isBanned: data.isBanned, role: data.role });
           }
           return {
             id: doc.id,
@@ -107,7 +108,7 @@ const UserManagementPage = () => {
         });
         setUsers(userData);
       } catch (error) {
-        console.error('Error fetching users:', error);
+        Logger.error('Error fetching users:', error);
       } finally {
         setLoading(false);
       }
@@ -124,7 +125,7 @@ const UserManagementPage = () => {
         setSelectedUser(null);
         await showAlert('User role updated successfully!', 'success');
       } catch (error) {
-        console.error('Error updating role:', error);
+        Logger.error('Error updating role:', error);
         await showAlert('Failed to update role. Please check your permissions.', 'error');
       }
     }
@@ -146,7 +147,7 @@ const UserManagementPage = () => {
         'success'
       );
     } catch (error) {
-      console.error('Error updating ban status:', error);
+      Logger.error('Error updating ban status:', error);
       await showAlert('Failed to update ban status', 'error');
     }
   };
@@ -181,7 +182,7 @@ const UserManagementPage = () => {
 
       await showAlert(`Database Fixed: Updated ${updatedCount} users.`, 'success');
     } catch (error) {
-      console.error('Error syncing:', error);
+      Logger.error('Error syncing:', error);
       await showAlert('Failed to sync database', 'error');
     } finally {
       setLoading(false);
@@ -221,7 +222,7 @@ const UserManagementPage = () => {
               eventName = eventResult.event?.title || 'Unknown Event';
             }
           } catch (error) {
-            console.error('Error fetching event details:', error);
+            Logger.error('Error fetching event details:', error);
           }
         }
 
@@ -264,7 +265,7 @@ const UserManagementPage = () => {
 
       setUserPurchases(purchases);
     } catch (error) {
-      console.error('Error fetching user details:', error);
+      Logger.error('Error fetching user details:', error);
     } finally {
       setLoadingDetails(false);
     }
@@ -288,24 +289,24 @@ const UserManagementPage = () => {
 
   return (
     <RoleProtected allowedRoles={[USER_ROLES.ADMIN]}>
-      <div className="min-h-screen bg-[#FFFDF5] pb-8 px-4 sm:px-6 lg:px-8">
+      <div className="px-3 py-4 pb-16 md:p-8 md:pb-16 min-h-screen bg-[#FFFDF5] overflow-x-hidden">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="text-center mb-12 border-b-2 border-black pb-8"
+            className="mb-8 md:mb-12 border-b-2 border-black pb-6 md:pb-8"
           >
-            <div className="flex items-center justify-center mb-4">
-              <div className="p-3 bg-[#6C5CE7] rounded-xl border-2 border-black neo-shadow">
-                <Users className="w-8 h-8 text-white" />
+            <div className="flex items-center gap-3 md:gap-4 mb-2">
+              <div className="p-2 bg-[#6C5CE7] rounded-lg border-2 border-black neo-shadow-sm">
+                <Users className="w-5 h-5 md:w-6 md:h-6 text-white" />
               </div>
+              <h1 className="font-header text-3xl md:text-6xl font-black text-black uppercase tracking-tighter">
+                User Management
+              </h1>
             </div>
-            <h1 className="text-5xl font-header font-black text-[#2D3436] mb-2 tracking-tighter uppercase">
-              User Management (Admin Console)
-            </h1>
-            <p className="text-lg text-[#2D3436]/60 max-w-2xl mx-auto font-medium">
+            <p className="text-black/60 font-bold text-sm md:text-xl md:ml-12 lg:ml-12">
               Manage user accounts, roles, and permissions across the platform.
             </p>
           </motion.div>
@@ -333,7 +334,7 @@ const UserManagementPage = () => {
             {/* Filters */}
             <div className="flex flex-col items-center gap-6 max-w-4xl mx-auto">
               {/* Status Filter */}
-              <div className="flex gap-1 bg-white p-1 rounded-2xl border-2 border-black neo-shadow">
+              <div className="flex flex-wrap gap-1 bg-white p-1 rounded-2xl border-2 border-black neo-shadow justify-center">
                 {(['all', 'unbanned', 'banned'] as const).map((status) => (
                   <button
                     key={status}
@@ -341,7 +342,7 @@ const UserManagementPage = () => {
                       setStatusFilter(status);
                       if (status === 'all') setRoleFilter('all');
                     }}
-                    className={`px-8 py-2.5 rounded-xl font-black uppercase tracking-wider text-sm transition-all duration-200 ${statusFilter === status
+                    className={`px-4 sm:px-8 py-2.5 rounded-xl font-black uppercase tracking-wider text-xs sm:text-sm transition-all duration-200 ${statusFilter === status
                       ? 'bg-[#FFD93D] text-black shadow-[2px_2px_0px_rgba(0,0,0,1)]'
                       : 'text-black/40 hover:text-black hover:bg-gray-50'
                       }`}
@@ -394,11 +395,11 @@ const UserManagementPage = () => {
               <Table>
                 <TableHeader className="bg-black text-white">
                   <TableRow className="border-b-2 border-black hover:bg-black">
-                    <TableHead className="font-black text-white uppercase tracking-wider py-4">User</TableHead>
-                    <TableHead className="font-black text-white uppercase tracking-wider py-4">Email</TableHead>
-                    <TableHead className="font-black text-white uppercase tracking-wider py-4">Role</TableHead>
-                    <TableHead className="font-black text-white uppercase tracking-wider py-4">Status</TableHead>
-                    <TableHead className="font-black text-white uppercase tracking-wider py-4">Actions</TableHead>
+                    <TableHead className="font-black text-white uppercase tracking-wider py-4 whitespace-nowrap">User</TableHead>
+                    <TableHead className="font-black text-white uppercase tracking-wider py-4 whitespace-nowrap">Email</TableHead>
+                    <TableHead className="font-black text-white uppercase tracking-wider py-4 whitespace-nowrap">Role</TableHead>
+                    <TableHead className="font-black text-white uppercase tracking-wider py-4 whitespace-nowrap">Status</TableHead>
+                    <TableHead className="font-black text-white uppercase tracking-wider py-4 whitespace-nowrap">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -431,7 +432,7 @@ const UserManagementPage = () => {
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell className="text-[#2D3436] font-medium">{user.email}</TableCell>
+                      <TableCell className="text-[#2D3436] font-medium max-w-[120px] md:max-w-xs truncate" title={user.email}>{user.email}</TableCell>
                       <TableCell>
                         <span className={`inline-flex items-center px-3 py-1 rounded-lg text-xs font-black uppercase tracking-wider border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,0.1)] ${user.role === 'admin' ? 'bg-[#FF7675] text-black' : 'bg-[#74B9FF] text-black'}`}>
                           <span className="mr-2">{getRoleIcon(user.role)}</span>

@@ -158,14 +158,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* Main Content */}
       <div
         className={`
-            flex-1 min-h-screen transition-all duration-300
+            flex-1 min-h-screen transition-all duration-300 min-w-0
             ${isCollapsed ? 'md:ml-20' : 'md:ml-64'}
-            pt-16 md:pt-0
+            pt-20 md:pt-0
          `}
       >
-        <div className="p-6">
-          {children}
-        </div>
+        {children}
       </div>
     </div>
   );

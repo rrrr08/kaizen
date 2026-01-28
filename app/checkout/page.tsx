@@ -9,6 +9,7 @@ import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { Coins, ArrowLeft, AlertTriangle, Check } from 'lucide-react';
+import JoyPhoneInput from '@/components/ui/JoyPhoneInput';
 
 export const dynamic = 'force-dynamic';
 
@@ -177,6 +178,10 @@ export default function CheckoutPage() {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handlePhoneChange = (value: string) => {
+    setFormData((prev) => ({ ...prev, phone: value }));
   };
 
   const handleRedeemPointsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -361,7 +366,14 @@ export default function CheckoutPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <input type="text" name="name" placeholder="Full Name" value={formData.name} onChange={handleInputChange} className="col-span-1 bg-white border-2 border-black rounded-lg px-4 py-3 md:py-4 text-sm md:text-base font-bold focus:bg-[#FFD93D]/20 outline-none w-full" required />
                   <input type="email" name="email" placeholder="Email" value={formData.email} onChange={handleInputChange} className="col-span-1 bg-white border-2 border-black rounded-lg px-4 py-3 md:py-4 text-sm md:text-base font-bold focus:bg-[#FFD93D]/20 outline-none w-full" required />
-                  <input type="tel" name="phone" placeholder="Phone" value={formData.phone} onChange={handleInputChange} className="col-span-1 bg-white border-2 border-black rounded-lg px-4 py-3 md:py-4 text-sm md:text-base font-bold focus:bg-[#FFD93D]/20 outline-none w-full" required />
+                  <div className="col-span-1">
+                    <JoyPhoneInput
+                      value={formData.phone}
+                      onChange={handlePhoneChange}
+                      required
+                      error={formData.phone && formData.phone.length < 13 ? "Invalid Number" : undefined}
+                    />
+                  </div>
                   <input type="text" name="address" placeholder="Address" value={formData.address} onChange={handleInputChange} className="col-span-1 md:col-span-2 bg-white border-2 border-black rounded-lg px-4 py-3 md:py-4 text-sm md:text-base font-bold focus:bg-[#FFD93D]/20 outline-none w-full" required />
                   <input type="text" name="city" placeholder="City" value={formData.city} onChange={handleInputChange} className="bg-white border-2 border-black rounded-lg px-4 py-3 md:py-4 text-sm md:text-base font-bold focus:bg-[#FFD93D]/20 outline-none w-full" />
                   <input type="text" name="state" placeholder="State" value={formData.state} onChange={handleInputChange} className="bg-white border-2 border-black rounded-lg px-4 py-3 md:py-4 text-sm md:text-base font-bold focus:bg-[#FFD93D]/20 outline-none w-full" />

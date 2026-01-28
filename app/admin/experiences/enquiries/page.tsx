@@ -451,7 +451,7 @@ export default function AdminEnquiriesPage() {
                         </div>
                         <div className="p-4 border-2 border-black rounded-xl bg-white shadow-inner">
                           <p className="text-[10px] font-bold uppercase text-[#2D3436]/40 mb-1">BUDGET</p>
-                          <p className="font-black text-xl text-[#2D3436]">{selectedEnquiry.budgetRange}</p>
+                          <p className="font-black text-sm md:text-xl text-[#2D3436] break-words">{selectedEnquiry.budgetRange}</p>
                         </div>
 
                       </div>

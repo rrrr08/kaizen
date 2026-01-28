@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ExperienceCategory } from '@/lib/types';
-import { ArrowLeft, Send, User, AtSign, Phone, MessageSquare, Calendar, Users, DollarSign, Star } from 'lucide-react';
+import { ArrowLeft, Send, User, AtSign, MessageSquare, Calendar, Users, DollarSign, Star } from 'lucide-react';
+import JoyPhoneInput from '@/components/ui/JoyPhoneInput';
 import Link from 'next/link';
 import { useAuth } from '@/app/context/AuthContext';
 import { motion } from 'framer-motion';
@@ -115,18 +116,9 @@ export default function ExperienceEnquiryPage() {
       errors.email = 'Please enter a valid email address';
     }
 
-    // Phone validation
-    // Allow + at start, then digits, spaces, hyphens, parentheses (common for country codes)
-    const phoneRegex = /^\+?[\d\s-()]{10,20}$/;
-    if (!formData.phone.trim()) {
-      errors.phone = 'Phone number is required';
-    } else if (!phoneRegex.test(formData.phone)) {
+    // Phone validation (handled by JoyPhoneInput)
+    if (!formData.phone.trim() || formData.phone.length < 13) {
       errors.phone = 'Please enter a valid phone number';
-    } else {
-      const cleanPhone = formData.phone.replace(/[^\d+]/g, ''); // Keep + and digits
-      if (cleanPhone.length < 10) {
-        errors.phone = 'Phone number must be at least 10 digits';
-      }
     }
 
     // Occasion details validation
@@ -219,7 +211,7 @@ export default function ExperienceEnquiryPage() {
         categoryId: category.id,
         categoryName: category.name,
         occasionDetails: formData.occasionDetails.trim(),
-        audienceSize: formData.audienceSize, 
+        audienceSize: formData.audienceSize,
         preferredDateRange: formData.preferredDateRange.trim(),
         budgetRange: formData.budgetRange,
         specialRequirements: formData.specialRequirements.trim(),
@@ -492,31 +484,12 @@ export default function ExperienceEnquiryPage() {
 
                 <div className="space-y-2">
                   <label className="text-xs font-black uppercase tracking-widest text-black/40 ml-2">Phone Number *</label>
-                  <div className="relative">
-                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-black/20" />
-                    <input
-                      required
-                      type="tel"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleInputChange}
-                      placeholder="+91 98765 43210"
-                      maxLength={20}
-                      className={`w-full pl-12 pr-4 py-4 bg-[#FFFDF5] border-2 rounded-2xl focus:outline-none focus:shadow-[4px_4px_0px_#000] transition-all font-bold placeholder:text-black/20 ${formErrors.phone ? 'border-[#FF7675]' : 'border-black'
-                        }`}
-                    />
-                  </div>
-                  {formErrors.phone && (
-                    <motion.p
-                      initial={{ opacity: 0, y: -5 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="text-xs text-[#FF7675] font-black uppercase tracking-wider ml-2 flex items-center gap-1"
-                    >
-                      <span className="w-1 h-1 bg-[#FF7675] rounded-full"></span>
-                      {formErrors.phone}
-                    </motion.p>
-                  )}
-                  <p className="text-[10px] text-black/40 font-bold mt-1 uppercase tracking-wider text-right">{formData.phone.length}/20</p>
+                  <JoyPhoneInput
+                    value={formData.phone}
+                    onChange={(val) => setFormData(prev => ({ ...prev, phone: val }))}
+                    required
+                    error={formErrors.phone}
+                  />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

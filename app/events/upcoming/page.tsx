@@ -152,7 +152,7 @@ export default function UpcomingEvents() {
         </div>
 
         {/* Category Filters */}
-        <div className="flex flex-wrap gap-4 mb-12">
+        <div className="flex flex-nowrap overflow-x-auto no-scrollbar gap-4 mb-12 pb-4 -mx-6 px-6 md:mx-0 md:px-0 md:flex-wrap">
           {['All', 'Workshop', 'Game Night', 'Other'].map((cat) => (
             <button
               key={cat}
@@ -175,112 +175,116 @@ export default function UpcomingEvents() {
           {events
             .filter(event => selectedCategory === 'All' || (event.category || 'Other') === selectedCategory)
             .map(event => (
-              <Link key={event.id} href={`/events/upcoming/${event.id}`}>
-                <div className="bg-white border-2 border-black rounded-[25px] overflow-hidden hover:translate-x-1 hover:-translate-y-1 transition-transform duration-300 neo-shadow group flex flex-col md:flex-row cursor-pointer mb-3">
-                  {/* Image */}
-                  <div className="w-full md:w-80 min-h-[256px] md:h-auto md:self-stretch bg-gray-100 flex-shrink-0 overflow-hidden border-b-2 md:border-b-0 md:border-r-2 border-black relative">
-                    {event.image !== "" ? (
-                      <img
-                        src={event.image}
-                        alt={event.title}
-                        loading="lazy"
-                        className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                        <Calendar className="w-12 h-12 text-black/20" />
-                      </div>
-                    )}
-                    <div className="absolute top-4 left-4">
-                      <span className="px-3 py-1 text-black text-xs font-black uppercase tracking-wider rounded-lg border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] bg-[#00B894]">
-                        Upcoming
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Content */}
-                  <div className="flex-1 p-8 flex flex-col justify-between">
-                    <div>
-                      <div className="mb-6">
-                        <h3 className="font-header text-3xl font-black text-black mb-2 uppercase tracking-tight">{event.title}</h3>
-                        <p className="text-black/60 text-sm font-medium leading-relaxed">{event.description}</p>
-                      </div>
-
-                      {/* Event Details */}
-                      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                        <div className="bg-[#FFFDF5] p-3 rounded-xl border-2 border-black">
-                          <p className="text-black/40 text-xs font-black uppercase tracking-wider mb-1 flex items-center gap-1">
-                            <Calendar className="w-3 h-3" /> Date
-                          </p>
-                          <p className="text-black font-black">{splitDateTime(event.datetime).date}</p>
-                          <p className="text-black/60 text-xs font-bold">{splitDateTime(event.datetime).time}</p>
-                        </div>
-                        <div className="bg-[#FFFDF5] p-3 rounded-xl border-2 border-black">
-                          <p className="text-black/40 text-xs font-black uppercase tracking-wider mb-1 flex items-center gap-1">
-                            <MapPin className="w-3 h-3" /> Location
-                          </p>
-                          <p className="text-black font-black text-sm truncate" title={event.location}>{event.location}</p>
-                        </div>
-                        <div className="bg-[#FFFDF5] p-3 rounded-xl border-2 border-black">
-                          <p className="text-black/40 text-xs font-black uppercase tracking-wider mb-1">Capacity</p>
-                          <p className="text-black font-black">{event.capacity}</p>
-                        </div>
-                        <div className="bg-[#FFFDF5] p-3 rounded-xl border-2 border-black">
-                          <p className="text-black/40 text-xs font-black uppercase tracking-wider mb-1 flex items-center gap-1">
-                            <Users className="w-3 h-3" /> Registered
-                          </p>
-                          <p className="text-[#00B894] font-black">{event.registered}</p>
-                          <p className="text-black/40 text-xs font-bold">{Math.round((event.registered / event.capacity) * 100)}% full</p>
-                        </div>
-                      </div>
-
-                      {/* Registration Bar */}
-                      <div className="mb-6">
-                        <div className="w-full h-4 bg-gray-100 rounded-full overflow-hidden border-2 border-black">
-                          <div
-                            className="h-full bg-[#FFD93D] border-r-2 border-black"
-                            style={{ width: `${Math.min((event.registered / event.capacity) * 100, 100)}%` }}
-                          ></div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Register Button */}
-                    <div className="pt-6 border-t-2 border-black/5">
-                      {registeredEventIds.has(event.id) ? (
-                        <div className="w-full px-6 py-4 bg-[#FF7675]/20 text-[#D63031] font-black text-xs tracking-[0.2em] rounded-xl border-2 border-[#D63031] text-center uppercase">
-                          ALREADY REGISTERED
-                        </div>
+              <div key={event.id} id={`event-${event.id}`}>
+                <Link href={`/events/upcoming/${event.id}`}>
+                  <div className="bg-white border-2 border-black rounded-[25px] overflow-hidden hover:translate-x-1 hover:-translate-y-1 transition-transform duration-300 neo-shadow group flex flex-col md:flex-row cursor-pointer mb-3">
+                    {/* Image */}
+                    <div className="w-full md:w-80 min-h-[256px] md:h-auto md:self-stretch bg-gray-100 flex-shrink-0 overflow-hidden border-b-2 md:border-b-0 md:border-r-2 border-black relative">
+                      {event.image !== "" ? (
+                        <img
+                          src={event.image}
+                          alt={event.title}
+                          loading="lazy"
+                          className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                        />
                       ) : (
-                        <button
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            handleRegister(event);
-                          }}
-                          disabled={event.registered >= event.capacity}
-                          className="w-full px-6 py-4 bg-[#6C5CE7] text-white font-black text-xs tracking-[0.2em] hover:bg-[#5849be] transition-all rounded-xl border-2 border-transparent shadow-[4px_4px_0px_rgba(0,0,0,0.2)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#6C5CE7]"
-                        >
-                          {event.registered >= event.capacity ? 'EVENT FULL' : 'REGISTER NOW'}
-                        </button>
+                        <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                          <Calendar className="w-12 h-12 text-black/20" />
+                        </div>
                       )}
+                      <div className="absolute top-4 left-4">
+                        <span className="px-3 py-1 text-black text-xs font-black uppercase tracking-wider rounded-lg border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] bg-[#00B894]">
+                          Upcoming
+                        </span>
+                      </div>
+                    </div>
 
+                    {/* Content */}
+                    <div className="flex-1 p-8 flex flex-col justify-between min-w-0">
+                      <div>
+                        <div className="mb-6">
+                          <h3 className="font-header text-3xl font-black text-black mb-2 uppercase tracking-tight">{event.title}</h3>
+                          <p className="text-black/60 text-sm font-medium leading-relaxed line-clamp-5 break-words overflow-hidden">{event.description}</p>
+                        </div>
+
+                        {/* Event Details */}
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                          <div className="bg-[#FFFDF5] p-3 rounded-xl border-2 border-black">
+                            <p className="text-black/40 text-xs font-black uppercase tracking-wider mb-1 flex items-center gap-1">
+                              <Calendar className="w-3 h-3" /> Date
+                            </p>
+                            <p className="text-black font-black">{splitDateTime(event.datetime).date}</p>
+                            <p className="text-black/60 text-xs font-bold">{splitDateTime(event.datetime).time}</p>
+                          </div>
+                          <div className="bg-[#FFFDF5] p-3 rounded-xl border-2 border-black">
+                            <p className="text-black/40 text-xs font-black uppercase tracking-wider mb-1 flex items-center gap-1">
+                              <MapPin className="w-3 h-3" /> Location
+                            </p>
+                            <p className="text-black font-black text-sm truncate" title={event.location}>{event.location}</p>
+                          </div>
+                          <div className="bg-[#FFFDF5] p-3 rounded-xl border-2 border-black">
+                            <p className="text-black/40 text-xs font-black uppercase tracking-wider mb-1">Capacity</p>
+                            <p className="text-black font-black">{event.capacity}</p>
+                          </div>
+                          <div className="bg-[#FFFDF5] p-3 rounded-xl border-2 border-black">
+                            <p className="text-black/40 text-xs font-black uppercase tracking-wider mb-1 flex items-center gap-1">
+                              <Users className="w-3 h-3" /> Registered
+                            </p>
+                            <p className="text-[#00B894] font-black">{event.registered}</p>
+                            <p className="text-black/40 text-xs font-bold">{Math.round((event.registered / event.capacity) * 100)}% full</p>
+                          </div>
+                        </div>
+
+                        {/* Registration Bar */}
+                        <div className="mb-6">
+                          <div className="w-full h-4 bg-gray-100 rounded-full overflow-hidden border-2 border-black">
+                            <div
+                              className="h-full bg-[#FFD93D] border-r-2 border-black"
+                              style={{ width: `${Math.min((event.registered / event.capacity) * 100, 100)}%` }}
+                            ></div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Register Button */}
+                      <div className="pt-6 border-t-2 border-black/5">
+                        {registeredEventIds.has(event.id) ? (
+                          <div className="w-full px-6 py-4 bg-[#FF7675]/20 text-[#D63031] font-black text-xs tracking-[0.2em] rounded-xl border-2 border-[#D63031] text-center uppercase">
+                            ALREADY REGISTERED
+                          </div>
+                        ) : (
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              handleRegister(event);
+                            }}
+                            disabled={event.registered >= event.capacity}
+                            className="w-full px-6 py-4 bg-[#6C5CE7] text-white font-black text-xs tracking-[0.2em] hover:bg-[#5849be] transition-all rounded-xl border-2 border-transparent shadow-[4px_4px_0px_rgba(0,0,0,0.2)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#6C5CE7]"
+                          >
+                            {event.registered >= event.capacity ? 'EVENT FULL' : 'REGISTER NOW'}
+                          </button>
+                        )}
+
+                      </div>
                     </div>
                   </div>
-                </div>
-              </Link>
+                </Link>
+              </div>
             ))}
         </div>
 
-        {events.length === 0 && (
-          <div className="text-center py-20 bg-white border-2 border-black rounded-[30px] border-dashed">
-            <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6 border-2 border-black">
-              <Calendar className="w-10 h-10 text-black/20" />
+        {
+          events.length === 0 && (
+            <div className="text-center py-20 bg-white border-2 border-black rounded-[30px] border-dashed">
+              <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6 border-2 border-black">
+                <Calendar className="w-10 h-10 text-black/20" />
+              </div>
+              <p className="text-black font-black uppercase tracking-widest text-lg">No upcoming events</p>
+              <p className="text-black/40 font-bold mt-2">Check back soon for new events!</p>
             </div>
-            <p className="text-black font-black uppercase tracking-widest text-lg">No upcoming events</p>
-            <p className="text-black/40 font-bold mt-2">Check back soon for new events!</p>
-          </div>
-        )}
+          )
+        }
       </div>
 
       {/* Registration Form Modal */}

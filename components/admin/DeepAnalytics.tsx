@@ -288,24 +288,24 @@ export default function DeepAnalytics() {
 
     return (
         <div className="mb-8">
-            <h3 className="font-header text-xl md:text-2xl font-black text-black uppercase tracking-tighter mb-6 flex items-center gap-2">
+            <h3 className="font-header text-xl md:text-2xl font-black text-black uppercase mb-6 flex items-center gap-2">
                 <Trophy className="text-[#FDCB6E]" />
                 Deep Dive Analytics
             </h3>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
                 {metrics.map((m, i) => (
-                    <div key={i} className="bg-white border-2 border-black rounded-2xl p-6 neo-shadow hover:translate-y-[-2px] transition-transform">
+                    <div key={i} className="bg-white border-2 border-black rounded-2xl p-4 md:p-6 neo-shadow hover:translate-y-[-2px] transition-transform">
                         <div className="flex items-start justify-between mb-4">
                             <div className="p-3 rounded-xl border-2 border-black" style={{ backgroundColor: m.bg }}>
                                 <m.icon style={{ color: m.color }} size={24} />
                             </div>
                         </div>
-                        <h4 className="text-gray-500 font-bold text-xs uppercase tracking-widest mb-1">{m.title}</h4>
-                        <p className="font-black text-lg text-black leading-tight mb-2 line-clamp-2 min-h-[3.5rem] flex items-end">
+                        <h4 className="text-gray-500 font-bold text-[10px] md:text-xs uppercase tracking-widest mb-1">{m.title}</h4>
+                        <p className="font-black text-lg text-black leading-tight mb-2 line-clamp-2 min-h-[3rem] md:min-h-[3.5rem] flex items-end">
                             {m.value}
                         </p>
-                        <div className="text-xs font-bold text-black/40 bg-gray-50 rounded-lg px-2 py-1 inline-block border border-black/5">
+                        <div className="text-[10px] md:text-xs font-bold text-black/40 bg-gray-50 rounded-lg px-2 py-1 inline-block border border-black/5">
                             {m.subValue}
                         </div>
                     </div>
@@ -313,9 +313,9 @@ export default function DeepAnalytics() {
             </div>
 
             {/* Bonus: Game Popularity Chart */}
-            <div className="bg-white border-2 border-black rounded-[25px] p-8 neo-shadow">
+            <div className="bg-white border-2 border-black rounded-[25px] p-4 md:p-8 neo-shadow">
                 <h4 className="font-black text-lg uppercase mb-6">Game Popularity Trends</h4>
-                <div className="h-[300px] w-full">
+                <div className="w-full" style={{ minHeight: '300px', height: '300px' }}>
                     <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={topGames}>
                             <XAxis dataKey="name" fontSize={12} tickMargin={10} />
