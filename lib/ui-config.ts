@@ -26,22 +26,22 @@ export const DEFAULT_HOMEPAGE_CONTENT: HomepageContent = {
     playAtHome: {
       title: "Play at Home",
       description: "Shop premium board games and puzzles for your home collection",
-      emoji: "🏠"
+      emoji: "Home"
     },
     playTogether: {
       title: "Play Together",
       description: "Join live game nights and community events in your city",
-      emoji: "👥"
+      emoji: "Users"
     },
     playOccasions: {
       title: "Play for Occasions",
       description: "Book custom game experiences for weddings, parties & corporate events",
-      emoji: "🎉"
+      emoji: "PartyPopper"
     },
     playEarn: {
       title: "Play & Earn Points",
       description: "Play free puzzles daily and earn rewards you can redeem",
-      emoji: "🎮"
+      emoji: "Gamepad2"
     }
   },
   featuredGames: [
@@ -93,41 +93,41 @@ export const DEFAULT_HOMEPAGE_CONTENT: HomepageContent = {
     ]
   },
   activePuzzles: [
-      {
-          id: "chess-daily",
-          title: "Daily Chess Puzzle",
-          xp: 150,
-          url: "/play/chess",
-          isLive: true,
-          description: "Solve in 3 moves"
-      },
-      {
-          id: "sudoku-hard",
-          title: "Hard Sudoku",
-          xp: 300,
-          url: "/play/sudoku",
-          isLive: true,
-          description: "Brain teaser"
-      }
+    {
+      id: "chess-daily",
+      title: "Daily Chess Puzzle",
+      xp: 150,
+      url: "/play/chess",
+      isLive: true,
+      description: "Solve in 3 moves"
+    },
+    {
+      id: "sudoku-hard",
+      title: "Hard Sudoku",
+      xp: 300,
+      url: "/play/sudoku",
+      isLive: true,
+      description: "Brain teaser"
+    }
   ],
   dailyDrops: [
-      {
-          id: "daily-chess",
-          type: "game",
-          title: "Win 1 Chess Game",
-          subtitle: "Daily Challenge",
-          xp: 500,
-          actionUrl: "/play/chess",
-          highlightColor: "bg-[#FF7675]"
-      },
-      {
-          id: "flash-deal-1",
-          type: "product",
-          title: "20% Off Hoodies",
-          subtitle: "Flash Deal",
-          ctaText: "CLAIM",
-          actionUrl: "/shop",
-          highlightColor: "bg-[#00B894]"
-      }
+    {
+      id: "daily-chess",
+      type: "game",
+      title: "Win 1 Chess Game",
+      subtitle: "Daily Challenge",
+      xp: 500,
+      actionUrl: "/play/chess",
+      highlightColor: "bg-[#FF7675]"
+    },
+    {
+      id: "flash-deal-1",
+      type: "product",
+      title: "20% Off Hoodies",
+      subtitle: "Flash Deal",
+      ctaText: "CLAIM",
+      actionUrl: "/shop",
+      highlightColor: "bg-[#00B894]"
+    }
   ]
 };
