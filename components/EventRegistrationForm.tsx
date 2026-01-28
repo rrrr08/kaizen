@@ -3,6 +3,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { User } from 'firebase/auth';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import JoyPhoneInput from '@/components/ui/JoyPhoneInput';
 import { createPaymentOrder, completeRegistration } from '@/lib/db/payments';
 import { useGamification } from '@/app/context/GamificationContext';
 import { usePopup } from '@/app/context/PopupContext';
@@ -166,21 +169,9 @@ export default function EventRegistrationForm({
       setShowErrorModal(true);
       return false;
     }
-    if (!formData.phone.trim()) {
-      setError('Please enter your phone number');
-      setShowErrorModal(true);
-      return false;
-    }
-    // Allow + at start, then digits, spaces, hyphens, parentheses
-    const phoneRegex = /^\+?[\d\s-()]{10,20}$/;
-    if (!phoneRegex.test(formData.phone)) {
+    // Phone validation (handled by JoyPhoneInput logic mostly, but we check length including country code)
+    if (!formData.phone.trim() || formData.phone.length < 13) {
       setError('Please enter a valid phone number');
-      setShowErrorModal(true);
-      return false;
-    }
-    const cleanPhone = formData.phone.replace(/[^\d+]/g, '');
-    if (cleanPhone.length < 10) {
-      setError('Phone number must be at least 10 digits');
       setShowErrorModal(true);
       return false;
     }
@@ -660,9 +651,7 @@ export default function EventRegistrationForm({
           <div className="bg-[#FFFDF5] border-4 border-black rounded-[30px] p-8 max-w-md w-full neo-shadow">
             {/* Error Icon */}
             <div className="mb-6 flex justify-center">
-              <div className="w-16 h-16 bg-[#FF7675] border-3 border-black rounded-full flex items-center justify-center neo-shadow">
-                <span className="text-3xl text-black font-black">!</span>
-              </div>
+              <div className="w-16 h-16 bg-[#FF7675] rounded-full flex items-center justify-center border border-black text-white text-xs font-black">!</div>
             </div>
 
             {/* Error Message */}
@@ -742,17 +731,14 @@ export default function EventRegistrationForm({
             </div>
 
             <div>
-              <label className="font-black text-xs tracking-widest text-black/60 mb-2 block uppercase">
+              <label className="text-xs font-black uppercase tracking-widest text-black/40 ml-2">
                 PHONE *
               </label>
-              <input
-                type="tel"
-                name="phone"
+              <JoyPhoneInput
                 value={formData.phone}
-                onChange={handleInputChange}
+                onChange={(val) => setFormData(prev => ({ ...prev, phone: val }))}
+                required
                 placeholder="+91 98765 43210"
-                maxLength={20}
-                className="w-full px-4 py-3 bg-white border-2 border-black rounded-xl text-black placeholder:text-black/30 focus:outline-none focus:shadow-[4px_4px_0px_#000] transition-all font-medium"
               />
             </div>
           </div>
