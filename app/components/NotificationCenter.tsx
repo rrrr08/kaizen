@@ -206,7 +206,7 @@ export default function NotificationCenter() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="absolute -right-16 sm:right-0 top-full mt-3 w-[90vw] sm:w-96 bg-[#FFFDF5] rounded-2xl border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] overflow-hidden z-50 transform origin-top-right"
+            className="absolute right-0 sm:right-0 top-full mt-3 w-[85vw] sm:w-96 bg-[#FFFDF5] rounded-2xl border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] overflow-hidden z-50 transform origin-top-right max-w-[calc(100vw-2rem)]"
           >
             {/* Header with gradient */}
             <div className="p-3 md:p-4 bg-[#FFD93D] border-b-4 border-black flex justify-between items-center sticky top-0 z-10">

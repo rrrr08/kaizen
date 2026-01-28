@@ -76,7 +76,7 @@ export default function CartPage() {
                 key={item.productId}
                 className="group border-2 border-black rounded-[20px] p-6 bg-white neo-shadow hover:-translate-y-1 hover:shadow-[6px_6px_0px_#000] transition-all"
               >
-                <div className="flex gap-6">
+                <div className="flex flex-col sm:flex-row gap-6">
                   {/* Product Image */}
                   <div className="flex-shrink-0 relative">
                     <div className="w-24 h-32 rounded-xl overflow-hidden border-2 border-black shadow-[2px_2px_0px_#000] relative">

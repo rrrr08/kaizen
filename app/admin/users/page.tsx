@@ -395,11 +395,11 @@ const UserManagementPage = () => {
               <Table>
                 <TableHeader className="bg-black text-white">
                   <TableRow className="border-b-2 border-black hover:bg-black">
-                    <TableHead className="font-black text-white uppercase tracking-wider py-4">User</TableHead>
-                    <TableHead className="font-black text-white uppercase tracking-wider py-4">Email</TableHead>
-                    <TableHead className="font-black text-white uppercase tracking-wider py-4">Role</TableHead>
-                    <TableHead className="font-black text-white uppercase tracking-wider py-4">Status</TableHead>
-                    <TableHead className="font-black text-white uppercase tracking-wider py-4">Actions</TableHead>
+                    <TableHead className="font-black text-white uppercase tracking-wider py-4 whitespace-nowrap">User</TableHead>
+                    <TableHead className="font-black text-white uppercase tracking-wider py-4 whitespace-nowrap">Email</TableHead>
+                    <TableHead className="font-black text-white uppercase tracking-wider py-4 whitespace-nowrap">Role</TableHead>
+                    <TableHead className="font-black text-white uppercase tracking-wider py-4 whitespace-nowrap">Status</TableHead>
+                    <TableHead className="font-black text-white uppercase tracking-wider py-4 whitespace-nowrap">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>

@@ -189,7 +189,7 @@ export default function PhoneVerification({
             <label className="block text-xs font-black uppercase tracking-wider text-black mb-2">
               Phone Number
             </label>
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-3">
               <div className="relative flex-1">
                 <JoyPhoneInput
                   value={phoneNumber}
@@ -200,7 +200,7 @@ export default function PhoneVerification({
               <Button
                 onClick={handleSendOTP}
                 disabled={loading || !phoneNumber || countdown > 0}
-                className="px-6 py-6 bg-[#6C5CE7] text-white font-black uppercase tracking-widest rounded-xl border-2 border-black shadow-[4px_4px_0px_#000] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2"
+                className="px-6 py-6 bg-[#6C5CE7] text-white font-black uppercase tracking-widest rounded-xl border-2 border-black shadow-[4px_4px_0px_#000] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 w-full sm:w-auto"
               >
                 {loading ? (
                   'Sending...'

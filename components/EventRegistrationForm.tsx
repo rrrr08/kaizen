@@ -797,22 +797,22 @@ export default function EventRegistrationForm({
           )}
 
           {/* Voucher Section */}
-          <div className="mb-8 p-6 bg-[#6C5CE7]/10 border-2 border-black rounded-xl">
+          <div className="mb-8 p-4 md:p-6 bg-[#6C5CE7]/10 border-2 border-black rounded-xl">
             <div className="font-black text-xs tracking-widest text-[#6C5CE7] mb-4 uppercase">HAVE A VOUCHER?</div>
 
             {!appliedVoucher ? (
-              <div className="flex gap-3">
+              <div className="flex flex-col sm:flex-row gap-3">
                 <input
                   type="text"
                   value={voucherCode}
                   onChange={(e) => setVoucherCode(e.target.value.toUpperCase())}
                   placeholder="PROMO CODE"
-                  className="flex-1 px-4 py-3 bg-white border-2 border-black rounded-xl text-black placeholder:text-black/30 focus:outline-none focus:shadow-[4px_4px_0px_#000] transition-all uppercase font-bold"
+                  className="flex-1 px-4 py-3 bg-white border-2 border-black rounded-xl text-black placeholder:text-black/30 focus:outline-none focus:shadow-[4px_4px_0px_#000] transition-all uppercase font-bold w-full"
                 />
                 <button
                   onClick={handleApplyVoucher}
                   disabled={checkingVoucher || !voucherCode.trim()}
-                  className="px-6 py-3 bg-[#6C5CE7] text-white border-2 border-black rounded-xl font-black text-xs tracking-widest hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all uppercase disabled:opacity-50 disabled:hover:translate-x-0 disabled:hover:translate-y-0"
+                  className="px-6 py-3 bg-[#6C5CE7] text-white border-2 border-black rounded-xl font-black text-xs tracking-widest hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all uppercase disabled:opacity-50 disabled:hover:translate-x-0 disabled:hover:translate-y-0 w-full sm:w-auto"
                 >
                   {checkingVoucher ? '...' : 'APPLY'}
                 </button>
@@ -880,7 +880,7 @@ export default function EventRegistrationForm({
           )}
 
           {/* Buttons */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <button
               onClick={() => {
                 if (lockId) releaseLock(lockId);
