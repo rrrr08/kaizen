@@ -233,6 +233,19 @@ export default function CheckoutPage() {
       return;
     }
 
+    // Validate email
+    try {
+      const res = await fetch(`/api/validate-email?email=${encodeURIComponent(formData.email)}`);
+      const data = await res.json();
+      if (!data.isValid) {
+        addToast({ title: 'Invalid Email', description: data.error || 'Please provide a valid email', variant: 'destructive' });
+        return;
+      }
+    } catch (err) {
+      console.error("Email validation failed", err);
+      // Fail open
+    }
+
     if (!isRazorpayLoaded) {
       addToast({ title: 'System Loading', description: 'Payment system is initializing. Please wait a moment.' });
       return;
