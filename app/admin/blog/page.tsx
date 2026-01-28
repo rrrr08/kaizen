@@ -215,19 +215,19 @@ export default function AdminBlogPage() {
   }
 
   return (
-    <div className="p-8 pb-16 min-h-screen bg-[#FFFDF5]">
+    <div className="px-3 py-4 pb-16 md:p-8 md:pb-16 min-h-screen bg-[#FFFDF5] overflow-x-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8 border-b-2 border-black pb-8">
+      <div className="flex flex-col md:flex-row items-center md:items-start justify-between mb-8 border-b-2 border-black pb-8 gap-4 text-center md:text-left">
         <div>
-          <h1 className="font-header text-5xl font-black text-[#2D3436] mb-2 uppercase tracking-tighter">Blog Management</h1>
-          <p className="text-[#2D3436]/60 font-bold text-lg">Create, edit, and manage blog posts</p>
+          <h1 className="font-header text-3xl md:text-5xl font-black text-[#2D3436] mb-2 uppercase tracking-tighter">Blog Management</h1>
+          <p className="text-[#2D3436]/60 font-bold text-sm md:text-lg">Create, edit, and manage blog posts</p>
         </div>
         <button
           onClick={onAdd}
           className="px-6 py-3 bg-[#FFD93D] text-black font-black uppercase tracking-wide rounded-xl border-2 border-black neo-shadow hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all flex items-center gap-2"
         >
           <Plus className="w-5 h-5" strokeWidth={3} />
-          New Post
+          <span className="text-sm md:text-base">New Post</span>
         </button>
       </div>
 
@@ -348,7 +348,7 @@ export default function AdminBlogPage() {
               </button>
             </div>
 
-            <form onSubmit={onSubmit} className="p-8 space-y-6">
+            <form onSubmit={onSubmit} className="p-5 md:p-8 space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="md:col-span-2">
                   <label className="block text-black font-black text-xs uppercase tracking-widest mb-2">Title *</label>
@@ -393,12 +393,13 @@ export default function AdminBlogPage() {
                 </div>
                 <div className="md:col-span-2">
                   <label className="block text-black font-black text-xs uppercase tracking-widest mb-2">Excerpt *</label>
-                  <input
+                  <textarea
                     value={form.excerpt}
                     onChange={(e) => setForm({ ...form, excerpt: e.target.value })}
-                    className="w-full bg-white border-2 border-black rounded-xl px-4 py-3 text-black placeholder-black/30 focus:outline-none focus:ring-0 focus:shadow-[4px_4px_0px_#000] transition-shadow font-bold"
+                    className="w-full px-4 py-3 bg-white border-2 border-black rounded-xl text-black placeholder-black/30 focus:outline-none focus:ring-0 focus:shadow-[4px_4px_0px_#000] transition-shadow font-bold resize-none"
                     placeholder="Short summary for the card"
                     maxLength={300}
+                    rows={3}
                     required
                   />
                   <p className="text-[10px] text-black/40 font-bold mt-1 uppercase tracking-wider text-right">{form.excerpt.length}/300</p>

@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Sparkles, Plus, Flame, ChevronRight } from 'lucide-react';
+import { Sparkles, Plus, Flame, ChevronRight, Calendar, Puzzle, Package, Wallet, Zap, Gift, Home as HomeIcon, Users, PartyPopper, Gamepad2 } from 'lucide-react';
 // import ContextAwareLayout from '@/components/home/ContextAwareLayout';
 // import DailyDropCard from '@/components/home/DailyDropCard';
 // import GameDiscoveryCarousel from '@/components/ui/GameDiscoveryCarousel';
@@ -163,13 +163,38 @@ export default function Home() {
               const links = ['/shop', '/events', '/experiences', '/play'];
               const linkTexts = ['Browse Shop', 'View Events', 'Explore Experiences', 'Play Now Free'];
 
+              const IconMap: Record<string, any> = {
+                'Home': HomeIcon,
+                '🏠': HomeIcon,
+                'Users': Users,
+                '👥': Users,
+                'PartyPopper': PartyPopper,
+                '🎉': PartyPopper,
+                'Gamepad2': Gamepad2,
+                '🎮': Gamepad2
+              };
+
+              const IconComponent = IconMap[style.emoji] || null;
+
               return (
                 <motion.div
                   key={idx}
                   whileHover={{ y: -8, scale: 1.02 }}
                   className={`bg-gradient-to-br ${colors[idx % 4]} ${textColors[idx % 4]} p-8 rounded-[24px] neo-border-thick neo-shadow cursor-pointer`}
                 >
-                  <div className="text-5xl mb-4">{style.emoji}</div>
+                  <div className="mb-4">
+                    {IconComponent ? (
+                      <IconComponent
+                        size={56}
+                        strokeWidth={1.5}
+                        className="drop-shadow-md transition-transform group-hover:scale-110 duration-300"
+                        fill="currentColor"
+                        fillOpacity={0.2}
+                      />
+                    ) : (
+                      <div className="text-5xl">{style.emoji}</div>
+                    )}
+                  </div>
                   <h3 className="text-2xl font-black mb-3">{style.title}</h3>
                   <p className={`font-medium mb-6 opacity-90`}>
                     {style.description}
@@ -202,7 +227,7 @@ export default function Home() {
               className="bg-white text-black p-5 rounded-[20px] neo-border-thick neo-shadow"
             >
               <div className="flex items-center gap-2 mb-4">
-                <span className="text-2xl">📅</span>
+                <Calendar className="w-8 h-8 text-[#6C5CE7] fill-[#6C5CE7]/20" strokeWidth={2} />
                 <h3 className="text-xl font-black">Upcoming Events</h3>
               </div>
               {loadingEvents ? (
@@ -241,7 +266,7 @@ export default function Home() {
               className="bg-white text-black p-5 rounded-[20px] neo-border-thick neo-shadow"
             >
               <div className="flex items-center gap-2 mb-4">
-                <span className="text-2xl">🧩</span>
+                <Puzzle className="w-8 h-8 text-[#00B894] fill-[#00B894]/20" strokeWidth={2} />
                 <h3 className="text-xl font-black">Active Puzzles</h3>
               </div>
               <div className="space-y-3">
@@ -287,7 +312,9 @@ export default function Home() {
               </div>
 
               <div className="flex items-center gap-3 mb-4 relative z-10">
-                <div className="w-10 h-10 bg-black rounded-xl neo-border flex items-center justify-center text-lg shadow-[2px_2px_0px_#FFFDF5]">📦</div>
+                <div className="w-10 h-10 bg-white rounded-xl neo-border flex items-center justify-center text-lg shadow-[3px_3px_0px_#000]">
+                  <Package className="w-6 h-6 text-[#6C5CE7] fill-[#6C5CE7]/20" strokeWidth={2} />
+                </div>
                 <h3 className="text-2xl font-header font-black tracking-tighter uppercase">Recent Stock</h3>
               </div>
 

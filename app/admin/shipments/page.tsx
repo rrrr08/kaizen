@@ -19,7 +19,7 @@ export default function AdminShipmentsPage() {
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="p-8 max-w-7xl mx-auto space-y-8 pb-20 min-h-screen bg-[#FFFDF5]"
+            className="px-3 py-4 md:p-8 max-w-7xl mx-auto space-y-8 pb-20 min-h-screen bg-[#FFFDF5] overflow-x-hidden"
         >
             {/* Top Toolbar */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b-2 border-black pb-8">

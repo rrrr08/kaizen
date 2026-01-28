@@ -45,6 +45,20 @@ export function SignupForm() {
       return;
     }
 
+    // Validate email
+    try {
+      const res = await fetch(`/api/validate-email?email=${encodeURIComponent(email)}`);
+      const data = await res.json();
+      if (!data.isValid) {
+        setError(data.error || "Invalid email address");
+        setLoading(false);
+        return;
+      }
+    } catch (err) {
+      console.error("Email validation failed", err);
+      // Fail open to not block user if our check fails internally
+    }
+
     try {
       // Lazy load Firebase
       const { createUser, auth } = await import('@/lib/firebase');

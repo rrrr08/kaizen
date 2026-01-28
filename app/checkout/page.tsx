@@ -9,6 +9,7 @@ import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { Coins, ArrowLeft, AlertTriangle, Check } from 'lucide-react';
+import JoyPhoneInput from '@/components/ui/JoyPhoneInput';
 
 export const dynamic = 'force-dynamic';
 
@@ -179,6 +180,10 @@ export default function CheckoutPage() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handlePhoneChange = (value: string) => {
+    setFormData((prev) => ({ ...prev, phone: value }));
+  };
+
   const handleRedeemPointsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let points = parseInt(e.target.value) || 0;
     const maxRedeemPoints = Math.floor(maxRedeemable / config.redeemRate);
@@ -231,6 +236,19 @@ export default function CheckoutPage() {
     if (!user?.uid || !formData.name || !formData.email || !formData.phone || !formData.address) {
       addToast({ title: 'Missing Information', description: 'Please fill in all required fields.' });
       return;
+    }
+
+    // Validate email
+    try {
+      const res = await fetch(`/api/validate-email?email=${encodeURIComponent(formData.email)}`);
+      const data = await res.json();
+      if (!data.isValid) {
+        addToast({ title: 'Invalid Email', description: data.error || 'Please provide a valid email', variant: 'destructive' });
+        return;
+      }
+    } catch (err) {
+      console.error("Email validation failed", err);
+      // Fail open
     }
 
     if (!isRazorpayLoaded) {
@@ -342,13 +360,20 @@ export default function CheckoutPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
           <div className="lg:col-span-2">
-            <form onSubmit={handlePlaceOrder} className="space-y-8">
+            <form id="checkout-form" onSubmit={handlePlaceOrder} className="space-y-8">
               <div className="bg-white border-2 border-black rounded-[20px] p-8 neo-shadow">
                 <h2 className="font-header text-2xl md:text-3xl font-black mb-6 md:mb-8 text-black">SHIPPING INFORMATION</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <input type="text" name="name" placeholder="Full Name" value={formData.name} onChange={handleInputChange} className="col-span-1 bg-white border-2 border-black rounded-lg px-4 py-3 md:py-4 text-sm md:text-base font-bold focus:bg-[#FFD93D]/20 outline-none w-full" required />
                   <input type="email" name="email" placeholder="Email" value={formData.email} onChange={handleInputChange} className="col-span-1 bg-white border-2 border-black rounded-lg px-4 py-3 md:py-4 text-sm md:text-base font-bold focus:bg-[#FFD93D]/20 outline-none w-full" required />
-                  <input type="tel" name="phone" placeholder="Phone" value={formData.phone} onChange={handleInputChange} className="col-span-1 bg-white border-2 border-black rounded-lg px-4 py-3 md:py-4 text-sm md:text-base font-bold focus:bg-[#FFD93D]/20 outline-none w-full" required />
+                  <div className="col-span-1">
+                    <JoyPhoneInput
+                      value={formData.phone}
+                      onChange={handlePhoneChange}
+                      required
+                      error={formData.phone && formData.phone.length < 13 ? "Invalid Number" : undefined}
+                    />
+                  </div>
                   <input type="text" name="address" placeholder="Address" value={formData.address} onChange={handleInputChange} className="col-span-1 md:col-span-2 bg-white border-2 border-black rounded-lg px-4 py-3 md:py-4 text-sm md:text-base font-bold focus:bg-[#FFD93D]/20 outline-none w-full" required />
                   <input type="text" name="city" placeholder="City" value={formData.city} onChange={handleInputChange} className="bg-white border-2 border-black rounded-lg px-4 py-3 md:py-4 text-sm md:text-base font-bold focus:bg-[#FFD93D]/20 outline-none w-full" />
                   <input type="text" name="state" placeholder="State" value={formData.state} onChange={handleInputChange} className="bg-white border-2 border-black rounded-lg px-4 py-3 md:py-4 text-sm md:text-base font-bold focus:bg-[#FFD93D]/20 outline-none w-full" />
@@ -366,14 +391,14 @@ export default function CheckoutPage() {
                 {voucherError && <p className="text-red-500 text-xs font-bold mt-2">{voucherError}</p>}
               </div>
 
-              <button type="submit" disabled={isProcessing} className="w-full py-5 bg-[#00B894] text-black font-header text-xl font-black rounded-[15px] border-2 border-black neo-shadow uppercase tracking-wide hover:scale-[1.01] transition-all">
-                {isProcessing ? 'PROCESSING...' : `PLACE ORDER & EARN ${earnedPoints} JP`}
+              <button type="submit" disabled={isProcessing} className="hidden lg:block w-full py-5 bg-[#00B894] text-black font-header text-xl font-black rounded-[15px] border-2 border-black neo-shadow uppercase tracking-wide hover:scale-[1.01] transition-all">
+                {isProcessing ? 'PROCESSING...' : `PLACE ORDER${earnedPoints > 0 ? ` & EARN ${earnedPoints} JP` : ''}`}
               </button>
             </form>
           </div>
 
           <div className="lg:col-span-1">
-            <div className="sticky top-32 bg-[#FFD93D] border-2 border-black p-8 rounded-[25px] neo-shadow">
+            <div className="!static lg:!sticky lg:top-32 bg-[#FFD93D] border-2 border-black p-8 rounded-[25px] neo-shadow z-0 mb-8 lg:mb-0">
               <h2 className="font-header text-2xl font-black mb-6 text-black uppercase">Order Summary</h2>
               <div className="space-y-4 mb-6 pb-6 border-b-2 border-black/10">
                 {items.map((item) => (
@@ -412,6 +437,18 @@ export default function CheckoutPage() {
                     <p className="font-header text-lg font-black">{balance} JP</p>
                   </div>
                 </div>
+              </div>
+
+              {/* Mobile Place Order Button - Now Inside the Card */}
+              <div className="lg:hidden mt-8 pt-8 border-t-2 border-black/10">
+                <button
+                  type="submit"
+                  form="checkout-form"
+                  disabled={isProcessing}
+                  className="w-full py-5 bg-[#00B894] text-black font-header text-xl font-black rounded-[15px] border-2 border-black neo-shadow uppercase tracking-wide hover:scale-[1.01] transition-all"
+                >
+                  {isProcessing ? 'PROCESSING...' : `PLACE ORDER${earnedPoints > 0 ? ` & EARN ${earnedPoints} JP` : ''}`}
+                </button>
               </div>
             </div>
           </div>

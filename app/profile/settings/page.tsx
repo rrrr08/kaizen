@@ -270,8 +270,8 @@ export default function SettingsPage() {
                       <opt.icon className={opt.text || 'text-black'} size={28} />
                     </div>
                     <div className="flex-1 min-w-0 pr-2">
-                      <h4 className="text-lg sm:text-xl font-black uppercase tracking-tight text-left truncate">{opt.title}</h4>
-                      <p className="text-[10px] sm:text-xs font-bold text-black/40 uppercase tracking-widest text-left truncate">{opt.desc}</p>
+                      <h4 className="text-lg sm:text-xl font-black uppercase tracking-tight text-left">{opt.title}</h4>
+                      <p className="text-[10px] sm:text-xs font-bold text-black/40 uppercase tracking-widest text-left">{opt.desc}</p>
                     </div>
                   </div>
                   <ChevronRight className="w-6 h-6 text-black/10 group-hover:text-black transition-colors" />

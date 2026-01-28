@@ -332,7 +332,11 @@ const Navbar: React.FC = () => {
                 );
               })}
               <div className="h-px bg-black/10 my-4" />
-              <Link href={user ? "/profile" : "/auth/login"} className="text-xl font-bold text-black/60 uppercase tracking-widest">
+              <Link
+                href={user ? "/profile" : "/auth/login"}
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="text-xl font-bold text-black/60 uppercase tracking-widest"
+              >
                 {user ? "My Profile" : "Login / Sign Up"}
               </Link>
               <div className="mt-8 p-6 bg-[#00B894] rounded-2xl border-4 border-black neo-shadow">

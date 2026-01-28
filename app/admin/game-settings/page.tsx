@@ -7,7 +7,8 @@ import { useRouter } from 'next/navigation';
 import {
     Gamepad2, Trophy, TrendingUp, Database,
     Plus, Trash2, Edit2, Save, AlertCircle,
-    Settings, Zap, CheckCircle, Info
+    Settings, Zap, CheckCircle, Info,
+    Grid3x3, HelpCircle, Search, Type, Skull, Lightbulb, Crown, Bomb, Activity, Calculator, Puzzle, Disc, Target, Shield, Swords, Coins, Users
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { doc, getDoc, setDoc, getFirestore } from 'firebase/firestore';
@@ -59,6 +60,14 @@ interface XPSource {
 type GameType = 'riddle' | 'trivia' | 'wordle' | 'hangman' | 'wordsearch' | 'chess';
 
 const db = getFirestore(app);
+
+const TIER_ICONS: Record<string, any> = {
+    'User': Users,
+    'Target': Target,
+    'Shield': Shield,
+    'Swords': Swords,
+    'Crown': Crown
+};
 
 export default function GameSettingsDashboard() {
     const { user, loading: authLoading, isAdmin } = useAuth();
@@ -268,7 +277,7 @@ export default function GameSettingsDashboard() {
             badge: 'Grey Meeple',
             perk: 'None',
             color: '#94a3b8',
-            icon: '♙',
+            icon: 'User',
             unlockPrice: 0
         },
         {
@@ -278,7 +287,7 @@ export default function GameSettingsDashboard() {
             badge: 'Green Pawn',
             perk: 'Early access to Event Tickets',
             color: '#34d399',
-            icon: '♟',
+            icon: 'Target',
             unlockPrice: 2000
         },
         {
@@ -288,7 +297,7 @@ export default function GameSettingsDashboard() {
             badge: 'Blue Rook',
             perk: '5% off all Workshops',
             color: '#60a5fa',
-            icon: '♜',
+            icon: 'Shield',
             unlockPrice: 5000
         },
         {
@@ -298,7 +307,7 @@ export default function GameSettingsDashboard() {
             badge: 'Purple Knight',
             perk: 'Priority access & bonus XP on Experiences',
             color: '#a78bfa',
-            icon: '♞',
+            icon: 'Swords',
             unlockPrice: 7500
         },
         {
@@ -308,7 +317,7 @@ export default function GameSettingsDashboard() {
             badge: 'Gold Crown',
             perk: 'VIP Seating at Game Nights',
             color: '#fbbf24',
-            icon: '♚',
+            icon: 'Crown',
             unlockPrice: 10000
         }
     ];
@@ -458,7 +467,7 @@ export default function GameSettingsDashboard() {
     if (!user || !isAdmin) return null;
 
     return (
-        <div className="min-h-screen bg-[#FFFDF5] flex flex-col md:flex-row gap-8 pb-12">
+        <div className="min-h-screen bg-[#FFFDF5] flex flex-col md:flex-row gap-8 pb-12 px-3 md:px-8 md:p-8 overflow-x-hidden">
             {/* Internal Navigation Sidebar */}
             <div className="w-full md:w-72 flex-shrink-0">
                 <div className="sticky top-8 space-y-3">
@@ -655,22 +664,25 @@ export default function GameSettingsDashboard() {
                                 <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
                                     {Object.entries(settings).map(([id, config]) => {
                                         // Game-specific icons and colors
-                                        const gameStyles: Record<string, { icon: string; color: string; bg: string }> = {
-                                            '2048': { icon: '🎯', color: '#FF6B6B', bg: '#FFE5E5' },
-                                            riddle: { icon: '🧩', color: '#6C5CE7', bg: '#F0EDFF' },
-                                            sudoku: { icon: '📊', color: '#00B894', bg: '#E5F9F4' },
-                                            wordsearch: { icon: '🔍', color: '#FDCB6E', bg: '#FFF9E5' },
-                                            wordle: { icon: '🎮', color: '#A29BFE', bg: '#F0EDFF' },
-                                            hangman: { icon: '🎭', color: '#FF7675', bg: '#FFE9E9' },
-                                            trivia: { icon: '💡', color: '#74B9FF', bg: '#E8F4FF' },
-                                            chess: { icon: '♟️', color: '#2D3436', bg: '#F5F6FA' },
-                                            memory: { icon: '🧠', color: '#A29BFE', bg: '#F0EDFF' },
-                                            tictactoe: { icon: '❌', color: '#FD79A8', bg: '#FFE9F5' },
-                                            minesweeper: { icon: '💣', color: '#E17055', bg: '#FFE9E3' },
-                                            snake: { icon: '🐍', color: '#55EFC4', bg: '#E5FFF8' }
+                                        // Game-specific icons and colors
+                                        const gameStyles: Record<string, { icon: React.ReactNode; color: string; bg: string }> = {
+                                            '2048': { icon: <Grid3x3 size={40} />, color: '#FF6B6B', bg: '#FFE5E5' },
+                                            riddle: { icon: <HelpCircle size={40} />, color: '#6C5CE7', bg: '#F0EDFF' },
+                                            sudoku: { icon: <Grid3x3 size={40} />, color: '#00B894', bg: '#E5F9F4' },
+                                            wordsearch: { icon: <Search size={40} />, color: '#FDCB6E', bg: '#FFF9E5' },
+                                            wordle: { icon: <Type size={40} />, color: '#A29BFE', bg: '#F0EDFF' },
+                                            hangman: { icon: <Skull size={40} />, color: '#FF7675', bg: '#FFE9E9' },
+                                            trivia: { icon: <Lightbulb size={40} />, color: '#74B9FF', bg: '#E8F4FF' },
+                                            chess: { icon: <Crown size={40} />, color: '#2D3436', bg: '#F5F6FA' },
+                                            memory: { icon: <Puzzle size={40} />, color: '#A29BFE', bg: '#F0EDFF' },
+                                            tictactoe: { icon: <Activity size={40} />, color: '#FD79A8', bg: '#FFE9F5' },
+                                            minesweeper: { icon: <Bomb size={40} />, color: '#E17055', bg: '#FFE9E3' },
+                                            snake: { icon: <Activity size={40} />, color: '#55EFC4', bg: '#E5FFF8' },
+                                            mathquiz: { icon: <Calculator size={40} />, color: '#74B9FF', bg: '#E8F4FF' },
+                                            puzzles: { icon: <Puzzle size={40} />, color: '#94a3b8', bg: '#f1f5f9' }
                                         };
 
-                                        const style = gameStyles[id] || { icon: '🎲', color: '#6C5CE7', bg: '#F0EDFF' };
+                                        const style = gameStyles[id] || { icon: <Gamepad2 size={40} />, color: '#6C5CE7', bg: '#F0EDFF' };
 
                                         return (
                                             <motion.div
@@ -688,7 +700,7 @@ export default function GameSettingsDashboard() {
                                                             </div>
                                                             <div className="min-w-0 flex-1">
                                                                 <h3 className="font-header text-xl md:text-2xl font-black text-black uppercase tracking-tight leading-tight break-words pr-2">
-                                                                    {id}
+                                                                    {config.name || id}
                                                                 </h3>
                                                             </div>
                                                         </div>
@@ -775,7 +787,7 @@ export default function GameSettingsDashboard() {
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                                 <div className="bg-white border-2 border-black p-8 rounded-[40px] neo-shadow h-fit">
                                     <div className="flex justify-between items-center mb-8">
-                                        <h2 className="font-header text-3xl italic">🎡 WHEEL ODDS</h2>
+                                        <h2 className="font-header text-3xl italic flex items-center gap-2"><Disc size={32} /> WHEEL ODDS</h2>
                                         <button
                                             onClick={() => setPrizes([...prizes, { id: `new_${Date.now()}`, type: 'JP', value: 10, label: '10 JP', probability: 0, color: '#000000' }])}
                                             className="p-3 bg-[#00B894] text-white rounded-xl border-2 border-black neo-shadow-sm"
@@ -785,17 +797,17 @@ export default function GameSettingsDashboard() {
                                     </div>
                                     <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
                                         {prizes.map((p, i) => (
-                                            <div key={p.id} className="flex items-center gap-3 p-3 bg-[#FFFDF5] border-2 border-black/10 rounded-2xl">
+                                            <div key={p.id} className="flex items-center gap-2 md:gap-3 p-3 bg-[#FFFDF5] border-2 border-black/10 rounded-2xl">
                                                 <input type="color" value={p.color} onChange={e => {
                                                     const n = [...prizes]; n[i].color = e.target.value; setPrizes(n);
-                                                }} className="w-10 h-10 rounded-lg cursor-pointer p-0 border-2 border-black" />
+                                                }} className="w-8 h-8 md:w-10 md:h-10 rounded-lg cursor-pointer p-0 border-2 border-black flex-shrink-0" />
                                                 <input value={p.label} onChange={e => {
                                                     const n = [...prizes]; n[i].label = e.target.value; setPrizes(n);
-                                                }} className="flex-1 bg-transparent font-bold text-sm outline-none px-2" />
+                                                }} className="flex-1 bg-transparent font-bold text-sm outline-none px-2 min-w-0" />
                                                 <input type="number" step="0.01" value={p.probability} onChange={e => {
                                                     const n = [...prizes]; n[i].probability = +e.target.value; setPrizes(n);
-                                                }} className="w-16 bg-white border-2 border-black/10 rounded-lg px-2 py-1 font-bold text-xs" />
-                                                <button onClick={() => setPrizes(prizes.filter((_, idx) => idx !== i))} className="text-red-400 p-1"><Trash2 size={16} /></button>
+                                                }} className="w-14 md:w-16 bg-white border-2 border-black/10 rounded-lg px-2 py-1 font-bold text-xs flex-shrink-0" />
+                                                <button onClick={() => setPrizes(prizes.filter((_, idx) => idx !== i))} className="text-red-400 p-1 flex-shrink-0"><Trash2 size={16} /></button>
                                             </div>
                                         ))}
                                     </div>
@@ -808,7 +820,7 @@ export default function GameSettingsDashboard() {
                                 </div>
 
                                 <div className="bg-white border-2 border-black p-8 rounded-[40px] neo-shadow">
-                                    <h2 className="font-header text-3xl mb-6 italic text-[#6C5CE7]">💰 ECONOMY & POINTS</h2>
+                                    <h2 className="font-header text-3xl mb-6 italic text-[#6C5CE7] flex items-center gap-2"><Coins size={32} /> ECONOMY & POINTS</h2>
 
                                     {/* Store Economy Settings */}
                                     <div className="grid gap-6 mb-8 pb-8 border-b-2 border-dashed border-black/10">
@@ -888,7 +900,23 @@ export default function GameSettingsDashboard() {
                                                 <div key={i} className="p-6 bg-[#FFFDF5] border-2 border-black rounded-3xl relative">
                                                     <span className="absolute -top-3 left-6 px-3 py-1 bg-black text-white text-[10px] font-black rounded-full uppercase italic">TIER 0{i + 1}</span>
                                                     <div className="flex gap-4 items-center mb-4">
-                                                        <input value={t.icon} onChange={e => { const n = [...tiers]; n[i].icon = e.target.value; setTiers(n); }} className="w-16 h-16 text-4xl border-2 border-black/10 rounded-2xl bg-white text-center" />
+                                                        <div className="relative">
+                                                            <div className="w-16 h-16 border-2 border-black/10 rounded-2xl bg-white flex items-center justify-center text-[#2D3436]">
+                                                                {(() => {
+                                                                    const Icon = TIER_ICONS[t.icon] || Users;
+                                                                    return <Icon size={32} />;
+                                                                })()}
+                                                            </div>
+                                                            <select
+                                                                value={t.icon}
+                                                                onChange={e => { const n = [...tiers]; n[i].icon = e.target.value; setTiers(n); }}
+                                                                className="absolute inset-0 opacity-0 cursor-pointer"
+                                                            >
+                                                                {Object.keys(TIER_ICONS).map(iconKey => (
+                                                                    <option key={iconKey} value={iconKey}>{iconKey}</option>
+                                                                ))}
+                                                            </select>
+                                                        </div>
                                                         <div className="flex-1">
                                                             <input value={t.name} onChange={e => { const n = [...tiers]; n[i].name = e.target.value; setTiers(n); }} className="w-full bg-transparent font-header text-2xl outline-none" />
                                                             <input value={t.perk} onChange={e => { const n = [...tiers]; n[i].perk = e.target.value; setTiers(n); }} className="w-full bg-transparent font-bold text-xs text-black/40 outline-none" placeholder="Perk details..." />
@@ -948,12 +976,12 @@ export default function GameSettingsDashboard() {
                             <div className="space-y-8">
                                 <div className="bg-white border-2 border-black p-8 rounded-[40px] neo-shadow">
                                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
-                                        <div className="grid grid-cols-3 md:grid-cols-6 gap-3 flex-1 w-full">
+                                        <div className="grid grid-cols-2 md:grid-cols-6 gap-3 flex-1 w-full">
                                             {(['riddle', 'trivia', 'wordle', 'hangman', 'wordsearch', 'chess'] as GameType[]).map((game) => (
                                                 <button
                                                     key={game}
                                                     onClick={() => setSelectedGame(game)}
-                                                    className={`px-4 py-3 font-black text-[10px] uppercase rounded-xl border-2 transition-all ${selectedGame === game
+                                                    className={`px-2 py-3 font-black text-[10px] uppercase rounded-xl border-2 transition-all ${selectedGame === game
                                                         ? 'bg-[#6C5CE7] text-white border-black neo-shadow-sm'
                                                         : 'bg-white text-black border-black/10 hover:border-black'
                                                         }`}
@@ -983,21 +1011,21 @@ export default function GameSettingsDashboard() {
                                                 <input placeholder="5-Letter Word" className="p-4 border-2 border-black rounded-2xl font-bold bg-white w-full uppercase" maxLength={5} value={newItem.word || ''} onChange={e => setNewItem({ ...newItem, word: e.target.value.toUpperCase() })} />
                                             )}
                                             {/* Add other specific forms if desired, truncated for clarity */}
-                                            <div className="flex gap-4 mt-8">
-                                                <button onClick={handleAddContent} className="px-8 py-3 bg-black text-white font-black text-xs uppercase rounded-xl">SAVE TO CLOUD</button>
-                                                <button onClick={() => setShowAddForm(false)} className="px-8 py-3 bg-white text-black font-black text-xs uppercase rounded-xl border-2 border-black">CANCEL</button>
+                                            <div className="flex flex-col sm:flex-row gap-4 mt-8">
+                                                <button onClick={handleAddContent} className="px-8 py-3 bg-black text-white font-black text-xs uppercase rounded-xl w-full sm:w-auto">SAVE TO CLOUD</button>
+                                                <button onClick={() => setShowAddForm(false)} className="px-8 py-3 bg-white text-black font-black text-xs uppercase rounded-xl border-2 border-black w-full sm:w-auto">CANCEL</button>
                                             </div>
                                         </div>
                                     )}
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         {gameContent?.items ? gameContent.items.map((item: any) => (
-                                            <div key={item.id} className="p-6 bg-[#FFFDF5] border-2 border-black/5 rounded-3xl group hover:border-black/20 transition-all flex justify-between items-center">
-                                                <div>
-                                                    <p className="font-black text-sm uppercase leading-tight mb-1">{item.question || item.word || item.theme}</p>
-                                                    <span className="text-[10px] font-bold opacity-30 tracking-widest uppercase">ANS: {item.answer || item.solution || 'N/A'}</span>
+                                            <div key={item.id} className="p-6 bg-[#FFFDF5] border-2 border-black/5 rounded-3xl group hover:border-black/20 transition-all flex justify-between items-center gap-4">
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="font-black text-sm uppercase leading-tight mb-1 break-words">{item.question || item.word || item.theme}</p>
+                                                    <span className="text-[10px] font-bold opacity-30 tracking-widest uppercase block truncate">ANS: {item.answer || item.solution || 'N/A'}</span>
                                                 </div>
-                                                <button onClick={() => handleDeleteContent(item.id)} className="p-3 text-red-400 opacity-0 group-hover:opacity-100 transition-all hover:bg-red-50 rounded-xl">
+                                                <button onClick={() => handleDeleteContent(item.id)} className="p-3 text-red-400 opacity-0 group-hover:opacity-100 transition-all hover:bg-red-50 rounded-xl flex-shrink-0">
                                                     <Trash2 size={16} />
                                                 </button>
                                             </div>

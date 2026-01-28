@@ -97,16 +97,16 @@ export default function OrdersList() {
 
     return (
         <div className="space-y-6">
-            <div className="overflow-hidden border-2 border-black rounded-[20px] bg-white neo-shadow relative">
-                <table className="w-full text-left border-collapse">
+            <div className="overflow-x-auto border-2 border-black rounded-[20px] bg-white neo-shadow relative">
+                <table className="w-full min-w-[1000px] text-left border-collapse">
                     <thead>
                         <tr className="bg-black text-white">
-                            <th className="p-4 font-black uppercase tracking-widest text-xs">Reference</th>
-                            <th className="p-4 font-black uppercase tracking-widest text-xs">Recipient</th>
-                            <th className="p-4 font-black uppercase tracking-widest text-xs text-center">Items</th>
-                            <th className="p-4 font-black uppercase tracking-widest text-xs">Total</th>
-                            <th className="p-4 font-black uppercase tracking-widest text-xs">Status</th>
-                            <th className="p-4 font-black uppercase tracking-widest text-xs text-right">Actions</th>
+                            <th className="p-4 font-black uppercase tracking-widest text-xs whitespace-nowrap">Reference</th>
+                            <th className="p-4 font-black uppercase tracking-widest text-xs whitespace-nowrap">Recipient</th>
+                            <th className="p-4 font-black uppercase tracking-widest text-xs text-center whitespace-nowrap">Items</th>
+                            <th className="p-4 font-black uppercase tracking-widest text-xs whitespace-nowrap">Total</th>
+                            <th className="p-4 font-black uppercase tracking-widest text-xs whitespace-nowrap">Status</th>
+                            <th className="p-4 font-black uppercase tracking-widest text-xs text-right whitespace-nowrap">Actions</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y-2 divide-black/10">

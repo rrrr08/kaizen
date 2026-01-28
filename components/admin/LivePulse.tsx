@@ -81,10 +81,10 @@ export default function LivePulse() {
     };
 
     return (
-        <div className="bg-white p-6 rounded-2xl neo-border shadow-sm h-full">
-            <div className="flex items-center gap-2 mb-6 border-b-2 border-black/5 pb-4">
+        <div className="bg-white p-4 md:p-6 rounded-2xl neo-border shadow-sm h-full">
+            <div className="flex items-center gap-2 mb-4 md:mb-6 border-b-2 border-black/5 pb-4">
                 <Activity className="text-[#6C5CE7]" size={20} />
-                <h3 className="text-xl font-black uppercase italic">Live Pulse</h3>
+                <h3 className="text-lg md:text-xl font-black uppercase italic">Live Pulse</h3>
                 <span className="ml-auto flex h-3 w-3 relative">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>

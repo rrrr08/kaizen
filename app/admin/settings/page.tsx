@@ -145,12 +145,12 @@ export default function AdminSettingsPage() {
   }
 
   return (
-    <div className="min-h-screen pt-24 pb-16 px-6 md:px-12 bg-[#FFFDF5]">
+    <div className="min-h-screen pt-24 pb-16 px-3 md:px-12 bg-[#FFFDF5] overflow-x-hidden">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="mb-12 border-b-2 border-black pb-8">
-          <h1 className="font-header text-6xl font-black text-black mb-2 uppercase tracking-tighter">Admin Settings</h1>
-          <p className="text-xl text-black/60 font-bold">Customize all platform configurations</p>
+        <div className="mb-8 md:mb-12 border-b-2 border-black pb-8 text-center md:text-left">
+          <h1 className="font-header text-4xl md:text-6xl font-black text-black mb-2 uppercase tracking-tighter">Admin Settings</h1>
+          <p className="text-sm md:text-xl text-black/60 font-bold">Customize all platform configurations</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -261,17 +261,17 @@ export default function AdminSettingsPage() {
         </div>
 
         {/* Save Button */}
-        <div className="mt-12 flex gap-6 justify-end">
+        <div className="mt-12 flex flex-col-reverse md:flex-row gap-4 md:gap-6 justify-end">
           <button
             onClick={handleReset}
-            className="px-8 py-4 bg-white border-2 border-black text-black font-black uppercase tracking-widest rounded-xl hover:bg-gray-100 transition-all text-sm"
+            className="w-full md:w-auto px-4 md:px-8 py-4 bg-white border-2 border-black text-black font-black uppercase tracking-widest rounded-xl hover:bg-gray-100 transition-all text-sm whitespace-normal"
           >
             Reset to Default
           </button>
           <button
             onClick={handleSave}
             disabled={isSaving}
-            className="px-10 py-4 bg-[#00B894] text-black font-black text-lg uppercase tracking-widest rounded-xl border-2 border-black neo-shadow hover:translate-x-[4px] hover:translate-y-[4px] hover:shadow-none disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            className="w-full md:w-auto px-6 md:px-10 py-4 bg-[#00B894] text-black font-black text-lg uppercase tracking-widest rounded-xl border-2 border-black neo-shadow hover:translate-x-[4px] hover:translate-y-[4px] hover:shadow-none disabled:opacity-50 disabled:cursor-not-allowed transition-all whitespace-normal"
           >
             {isSaving ? 'Saving...' : 'Save All Settings'}
           </button>
