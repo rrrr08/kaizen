@@ -31,7 +31,9 @@ const WheelOfJoy: React.FC = () => {
 
     const canFreeSpin = (() => {
         if (!dailyStats.lastSpinDate) return true;
-        const today = new Date().toISOString().split('T')[0];
+        // Use the same date utility as the backend to ensure consistency (IST)
+        const { getServerTodayString } = require('@/lib/date-utils');
+        const today = getServerTodayString();
         return dailyStats.lastSpinDate !== today;
     })();
 
@@ -153,7 +155,7 @@ const WheelOfJoy: React.FC = () => {
             {/* The Wheel */}
             <div className="relative w-72 h-72 md:w-96 md:h-96">
                 {/* Pointer */}
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-6 z-20 w-12 h-14 drop-shadow-[4px_4px_0px_#000]">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-6 z-20 w-12 h-14">
                     <div className="w-0 h-0 border-l-[15px] border-l-transparent border-r-[15px] border-r-transparent border-t-[30px] border-t-black"></div>
                     <div className="absolute top-[-2px] left-1/2 -translate-x-1/2 w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-t-[24px] border-t-[#FFD93D]"></div>
                 </div>
@@ -184,19 +186,39 @@ const WheelOfJoy: React.FC = () => {
                     ))}
 
                     {/* Labels Layer */}
-                    {prizes.map((prize, index) => (
-                        <div
-                            key={prize.id}
-                            className="absolute w-full h-1/2 left-0 top-0 origin-bottom flex justify-center pt-8 z-10"
-                            style={{
-                                transform: `rotate(${index * segmentAngle + (segmentAngle / 2)}deg)`, // Rotate to center of segment
-                            }}
-                        >
-                            <span className="font-black text-xs md:text-sm text-white drop-shadow-[2px_2px_0px_#000] tracking-wider uppercase -rotate-90 md:rotate-0">
-                                {prize.label}
-                            </span>
-                        </div>
-                    ))}
+                    {/* Labels Layer - SVG for Curved Text */}
+                    <div className="absolute inset-0 z-10 pointer-events-none">
+                        <svg viewBox="0 0 100 100" className="w-full h-full">
+                            <defs>
+                                <path id="textArc" d="M 15 50 A 35 35 0 0 1 85 50" />
+                            </defs>
+                            {prizes.map((prize, index) => (
+                                <g
+                                    key={prize.id}
+                                    style={{
+                                        transformOrigin: '50px 50px',
+                                        transform: `rotate(${index * segmentAngle + (segmentAngle / 2)}deg)`,
+                                    }}
+                                >
+                                    <text
+                                        fill="white"
+                                        fontSize="4.2"
+                                        fontWeight="900"
+                                        letterSpacing="0.05em"
+                                        style={{ textShadow: "2px 2px 0px #000" }}
+                                    >
+                                        <textPath
+                                            href="#textArc"
+                                            startOffset="50%"
+                                            textAnchor="middle"
+                                        >
+                                            {prize.label}
+                                        </textPath>
+                                    </text>
+                                </g>
+                            ))}
+                        </svg>
+                    </div>
 
                     {/* Center Cap */}
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-white border-4 border-black rounded-full z-20 flex items-center justify-center shadow-[4px_4px_0px_transparent]">

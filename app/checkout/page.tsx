@@ -380,13 +380,13 @@ export default function CheckoutPage() {
               </div>
 
               <button type="submit" disabled={isProcessing} className="hidden lg:block w-full py-5 bg-[#00B894] text-black font-header text-xl font-black rounded-[15px] border-2 border-black neo-shadow uppercase tracking-wide hover:scale-[1.01] transition-all">
-                {isProcessing ? 'PROCESSING...' : `PLACE ORDER & EARN ${earnedPoints} JP`}
+                {isProcessing ? 'PROCESSING...' : `PLACE ORDER${earnedPoints > 0 ? ` & EARN ${earnedPoints} JP` : ''}`}
               </button>
             </form>
           </div>
 
           <div className="lg:col-span-1">
-            <div className="lg:sticky lg:top-32 bg-[#FFD93D] border-2 border-black p-8 rounded-[25px] neo-shadow">
+            <div className="!static lg:!sticky lg:top-32 bg-[#FFD93D] border-2 border-black p-8 rounded-[25px] neo-shadow z-0 mb-8 lg:mb-0">
               <h2 className="font-header text-2xl font-black mb-6 text-black uppercase">Order Summary</h2>
               <div className="space-y-4 mb-6 pb-6 border-b-2 border-black/10">
                 {items.map((item) => (
@@ -426,17 +426,19 @@ export default function CheckoutPage() {
                   </div>
                 </div>
               </div>
-            </div>
 
-            {/* Mobile Place Order Button */}
-            <button
-              type="submit"
-              form="checkout-form"
-              disabled={isProcessing}
-              className="lg:hidden w-full py-5 bg-[#00B894] text-black font-header text-xl font-black rounded-[15px] border-2 border-black neo-shadow uppercase tracking-wide hover:scale-[1.01] transition-all mt-6"
-            >
-              {isProcessing ? 'PROCESSING...' : `PLACE ORDER & EARN ${earnedPoints} JP`}
-            </button>
+              {/* Mobile Place Order Button - Now Inside the Card */}
+              <div className="lg:hidden mt-8 pt-8 border-t-2 border-black/10">
+                <button
+                  type="submit"
+                  form="checkout-form"
+                  disabled={isProcessing}
+                  className="w-full py-5 bg-[#00B894] text-black font-header text-xl font-black rounded-[15px] border-2 border-black neo-shadow uppercase tracking-wide hover:scale-[1.01] transition-all"
+                >
+                  {isProcessing ? 'PROCESSING...' : `PLACE ORDER${earnedPoints > 0 ? ` & EARN ${earnedPoints} JP` : ''}`}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
