@@ -60,6 +60,13 @@ body {
   letter-spacing: 0.02em !important;
 }
 
+b,
+strong,
+.font-bold,
+.font-black {
+  letter-spacing: 0.06em !important;
+}
+
 h1,
 h2,
 h3,
@@ -68,14 +75,7 @@ h5,
 h6,
 .font-header {
   font-family: var(--font-fredoka), sans-serif;
-  letter-spacing: 0.12em !important;
-}
-
-b,
-strong,
-.font-bold,
-.font-black {
-  letter-spacing: 0.06em !important;
+  letter-spacing: 0.25em !important;
 }
 
 .font-sans {

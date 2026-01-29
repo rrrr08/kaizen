@@ -27,19 +27,19 @@ const FAQSection: React.FC<FAQSectionProps> = ({ faqs }) => {
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
                     {/* Left Column: Headline */}
-                    <div className="lg:col-span-4 sticky top-32">
+                    <div className="lg:col-span-4 static lg:sticky lg:top-32">
                         <motion.div
                             initial={{ opacity: 0, x: -20 }}
                             whileInView={{ opacity: 1, x: 0 }}
                             viewport={{ once: true }}
-                            className="text-left bg-black p-8 border-4 border-black rounded-[30px] shadow-[8px_8px_0px_#FFF]"
+                            className="text-left bg-black p-6 md:p-8 border-4 border-black rounded-[30px] shadow-[8px_8px_0px_#FFF]"
                         >
                             <div className="flex items-center gap-2 mb-4">
                                 <Sparkles size={16} className="text-white" />
                                 <span className="font-black text-xs tracking-[0.3em] text-white uppercase font-display">Support</span>
                             </div>
 
-                            <h2 className="text-5xl md:text-6xl font-header font-black tracking-tighter uppercase mb-6 text-white leading-[0.9]">
+                            <h2 className="text-3xl sm:text-4xl md:text-6xl font-header font-black tracking-tighter uppercase mb-6 text-white leading-[0.9]">
                                 Got <br />
                                 <span className="text-[#FFD93D]">Questions?</span>
                             </h2>
