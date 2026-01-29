@@ -10,6 +10,7 @@ interface PlayStyle {
     emoji: string;
     title: string;
     description: string;
+    images?: string[];
 }
 
 interface PlayStyleSelectorProps {
@@ -127,9 +128,32 @@ BackgroundLayer.displayName = 'BackgroundLayer';
 const PlayStyleSelector: React.FC<PlayStyleSelectorProps> = ({ playStyles }) => {
     const [activeId, setActiveId] = useState<string>('home');
 
+    // Combine prop data with structure (icons/colors/links) from defaultStyles
+    // This allows dynamic content while keeping structural integrity (links/icons) stable
+    const mergedStyles = defaultStyles.map(style => {
+        // Map playStyle keys to default ids
+        let dynamicData;
+        if (playStyles) {
+            switch (style.id) {
+                case 'home': dynamicData = playStyles.playAtHome; break;
+                case 'together': dynamicData = playStyles.playTogether; break;
+                case 'occasions': dynamicData = playStyles.playOccasions; break;
+                case 'earn': dynamicData = playStyles.playEarn; break;
+            }
+        }
+
+        return {
+            ...style,
+            title: dynamicData?.title || style.title,
+            description: dynamicData?.description || style.description,
+            // Use dynamic images if available and not empty, otherwise fallback
+            images: (dynamicData?.images && dynamicData.images.length > 0) ? dynamicData.images : style.images
+        };
+    });
+
     return (
         <div className="flex flex-col lg:flex-row gap-2 h-auto lg:h-[600px] w-full items-stretch">
-            {defaultStyles.map((style) => {
+            {mergedStyles.map((style) => {
                 const isActive = activeId === style.id;
 
                 return (
