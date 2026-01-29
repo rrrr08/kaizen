@@ -10,6 +10,7 @@ import { Sparkles, Plus, Flame, ChevronRight } from 'lucide-react';
 // import ArcadeHero from '@/components/home/ArcadeHero';
 // import EventHero from '@/components/home/EventHero';
 import Hero from '@/components/home/Hero';
+import PlayStyleSelector from '@/components/home/PlayStyleSelector';
 import { Product, GameEvent, HomepageContent } from '@/lib/types';
 import { useAuth } from '@/app/context/AuthContext';
 import { DEFAULT_HOMEPAGE_CONTENT } from '@/lib/ui-config';
@@ -119,48 +120,8 @@ export default function Home() {
             <p className="text-xl font-medium text-charcoal/60">Find your perfect way to play and connect with our community</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {content.playStyle && Object.values(content.playStyle).map((style, idx) => {
-              const colors = [
-                'from-[#6C5CE7] to-[#8B7FE8]',
-                'from-[#FF6B6B] to-[#FF8E8E]',
-                'from-[#FFD93D] to-[#FFE066]',
-                'from-[#00D9A3] to-[#00F5B8]'
-              ];
-              const textColors = [
-                'text-white',
-                'text-white',
-                'text-black',
-                'text-black'
-              ];
-              const btnColors = [
-                'text-[#6C5CE7]',
-                'text-[#FF6B6B]',
-                'text-black',
-                'text-[#00D9A3]'
-              ];
-              const links = ['/shop', '/events', '/experiences', '/play'];
-              const linkTexts = ['Browse Shop', 'View Events', 'Explore Experiences', 'Play Now Free'];
-
-              return (
-                <motion.div
-                  key={idx}
-                  whileHover={{ y: -8, scale: 1.02 }}
-                  className={`bg-gradient-to-br ${colors[idx % 4]} ${textColors[idx % 4]} p-8 rounded-[24px] neo-border-thick neo-shadow cursor-pointer`}
-                >
-                  <div className="text-5xl mb-4">{style.emoji}</div>
-                  <h3 className="text-2xl font-black mb-3">{style.title}</h3>
-                  <p className={`font-medium mb-6 opacity-90`}>
-                    {style.description}
-                  </p>
-                  <Link href={links[idx % 4]}>
-                    <button className={`w-full bg-white ${btnColors[idx % 4]} font-black py-3 rounded-xl neo-border hover:bg-gray-50 transition-colors`}>
-                      {linkTexts[idx % 4]}
-                    </button>
-                  </Link>
-                </motion.div>
-              );
-            })}
+          <div className="mt-8">
+            <PlayStyleSelector playStyles={content.playStyle || {}} />
           </div>
         </div>
       </section>
