@@ -21,9 +21,11 @@
 **Joy Juncture** is a next-generation platform that reimagines e-commerce by blending shopping, gaming, and community engagement into one seamless experience.
 
 ### 🎯 Core Philosophy
+>
 > **Games are moments, memories, and shared joy.**
 
 We believe that shopping should be fun, engaging, and rewarding. That's why we've built a platform where:
+
 - 🛒 **Shopping** earns you rewards
 - 🎮 **Gaming** unlocks benefits
 - 🎉 **Events** build community
@@ -34,6 +36,7 @@ We believe that shopping should be fun, engaging, and rewarding. That's why we'v
 ## ✨ Features
 
 ### 🛍️ E-Commerce Platform
+
 - **Product Catalog**: 11+ curated board games with advanced filtering
 - **Smart Cart**: Persistent shopping cart with real-time updates
 - **Secure Checkout**: Razorpay integration (UPI, Cards, Wallets)
@@ -41,6 +44,7 @@ We believe that shopping should be fun, engaging, and rewarding. That's why we'v
 - **Rewards Integration**: Earn XP & JP on every purchase
 
 ### 🎮 Gaming Platform (14+ Games)
+
 - **Strategy**: Chess, Sudoku, 2048, Minesweeper
 - **Word Games**: Wordle, Hangman, Word Search
 - **Arcade**: Snake, Tic-Tac-Toe
@@ -49,6 +53,7 @@ We believe that shopping should be fun, engaging, and rewarding. That's why we'v
 - **Leaderboards**: Compete globally and per-game
 
 ### 🎪 Events System
+
 - **Event Discovery**: Browse upcoming tournaments, workshops, meetups
 - **Registration**: Seamless booking with payment integration
 - **Capacity Management**: Auto-waitlist when events fill up
@@ -56,6 +61,7 @@ We believe that shopping should be fun, engaging, and rewarding. That's why we'v
 - **Ticket Generation**: Digital tickets with QR codes
 
 ### 🏆 Gamification Engine
+
 - **XP System**: Earn experience points for all activities
 - **JP (Joy Points)**: Platform currency for discounts & rewards
 - **Tier System**: 4 tiers with multiplier bonuses (1.0x - 1.5x)
@@ -67,6 +73,7 @@ We believe that shopping should be fun, engaging, and rewarding. That's why we'v
 - **Achievements**: Unlock badges and milestones
 
 ### ⚡ Performance & Security (Redis Integration)
+
 - **Caching**: 4x faster queries, 80% cost reduction
 - **Rate Limiting**: Protection against:
   - Payment fraud (5 req/5min)
@@ -77,31 +84,37 @@ We believe that shopping should be fun, engaging, and rewarding. That's why we'v
 - **Analytics**: Real-time tracking and insights
 
 ### 👥 User Management
+
 - **Authentication**: Email, Google, Phone (OTP)
 - **Profiles**: Customizable avatars (Multiavatar)
 - **Wallet**: Track XP, JP, and transaction history
 - **Preferences**: Notification settings, privacy controls
 
 ### 🎨 Design & UX
+
 - **Neo-Brutalist Aesthetic**: Bold, playful, memorable
 - **Smooth Animations**: Framer Motion powered
 - **Fully Responsive**: Mobile-first design
 - **Dark Mode**: Comfortable viewing
 - **Accessible**: WCAG 2.1 AA compliant
+- **Interactive Elements**: Auto-rotating Play Style carousel with smart pause-on-hover
 
 ### 🔧 Admin Dashboard
+
 - **Product Management**: CRUD operations, inventory tracking
 - **Event Management**: Create, edit, monitor registrations
 - **User Management**: View profiles, manage permissions
 - **XP/JP Configuration**: Adjust rewards and multipliers
 - **Analytics**: Platform metrics and insights
 - **Notification System**: Targeted user communications
+- **Dynamic Content**: Manage homepage images and text (Play Styles, Hero) directly
 
 ---
 
 ## 🛠️ Tech Stack
 
 ### Frontend
+
 - **Framework**: Next.js 16 (App Router, Turbopack)
 - **Language**: TypeScript 5.0
 - **Styling**: Tailwind CSS 4.0
@@ -110,6 +123,7 @@ We believe that shopping should be fun, engaging, and rewarding. That's why we'v
 - **Forms**: React Hook Form + Zod validation
 
 ### Backend
+
 - **Database**: Firebase Firestore
 - **Authentication**: Firebase Auth
 - **Storage**: Firebase Storage
@@ -117,12 +131,14 @@ We believe that shopping should be fun, engaging, and rewarding. That's why we'v
 - **Rate Limiting**: Redis-based middleware
 
 ### Integrations
+
 - **Payments**: Razorpay (UPI, Cards, Wallets, Net Banking)
 - **Email**: Nodemailer (SMTP)
 - **SMS**: Twilio
 - **Analytics**: Custom Redis-based tracking
 
 ### DevOps
+
 - **Hosting**: Vercel
 - **CI/CD**: GitHub Actions
 - **Monitoring**: Upstash Dashboard
@@ -133,6 +149,7 @@ We believe that shopping should be fun, engaging, and rewarding. That's why we'v
 ## 🚀 Getting Started
 
 ### Prerequisites
+
 - Node.js 18+ and npm
 - Firebase account
 - Upstash Redis account
@@ -143,17 +160,20 @@ We believe that shopping should be fun, engaging, and rewarding. That's why we'v
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/yourusername/joy-juncture.git
    cd joy-juncture
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
 
 3. **Set up environment variables**
+
    ```bash
    cp .env.example .env.local
    ```
@@ -161,11 +181,13 @@ We believe that shopping should be fun, engaging, and rewarding. That's why we'v
 4. **Configure environment variables** (see [Environment Variables](#environment-variables))
 
 5. **Run development server**
+
    ```bash
    npm run dev
    ```
 
 6. **Open your browser**
+
    ```
    http://localhost:3000
    ```
@@ -219,6 +241,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 ## 📚 Documentation
 
 ### Core Documentation
+
 - **[Getting Started Guide](./docs/GETTING_STARTED.md)** - Setup and installation
 - **[API Documentation](./docs/API.md)** - API endpoints and usage
 - **[Redis Integration Guide](./docs/REDIS_INTEGRATION_GUIDE.md)** - Caching and rate limiting
@@ -226,11 +249,13 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 - **[Video Script](./docs/VIDEO_SCRIPT.md)** - 14-minute demo script
 
 ### Technical Guides
+
 - **[Accessibility Audit](./ACCESSIBILITY-AUDIT.md)** - WCAG compliance
 - **[Deployment Guide](./docs/DEPLOYMENT.md)** - Production deployment
 - **[Contributing Guide](./CONTRIBUTING.md)** - How to contribute
 
 ### Feature Documentation
+
 - **Gamification System**: XP/JP mechanics, tier system
 - **Payment Integration**: Razorpay setup and testing
 - **Event Management**: Registration flow and capacity handling
@@ -243,12 +268,14 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 ### Gamification System
 
 **How it works:**
+
 1. **Earn XP**: Complete games, make purchases, attend events
 2. **Level Up**: Reach tier thresholds for multiplier bonuses
 3. **Earn JP**: XP earnings × tier multiplier = JP earned
 4. **Spend JP**: Use for discounts on products and events
 
 **Example:**
+
 ```
 User plays Chess (Hard difficulty)
 Base reward: 20 XP, 20 JP
@@ -262,11 +289,13 @@ Final reward:
 ### Redis Caching
 
 **Performance Impact:**
+
 - Leaderboard queries: 2.1s → 0.2s (10x faster)
 - Firestore reads: 80% reduction
 - Cost savings: ~$20/month at scale
 
 **Cached Endpoints:**
+
 - `/api/leaderboard` (60s TTL)
 - Product listings (300s TTL)
 - Event listings (300s TTL)
@@ -288,6 +317,7 @@ Final reward:
 ## 🧪 Testing
 
 ### Run Tests
+
 ```bash
 # Unit tests
 npm test
@@ -300,6 +330,7 @@ npm run test:redis
 ```
 
 ### Manual Testing
+
 See [Redis Testing Manual](./docs/REDIS_TESTING_MANUAL.md) for comprehensive testing guide.
 
 ---
@@ -309,6 +340,7 @@ See [Redis Testing Manual](./docs/REDIS_TESTING_MANUAL.md) for comprehensive tes
 ### Deploy to Vercel
 
 1. **Push to GitHub**
+
    ```bash
    git push origin main
    ```
@@ -325,6 +357,7 @@ See [Redis Testing Manual](./docs/REDIS_TESTING_MANUAL.md) for comprehensive tes
    - Redeploy
 
 ### Post-Deployment
+
 - ✅ Test all features on production URL
 - ✅ Monitor Upstash Redis dashboard
 - ✅ Check error logs in Vercel
@@ -337,6 +370,7 @@ See [Redis Testing Manual](./docs/REDIS_TESTING_MANUAL.md) for comprehensive tes
 We welcome contributions! Please see our [Contributing Guide](./CONTRIBUTING.md) for details.
 
 ### Development Workflow
+
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
 3. Commit your changes (`git commit -m 'Add amazing feature'`)
@@ -359,6 +393,7 @@ We welcome contributions! Please see our [Contributing Guide](./CONTRIBUTING.md)
 ## 🗺️ Roadmap
 
 ### Phase 1: Core Platform ✅
+
 - [x] E-commerce functionality
 - [x] Gaming platform
 - [x] Event system
@@ -366,12 +401,14 @@ We welcome contributions! Please see our [Contributing Guide](./CONTRIBUTING.md)
 - [x] Admin dashboard
 
 ### Phase 2: Performance & Security ✅
+
 - [x] Redis integration
 - [x] Rate limiting
 - [x] Caching optimization
 - [x] Payment security
 
 ### Phase 3: Enhancements (In Progress)
+
 - [ ] Mobile app (React Native)
 - [ ] Social features (friends, chat)
 - [ ] Tournament system
@@ -379,6 +416,7 @@ We welcome contributions! Please see our [Contributing Guide](./CONTRIBUTING.md)
 - [ ] Advanced analytics
 
 ### Phase 4: Scale (Planned)
+
 - [ ] Multi-language support
 - [ ] Multi-currency support
 - [ ] Marketplace for user-created content
@@ -414,7 +452,7 @@ This project is licensed under the MIT License - see the [LICENSE](./LICENSE) fi
 
 - **Documentation**: [docs/](./docs/)
 - **Issues**: [GitHub Issues](https://github.com/yourusername/joy-juncture/issues)
-- **Email**: support@joyjuncture.com
+- **Email**: <support@joyjuncture.com>
 - **Discord**: [Join our community](#)
 
 ---
