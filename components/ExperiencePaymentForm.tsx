@@ -37,13 +37,6 @@ export default function ExperiencePaymentForm({
     const [showErrorModal, setShowErrorModal] = useState(false);
     const [isRazorpayLoaded, setIsRazorpayLoaded] = useState(false);
 
-    // Check if Razorpay is already loaded
-    useEffect(() => {
-        if (window.Razorpay) {
-            setIsRazorpayLoaded(true);
-        }
-    }, []);
-
     // Form Data
     const [formData, setFormData] = useState({
         name: user?.displayName || enquiry.name || '',
