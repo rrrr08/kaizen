@@ -140,8 +140,8 @@ const PlayStyleSelector: React.FC<PlayStyleSelectorProps> = ({ playStyles }) => 
                         className={`
                             relative overflow-hidden cursor-pointer
                             transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)]
-                            ${isActive ? 'lg:flex-[3.5]' : 'lg:flex-[1]'}
-                            min-h-[220px] lg:min-h-0 lg:min-w-[100px]
+                            ${isActive ? 'lg:flex-[3.5] min-h-[450px]' : 'lg:flex-[1] min-h-[140px]'}
+                            lg:min-h-0 lg:min-w-[100px]
                             rounded-3xl border-2 hover:border-4 border-black group
                             will-change-[flex,transform]
                         `}
@@ -198,7 +198,7 @@ const PlayStyleSelector: React.FC<PlayStyleSelectorProps> = ({ playStyles }) => 
                             {/* Description & Action (Only visible when active) */}
                             <div className={`
                                 overflow-hidden transition-all duration-500 ease-out
-                                ${isActive ? 'max-h-[300px] opacity-100 delay-150' : 'max-h-0 opacity-0'}
+                                ${isActive ? 'max-h-[500px] opacity-100 delay-150' : 'max-h-0 opacity-0'}
                             `}>
                                 <p className="text-white/80 font-bold text-lg leading-snug mb-6 max-w-lg">
                                     {style.description}
