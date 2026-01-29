@@ -151,8 +151,38 @@ const PlayStyleSelector: React.FC<PlayStyleSelectorProps> = ({ playStyles }) => 
         };
     });
 
+    const [isPaused, setIsPaused] = useState(false);
+
+    // Auto-rotation logic
+    useEffect(() => {
+        if (isPaused) return;
+
+        // Disable auto-rotation on mobile (screen width < 1024px) to prevent layout shifting
+        if (window.innerWidth < 1024) return;
+
+        const currentStyleIndex = mergedStyles.findIndex(s => s.id === activeId);
+        if (currentStyleIndex === -1) return;
+
+        const currentStyle = mergedStyles[currentStyleIndex];
+        // Calculate duration based on number of images (5s per image)
+        // If no images (fallback), default to 5s
+        const imageCount = currentStyle.images?.length || 1;
+        const duration = imageCount * 5000;
+
+        const timer = setTimeout(() => {
+            const nextIndex = (currentStyleIndex + 1) % mergedStyles.length;
+            setActiveId(mergedStyles[nextIndex].id);
+        }, duration);
+
+        return () => clearTimeout(timer);
+    }, [activeId, isPaused, mergedStyles]);
+
     return (
-        <div className="flex flex-col lg:flex-row gap-2 h-auto lg:h-[600px] w-full items-stretch">
+        <div
+            className="flex flex-col lg:flex-row gap-2 h-auto lg:h-[600px] w-full items-stretch"
+            onMouseEnter={() => setIsPaused(true)}
+            onMouseLeave={() => setIsPaused(false)}
+        >
             {mergedStyles.map((style) => {
                 const isActive = activeId === style.id;
 
@@ -160,6 +190,7 @@ const PlayStyleSelector: React.FC<PlayStyleSelectorProps> = ({ playStyles }) => 
                     <div
                         key={style.id}
                         onMouseEnter={() => setActiveId(style.id)}
+                        // Click also sets active, useful for touch devices
                         onClick={() => setActiveId(style.id)}
                         className={`
                             relative overflow-hidden cursor-pointer

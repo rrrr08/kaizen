@@ -39,7 +39,7 @@ const FAQSection: React.FC<FAQSectionProps> = ({ faqs }) => {
                                 <span className="font-black text-xs tracking-[0.3em] text-white uppercase font-display">Support</span>
                             </div>
 
-                            <h2 className="text-3xl sm:text-4xl md:text-6xl font-header font-black tracking-tighter uppercase mb-6 text-white leading-[0.9]">
+                            <h2 className="text-3xl sm:text-4xl md:text-6xl lg:text-3xl xl:text-4xl 2xl:text-5xl font-header font-black tracking-tighter uppercase mb-6 text-white leading-[0.9]">
                                 Got <br />
                                 <span className="text-[#FFD93D]">Questions?</span>
                             </h2>
