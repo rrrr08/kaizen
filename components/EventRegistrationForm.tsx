@@ -69,6 +69,13 @@ export default function EventRegistrationForm({
   const [lockId, setLockId] = useState<string | null>(null);
   const [isRazorpayLoaded, setIsRazorpayLoaded] = useState(false);
 
+  // Check if Razorpay is already loaded
+  useEffect(() => {
+    if (window.Razorpay) {
+      setIsRazorpayLoaded(true);
+    }
+  }, []);
+
   const [formData, setFormData] = useState({
     name: user?.displayName || '',
     email: user?.email || '',
@@ -385,6 +392,20 @@ export default function EventRegistrationForm({
 
     if (!validateForm()) {
       return;
+    }
+
+    // Validate email
+    try {
+      const res = await fetch(`/api/validate-email?email=${encodeURIComponent(formData.email)}`);
+      const data = await res.json();
+      if (!data.isValid) {
+        setError(data.error || "Invalid email address");
+        setShowErrorModal(true);
+        return;
+      }
+    } catch (err) {
+      console.error("Email validation failed", err);
+      // Fail open
     }
 
     try {

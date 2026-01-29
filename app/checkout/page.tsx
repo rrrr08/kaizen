@@ -35,6 +35,13 @@ export default function CheckoutPage() {
   const [checkoutInfoLoaded, setCheckoutInfoLoaded] = useState(false);
   const [isRazorpayLoaded, setIsRazorpayLoaded] = useState(false);
 
+  // Check if Razorpay is already loaded (for client-side navigations)
+  useEffect(() => {
+    if (window.Razorpay) {
+      setIsRazorpayLoaded(true);
+    }
+  }, []);
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -238,6 +245,19 @@ export default function CheckoutPage() {
       return;
     }
 
+    // Validate email
+    try {
+      const res = await fetch(`/api/validate-email?email=${encodeURIComponent(formData.email)}`);
+      const data = await res.json();
+      if (!data.isValid) {
+        addToast({ title: 'Invalid Email', description: data.error || 'Please provide a valid email', variant: 'destructive' });
+        return;
+      }
+    } catch (err) {
+      console.error("Email validation failed", err);
+      // Fail open
+    }
+
     if (!isRazorpayLoaded) {
       addToast({ title: 'System Loading', description: 'Payment system is initializing. Please wait a moment.' });
       return;
@@ -347,7 +367,7 @@ export default function CheckoutPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
           <div className="lg:col-span-2">
-            <form onSubmit={handlePlaceOrder} className="space-y-8">
+            <form id="checkout-form" onSubmit={handlePlaceOrder} className="space-y-8">
               <div className="bg-white border-2 border-black rounded-[20px] p-8 neo-shadow">
                 <h2 className="font-header text-2xl md:text-3xl font-black mb-6 md:mb-8 text-black">SHIPPING INFORMATION</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
@@ -378,14 +398,14 @@ export default function CheckoutPage() {
                 {voucherError && <p className="text-red-500 text-xs font-bold mt-2">{voucherError}</p>}
               </div>
 
-              <button type="submit" disabled={isProcessing} className="w-full py-5 bg-[#00B894] text-black font-header text-xl font-black rounded-[15px] border-2 border-black neo-shadow uppercase tracking-wide hover:scale-[1.01] transition-all">
+              <button type="submit" disabled={isProcessing} className="hidden lg:block w-full py-5 bg-[#00B894] text-black font-header text-xl font-black rounded-[15px] border-2 border-black neo-shadow uppercase tracking-wide hover:scale-[1.01] transition-all">
                 {isProcessing ? 'PROCESSING...' : `PLACE ORDER${earnedPoints > 0 ? ` & EARN ${earnedPoints} JP` : ''}`}
               </button>
             </form>
           </div>
 
           <div className="lg:col-span-1">
-            <div className="sticky top-32 bg-[#FFD93D] border-2 border-black p-8 rounded-[25px] neo-shadow">
+            <div className="!static lg:!sticky lg:top-32 bg-[#FFD93D] border-2 border-black p-8 rounded-[25px] neo-shadow z-0 mb-8 lg:mb-0">
               <h2 className="font-header text-2xl font-black mb-6 text-black uppercase">Order Summary</h2>
               <div className="space-y-4 mb-6 pb-6 border-b-2 border-black/10">
                 {items.map((item) => (
@@ -424,6 +444,18 @@ export default function CheckoutPage() {
                     <p className="font-header text-lg font-black">{balance} JP</p>
                   </div>
                 </div>
+              </div>
+
+              {/* Mobile Place Order Button - Now Inside the Card */}
+              <div className="lg:hidden mt-8 pt-8 border-t-2 border-black/10">
+                <button
+                  type="submit"
+                  form="checkout-form"
+                  disabled={isProcessing}
+                  className="w-full py-5 bg-[#00B894] text-black font-header text-xl font-black rounded-[15px] border-2 border-black neo-shadow uppercase tracking-wide hover:scale-[1.01] transition-all"
+                >
+                  {isProcessing ? 'PROCESSING...' : `PLACE ORDER${earnedPoints > 0 ? ` & EARN ${earnedPoints} JP` : ''}`}
+                </button>
               </div>
             </div>
           </div>
