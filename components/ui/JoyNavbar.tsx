@@ -4,11 +4,11 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Coins, ShoppingBag, Menu, X, User, LogOut, Settings, LayoutDashboard, ChevronDown, ArrowRight } from 'lucide-react';
+import { Coins, ShoppingBag, Menu, X, User, LogOut, Settings, LayoutDashboard, ChevronDown, ArrowRight, Sparkles } from 'lucide-react';
 import { useCart } from '@/app/context/CartContext';
 import { useGamification } from '@/app/context/GamificationContext';
-import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
-import { doc, getDoc, getFirestore } from 'firebase/firestore';
+import { getAuth, signOut } from 'firebase/auth';
+// import { doc, getDoc, getFirestore } from 'firebase/firestore';
 import { app } from '@/lib/firebase';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import Logo from '@/components/ui/Logo';
@@ -270,79 +270,180 @@ const Navbar: React.FC = () => {
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="fixed inset-0 top-[80px] z-40 bg-[#FFFDF5] p-6 lg:hidden overflow-y-auto"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 top-[76px] z-40 bg-[#FFFDF5] lg:hidden overflow-y-auto"
           >
-            <div className="flex flex-col gap-4">
-              {navItems.map((item) => {
-                if (item.name === 'Events') {
-                  return (
-                    <div key={item.path} className="flex flex-col">
-                      <button
-                        onClick={() => setIsMobileEventsOpen(!isMobileEventsOpen)}
-                        className="flex items-center justify-between text-3xl sm:text-4xl font-black text-black hover:text-[#6C5CE7] uppercase tracking-tighter w-full text-left"
-                      >
-                        {item.name}
-                        <ChevronDown
-                          size={24}
-                          className={`transition-transform duration-300 ${isMobileEventsOpen ? 'rotate-180' : ''
-                            }`}
+            <div className="p-4 pb-24 flex flex-col min-h-full">
+              {/* User Profile Section */}
+              {user ? (
+                <motion.div
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.1 }}
+                  className="bg-white border-4 border-black p-4 rounded-2xl neo-shadow mb-6"
+                >
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="w-16 h-16 rounded-full border-2 border-black overflow-hidden relative shadow-[4px_4px_0px_#000]">
+                      {userProfile?.image || user?.photoURL ? (
+                        <Image
+                          src={userProfile?.image || user?.photoURL || ''}
+                          alt="Profile"
+                          fill
+                          className="object-cover"
                         />
-                      </button>
-                      <AnimatePresence>
-                        {isMobileEventsOpen && (
-                          <motion.div
-                            initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: 'auto', opacity: 1 }}
-                            exit={{ height: 0, opacity: 0 }}
-                            transition={{ duration: 0.3, ease: 'easeInOut' }}
-                            className="overflow-hidden flex flex-col gap-3 pl-6 mt-2 border-l-4 border-black/10 ml-2"
-                          >
-                            <Link
-                              href="/events/upcoming"
-                              onClick={() => setIsMobileMenuOpen(false)}
-                              className="text-xl sm:text-2xl font-black text-black/80 hover:text-[#FFD93D] uppercase tracking-tighter flex items-center gap-2 py-1"
-                            >
-                              <ArrowRight size={16} /> Upcoming
-                            </Link>
-                            <Link
-                              href="/events/past"
-                              onClick={() => setIsMobileMenuOpen(false)}
-                              className="text-xl sm:text-2xl font-black text-black/80 hover:text-[#6C5CE7] uppercase tracking-tighter flex items-center gap-2 py-1"
-                            >
-                              <ArrowRight size={16} /> Past
-                            </Link>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
+                      ) : (
+                        <div className="w-full h-full bg-[#6C5CE7] flex items-center justify-center text-white text-2xl font-black">
+                          {user.email?.[0].toUpperCase()}
+                        </div>
+                      )}
                     </div>
-                  );
-                }
-                return (
+                    <div>
+                      <p className="text-xs font-bold text-black/50 uppercase tracking-widest">Welcome back</p>
+                      <p className="text-lg font-black text-black truncate max-w-[150px]">{userProfile?.name || user.displayName || 'Gamer'}</p>
+                      <div className="flex items-center gap-1 mt-1 bg-[#00B894]/10 px-2 py-0.5 rounded-md border border-[#00B894] w-fit">
+                        <Coins size={12} className="text-[#00B894]" />
+                        <span className="text-xs font-black text-[#00B894]">{balance.toLocaleString()} JP</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <Link
+                      href="/profile"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="flex items-center justify-center gap-2 py-2 bg-black text-white rounded-xl font-black text-xs uppercase hover:bg-black/80 transition-colors"
+                    >
+                      <User size={14} /> Profile
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="flex items-center justify-center gap-2 py-2 border-2 border-black text-black rounded-xl font-black text-xs uppercase hover:bg-red-50 hover:text-red-500 hover:border-red-500 transition-colors"
+                    >
+                      <LogOut size={14} /> Logout
+                    </button>
+                  </div>
+                </motion.div>
+              ) : (
+                <motion.div
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.1 }}
+                  className="bg-[#6C5CE7] border-4 border-black p-6 rounded-2xl neo-shadow mb-6 text-center"
+                >
+                  <h3 className="text-white font-black text-2xl uppercase italic mb-2">Join the Grid</h3>
+                  <p className="text-white/80 text-sm font-bold mb-4">Unlock rewards, track stats, and compete.</p>
                   <Link
-                    key={item.path}
-                    href={item.path}
+                    href="/auth/login"
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="text-3xl sm:text-4xl font-black text-black hover:text-[#6C5CE7] uppercase tracking-tighter"
+                    className="block w-full py-3 bg-white text-black font-black uppercase tracking-widest rounded-xl hover:bg-gray-100 transition-colors shadow-[4px_4px_0px_#000]"
                   >
-                    {item.name}
+                    Login / Sign Up
                   </Link>
-                );
-              })}
-              <div className="h-px bg-black/10 my-4" />
-              <Link
-                href={user ? "/profile" : "/auth/login"}
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="text-xl font-bold text-black/60 uppercase tracking-widest"
-              >
-                {user ? "My Profile" : "Login / Sign Up"}
-              </Link>
-              <div className="mt-8 p-6 bg-[#00B894] rounded-2xl border-4 border-black neo-shadow">
-                <p className="font-black text-black uppercase tracking-widest mb-2">My Balance</p>
-                <p className="text-4xl font-black text-black">{balance.toLocaleString()} JP</p>
+                </motion.div>
+              )}
+
+              {/* Navigation List */}
+              <div className="flex flex-col gap-2 mb-6">
+                {[
+                  { name: 'Shop', icon: ShoppingBag, color: 'text-[#FFD93D]', hoverBg: 'hover:bg-[#FFD93D]/10', path: '/shop' },
+                  { name: 'Experiences', icon: Sparkles, color: 'text-[#6C5CE7]', hoverBg: 'hover:bg-[#6C5CE7]/10', path: '/experiences' },
+                  { name: 'Play', icon: LayoutDashboard, color: 'text-[#00B894]', hoverBg: 'hover:bg-[#00B894]/10', path: '/play' },
+                  { name: 'Events', icon: Menu, color: 'text-[#FF7675]', hoverBg: 'hover:bg-[#FF7675]/10', path: '/events' }, // Path unused for accordion
+                  { name: 'Community', icon: User, color: 'text-[#74B9FF]', hoverBg: 'hover:bg-[#74B9FF]/10', path: '/community' },
+                  { name: 'Blog', icon: Menu, color: 'text-[#FAB1A0]', hoverBg: 'hover:bg-[#FAB1A0]/10', path: '/blog' },
+                ].map((item, i) => {
+                  if (item.name === 'Events') {
+                    return (
+                      <div key={item.name} className="flex flex-col">
+                        <button
+                          onClick={() => setIsMobileEventsOpen(!isMobileEventsOpen)}
+                          className={`w-full p-4 border-b-2 border-black/5 flex items-center gap-4 ${item.hoverBg} transition-colors group text-left`}
+                        >
+                          <div className={`p-2 rounded-lg border-2 border-black ${item.color} bg-white shadow-[2px_2px_0px_#000] group-hover:scale-110 transition-transform`}>
+                            <item.icon className="w-5 h-5 text-black" strokeWidth={2.5} />
+                          </div>
+                          <span className="font-black uppercase tracking-tight text-xl text-black">{item.name}</span>
+                          <ChevronDown
+                            className={`w-5 h-5 text-black/20 ml-auto group-hover:text-black transition-transform duration-300 ${isMobileEventsOpen ? 'rotate-180' : ''}`}
+                          />
+                        </button>
+
+                        <AnimatePresence>
+                          {isMobileEventsOpen && (
+                            <motion.div
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: 'auto', opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              className="overflow-hidden bg-gray-50/50"
+                            >
+                              <Link
+                                href="/events/upcoming"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                                className="block pl-20 pr-4 py-3 border-b border-black/5 hover:bg-black/5 font-bold text-black/70 hover:text-black uppercase tracking-wide text-sm transition-colors"
+                              >
+                                Upcoming Events
+                              </Link>
+                              <Link
+                                href="/events/past"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                                className="block pl-20 pr-4 py-3 border-b border-black/5 hover:bg-black/5 font-bold text-black/70 hover:text-black uppercase tracking-wide text-sm transition-colors"
+                              >
+                                Past Events
+                              </Link>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <Link
+                      key={item.name}
+                      href={item.path}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <motion.div
+                        initial={{ x: -20, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        transition={{ delay: 0.1 + (i * 0.05) }}
+                        className={`w-full p-4 border-b-2 border-black/5 flex items-center gap-4 ${item.hoverBg} transition-colors group`}
+                      >
+                        <div className={`p-2 rounded-lg border-2 border-black ${item.color} bg-white shadow-[2px_2px_0px_#000] group-hover:scale-110 transition-transform`}>
+                          <item.icon className="w-5 h-5 text-black" strokeWidth={2.5} />
+                        </div>
+                        <span className="font-black uppercase tracking-tight text-xl text-black">{item.name}</span>
+                        <ArrowRight className="w-5 h-5 text-black/20 ml-auto group-hover:text-black transition-colors" />
+                      </motion.div>
+                    </Link>
+                  );
+                })}
               </div>
+
+              {/* Footer Links */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
+                className="mt-auto grid grid-cols-2 gap-4"
+              >
+                <Link
+                  href="/about"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="py-3 text-center border-2 border-black rounded-xl font-black text-xs uppercase bg-white hover:bg-gray-50 neo-shadow"
+                >
+                  About Us
+                </Link>
+                <Link
+                  href="/contact"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="py-3 text-center border-2 border-black rounded-xl font-black text-xs uppercase bg-white hover:bg-gray-50 neo-shadow"
+                >
+                  Contact
+                </Link>
+              </motion.div>
             </div>
           </motion.div>
         )}
