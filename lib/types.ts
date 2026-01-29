@@ -528,6 +528,7 @@ export interface PlayStyleItem {
   title: string;
   description: string;
   emoji: string;
+  images: string[];
 }
 
 export interface FeaturedGame {
