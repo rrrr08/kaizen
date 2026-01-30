@@ -55,14 +55,14 @@ export default function ExperienceCategoryPage() {
       </div>
     );
   }
- 
+
   return (
     <div className="min-h-screen pt-28 pb-16 bg-[#FFFDF5]">
       <div className="max-w-7xl mx-auto px-6 md:px-12">
         {/* Header */}
         <div className="mb-20">
           <div className="text-[#6C5CE7] font-black text-sm tracking-[0.2em] mb-4 uppercase font-display">Custom Experience</div>
-          <h1 className="font-header text-6xl md:text-8xl tracking-tighter mb-8 text-[#2D3436]">
+          <h1 className="font-header text-5xl md:text-8xl tracking-tighter md:tracking-tight mb-8 text-[#2D3436]">
             {category.name}
           </h1>
           <p className="text-black/80 font-bold text-xl max-w-3xl leading-relaxed">
