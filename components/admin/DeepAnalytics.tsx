@@ -290,7 +290,7 @@ export default function DeepAnalytics() {
         <div className="mb-8">
             <h3 className="font-header text-xl md:text-2xl font-black text-black uppercase mb-6 flex items-center gap-2">
                 <Trophy className="text-[#FDCB6E]" />
-                Deep Dive Analytics
+                Advanced Analytics
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
