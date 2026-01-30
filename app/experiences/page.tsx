@@ -91,7 +91,7 @@ export default function Experiences() {
 
                   {/* Content */}
                   <div className="p-8">
-                    <div className="bg-[#FFD93D] text-black px-4 py-2 rounded-lg neo-border shadow-[2px_2px_0px_#000] inline-block font-black text-xs tracking-[0.2em] mb-4 uppercase">
+                    <div className="bg-[#FFD93D] text-black px-4 py-2 rounded-lg neo-border shadow-[2px_2px_0px_#000] inline-block font-black text-xs tracking-wider md:tracking-[0.2em] mb-4 uppercase">
                       {category.name}
                     </div>
                     <p className="text-black/80 font-medium text-lg mb-6 leading-relaxed line-clamp-5 md:line-clamp-6 break-words overflow-hidden">

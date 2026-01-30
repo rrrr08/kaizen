@@ -8,7 +8,7 @@ import {
     Gamepad2, Trophy, TrendingUp, Database,
     Plus, Trash2, Edit2, Save, AlertCircle,
     Settings, Zap, CheckCircle, Info,
-    Grid3x3, HelpCircle, Search, Type, Skull, Lightbulb, Crown, Bomb, Activity, Calculator, Puzzle, Disc, Target, Shield, Swords, Coins, Users
+    Grid3x3, HelpCircle, Search, Type, Skull, Lightbulb, Bomb, Activity, Calculator, Puzzle, Disc, Coins
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { doc, getDoc, setDoc, getFirestore } from 'firebase/firestore';
@@ -60,14 +60,6 @@ interface XPSource {
 type GameType = 'riddle' | 'trivia' | 'wordle' | 'hangman' | 'wordsearch' | 'chess';
 
 const db = getFirestore(app);
-
-const TIER_ICONS: Record<string, any> = {
-    'User': Users,
-    'Target': Target,
-    'Shield': Shield,
-    'Swords': Swords,
-    'Crown': Crown
-};
 
 export default function GameSettingsDashboard() {
     const { user, loading: authLoading, isAdmin } = useAuth();
@@ -277,7 +269,7 @@ export default function GameSettingsDashboard() {
             badge: 'Grey Meeple',
             perk: 'None',
             color: '#94a3b8',
-            icon: 'User',
+            icon: '♟️',
             unlockPrice: 0
         },
         {
@@ -287,7 +279,7 @@ export default function GameSettingsDashboard() {
             badge: 'Green Pawn',
             perk: 'Early access to Event Tickets',
             color: '#34d399',
-            icon: 'Target',
+            icon: '♝',
             unlockPrice: 2000
         },
         {
@@ -297,7 +289,7 @@ export default function GameSettingsDashboard() {
             badge: 'Blue Rook',
             perk: '5% off all Workshops',
             color: '#60a5fa',
-            icon: 'Shield',
+            icon: '♜',
             unlockPrice: 5000
         },
         {
@@ -307,7 +299,7 @@ export default function GameSettingsDashboard() {
             badge: 'Purple Knight',
             perk: 'Priority access & bonus XP on Experiences',
             color: '#a78bfa',
-            icon: 'Swords',
+            icon: '♞',
             unlockPrice: 7500
         },
         {
@@ -317,8 +309,18 @@ export default function GameSettingsDashboard() {
             badge: 'Gold Crown',
             perk: 'VIP Seating at Game Nights',
             color: '#fbbf24',
-            icon: 'Crown',
+            icon: '♛',
             unlockPrice: 10000
+        },
+        {
+            name: 'Legend',
+            minXP: 7500,
+            multiplier: 1.75,
+            badge: 'Platinum King',
+            perk: 'Exclusive access to all premium features',
+            color: '#e879f9',
+            icon: '♚',
+            unlockPrice: 15000
         }
     ];
 
@@ -673,7 +675,7 @@ export default function GameSettingsDashboard() {
                                             wordle: { icon: <Type size={40} />, color: '#A29BFE', bg: '#F0EDFF' },
                                             hangman: { icon: <Skull size={40} />, color: '#FF7675', bg: '#FFE9E9' },
                                             trivia: { icon: <Lightbulb size={40} />, color: '#74B9FF', bg: '#E8F4FF' },
-                                            chess: { icon: <Crown size={40} />, color: '#2D3436', bg: '#F5F6FA' },
+                                            // chess: { icon: <Crown size={40} />, color: '#2D3436', bg: '#F5F6FA' },
                                             memory: { icon: <Puzzle size={40} />, color: '#A29BFE', bg: '#F0EDFF' },
                                             tictactoe: { icon: <Activity size={40} />, color: '#FD79A8', bg: '#FFE9F5' },
                                             minesweeper: { icon: <Bomb size={40} />, color: '#E17055', bg: '#FFE9E3' },
@@ -901,21 +903,14 @@ export default function GameSettingsDashboard() {
                                                     <span className="absolute -top-3 left-6 px-3 py-1 bg-black text-white text-[10px] font-black rounded-full uppercase italic">TIER 0{i + 1}</span>
                                                     <div className="flex gap-4 items-center mb-4">
                                                         <div className="relative">
-                                                            <div className="w-16 h-16 border-2 border-black/10 rounded-2xl bg-white flex items-center justify-center text-[#2D3436]">
-                                                                {(() => {
-                                                                    const Icon = TIER_ICONS[t.icon] || Users;
-                                                                    return <Icon size={32} />;
-                                                                })()}
-                                                            </div>
-                                                            <select
+                                                            <input
+                                                                type="text"
                                                                 value={t.icon}
                                                                 onChange={e => { const n = [...tiers]; n[i].icon = e.target.value; setTiers(n); }}
-                                                                className="absolute inset-0 opacity-0 cursor-pointer"
-                                                            >
-                                                                {Object.keys(TIER_ICONS).map(iconKey => (
-                                                                    <option key={iconKey} value={iconKey}>{iconKey}</option>
-                                                                ))}
-                                                            </select>
+                                                                className="w-16 h-16 border-2 border-black/10 rounded-2xl bg-white flex items-center justify-center text-3xl text-center outline-none focus:border-[#6C5CE7] transition-all cursor-text"
+                                                                maxLength={2}
+                                                                placeholder="🎮"
+                                                            />
                                                         </div>
                                                         <div className="flex-1">
                                                             <input value={t.name} onChange={e => { const n = [...tiers]; n[i].name = e.target.value; setTiers(n); }} className="w-full bg-transparent font-header text-2xl outline-none" />
