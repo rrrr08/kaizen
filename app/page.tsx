@@ -10,6 +10,8 @@ import { Sparkles, Plus, Flame, ChevronRight, Calendar, Puzzle, Package, Wallet,
 // import ArcadeHero from '@/components/home/ArcadeHero';
 // import EventHero from '@/components/home/EventHero';
 import Hero from '@/components/home/Hero';
+import FAQSection from '@/components/FAQSection';
+import PlayStyleSelector from '@/components/home/PlayStyleSelector';
 import { Product, GameEvent, HomepageContent } from '@/lib/types';
 import { useAuth } from '@/app/context/AuthContext';
 import { useGamification } from '@/app/context/GamificationContext';
@@ -134,85 +136,20 @@ export default function Home() {
 
       {/* Section 2: Choose Your Play Style */}
       <section className="px-6 py-20 bg-white">
+
         <div className="container mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-5xl font-black mb-4">Choose Your Play Style at Joy Juncture</h2>
             <p className="text-xl font-medium text-charcoal/60">Find your perfect way to play and connect with our community</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {content.playStyle && Object.values(content.playStyle).map((style, idx) => {
-              const colors = [
-                'from-[#6C5CE7] to-[#8B7FE8]',
-                'from-[#FF6B6B] to-[#FF8E8E]',
-                'from-[#FFD93D] to-[#FFE066]',
-                'from-[#00D9A3] to-[#00F5B8]'
-              ];
-              const textColors = [
-                'text-white',
-                'text-white',
-                'text-black',
-                'text-black'
-              ];
-              const btnColors = [
-                'text-[#6C5CE7]',
-                'text-[#FF6B6B]',
-                'text-black',
-                'text-[#00D9A3]'
-              ];
-              const links = ['/shop', '/events', '/experiences', '/play'];
-              const linkTexts = ['Browse Shop', 'View Events', 'Explore Experiences', 'Play Now Free'];
-
-              const IconMap: Record<string, any> = {
-                'Home': HomeIcon,
-                '🏠': HomeIcon,
-                'Users': Users,
-                '👥': Users,
-                'PartyPopper': PartyPopper,
-                '🎉': PartyPopper,
-                'Gamepad2': Gamepad2,
-                '🎮': Gamepad2
-              };
-
-              const IconComponent = IconMap[style.emoji] || null;
-
-              return (
-                <motion.div
-                  key={idx}
-                  whileHover={{ y: -8, scale: 1.02 }}
-                  className={`bg-gradient-to-br ${colors[idx % 4]} ${textColors[idx % 4]} p-8 rounded-[24px] neo-border-thick neo-shadow cursor-pointer`}
-                >
-                  <div className="mb-4">
-                    {IconComponent ? (
-                      <IconComponent
-                        size={56}
-                        strokeWidth={1.5}
-                        className="drop-shadow-md transition-transform group-hover:scale-110 duration-300"
-                        fill="currentColor"
-                        fillOpacity={0.2}
-                      />
-                    ) : (
-                      <div className="text-5xl">{style.emoji}</div>
-                    )}
-                  </div>
-                  <h3 className="text-2xl font-black mb-3">{style.title}</h3>
-                  <p className={`font-medium mb-6 opacity-90`}>
-                    {style.description}
-                  </p>
-                  <Link href={links[idx % 4]}>
-                    <button className={`w-full bg-white ${btnColors[idx % 4]} font-black py-3 rounded-xl neo-border hover:bg-gray-50 transition-colors`}>
-                      {linkTexts[idx % 4]}
-                    </button>
-                  </Link>
-                </motion.div>
-              );
-            })}
-          </div>
+          <PlayStyleSelector playStyles={content.playStyle as any} />
         </div>
       </section>
 
       {/* Section 3: What's Happening Now */}
       <section className="px-6 py-12 bg-gradient-to-br from-[#6C5CE7] to-[#8B7FE8] text-white">
+
         <div className="container mx-auto">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-black mb-2">What's Happening Now at Joy Juncture</h2>
@@ -350,8 +287,9 @@ export default function Home() {
       </section>
 
       {/* Section 4: Proof of Joy */}
-      <section className="px-6 py-10 bg-[#FFD93D] overflow-hidden relative">
+      <section className="px-6 py-10 bg-[#FF7675] overflow-hidden relative">
         <div className="absolute top-0 left-0 w-full h-2 bg-black/10" />
+
         <div className="container mx-auto">
           {/* Replaced with standardized ProofOfJoyGrid to sync content across site */}
           <ProofOfJoyGrid limit={3} />
@@ -523,7 +461,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Footer / Bottom Spacing adjustments if needed */}
+      {/* FAQ Section */}
+      {content?.faqs && <FAQSection faqs={content.faqs} />}
     </motion.div>
   );
 }

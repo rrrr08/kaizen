@@ -240,6 +240,123 @@ const SiteContentManager = () => {
                         </div>
                     </div>
 
+                    {/* PLAY STYLES */}
+                    <div className="space-y-8 pt-8 border-t-2 border-black/10">
+                        <div className="flex items-center justify-between">
+                            <h3 className="font-black text-lg uppercase tracking-wider">Play Styles</h3>
+                            <span className="text-xs font-bold text-black/40 uppercase">Edit the 4 main interaction cards</span>
+                        </div>
+
+                        {['playAtHome', 'playTogether', 'playOccasions', 'playEarn'].map((key) => {
+                            const styleData = homeContent.playStyle?.[key] || {};
+                            return (
+                                <div key={key} className="bg-gray-50 p-6 rounded-xl border-2 border-black/5 space-y-4">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <div className="w-3 h-3 rounded-full bg-[#FFD93D] border border-black" />
+                                        <h4 className="font-black text-sm uppercase">{key.replace(/([A-Z])/g, ' $1').trim()}</h4>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="text-xs font-bold uppercase block mb-1 text-black/60">Title</label>
+                                            <input
+                                                type="text"
+                                                className="w-full bg-white border-2 border-black/10 rounded-lg p-2 font-bold text-sm focus:border-black transition-colors"
+                                                value={styleData.title || ''}
+                                                onChange={(e) => setHomeContent({
+                                                    ...homeContent,
+                                                    playStyle: {
+                                                        ...homeContent.playStyle,
+                                                        [key]: { ...styleData, title: e.target.value }
+                                                    }
+                                                })}
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="text-xs font-bold uppercase block mb-1 text-black/60">Emoji Data</label>
+                                            <input
+                                                type="text"
+                                                className="w-full bg-white border-2 border-black/10 rounded-lg p-2 font-bold text-sm focus:border-black transition-colors"
+                                                value={styleData.emoji || ''}
+                                                onChange={(e) => setHomeContent({
+                                                    ...homeContent,
+                                                    playStyle: {
+                                                        ...homeContent.playStyle,
+                                                        [key]: { ...styleData, emoji: e.target.value }
+                                                    }
+                                                })}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="text-xs font-bold uppercase block mb-1 text-black/60">Description</label>
+                                        <textarea
+                                            className="w-full bg-white border-2 border-black/10 rounded-lg p-2 font-bold text-sm focus:border-black transition-colors h-20 resize-none"
+                                            value={styleData.description || ''}
+                                            onChange={(e) => setHomeContent({
+                                                ...homeContent,
+                                                playStyle: {
+                                                    ...homeContent.playStyle,
+                                                    [key]: { ...styleData, description: e.target.value }
+                                                }
+                                            })}
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="text-xs font-bold uppercase block mb-2 text-black/60">
+                                            Background Images (Max 3)
+                                        </label>
+                                        <ImageUpload
+                                            value={styleData.images || []}
+                                            maxFiles={3}
+                                            onChange={(url) => {
+                                                const currentImages = styleData.images || [];
+                                                // If this URL is already in the list, don't add it again (ImageUpload might handle this but good to be safe)
+                                                // Actually ImageUpload sends the NEW url on change, so checking duplicates is manual if needed, 
+                                                // but usually we just append. ImageUpload usage here implies `onChange` is called with ONE new url?
+                                                // Wait, looking at ImageUpload.tsx: 
+                                                // `onChange(result.info.secure_url)` -> it passes a single string.
+                                                // But `value` is string[].
+                                                // Typically my ImageUpload component expects the parent to handle appending if it returns a single string.
+                                                // Let's check ImageUpload usage in other parts of this file.
+                                                // Line 224: `onChange={(url) => setHomeContent(... hero: { ... backgroundImage: url } )}`.
+                                                // It seems designed for single image there.
+                                                // But wait, `ImageUpload.tsx`:
+                                                // `onRemove` calls `onRemove(url)`.
+                                                // `onChange` calls `onChange(url)`.
+                                                // The parent needs to decide if it replaces or appends.
+
+                                                // For PlayStyles, we want to APPEND up to 3.
+                                                const newImages = [...currentImages, url].slice(0, 3);
+
+                                                setHomeContent({
+                                                    ...homeContent,
+                                                    playStyle: {
+                                                        ...homeContent.playStyle,
+                                                        [key]: { ...styleData, images: newImages }
+                                                    }
+                                                });
+                                            }}
+                                            onRemove={(urlToRemove) => {
+                                                const currentImages = styleData.images || [];
+                                                const newImages = currentImages.filter((img: string) => img !== urlToRemove);
+                                                setHomeContent({
+                                                    ...homeContent,
+                                                    playStyle: {
+                                                        ...homeContent.playStyle,
+                                                        [key]: { ...styleData, images: newImages }
+                                                    }
+                                                });
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+
                     <Button onClick={() => handleSave('homepage', homeContent)} disabled={saving} className="w-full bg-black text-white font-black uppercase py-6 hover:bg-neutral-800">
                         {saving ? <Loader2 className="animate-spin" /> : 'Save Home Content'}
                     </Button>

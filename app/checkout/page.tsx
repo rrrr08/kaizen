@@ -35,13 +35,6 @@ export default function CheckoutPage() {
   const [checkoutInfoLoaded, setCheckoutInfoLoaded] = useState(false);
   const [isRazorpayLoaded, setIsRazorpayLoaded] = useState(false);
 
-  // Check if Razorpay is already loaded (for client-side navigations)
-  useEffect(() => {
-    if (window.Razorpay) {
-      setIsRazorpayLoaded(true);
-    }
-  }, []);
-
   const [formData, setFormData] = useState({
     name: '',
     email: '',
