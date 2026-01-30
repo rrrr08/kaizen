@@ -312,42 +312,37 @@ const SiteContentManager = () => {
                                             value={styleData.images || []}
                                             maxFiles={3}
                                             onChange={(url) => {
-                                                const currentImages = styleData.images || [];
-                                                // If this URL is already in the list, don't add it again (ImageUpload might handle this but good to be safe)
-                                                // Actually ImageUpload sends the NEW url on change, so checking duplicates is manual if needed, 
-                                                // but usually we just append. ImageUpload usage here implies `onChange` is called with ONE new url?
-                                                // Wait, looking at ImageUpload.tsx: 
-                                                // `onChange(result.info.secure_url)` -> it passes a single string.
-                                                // But `value` is string[].
-                                                // Typically my ImageUpload component expects the parent to handle appending if it returns a single string.
-                                                // Let's check ImageUpload usage in other parts of this file.
-                                                // Line 224: `onChange={(url) => setHomeContent(... hero: { ... backgroundImage: url } )}`.
-                                                // It seems designed for single image there.
-                                                // But wait, `ImageUpload.tsx`:
-                                                // `onRemove` calls `onRemove(url)`.
-                                                // `onChange` calls `onChange(url)`.
-                                                // The parent needs to decide if it replaces or appends.
+                                                // Use functional update to ensure we capture all uploads
+                                                setHomeContent((prev: any) => {
+                                                    const currentStyle = prev.playStyle?.[key] || {};
+                                                    const currentImages = currentStyle.images || [];
 
-                                                // For PlayStyles, we want to APPEND up to 3.
-                                                const newImages = [...currentImages, url].slice(0, 3);
+                                                    // Avoid duplicates and limit to 3
+                                                    if (currentImages.includes(url)) return prev;
+                                                    const newImages = [...currentImages, url].slice(0, 3);
 
-                                                setHomeContent({
-                                                    ...homeContent,
-                                                    playStyle: {
-                                                        ...homeContent.playStyle,
-                                                        [key]: { ...styleData, images: newImages }
-                                                    }
+                                                    return {
+                                                        ...prev,
+                                                        playStyle: {
+                                                            ...prev.playStyle,
+                                                            [key]: { ...currentStyle, images: newImages }
+                                                        }
+                                                    };
                                                 });
                                             }}
                                             onRemove={(urlToRemove) => {
-                                                const currentImages = styleData.images || [];
-                                                const newImages = currentImages.filter((img: string) => img !== urlToRemove);
-                                                setHomeContent({
-                                                    ...homeContent,
-                                                    playStyle: {
-                                                        ...homeContent.playStyle,
-                                                        [key]: { ...styleData, images: newImages }
-                                                    }
+                                                setHomeContent((prev: any) => {
+                                                    const currentStyle = prev.playStyle?.[key] || {};
+                                                    const currentImages = currentStyle.images || [];
+                                                    const newImages = currentImages.filter((img: string) => img !== urlToRemove);
+
+                                                    return {
+                                                        ...prev,
+                                                        playStyle: {
+                                                            ...prev.playStyle,
+                                                            [key]: { ...currentStyle, images: newImages }
+                                                        }
+                                                    };
                                                 });
                                             }}
                                         />

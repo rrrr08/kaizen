@@ -32,9 +32,8 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const onUpload = (result: any) => {
-        if (result.event !== 'success') return;
-
-        if (result.info && result.info.secure_url) {
+        // Handle successful uploads - this fires once per file
+        if (result.event === 'success' && result.info?.secure_url) {
             onChange(result.info.secure_url);
         }
     };
