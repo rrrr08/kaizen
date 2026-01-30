@@ -75,7 +75,7 @@ h5,
 h6,
 .font-header {
   font-family: var(--font-fredoka), sans-serif;
-  letter-spacing: 0.25em !important;
+  letter-spacing: 0.15em !important;
 }
 
 .font-sans {

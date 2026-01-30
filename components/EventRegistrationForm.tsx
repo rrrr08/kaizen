@@ -119,6 +119,25 @@ export default function EventRegistrationForm({
             const userData = userSnap.data();
             setWalletPoints(userData?.points || 0);
 
+            // IMMEDIATE REDIRECT CHECK: If user doesn't have a phone number in Firestore
+            if (!userData?.phoneNumber) {
+              // Store event context for return
+              if (typeof window !== 'undefined') {
+                sessionStorage.setItem('eventRegistrationRedirect', JSON.stringify({
+                  eventId: event.id,
+                  eventTitle: event.title
+                }));
+              }
+              // Redirect immediately with reason
+              // Set a visual state instead of just redirecting
+              setError('Redirecting to add phone number...');
+              setLoading(true);
+              setTimeout(() => {
+                window.location.href = '/notification-preferences?redirect=/events&reason=phone_required';
+              }, 300);
+              return;
+            }
+
             // Load saved checkout info for auto-fill
             const savedInfo = userData?.checkoutInfo;
             if (savedInfo || userData?.phoneNumber) {
@@ -400,6 +419,8 @@ export default function EventRegistrationForm({
       console.error("Email validation failed", err);
       // Fail open
     }
+
+    // Phone validation already handled by immediate check in useEffect above
 
     try {
       setIsProcessing(true);

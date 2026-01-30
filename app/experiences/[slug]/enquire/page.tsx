@@ -89,6 +89,18 @@ export default function ExperienceEnquiryPage() {
   // Pre-fill form with user data when user is loaded
   useEffect(() => {
     if (user && !authLoading) {
+      // IMMEDIATE REDIRECT CHECK: If user doesn't have a phone number in Firestore/Profile
+      if (!userProfile?.phoneNumber && !userProfile?.checkoutInfo?.phone) {
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem('experiencePaymentRedirect', 'true'); // General flag for experiences
+        }
+        // We don't have a centralized showAlert here like in modals, let's use router or window.location
+        // But the user might want to see why they are redirected. 
+        // For now, redirecting to preferences is the "immediate" requirement.
+        window.location.href = '/notification-preferences?redirect=/experiences&reason=phone_required';
+        return;
+      }
+
       setFormData(prev => ({
         ...prev,
         name: userProfile?.name || user.displayName || prev.name,
@@ -96,7 +108,7 @@ export default function ExperienceEnquiryPage() {
         phone: userProfile?.phoneNumber || userProfile?.checkoutInfo?.phone || prev.phone,
       }));
     }
-  }, [user, authLoading]);
+  }, [user, userProfile, authLoading]);
 
   const validateForm = (): boolean => {
     const errors: FormErrors = {};

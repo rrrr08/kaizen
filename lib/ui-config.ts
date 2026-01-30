@@ -58,9 +58,8 @@ export const DEFAULT_HOMEPAGE_CONTENT: HomepageContent = {
       description: "Play free puzzles daily and earn rewards you can redeem",
       emoji: "Gamepad2",
       images: [
-        'https://images.unsplash.com/photo-1557683316-973673baf926?auto=format&fit=crop&q=80&w=800',
-        'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80&w=800',
-        'https://images.unsplash.com/photo-1511512578047-926c369dd443?auto=format&fit=crop&q=80&w=800'
+        '/game-points-rewards.png',
+        'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80&w=800'
       ]
     }
   },

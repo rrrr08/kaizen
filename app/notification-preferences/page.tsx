@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { usePushNotifications } from '@/hooks/use-push-notifications';
 import { Button } from '@/components/ui/button';
@@ -38,10 +39,13 @@ interface Device {
   registeredAt: string;
 }
 
-export default function NotificationPreferencesPage() {
+function PreferenceContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const { addToast } = useToast();
   const { requestPermission, permission, isSupported } = usePushNotifications();
-  
+  const [hasShownReason, setHasShownReason] = useState(false);
+
   const [preferences, setPreferences] = useState<Preferences>({
     pushEnabled: true,
     inAppEnabled: true,
@@ -69,8 +73,23 @@ export default function NotificationPreferencesPage() {
   const [phoneVerified, setPhoneVerified] = useState(false);
 
   useEffect(() => {
+    // Check for reason in URL
+    const reason = searchParams.get('reason');
+    if (reason === 'phone_required' && !hasShownReason) {
+      const timer = setTimeout(() => {
+        addToast({
+          title: 'Phone Number Required',
+          description: 'Please add and verify your phone number to continue.',
+        });
+        setHasShownReason(true);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [searchParams, addToast, hasShownReason]);
+
+  useEffect(() => {
     loadPreferencesAndDevices();
-    
+
     // Subscribe to real-time phone number updates
     const currentUser = auth.currentUser;
     if (currentUser) {
@@ -160,7 +179,7 @@ export default function NotificationPreferencesPage() {
 
       const response = await fetch('/api/user/notification-preferences', {
         method: 'PUT',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
@@ -202,7 +221,7 @@ export default function NotificationPreferencesPage() {
 
       const response = await fetch('/api/push/unregister-device', {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
@@ -388,11 +407,29 @@ export default function NotificationPreferencesPage() {
                   // Immediately update local state
                   setPhoneNumber(verifiedPhone);
                   setPhoneVerified(true);
-                  
+
                   addToast({
                     title: 'Success!',
                     description: 'Phone number verified. You can now receive SMS notifications.',
                   });
+
+                  // Check for payment redirect context
+                  if (typeof window !== 'undefined') {
+                    const checkoutRedirect = sessionStorage.getItem('checkoutRedirect');
+                    const eventRedirect = sessionStorage.getItem('eventRegistrationRedirect');
+                    const experienceRedirect = sessionStorage.getItem('experiencePaymentRedirect');
+
+                    if (checkoutRedirect) {
+                      sessionStorage.removeItem('checkoutRedirect');
+                      setTimeout(() => router.push('/checkout'), 1500);
+                    } else if (eventRedirect) {
+                      sessionStorage.removeItem('eventRegistrationRedirect');
+                      setTimeout(() => router.push('/events'), 1500);
+                    } else if (experienceRedirect) {
+                      sessionStorage.removeItem('experiencePaymentRedirect');
+                      setTimeout(() => router.push('/experiences'), 1500);
+                    }
+                  }
                 }}
               />
             </div>
@@ -451,8 +488,8 @@ export default function NotificationPreferencesPage() {
                 <label
                   key={value}
                   className={`flex items-center p-4 border-2 border-black rounded-xl cursor-pointer transition-all ${preferences.frequency === value
-                      ? 'bg-[#FFD93D] shadow-[4px_4px_0px_#000] -translate-y-1'
-                      : 'bg-white hover:bg-black/5'
+                    ? 'bg-[#FFD93D] shadow-[4px_4px_0px_#000] -translate-y-1'
+                    : 'bg-white hover:bg-black/5'
                     }`}
                 >
                   <input
@@ -615,7 +652,7 @@ export default function NotificationPreferencesPage() {
                 <Button
                   onClick={async () => {
                     const granted = await requestPermission();
-                    
+
                     if (granted) {
                       addToast({
                         title: 'Device Registered!',
@@ -626,8 +663,8 @@ export default function NotificationPreferencesPage() {
                       const currentPermission = Notification.permission;
                       addToast({
                         title: 'Registration Failed',
-                        description: currentPermission === 'denied' 
-                          ? 'Notifications are blocked. Check browser settings.' 
+                        description: currentPermission === 'denied'
+                          ? 'Notifications are blocked. Check browser settings.'
                           : 'Please allow notifications when prompted',
                         variant: 'destructive',
                       });
@@ -679,5 +716,17 @@ export default function NotificationPreferencesPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function NotificationPreferencesPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen pt-32 pb-16 flex items-center justify-center bg-[#FFFDF5]">
+        <div className="w-12 h-12 border-4 border-black border-t-[#6C5CE7] rounded-full animate-spin"></div>
+      </div>
+    }>
+      <PreferenceContent />
+    </Suspense>
   );
 }

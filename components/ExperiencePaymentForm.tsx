@@ -52,6 +52,44 @@ export default function ExperiencePaymentForm({
     const [voucherError, setVoucherError] = useState('');
     const [checkingVoucher, setCheckingVoucher] = useState(false);
 
+    // IMMEDIATE REDIRECT CHECK: If user doesn't have a phone number in Firestore
+    useEffect(() => {
+        if (!user) return;
+
+        const checkPhone = async () => {
+            try {
+                const { getFirestore, doc, getDoc } = await import('firebase/firestore');
+                const { app } = await import('@/lib/firebase');
+                const db = getFirestore(app);
+                const userRef = doc(db, 'users', user.uid);
+                const userSnap = await getDoc(userRef);
+
+                if (userSnap.exists()) {
+                    const userData = userSnap.data();
+                    if (!userData?.phoneNumber) {
+                        // Store experience context for return
+                        if (typeof window !== 'undefined') {
+                            sessionStorage.setItem('experiencePaymentRedirect', JSON.stringify({
+                                enquiryId: enquiry.id,
+                                categoryName: enquiry.categoryName
+                            }));
+                        }
+                        // Redirect immediately with reason
+                        // Show a loading state instead of closing
+                        setIsProcessing(true);
+                        setTimeout(() => {
+                            window.location.href = '/notification-preferences?redirect=/experiences&reason=phone_required';
+                        }, 300);
+                    }
+                }
+            } catch (error) {
+                console.error('Error checking phone number:', error);
+            }
+        };
+
+        checkPhone();
+    }, [user, enquiry.id, enquiry.categoryName, onClose, showAlert]);
+
     // Hardcoded Earnings as requested
     const EARN_XP = 60;
     const EARN_JP = 60;
@@ -122,6 +160,8 @@ export default function ExperiencePaymentForm({
     const handlePayment = async () => {
         if (!user) { await showAlert('Please sign in to proceed', 'warning'); return; }
         if (!validateForm()) return;
+
+        // Phone validation already handled by immediate check in useEffect above
 
         try {
             setIsProcessing(true);

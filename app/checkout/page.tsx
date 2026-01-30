@@ -66,6 +66,17 @@ export default function CheckoutPage() {
 
         if (userSnap.exists()) {
           const userData = userSnap.data();
+
+          // IMMEDIATE REDIRECT CHECK: If user doesn't have a phone number in Firestore
+          if (!userData?.phoneNumber) {
+            // Store checkout intent for return
+            if (typeof window !== 'undefined') {
+              sessionStorage.setItem('checkoutRedirect', 'true');
+            }
+            router.push('/notification-preferences?redirect=/checkout&reason=phone_required');
+            return;
+          }
+
           const savedInfo = userData?.checkoutInfo;
 
           if (savedInfo || userData?.phoneNumber) {
@@ -95,7 +106,7 @@ export default function CheckoutPage() {
     };
 
     loadSavedCheckoutInfo();
-  }, [user, checkoutInfoLoaded]);
+  }, [user, checkoutInfoLoaded, router]);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -237,6 +248,8 @@ export default function CheckoutPage() {
       addToast({ title: 'Missing Information', description: 'Please fill in all required fields.' });
       return;
     }
+
+    // Phone validation already handled by immediate check in useEffect above
 
     // Validate email
     try {
