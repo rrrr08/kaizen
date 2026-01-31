@@ -304,7 +304,10 @@ export default function Home() {
 
         <div className="container mx-auto relative z-10">
           <div className="text-center mb-12 md:mb-16 max-w-4xl mx-auto">
-            <div className="text-[#00B894] font-black text-xs tracking-[0.3em] mb-4 uppercase font-display">Gamification Teaser</div>
+            {/* <div className="text-[#00B894] font-black text-xs tracking-[0.3em] mb-4 uppercase font-display">Gamification Teaser</div> */}
+            <div className="text-[#00B894] font-black text-xs md:text-sm uppercase tracking-[0.2em] mb-4 font-display"> Gamification Teaser 
+            </div>
+
             <h2 className="font-header text-4xl md:text-6xl font-black uppercase tracking-tighter leading-[0.9] mb-6">
               Play. <span className="text-[#FFD93D]">Earn.</span> Redeem.
             </h2>
