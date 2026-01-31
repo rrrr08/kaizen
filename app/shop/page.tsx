@@ -142,7 +142,7 @@ export default function Shop() {
           <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-8">
             <div className="flex flex-col items-start">
               <div className="text-[#6C5CE7] font-black text-xs md:text-sm tracking-[0.3em] mb-6 uppercase font-display bg-white px-3 py-1 border-2 border-black rounded-lg shadow-[2px_2px_0px_#000]">
-                Archive of Curiosities at Joy Juncture
+                Cabinet of Curiosities at Joy Juncture
               </div>
               <h1 className="font-header tracking-tighter text-[#2D3436] flex flex-col items-start leading-none">
                 <span className="text-2xl md:text-4xl font-black uppercase mb-1">THE</span>
